@@ -1,0 +1,5 @@
+LIBRARY EMSIsapi 
+EXPORTS 
+    GetExtensionVersion 
+    HttpExtensionProc 
+	TerminateExtension

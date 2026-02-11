@@ -1,0 +1,326 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+DLG_MAIN DIALOGEX 0, 0, 277, 295
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+CAPTION "VisNetic MailFlow Administration Tool"
+MENU MNU_MAIN
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        TXT_SERVER,77,91,186,12,ES_AUTOHSCROLL | WS_GROUP
+    EDITTEXT        TXT_DATABASE,78,110,185,12,ES_AUTOHSCROLL
+    CONTROL         "Use Windows Authentication",OPT_WIN_AUTH,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,14,141,106,10
+    EDITTEXT        TXT_USERNAME,75,156,188,12,ES_AUTOHSCROLL
+    EDITTEXT        TXT_PASSWORD_WIN,75,175,188,12,ES_PASSWORD | ES_AUTOHSCROLL
+    EDITTEXT        TXT_DOMAIN,75,194,188,12,ES_AUTOHSCROLL
+    CONTROL         "Use SQL Server Authentication",OPT_SQL_AUTH,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,14,217,114,10
+    EDITTEXT        TXT_LOGIN_NAME,75,232,188,12,ES_AUTOHSCROLL
+    EDITTEXT        TXT_PASSWORD_ODBC,75,251,188,12,ES_PASSWORD | ES_AUTOHSCROLL
+    PUSHBUTTON      "Test ODBC",CMD_TEST,79,267,50,14
+    PUSHBUTTON      "Save",CMD_SAVE,146,267,50,14
+    PUSHBUTTON      "Exit",CMD_EXIT,213,267,50,14
+    GROUPBOX        "Oauth2 Token Request",FRM_OAUTH2,7,6,263,46
+    LTEXT           "Server:",LBL_SERVER,14,93,25,8
+    LTEXT           "Database:",LBL_DATABASE,14,111,34,8
+    LTEXT           "Username:",LBL_USERNAME,30,158,36,8
+    LTEXT           "Password:",LBL_PASSWORD_WIN,30,177,34,8
+    LTEXT           "Domain:",LBL_DOMAIN,30,196,27,8
+    LTEXT           "Username:",LBL_LOGIN_NAME,30,233,40,8
+    LTEXT           "Password:",LBL_PASSWORD_ODBC,30,252,34,8
+    LTEXT           "ODBC Driver:",LBL_OdbcDriver,14,72,45,8
+    COMBOBOX        COMBO_ODBC,77,71,186,72,CBS_DROPDOWN | CBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Secure Connection",CHK_SECURE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,77,127,76,10
+    CONTROL         "Trust Server Certificate",CHK_TRUST,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,168,127,91,10
+    GROUPBOX        "ODBC Connection",FRM_ODBC_CONN2,7,57,263,230
+    LTEXT           "Message Source:",IDC_MSG_SRC,14,18,68,8
+    LTEXT           "Message Destination:",IDC_MSG_DEST,14,36,73,8
+    COMBOBOX        SEL_MSG_SRC,90,16,144,56,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        SEL_MSG_DEST,90,35,144,59,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Go",BTN_MSG_SRC,239,15,23,14
+    PUSHBUTTON      "Go",BTN_MSG_DEST,239,33,23,14
+    PUSHBUTTON      "Refresh",BTN_REFRESH,14,267,50,14
+END
+
+DLG_FORCEHTTPS DIALOGEX 0, 0, 186, 42
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Settings - Force HTTPS Option"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",CMD_FORCE_HTTPS_OK,129,21,50,14
+    PUSHBUTTON      "Cancel",CMD_FORCE_HTTPS_CANCEL,7,21,50,14
+    CONTROL         "Enable Force HTTPS",CHK_FORCE_HTTPS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,172,10
+END
+
+DLG_ADMIN_PASSWD DIALOGEX 0, 0, 234, 69
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Settings - Change Administrator Password"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",CMD_ADMIN_PASSWD_OK,177,48,50,14
+    PUSHBUTTON      "Cancel",CMD_ADMIN_PASSWD_CANCEL,7,48,50,14
+    LTEXT           "New Password :",IDC_STATIC,7,9,63,8
+    LTEXT           "Confirm Password :",IDC_STATIC,7,27,63,8
+    EDITTEXT        TXT_NEW_AGENT_PASSWD,70,7,157,12,ES_PASSWORD | ES_AUTOHSCROLL
+    EDITTEXT        TXT_CONFIRM_AGENT_PASSWD,70,25,157,12,ES_PASSWORD | ES_AUTOHSCROLL
+END
+
+DLG_MIN_MB_SIZE DIALOGEX 0, 0, 160, 47
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Settings - Disk Alert Size"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",CMD_MIN_DISK_OK,103,26,50,14
+    PUSHBUTTON      "Cancel",CMD_MIN_DISK_CANCEL,7,26,50,14
+    EDITTEXT        TXT_MIN_MB,83,7,70,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Minimum MB Alert Size :",IDC_STATIC,7,7,76,8
+END
+
+DLG_ABOUT DIALOGEX 0, 0, 226, 66
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "About"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,169,45,50,14
+    ICON            ICO_VMF,IDC_STATIC,7,7,20,20
+    LTEXT           "VisNetic MailFlow Administration Tool Version 6.9.4.1\nCopyright © 2002-2024 Deerfield Communications Inc.",IDC_STATIC,35,9,184,16
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME | SS_SUNKEN,7,34,212,1
+END
+
+DLG_LOGIN DIALOGEX 0, 0, 274, 163
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_BORDER | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Login",CMD_LOGIN,111,141,50,14
+    LTEXT           "Username : ",LBL_LOGIN_USERNAME,52,108,40,8
+    LTEXT           "Password : ",LBL_LOGIN_PASSWORD,52,125,40,8
+    EDITTEXT        TXT_LOGIN_USERNAME,97,106,127,12,ES_AUTOHSCROLL
+    EDITTEXT        TXT_LOGIN_PASSWORD,97,122,127,12,ES_PASSWORD | ES_AUTOHSCROLL
+    CONTROL         BMP_LOGIN,IDC_STATIC,"Static",SS_BITMAP | WS_BORDER,7,7,259,92
+END
+
+DLG_OAUTH2 DIALOGEX 0, 0, 186, 92
+STYLE DS_LOCALEDIT | DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "OAuth2 Token"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,129,71,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,7,71,50,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    DLG_MAIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 270
+        VERTGUIDE, 14
+        VERTGUIDE, 30
+        VERTGUIDE, 263
+        BOTTOMMARGIN, 288
+    END
+
+    DLG_FORCEHTTPS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 35
+    END
+
+    DLG_ADMIN_PASSWD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 227
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 62
+    END
+
+    DLG_MIN_MB_SIZE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 153
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 40
+    END
+
+    DLG_ABOUT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 219
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 59
+    END
+
+    DLG_LOGIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 267
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 155
+    END
+
+    DLG_OAUTH2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 85
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+MNU_MAIN MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "E&xit",                       CMD_EXIT
+    END
+    POPUP "&Settings"
+    BEGIN
+        MENUITEM "F&orce HTTPS Option",         CMD_SETTINGS_FORCEHTTPSOPTION
+        MENUITEM "&Administrator Agent Password", CMD_SETTINGS_ADMINISTRATORAGENTPASSWORD
+        MENUITEM "&Disk Alert Size",            CMD_SETTINGS_DISK
+    END
+    POPUP "Help"
+    BEGIN
+        MENUITEM "&About",                      CMD_HELP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+ICO_VMF                 ICON                    "vmf.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+BMP_LOGIN               BITMAP                  "visnetic_version.bmp"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 6,9,5,0
+ PRODUCTVERSION 6,9,5,0
+ FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "VisNetic MailFlow Administration Tool"
+            VALUE "CompanyName", "Deerfield Communications Inc."
+            VALUE "FileDescription", "VisNetic MailFlow Administration Tool"
+            VALUE "FileVersion", "6.9.5.0"
+            VALUE "InternalName", "VisNetic MailFlow Administration Tool"
+            VALUE "LegalCopyright", "Copyright © 2002 - 2024"
+            VALUE "LegalTrademarks", "VisNetic is a Registered Trademark of Deerfield Communications Inc."
+            VALUE "OriginalFilename", "vmfadmintool.exe"
+            VALUE "ProductName", "VisNetic MailFlow"
+            VALUE "ProductVersion", "6.9.5.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

@@ -1,0 +1,506 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 6,9,5,0
+ PRODUCTVERSION 6,9,5,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "VisNetic MailFlow Resource DLL"
+            VALUE "CompanyName", "Deerfield Communications Inc."
+            VALUE "FileDescription", "VisNetic MailFlow Resource DLL"
+            VALUE "FileVersion", "6.9.5.0"
+            VALUE "InternalName", "VisNetic MailFlow Resource DLL"
+            VALUE "LegalCopyright", "Copyright © 2002 - 2024"
+            VALUE "LegalTrademarks", "VisNetic is a Registered Trademark of Deerfield Communications Inc."
+            VALUE "OriginalFilename", "EMSResource.dll"
+            VALUE "ProductName", "VisNetic MailFlow"
+            VALUE "ProductVersion", "6.9.5.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    EMS_STRING_LOGON_SUCCESSFUL 
+                            "%s logged into Session %s  from IP address %s"
+    EMS_STRING_LOGON_FAILED_IPRANGE 
+                            "%s could not login from %s due to IP range restrictions"
+    EMS_STRING_LOGON_FAILED_NO_SUCH_USER 
+                            "%s could not login from %s because username does not exist"
+    EMS_STRING_LOGON_FAILED_BAD_PASSWORD 
+                            "%s could not login from %s due to incorrect password"
+    EMS_STRING_INVALID_ID   "Invalid ID"
+    EMS_STRING_MUST_BE_ADMIN "Must be a member of Administrator group"
+    EMS_STRING_SYSTEM_STARTING "System starting"
+    EMS_STRING_SYSTEM_STOPPING "System shutting down"
+    EMS_STRING_NULL_DATE    "NULL DATE"
+    IDS_STRING10            "EMS_ISAPI_ERROR_SECURITY_VIOLATION"
+    EMS_STRING_MAILCOMP_PERMANENT_MSG_DELIVERY_FAILURE_ALERT 
+                            "[%s] permanent outbound message delivery failure for outbound message ID: (%d)\r\n (%s)"
+    EMS_STRING_ERROR_INVALID_TO_ADDRESS_2 
+                            "The %s field must contain at least one valid email address. eg. ""TEST"" <test@test.com>; test@test.com"
+END
+
+STRINGTABLE
+BEGIN
+    EMS_STRING_ERROR_SQLGETDIAGFIELD "Error in SQLGetDialField:"
+    EMS_STRING_ERROR_EXECUTING_QUERY "Error in database query: %s"
+    EMS_STRING_ERROR_ALLOCATING_HANDLE "Error allocating handle: %s"
+    EMS_STRING_ERROR_SETENVATTR "Error setting environment attributes: %s"
+    EMS_STRING_ERROR_SETCONNOPTIONS "Error setting connect options: %s"
+    EMS_STRING_ERROR_UNKNOWN_ODBC_ERROR "Unknown ODBC error: %s"
+    EMS_STRING_ERROR_OUTPUT_ARRAY 
+                            "Memory allocation error creating output array"
+    EMS_STRING_ERROR_ACCESS_DENIED 
+                            "Access Denied: Object: (%s)  Operation: (%s) "
+    EMS_STRING_ERROR_MEMORY "Memory allocation error"
+    EMS_STRING_ERROR_SQLROWCOUNT "Error in SQLRowCount: %s"
+    EMS_STRING_ERROR_SQLFREESTMT "Error in SQLFreeStmt: %s"
+    EMS_STRING_ERROR_NODSN  "Error DSN not in registry"
+END
+
+STRINGTABLE
+BEGIN
+    EMS_STRING_ERROR_DATASOURCE "Error connecting to datasource: %s"
+    EMS_STRING_ERROR_UKNOWN_DBTYPE 
+                            "The database platform could not be determined or is not supported."
+    EMS_STRING_ERROR_READING_MSG_BODY 
+                            "Error reading message body file. InboundMessageID: %d"
+    EMS_STRING_ERROR_LOADING_MAILCOMPONENTS 
+                            "Error %d loading messaging component DLL"
+    EMS_STRING_ERROR_UNHANDLED_EXCEPTION "Unhandled exception"
+    EMS_STRING_MAILCOMP_MSG_TOO_LARGE 
+                            "Message was not downloaded because its size (%dk) exceeded the defined size limit (%dk)."
+    EMS_STRING_MAILCOMP_MSG_BODY_INFECTED 
+                            "Message body was removed due to viral infection. Please see your system administrator for more information."
+    IDS_RCPT_TO_PARTIAL_FAILURE 
+                            "Warning - the following email addresses were rejected by the \r\nreceiving server (%s):\r\n\r\n%s\r\n\r\nMessage details:\r\nFrom: %s\r\nTo: %s\r\nCC: %s\r\nBCC: %s\r\nSubject: %s\r\n"
+    EMS_STRING_E_URLVarNotFound "Required URL Variable [%s] not found"
+    EMS_STRING_E_FormFieldNotFound "Required form field [%s] not found"
+    EMS_STRING_MAILCOMP_SETLASTCHECKED_FAILURE 
+                            "[%s] failed to set last-processed value"
+    EMS_STRING_MAILCOMP_FAILED_SERVER_CONNECT 
+                            "[%s] failed to initialize connection to server: (%s) on port: (%d)"
+    EMS_STRING_MAILCOMP_BAD_INITIAL_RESPONSE 
+                            "[%s] received bad response: (%s) from server: (%s)"
+    EMS_STRING_MAILCOMP_POP3_AUTH_FAILURE 
+                            "[%s] authentication failed on server: (%s) for account: (%s) with error: (%s)"
+    EMS_STRING_MAILCOMP_POP3_LIST_FAILURE 
+                            "[%s] failed to retrieve message list from server: (%s) for account: (%s)"
+    EMS_STRING_MAILCOMP_UIDL_UNSUPPORTED 
+                            "[%s] UIDL command not supported by server: (%s) for account: (%s), mail will not be left on server"
+END
+
+STRINGTABLE
+BEGIN
+    EMS_STRING_MAILCOMP_UIDL_PRUNING_FAILED 
+                            "[%s] error occurred while processing UIDL listing on server: (%s) for account: (%s)"
+    EMS_STRING_MESSAGE_RETRIEVAL_FAILURE 
+                            "[%s] failed to retrieve waiting messages from server: (%s) for account: (%s)"
+    EMS_STRING_MAILCOMP_MSGS_WAITING 
+                            "[%s] account: (%s) has (%d) messages waiting"
+    EMS_STRING_MAILCOMP_MSG_RETRIEVAL_FAILURE 
+                            "[%s] unable to retrieve message index no. (%d) from server: (%s) for account: (%s), retrieval will be re-attempted"
+    EMS_STRING_MAILCOMP_MSG_DB_SAVE_FAILURE 
+                            "Failed to save message to database (message will be downloaded again)"
+    EMS_STRING_MAILCOMP_MSG_ATTACHMENT_SAVE_FAILURE 
+                            "Failed to save message attachment files (message was left on mail server and will not be downloaded again)"
+    EMS_STRING_MAILCOMP_ATTACHMENT_DB_SAVE_FAILURE 
+                            "Failed to save attachment database records  (message was left on mail server and will not be downloaded again)"
+    EMS_STRING_MAILCOMP_MSG_DB_COMMIT_FAILURE 
+                            "Failed to commit message save in database (message will be downloaded again)"
+    EMS_STRING_MAILCOMP_MSG_SAVE_FAILED 
+                            "[%s] unable to save message index no. (%d) from server: (%s) for account: (%s)"
+    EMS_STRING_MAILCOMP_AV_SCANNER_INIT_FAILURE 
+                            "Failed to initialize message virus scanner (check scanner installation & registration)"
+    EMS_STRING_MAILCOMP_AV_SCAN_ERROR 
+                            "Error occurred while trying to virus-scan retrieved message (AV error: %d)"
+    EMS_STRING_MAILCOMP_UIDL_SAVE_FAILURE 
+                            "[%s] failed to save UIDL information for message index no. (%d) from server: (%s) for account: (%s)"
+    EMS_STRING_MAILCOMP_SERVER_MSG_DELETE_FAILURE 
+                            "[%s] failed to delete message index no. (%d) from server: (%s) for account: (%s)"
+    EMS_STRING_MAILCOMP_UIDL_CMD_ERROR 
+                            "[%s] error during UIDL command on server: (%s) for account: (%s)"
+    EMS_STRING_MAILCOMP_MSG_SIZE_WARNING 
+                            "[%s] inbound message index no. (%d) with size of (%dk) exceeds defined limit of (%dk) on server: (%s) for account: (%s)"
+    EMS_STRING_MAILCOMP_TOP_FAILED 
+                            "[%s] unable to retrieve TOP of message index no. (%d) from server: (%s) for account: (%s)"
+END
+
+STRINGTABLE
+BEGIN
+    EMS_STRING_MAILCOMP_RETR_MSG_TO_FILE_ERROR 
+                            "[%s] error saving msg index no. (%d) from server: (%s) for account: (%s) to file"
+    EMS_STRING_MAILCOMP_ERR_MAPPING_FILE_TO_STRING 
+                            "[%s] error mapping file for message index no. (%d) from server: (%s) for account: (%s) to string"
+    EMS_STRING_MAILCOMP_ERR_DELETING_TEMPFILE 
+                            "Failed to delete temporary file (%s)"
+    EMS_STRING_MAILCOMP_SENT_POP3_COMMAND 
+                            "[%s] sent POP3 command: (%s) to server: (%s)"
+    EMS_STRING_MAILCOMP_RECEIVED_POP3_RESPONSE 
+                            "[%s] received POP3 response: (%s) from server: (%s)"
+    EMS_STRING_MAILCOMP_MSG_BODY_INFECTED_LOGENTRY 
+                            "Message from %s has virus-infected body content"
+    EMS_STRING_MAILCOMP_AVSCAN_ATTACHMENT_FAILURE 
+                            "Unable to enact anti-virus scanning on attachment file: %s"
+    EMS_STRING_MAILCOMP_INFECTION_UNHANDLED 
+                            "Infected attachment file was found but not handled! Path: %s"
+    EMS_STRING_DO_NOT_DELETE "Do not delete"
+    EMS_STRING_DELETE_TO_WASTE_BASKET "Delete to waste basket"
+    EMS_STRING_DELETE_PERMANENTLY "Delete permanently"
+    EMS_STRING_MATCH_LOCATION_SUBJECT "Subject"
+    EMS_STRING_MATCH_LOCATION_BODY "Body"
+    EMS_STRING_MATCH_LOCATION_BOTH "Both"
+    EMS_STRING_MAILCOMP_CHECKACCOUNT_FAILED 
+                            "[%s] failed to check account: (%s) on server: (%s)"
+    EMS_STRING_MAILCOMP_POPACCOUNT_DB_READ_FAILURE 
+                            "Failed to retrieve Message Source account information from database"
+END
+
+STRINGTABLE
+BEGIN
+    EMS_STRING_MAILCOMP_POP3_ACCOUNTS_CHECK_FAILURE 
+                            "Unable to check Message Source accounts"
+    EMS_STRING_MAILCOMP_NO_POP_ACCOUNTS_DEFINED 
+                            "There are no enabled Message Sources"
+    EMS_STRING_MAILCOMP_OUTBOUND_MSG_DBREAD_FAILURE 
+                            "[%s] failed to retrieve outbound messages from database"
+    EMS_STRING_MAILCOMP_OUTBOUND_MSGS_WAITING 
+                            "[%s] has (%d) messages to process"
+    EMS_STRING_MAILCOMP_ATTACHMENT_DB_READ_FAILURE 
+                            "[%s] failed to retrieve message attachment info from database"
+    EMS_STRING_MAILCOMP_OUTBOUND_MSG_PROCESSING_FAILURE 
+                            "[%s] failed to process outbound messages"
+    EMS_STRING_MAILCOMP_SMTP_SERVER_CONN_FAILURE 
+                            "[%s] failed to initialize connection to SMTP server: (%s) on port: (%d)"
+    EMS_STRING_MAILCOMP_SMTP_HELLO_FAILURE 
+                            "[%s] failed to say hello to SMTP server: (%s)"
+    EMS_STRING_MAILCOMP_SMTPAUTH_FAILURE 
+                            "[%s] failed to authenticate to SMTP server: (%s) with username: (%s)"
+    EMS_STRING_MAILCOMP_SMTPAUTH_METHOD_LOGIN 
+                            "[%s] using LOGIN protocol to authenticate to SMTP server: (%s) with username: (%s)"
+    EMS_STRING_MAILCOMP_SMTPAUTH_METHOD_CRAMMD5 
+                            "[%s] using CRAM-MD5 protocol to authenticate to SMTP server: (%s) with username: (%s)"
+    EMS_STRING_MAILCOMP_OUTBOUND_MSG_PREP_FAILURE 
+                            "[%s] failed to prepare outbound message ID: (%d) for sending"
+    EMS_STRING_MAILCOMP_PERMANENT_MSG_DELIVERY_FAILURE 
+                            "[%s] permanent outbound message delivery failure for outbound message ID: (%d)"
+    EMS_STRING_MAILCOMP_MSGDEL_FAILUREHANDLER_FAILURE 
+                            "[%s] error handling outbound message ID: (%d) delivery failure"
+    EMS_STRING_MAILCOMP_TEMP_MSG_DELIVERY_FAILURE 
+                            "[%s] temporary outbound message ID: (%d) delivery failure to server: (%s), delivery will be re-attempted"
+    EMS_STRING_MAILCOMP_DELIVERY_SUCCESS_HANDLER_FAILURE 
+                            "[%s] outbound message ID: (%d) delivery post-processing failure"
+END
+
+STRINGTABLE
+BEGIN
+    EMS_STRING_MAILCOMP_SMTP_RESPONSE_LOG 
+                            "[%s] received SMTP response: (%s) from server: (%s)"
+    EMS_STRING_MAILCOMP_SMTP_SENT_CMD 
+                            "[%s] sent SMTP command: (%s) to server: (%s)"
+    EMS_STRING_MAILCOMP_RCPTO_REJECT_WARNING_LOG 
+                            "[%s] SMTP server: (%s) rejected message recipient: (%s)"
+    EMS_STRING_MAILCOMP_OPEN_SPOOLFILE_FAILURE 
+                            "Failed to open outbound spool file (path: %s, getlasterror: %d, msg id: %d)"
+    EMS_STRING_MAILCOMP_SPOOLFILE_READ_FAILURE 
+                            "Failed to read from outbound spool file (path: %s, getlasterror: %d, msg id: %d)"
+    EMS_STRING_MAILCOMP_MSG_DATA_TRANSMISSION_FAILURE 
+                            "Failed to transmit message data (getlasterror: %d, msg id: %d)"
+    EMS_STRING_MAILCOMP_MSG_DEST_RETRIEVAL_FAILURE 
+                            "Failed to retrieve outbound message destinations"
+    EMS_STRING_MAILCOMP_NO_MSG_DESTS_DEFINED 
+                            "There are no enabled Message Destinations"
+    EMS_STRING_MAILCOMP_SMTP_INIT_SMTP_CONNS_FAILURE 
+                            "Failed to initialize SMTP connections"
+    EMS_STRING_MAILCOMP_MSG_DESTINATION_RESOLUTION_FAILURE 
+                            "Failed to resolve destinations for queued outbound messages"
+    EMS_STRING_MAILCOMP_DBCONN_FAILURE 
+                            "Unable to establish connection to application database (code: %d, msg: %s)"
+    EMS_STRING_MAILCOMP_POP3_POLLTHREAD_INIT_FAILURE 
+                            "Failed to initialize the POP polling thread"
+    EMS_STRING_MAILCOMP_WINSOCK_INIT_FAILURE 
+                            "Winsock layer failed to initialize"
+    EMS_STRING_MAILCOMP_SMTP_POLLTHREAD_INIT_FAILURE 
+                            "Failed to initialize the SMTP polling thread"
+    EMS_STRING_MAILCOMP_INITIALIZING 
+                            "Initializing mail components (LogThreadID = %d)"
+    EMS_STRING_MAILCOMP_POP3_CHECK_FORCED 
+                            "Forcing an immediate POP3 mail check"
+END
+
+STRINGTABLE
+BEGIN
+    EMS_STRING_MAILCOMP_SMTP_FORCED "Forcing immediate SMTP mail delivery"
+    EMS_STRING_MAILCOMP_POP3_POLLTHREAD_STOP_TIMEOUT 
+                            "Timed out waiting for POP3 polling thread to stop (waited %d milliseconds)"
+    EMS_STRING_MAILCOMP_SMTP_POLLTHREAD_TIMEOUT 
+                            "Timed out waiting for SMTP polling thread to stop (waited %d milliseconds)"
+    EMS_STRING_MAILCOMP_SHUTDOWN "Mail components DLL has been terminated"
+    EMS_STRING_MAILCOMP_MSG_DEST_UNRESOLVED 
+                            "Failed to resolve destination for queued outbound message no. %d (does a default message destination exist?)"
+    EMS_STRING_MAILCOMP_FATAL_DELIVERY_TEMPLATE 
+                            "The following message had PERMANENT fatal delivery errors!\r\n\r\nAfter one or more unsuccessful delivery attempts, it has been\r\ndetermined that this message cannot be successfully delivered.\r\nNo further delivery attempts will be made.\r\n\r\nMessage details:\r\nFrom: %s\r\nTo: %s\r\nCC: %s\r\nBCC: %s\r\nSubject: %s\r\n\r\n--- SESSION TRANSCRIPT ---\r\n%s--- END TRANSCRIPT ---"
+    EMS_STRING_MAILCOMP_BOUNCE_FAILED 
+                            "Failed to send message delivery failure notification to sender (sender: %s)"
+    EMS_STRING_RTR_NEW_MESSAGE 
+                            "Received a new message from message source: %s"
+    EMS_STRING_RTR_NEW_CONTACT 
+                            "Created new contact: %s from inbound message ID: %d"
+    EMS_STRING_RTR_RULE_MATCH "Rule %s matches message"
+    EMS_STRING_RTR_PUT_IN_TICKETBOX "Routing message to ticketbox: %s"
+    EMS_STRING_MAILCOMP_OUTBOUND_DEL_COMPLETE 
+                            "[%s] outbound message delivery complete"
+    EMS_STRING_MAILCOMP_CHECKING_POP3 "[%s] checking for new mail"
+    EMS_STRING_MAILCOMP_POP3_CHECK_COMPLETE "[%s] retrieval complete"
+    EMS_STRING_MAILCOMP_MSG_SENTTO_MAIL_SERVER 
+                            "[%s] outbound message ID: (%d) successfully delivered to SMTP server: (%s)"
+    EMS_STRING_MAILCOMP_DB_CONN_FAILURE 
+                            "Unable to establish connection to database"
+END
+
+STRINGTABLE
+BEGIN
+    EMS_STRING_MAILCOMP_AV_INFECTION_HANDLED 
+                            "Infected attachment file found, but was effectively handled (path: %s)"
+    EMS_STRING_MAILCOMP_AV_ATTACH_FILE_CLEAN 
+                            "Attachment file (%s) was virus-scanned and is virus-free"
+    EMS_STRING_MAILCOMP_AV_MSG_BODY_CLEAN 
+                            "Message body (from: %s) was virus-scanned and is virus-free"
+    EMS_STRING_MAILCOMP_VIRUS_WARNING_EMAIL_TEXT 
+                            "------------------------------------------------------------------\r\nWarning: Virus detection report!\r\n\r\nThe following message has been identified by the MailFlow\r\nantivirus system as being either suspicious or infected.\r\n------------------------------------------------------------------\r\n\r\nDate message received: %s \r\n\r\nMessage sent from: %s\r\n\r\nMessage subject: %s\r\n\r\nVirus detected: %s\r\n"
+    EMS_STRING_MAILCOMP_AV_INFECTION_NOTIFICATION_FAILURE 
+                            "Failed to send message virus infection notification to message originator (sender: %s)"
+    EMS_STRING_MAILCOMP_CMD_NOT_LOGGED 
+                            "[Command not logged - contains sensitive data]"
+    EMS_ISAPI_ERROR_SECURITY_VIOLATION 
+                            "Access Denied for Agent: (%s) Operation: (%s) Object: (%s)"
+    EMS_STRING_ENUM_ACCESS  "Enumeration"
+    EMS_STRING_READ_ACCESS  "Read"
+    EMS_STRING_EDIT_ACCESS  "Edit"
+    EMS_STRING_DELETE_ACCESS "Delete"
+    EMS_ISAPI_ERROR_SECURITY_VIOLATION_ADMIN_ONLY 
+                            "Access Denied - Agent: (%s) Page: (%s) The requested action requires administrative rights"
+    IDS_ISAPI_ERROR_INFECTED_BODY 
+                            "------------------------------------------------------------------\r\nWarning: Virus detection report!\r\n\r\nThis message has been identified by the MailFlow antivirus \r\nsystem as being either suspicious or infected.\r\n\r\nVirus detected: %s\r\n\r\nPlease contact your system administrator for additional\r\ninformation...\r\n------------------------------------------------------------------"
+    EMS_STRING_MAILCOMP_DELETED_OLD_MSG 
+                            "[%s] deleted old message ID: (%d) from server: (%s) account: (%s)"
+    EMS_STRING_MAILCOMP_POP3_AUTHTEST_STARTED 
+                            "POP3 authentication test was initiated (server = %s, port = %d, username = %s)"
+    EMS_STRING_MAILCOMP_SMTP_AUTH_TEST_STARTED 
+                            "SMTP authentication test was initiated (server = %s, port = %d, username = %s)"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_STRING_MAILCOMP_SPOOLFILE_GEN_FAILURE 
+                            "Failed to generate outbound message spool file (Message ID: %d)"
+    IDS_STRING_MAILCOMP_TRANSCRIPT_SMTP_CONNECTING 
+                            "Attempting SMTP connection to [%s: %d]...\r\n"
+    IDS_STRING_MAILCOMP_TRANSCRIPT_MAX_OUTBOUND_SIZE_EXCEEDED 
+                            "Message size (including encoding) exceeded maximum allowable (%dk)\r\n"
+    IDS_STRING_MAILCOMP_TRANSCRIPT_SMTP_CONN_ESTABLISHED 
+                            "SMTP connection to [%s: %d] established\r\n"
+    IDS_STRING_MAILCOMP_SPOOLFILE_CREATE_FAILED 
+                            "Failed to create outbound spool file (%s):: code %n"
+    IDS_STRING_MAILCOMP_OUTBOUND_MSG_SIZE_EXCEEDS_MAX 
+                            "[%s] the size:  (%dk, including encoding) of outbound message ID: (%d) exceeds the defined limit: (%dk)"
+    IDS_STRING_MAILCOMP_DB_EXCEPTION_CAUGHT 
+                            "Encountered database exception (code: %d, msg: %s)"
+    IDS_STRING_MAILCOMP_LASTCHECKED_UPDATE_FAILURE 
+                            "[%s] failed to set last-processed value"
+    IDS_STRING_MAILCOMP_OUTBOUND_WAITING_COUNT_READ_FAILURE 
+                            "[%s] failed to retrieve waiting message count"
+    IDS_STRING_MAILCOMP_CHECKMAIL_COM_INIT_FAILURE 
+                            "Failed to initialize COM in message retrieval thread (server: %s, account: %s)"
+    IDS_STRING_MAILCOMP_NOMSGDESTDEF_ALERT 
+                            "Outbound delivery halted because no default message destination defined"
+    EMS_STRING_LIST_NONE    "-- NONE --"
+    EMS_STRING_NEW_TICKET_NO_SUBJECT 
+                            "Please enter a subject for the new ticket."
+    EMS_STRING_NEW_TICKET_NO_CONTACT 
+                            "The name or email address of the contact must be specified"
+    EMS_STRING_NEW_TICKET_NAME_LENGTH "Contact name exceeds maximum length"
+    EMS_STRING_NEW_TICKET_EMAIL_LENGTH 
+                            "Contact email address exceeds maximum length"
+END
+
+STRINGTABLE
+BEGIN
+    EMS_STRING_NEW_TICKET_INVALID_EMAIL "Contact email address is invalid"
+    EMS_STRING_ERROR_CREATE_CONTACT 
+                            "Unable to create contact due to an internal error."
+    EMS_STRING_ERROR_MSG_BODY_VIRUS 
+                            "Unable to save message. This message has been identified by the MailFlow antivirus system as being either suspicious or infected.\r\n\r\nVirus detected: %s\r\n\r\nPlease contact your system administrator for additional information."
+    EMS_STRING_ERROR_INVALID_TO_ADDRESS 
+                            "The To: field must contain at least one valid email address"
+    EMS_STRING_ERROR_UPDATE_MSG 
+                            "Unable to update message, the message no longer exsists in the database."
+    EMS_STRING_ERROR_SAVE_ATTACH "Error (%d) saving attachment"
+    EMS_STRING_ERROR_ATTACH_PATH 
+                            "An error occurred saving attachment (%s) - [Unable to obtain unique filename]"
+    EMS_STRING_ERROR_ATTACH_CREATEFILE 
+                            "An error occurred saving attachment (%s) - [CreateFile() failed error (%d)]"
+    EMS_STRING_ERROR_ATTACH_COPYFILE 
+                            "An error occurred saving attachment (%s) - [CopyFile() failed error (%d)]"
+    EMS_STRING_ERROR_ATTACH_WRITEFILE 
+                            "An error occurred saving attachment (%s) - [WriteFile() failed error (%d)]"
+    EMS_STRING_ERROR_AV_DELETEFILE 
+                            "An error occurred during message virus scanning (%s) - [DeleteFile() failed error (%d)]"
+    EMS_STRING_ERROR_AV_MOVEFILE 
+                            "An error occurred during message virus scanning (%s) - [MoveFile() failed error (%d)]"
+    EMS_STRING_ERROR_AV_QUARANTINE_PATH_RETRIEVAL 
+                            "An error occurred during message virus scanning (%s) - [Failed to retrieve quarantine path]"
+    EMS_STRING_MAILCOMP_MSG_BODY_INFECTED_HANDLED 
+                            "Message from %s had virus-infected body content which was effectively repaired"
+    EMS_STRING_ERROR_INVALID_FROM_ADDRESS 
+                            "The From: field must contain a valid email address"
+END
+
+STRINGTABLE
+BEGIN
+    EMS_STRING_ERROR_FILE_VIRUS 
+                            "The file (%s) has been identified by the MailFlow antivirus system as being either suspicious or infected.\r\n\r\nVirus detected: %s\r\n\r\nPlease contact your system administrator for additional information."
+    EMS_STRING_MAILCOMP_ERROR_DECRYPTING_POP3_PASSWORD 
+                            "An error occurred while attempting to decrypt POP3 account password (server: %s, username: %s). Account cannot be checked."
+    EMS_STRING_MAILCOMP_ERROR_DECRYPTING_SMTP_PASSWORD 
+                            "An error occured while attempting to decrypt message destination password (server: %s, username: %s)."
+    EMS_STRING_MAILCOMP_ATTACHMENT_CANNOT_BE_AV_SCANNED 
+                            "Attachment file (%s) could not be virus-scanned"
+    EMS_STRING_MAILCOMP_ATTACHMENT_SCANNED_SUSPICIOUS 
+                            "Attachment file (%s) was flagged as suspicious by the virus scanner"
+    EMS_STRING_MAILCOMP_ATTACH_AVSCAN_UNEXPECTED_RESULT 
+                            "Unexpected error occurred during attachment virus scan: %d"
+    EMS_STRING_MAILCOMP_MSG_BODY_AV_SUSPICIOUS 
+                            "Message from %s has body content considered suspicious by the virus scanner"
+    EMS_STRING_MAILCOMP_MSG_BODY_AV_CANNOT_BE_SCANNED 
+                            "Body of message from %s could not be scanned for viruses"
+    EMS_STRING_MAILCOMP_MESSAGEBODY_AVSCAN_UNEXPECTED_RESULT 
+                            "Unexpected error occurred during msg body virus scan: %d"
+    EMS_STRING_MAILCOMP_ATTACHMENT_NOT_FOUND 
+                            "Attachment file (%s) does not exist and was removed from the outbound message."
+    EMS_STRING_MAILCOMP_AV_VIRUS_FOUND 
+                            "Virus %s was found in attachment file (%s) and %s"
+    EMS_STRING_ERROR_ACCESS_DENIED_ADMIN 
+                            "Access Denied - The requested action requires administrative rights"
+    EMS_STRING_MAILCOMP_DISKDATASIZE 
+                            "The Database or Disk drive that VisNetic MailFlow is running on, has run out of available space."
+    EMS_STRING_REPORTER_CREATEFILE 
+                            "An error occurred creating report file (%s) - [CreateFile() failed error (%d)]"
+    EMS_STRING_MAILCOMP_MSG_ATTACHMENT_ZIP_FAILURE 
+                            "An error occured while adding message attachments to zip file"
+    EMS_STRING_MAILCOMP_DUP_MSG 
+                            "[%s] a duplicate message was detected and will not be routed (server: %s account: %s subject: %s)"
+END
+
+STRINGTABLE
+BEGIN
+    EMS_STRING_MAILCOMP_INVALID_TYPE "Invalid Message Source Type Detected"
+    EMS_STRING_MAILCOMP_IMAP_AUTHTEST_STARTED 
+                            "IMAP authentication test was initiated (server = %s, port = %d, username = %s)"
+    EMS_STRING_MAILCOMP_IMAP_AUTHTEST_FAILED_CONNECT 
+                            "IMAP authentication test failed to connect to server (server = %s, port = %d, username = %s)"
+    EMS_STRING_MAILCOMP_IMAP_AUTHTEST_FAILED_AUTH 
+                            "IMAP authentication test failed, invalid username or password (server = %s, port = %d, username = %s)"
+    EMS_STRING_MAILCOMP_IMAP_AUTHTEST_SUCCESS 
+                            "IMAP authentication test succeeded"
+    EMS_STRING_ERROR_INITIALIZE_COMPONENT "Failed to initialize component"
+    EMS_STRING_MAILCOMP_SENDING_MSG 
+                            "[%s] sending outbound message ID: (%d)  to SMTP server: (%s)"
+    EMS_STRING_MAILCOMP_POP3_AUTHTEST_SUCCESS 
+                            "POP3 authentication test succeeded"
+    EMS_STRING_MAILCOMP_SMTP_AUTH_TEST_SUCCESS 
+                            "SMTP authentication test succeeded"
+    EMS_STRING_MAILCOMP_RESTART 
+                            "MailComponents DLL has requested a restart, see the debug log for details"
+    EMS_STRING_MAILCOMP_MSG_SKIPPED 
+                            "[%s] message not routed because it is older than [%d] days (server: %s account: %s subject: %s)"
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

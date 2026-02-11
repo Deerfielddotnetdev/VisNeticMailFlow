@@ -1,0 +1,24 @@
+HKCR
+{
+	DeerfieldEMS.RoutingEngineAdmin.1 = s 'RoutingEngineAdmin Class'
+	{
+		CLSID = s '{772926AD-F557-4010-A92C-E0DA95CB0AC6}'
+	}
+	DeerfieldEMS.RoutingEngineAdmin = s 'RoutingEngineAdmin Class'
+	{
+		CLSID = s '{772926AD-F557-4010-A92C-E0DA95CB0AC6}'
+		CurVer = s 'DeerfieldEMS.RoutingEngineAdmin.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {772926AD-F557-4010-A92C-E0DA95CB0AC6} = s 'RoutingEngineAdmin Class'
+		{
+			ProgID = s 'DeerfieldEMS.RoutingEngineAdmin.1'
+			VersionIndependentProgID = s 'DeerfieldEMS.RoutingEngineAdmin'
+			ForceRemove 'Programmable'
+			LocalServer32 = s '%MODULE%'
+			val AppID = s '{6B9984E2-1934-4E29-8325-3A115E684A54}'
+			'TypeLib' = s '{395873CD-6C24-44B3-B057-E0A944F6DE3B}'
+		}
+	}
+}

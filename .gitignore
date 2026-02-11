@@ -1,0 +1,13 @@
+*.user
+*.suo
+*.scc
+*.log
+*.obj
+*.tlog
+*.pdb
+Debug
+.vs
+Release
+DebugUnicode
+ReleaseUnicode
+*.aps

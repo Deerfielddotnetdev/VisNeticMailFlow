@@ -1,0 +1,24 @@
+HKCR
+{
+	DeerfieldEMS.RoutingEngineComm.1 = s 'RoutingEngineComm Class'
+	{
+		CLSID = s '{B47C1233-2A8E-4D46-B983-3E8A10D17F75}'
+	}
+	DeerfieldEMS.RoutingEngineComm = s 'RoutingEngineComm Class'
+	{
+		CLSID = s '{B47C1233-2A8E-4D46-B983-3E8A10D17F75}'
+		CurVer = s 'DeerfieldEMS.RoutingEngineComm.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {B47C1233-2A8E-4D46-B983-3E8A10D17F75} = s 'RoutingEngineComm Class'
+		{
+			ProgID = s 'DeerfieldEMS.RoutingEngineComm.1'
+			VersionIndependentProgID = s 'DeerfieldEMS.RoutingEngineComm'
+			ForceRemove 'Programmable'
+			LocalServer32 = s '%MODULE%'
+			val AppID = s '{6B9984E2-1934-4E29-8325-3A115E684A54}'
+			'TypeLib' = s '{395873CD-6C24-44B3-B057-E0A944F6DE3B}'
+		}
+	}
+}

@@ -1,0 +1,2292 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+<table name="AccessControl">
+</table>
+<table name="AgeAlerts">
+</table>
+<table name="AgeAlertsSent">
+</table>
+<table name="AgentGroupings">
+</table>
+<table name="Agents">
+</table>
+<table name="AlertEvents">
+</table>
+<table name="AlertMethods">
+</table>
+<table name="AlertMsgs">
+</table>
+<table name="Alerts">
+</table>
+<table name="ApprovalObjectTypes">
+</table>
+<table name="Approvals">
+</table>
+<table name="Archives">
+</table>
+<table name="Attachments">
+</table>
+<table name="AutoMessages">
+</table>
+<table name="AutoMessagesSent">
+</table>
+<table name="AutoResponses">
+</table>
+<table name="AutoResponsesSent">
+</table>
+<table name="ContactNotes">
+</table>
+<table name="Contacts">
+</table>
+<table name="CustomDictionary">
+</table>
+<table name="Folders">
+</table>
+<table name="ForwardCCAddresses">
+</table>
+<table name="ForwardToAddresses">
+</table>
+<table name="Groups">
+</table>
+<table name="InboundMessageAttachments">
+</table>
+<table name="InboundMessageQueue">
+</table>
+<table name="InboundMessageRead">
+</table>
+<table name="InboundMessages">
+</table>
+<table name="InstantMessages">
+</table>
+<table name="IPRanges">
+</table>
+<table name="LogEntryTypes">
+</table>
+<table name="LogSeverity">
+</table>
+<table name="MatchFromAddresses">
+</table>
+<table name="MatchFromAddressP">
+</table>
+<table name="MatchText">
+</table>
+<table name="MatchTextP">
+</table>
+<table name="MatchToAddresses">
+</table>
+<table name="MatchToAddressP">
+</table>
+<table name="MessageDestinations">
+</table>
+<table name="MessageSources">
+</table>
+<table name="MessageSourceTypes">
+</table>
+<table name="MsgApprovalQueue">
+</table>
+<table name="Objects">
+</table>
+<table name="ObjectTypes">
+</table>
+<table name="OutboundMessageAttachments">
+</table>
+<table name="OutboundMessageContacts">
+</table>
+<table name="OutboundMessageQueue">
+</table>
+<table name="OutboundMessages">
+</table>
+<table name="OutboundMessageStates">
+</table>
+<table name="OutboundMessageTypes">
+</table>
+<table name="PersonalData">
+</table>
+<table name="PersonalDataTypes">
+</table>
+<table name="Priorities">
+</table>
+<table name="ProcessingRules">
+</table>
+<table name="ReportCustom">
+</table>
+<table name="ReportObjects">
+</table>
+<table name="ReportResultRows">
+</table>
+<table name="ReportResults">
+</table>
+<table name="ReportScheduled">
+</table>
+<table name="ReportStandard">
+</table>
+<table name="ReportTypes">
+</table>
+<table name="RoutingRules">
+</table>
+<table name="ServerParameters">
+</table>
+<table name="Signatures">
+</table>
+<table name="SRKeywordResults">
+</table>
+<table name="StandardResponses">
+</table>
+<table name="StandardResponseUsage">
+</table>
+<table name="StdRespApprovalQueue">
+</table>
+<table name="StdResponseAttachments">
+</table>
+<table name="StdResponseCategories">
+</table>
+<table name="StdResponseFavorites">
+</table>
+<table name="StyleSheets">
+</table>
+<table name="sysdiagrams">
+</table>
+<table name="TaskList">
+</table>
+<table name="TaskPriorities">
+</table>
+<table name="TaskStatuses">
+</table>
+<table name="TicketActions">
+</table>
+<table name="TicketBoxes">
+</table>
+<table name="TicketBoxFooters">
+</table>
+<table name="TicketBoxHeaders">
+</table>
+<table name="TicketBoxOwners">
+</table>
+<table name="TicketBoxRouting">
+</table>
+<table name="TicketBoxTicketBoxOwner">
+</table>
+<table name="TicketBoxViews">
+</table>
+<table name="TicketBoxViewTypes">
+</table>
+<table name="TicketCategories">
+</table>
+<table name="TicketContacts">
+</table>
+<table name="TicketHistory">
+</table>
+<table name="TicketNotes">
+</table>
+<table name="TicketNotesRead">
+</table>
+<table name="Tickets">
+</table>
+<table name="TicketStates">
+</table>
+<table name="Transactions">
+</table>
+<table name="TransactionTypes">
+</table>
+<table name="UIDLData">
+</table>
+<table name="VirusScanStates">
+</table>
+<table name="WaterMarkAlerts">
+</table>
+</root>
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+   <table name="AccessControl">
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+   <table name="AccessControl">
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+   <table name="AccessControl">
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+   <table name="AccessControl">
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+   <table name="AccessControl">
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+   <table name="AccessControl">
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+   <table name="AccessControl">
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+   <table name="AccessControl">
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+   <table name="AccessControl">
+      <column name="AccessControlID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="GroupID" type="INTEGER">
+      </column>
+      <column name="AccessLevel" type="TINYINT">
+      </column>
+      <column name="ObjectID" type="INTEGER">
+      </column>
+   </table>
+   <table name="AgeAlerts">
+      <column name="AgeAlertID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(%d)">
+      </column>
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+   <table name="AccessControl">
+      <column name="AccessControlID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="GroupID" type="INTEGER">
+      </column>
+      <column name="AccessLevel" type="TINYINT">
+      </column>
+      <column name="ObjectID" type="INTEGER">
+      </column>
+   </table>
+   <table name="AgeAlerts">
+      <column name="AgeAlertID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(255)">
+      </column>
+      <column name="HitCount" type="INTEGER">
+      </column>
+      <column name="AgeAlerted" type="BIT">
+      </column>
+      <column name="ThresholdMins" type="INTEGER">
+      </column>
+      <column name="ThresholdFreq" type="INTEGER">
+      </column>
+      <column name="IsEnabled" type="BIT">
+      </column>
+      <column name="NoAlertIfRepliedTo" type="BIT">
+      </column>
+      <column name="AlertOnTypeID" type="INTEGER">
+      </column>
+      <column name="AlertOnID" type="INTEGER">
+      </column>
+      <column name="AlertToTypeID" type="INTEGER">
+      </column>
+      <column name="AlertToID" type="INTEGER">
+      </column>
+      <column name="AlertMethodID" type="INTEGER">
+      </column>
+      <column name="EmailAddress" type="VARCHAR(255)">
+      </column>
+      <column name="FromEmailAddress" type="VARCHAR(255)">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+      <column name="DateEdited" type="DATETIME">
+      </column>
+      <column name="CreatedByID" type="INTEGER">
+      </column>
+      <column name="EditedByID" type="INTEGER">
+      </column>
+   </table>
+   <table name="AgeAlertsSent">
+      <column name="AgeAlertSentID" type="INTEGER">
+      </column>
+      <column name="AgeAlertID" type="INTEGER">
+      </column>
+      <column name="TicketID" type="INTEGER">
+      </column>
+   </table>
+   <table name="AgentGroupings">
+      <column name="AgentGroupingID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="GroupID" type="INTEGER">
+      </column>
+   </table>
+   <table name="Agents">
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="LoginName" type="VARCHAR(50)">
+      </column>
+      <column name="Password" type="VARCHAR(50)">
+      </column>
+      <column name="Name" type="VARCHAR(128)">
+      </column>
+      <column name="IsEnabled" type="BIT">
+      </column>
+      <column name="ObjectID" type="INTEGER">
+      </column>
+      <column name="DefaultAgentAddressID" type="INTEGER">
+      </column>
+      <column name="MaxReportRowsPerPage" type="INTEGER">
+      </column>
+      <column name="StdResponseApprovalsRequired" type="BIT">
+      </column>
+      <column name="MessageApprovalsRequired" type="BIT">
+      </column>
+      <column name="QuoteMsgInReply" type="BIT">
+      </column>
+      <column name="ReplyQuotedPrefix" type="BIT">
+      </column>
+      <column name="NTDomain" type="VARCHAR(125)">
+      </column>
+      <column name="IsNTUser" type="INTEGER">
+      </column>
+      <column name="StyleSheetID" type="INTEGER">
+      </column>
+      <column name="IsDeleted" type="BIT">
+      </column>
+      <column name="UseIM" type="BIT">
+      </column>
+      <column name="EscalateToAgentID" type="INTEGER">
+      </column>
+      <column name="RequireGetOldest" type="BIT">
+      </column>
+      <column name="HasLoggedIn" type="BIT">
+      </column>
+      <column name="DefaultSignatureID" type="INTEGER">
+      </column>
+      <column name="ForceSpellCheck" type="BIT">
+      </column>
+      <column name="SignatureTopReply" type="BIT">
+      </column>
+      <column name="ShowMessagesInbound" type="BIT">
+      </column>
+      <column name="UsePreviewPane" type="BIT">
+      </column>
+      <column name="CloseTicket" type="TINYINT">
+      </column>
+      <column name="RouteToInbox" type="TINYINT">
+      </column>
+      <column name="OutboxHoldTime" type="INTEGER">
+      </column>
+      <column name="UseMarkAsRead" type="BIT">
+      </column>
+      <column name="MarkAsReadSeconds" type="INTEGER">
+      </column>
+   </table>
+   <table name="AlertEvents">
+      <column name="AlertEventID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(255)">
+      </column>
+      <column name="NeedTicketBoxID" type="BIT">
+      </column>
+   </table>
+   <table name="AlertMethods">
+      <column name="AlertMethodID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(255)">
+      </column>
+   </table>
+   <table name="AlertMsgs">
+      <column name="AlertMsgID" type="INTEGER">
+      </column>
+      <column name="AlertEventID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="TicketID" type="INTEGER">
+      </column>
+      <column name="Viewed" type="TINYINT">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+      <column name="Body" type="TEXT">
+      </column>
+      <column name="Subject" type="VARCHAR(255)">
+      </column>
+   </table>
+   <table name="Alerts">
+      <column name="AlertID" type="INTEGER">
+      </column>
+      <column name="AlertEventID" type="INTEGER">
+      </column>
+      <column name="AlertMethodID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="GroupID" type="INTEGER">
+      </column>
+      <column name="TicketBoxID" type="INTEGER">
+      </column>
+      <column name="EmailAddress" type="VARCHAR(255)">
+      </column>
+      <column name="FromEmailAddress" type="VARCHAR(255)">
+      </column>
+   </table>
+   <table name="ApprovalObjectTypes">
+      <column name="ApprovalObjectTypeID" type="INTEGER">
+      </column>
+      <column name="Name" type="VARCHAR(55)">
+      </column>
+   </table>
+   <table name="Approvals">
+      <column name="ApprovalID" type="INTEGER">
+      </column>
+      <column name="RequestAgentID" type="INTEGER">
+      </column>
+      <column name="ApproverAgentID" type="INTEGER">
+      </column>
+      <column name="ApproverGroupID" type="INTEGER">
+      </column>
+      <column name="ApprovalObjectTypeID" type="INTEGER">
+      </column>
+   </table>
+   <table name="Archives">
+      <column name="ArchiveID" type="INTEGER">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+      <column name="Purged" type="TINYINT">
+      </column>
+      <column name="ArcFilePath" type="VARCHAR(255)">
+      </column>
+      <column name="InMsgRecords" type="INTEGER">
+      </column>
+      <column name="InAttRecords" type="INTEGER">
+      </column>
+      <column name="OutMsgRecords" type="INTEGER">
+      </column>
+      <column name="OutAttRecords" type="INTEGER">
+      </column>
+   </table>
+   <table name="Attachments">
+      <column name="AttachmentID" type="INTEGER">
+      </column>
+      <column name="AttachmentLocation" type="VARCHAR(255)">
+      </column>
+      <column name="MediaType" type="VARCHAR(125)">
+      </column>
+      <column name="MediaSubType" type="VARCHAR(125)">
+      </column>
+      <column name="ContentDisposition" type="VARCHAR(125)">
+      </column>
+      <column name="FileName" type="VARCHAR(255)">
+      </column>
+      <column name="FileSize" type="INTEGER">
+      </column>
+      <column name="VirusScanStateID" type="INTEGER">
+      </column>
+      <column name="VirusName" type="VARCHAR(125)">
+      </column>
+      <column name="ContentID" type="VARCHAR(255)">
+      </column>
+      <column name="IsInbound" type="BIT">
+      </column>
+   </table>
+   <table name="AutoMessages">
+      <column name="AutoMessageID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(255)">
+      </column>
+      <column name="HitCount" type="INTEGER">
+      </column>
+      <column name="FailCount" type="INTEGER">
+      </column>
+      <column name="TotalCount" type="INTEGER">
+      </column>
+      <column name="SendToTypeID" type="INTEGER">
+      </column>
+      <column name="SendToID" type="INTEGER">
+      </column>
+      <column name="IsEnabled" type="BIT">
+      </column>
+      <column name="WhenToSendVal" type="INTEGER">
+      </column>
+      <column name="WhenToSendFreq" type="INTEGER">
+      </column>
+      <column name="WhenToSendTypeID" type="INTEGER">
+      </column>
+      <column name="SrToSendID" type="INTEGER">
+      </column>
+      <column name="SendFromTypeID" type="INTEGER">
+      </column>
+      <column name="CreateNewTicket" type="BIT">
+      </column>
+      <column name="ReplyToAddress" type="VARCHAR(255)">
+      </column>
+      <column name="ReplyToName" type="VARCHAR(255)">
+      </column>
+      <column name="OwnerID" type="INTEGER">
+      </column>
+      <column name="TicketBoxID" type="INTEGER">
+      </column>
+      <column name="TicketCategoryID" type="INTEGER">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+      <column name="DateEdited" type="DATETIME">
+      </column>
+      <column name="CreatedByID" type="INTEGER">
+      </column>
+      <column name="EditedByID" type="INTEGER">
+      </column>
+      <column name="SendToPercent" type="INTEGER">
+      </column>
+   </table>
+   <table name="AutoMessagesSent">
+      <column name="AutoMessageSentID" type="INTEGER">
+      </column>
+      <column name="AutoMessageID" type="INTEGER">
+      </column>
+      <column name="TicketID" type="INTEGER">
+      </column>
+      <column name="ResultCode" type="INTEGER">
+      </column>
+   </table>
+   <table name="AutoResponses">
+      <column name="AutoResponseID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(255)">
+      </column>
+      <column name="HitCount" type="INTEGER">
+      </column>
+      <column name="FailCount" type="INTEGER">
+      </column>
+      <column name="TotalCount" type="INTEGER">
+      </column>
+      <column name="SendToTypeID" type="INTEGER">
+      </column>
+      <column name="SendToID" type="INTEGER">
+      </column>
+      <column name="IsEnabled" type="BIT">
+      </column>
+      <column name="SendFromTypeID" type="INTEGER">
+      </column>
+      <column name="ReplyToAddress" type="VARCHAR(255)">
+      </column>
+      <column name="ReplyToName" type="VARCHAR(255)">
+      </column>
+      <column name="WhenToSendVal" type="INTEGER">
+      </column>
+      <column name="WhenToSendFreq" type="INTEGER">
+      </column>
+      <column name="WhenToSendTypeID" type="INTEGER">
+      </column>
+      <column name="SrToSendID" type="INTEGER">
+      </column>
+      <column name="AutoReplyQuoteMsg" type="BIT">
+      </column>
+      <column name="AutoReplyCloseTicket" type="BIT">
+      </column>
+      <column name="HeaderID" type="INTEGER">
+      </column>
+      <column name="FooterID" type="INTEGER">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+      <column name="DateEdited" type="DATETIME">
+      </column>
+      <column name="CreatedByID" type="INTEGER">
+      </column>
+      <column name="EditedByID" type="INTEGER">
+      </column>
+      <column name="SendToPercent" type="INTEGER">
+      </column>
+   </table>
+   <table name="AutoResponsesSent">
+      <column name="AutoResponseSentID" type="INTEGER">
+      </column>
+      <column name="AutoResponseID" type="INTEGER">
+      </column>
+      <column name="TicketID" type="INTEGER">
+      </column>
+      <column name="ResultCode" type="INTEGER">
+      </column>
+   </table>
+   <table name="ContactNotes">
+      <column name="ContactNoteID" type="INTEGER">
+      </column>
+      <column name="ContactID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+      <column name="Note" type="TEXT">
+      </column>
+   </table>
+   <table name="Contacts">
+      <column name="ContactID" type="INTEGER">
+      </column>
+      <column name="Name" type="VARCHAR(255)">
+      </column>
+      <column name="CompanyName" type="VARCHAR(50)">
+      </column>
+      <column name="Title" type="VARCHAR(20)">
+      </column>
+      <column name="WebPageAddress" type="VARCHAR(255)">
+      </column>
+      <column name="StreetAddress1" type="VARCHAR(75)">
+      </column>
+      <column name="StreetAddress2" type="VARCHAR(75)">
+      </column>
+      <column name="City" type="VARCHAR(35)">
+      </column>
+      <column name="State" type="VARCHAR(30)">
+      </column>
+      <column name="ZipCode" type="VARCHAR(20)">
+      </column>
+      <column name="Country" type="VARCHAR(55)">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+      <column name="IsDeleted" type="TINYINT">
+      </column>
+      <column name="DeletedTime" type="DATETIME">
+      </column>
+      <column name="DeletedBy" type="INTEGER">
+      </column>
+      <column name="OwnerID" type="INTEGER">
+      </column>
+      <column name="DefaultEmailAddressID" type="INTEGER">
+      </column>
+   </table>
+   <table name="CustomDictionary">
+      <column name="CustomDictionaryID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="Word" type="VARCHAR(255)">
+      </column>
+   </table>
+   <table name="Folders">
+      <column name="FolderID" type="INTEGER">
+      </column>
+      <column name="Name" type="VARCHAR(55)">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="ParentID" type="INTEGER">
+      </column>
+   </table>
+   <table name="ForwardCCAddresses">
+      <column name="AddressID" type="INTEGER">
+      </column>
+      <column name="EmailAddress" type="VARCHAR(255)">
+      </column>
+      <column name="RoutingRuleID" type="INTEGER">
+      </column>
+   </table>
+   <table name="ForwardToAddresses">
+      <column name="AddressID" type="INTEGER">
+      </column>
+      <column name="EmailAddress" type="VARCHAR(255)">
+      </column>
+      <column name="RoutingRuleID" type="INTEGER">
+      </column>
+   </table>
+   <table name="Groups">
+      <column name="GroupID" type="INTEGER">
+      </column>
+      <column name="GroupName" type="VARCHAR(50)">
+      </column>
+      <column name="ObjectID" type="INTEGER">
+      </column>
+      <column name="IsDeleted" type="BIT">
+      </column>
+      <column name="IsEscalationGroup" type="BIT">
+      </column>
+      <column name="UseEscTicketBox" type="BIT">
+      </column>
+      <column name="AssignToTicketBoxID" type="INTEGER">
+      </column>
+   </table>
+   <table name="InboundMessageAttachments">
+      <column name="InboundMessageAttachmentID" type="INTEGER">
+      </column>
+      <column name="AttachmentID" type="INTEGER">
+      </column>
+      <column name="InboundMessageID" type="INTEGER">
+      </column>
+   </table>
+   <table name="InboundMessageQueue">
+      <column name="InboundMessageQueueID" type="INTEGER">
+      </column>
+      <column name="InboundMessageID" type="INTEGER">
+      </column>
+   </table>
+   <table name="InboundMessageRead">
+      <column name="InboundMessageReadID" type="INTEGER">
+      </column>
+      <column name="InboundMessageID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+   </table>
+   <table name="InboundMessages">
+      <column name="InboundMessageID" type="INTEGER">
+      </column>
+      <column name="TicketID" type="INTEGER">
+      </column>
+      <column name="EmailFrom" type="VARCHAR(255)">
+      </column>
+      <column name="EmailFromName" type="VARCHAR(128)">
+      </column>
+      <column name="EmailPrimaryTo" type="VARCHAR(255)">
+      </column>
+      <column name="EmailDateTime" type="DATETIME">
+      </column>
+      <column name="DateReceived" type="DATETIME">
+      </column>
+      <column name="Subject" type="VARCHAR(255)">
+      </column>
+      <column name="MediaType" type="VARCHAR(125)">
+      </column>
+      <column name="MediaSubType" type="VARCHAR(125)">
+      </column>
+      <column name="IsDeleted" type="TINYINT">
+      </column>
+      <column name="DeletedBy" type="INTEGER">
+      </column>
+      <column name="DeletedTime" type="DATETIME">
+      </column>
+      <column name="RoutingRuleID" type="INTEGER">
+      </column>
+      <column name="MessageSourceID" type="INTEGER">
+      </column>
+      <column name="VirusScanStateID" type="INTEGER">
+      </column>
+      <column name="ReplyToMsgID" type="INTEGER">
+      </column>
+      <column name="ReplyToIDIsInbound" type="BIT">
+      </column>
+      <column name="VirusName" type="VARCHAR(125)">
+      </column>
+      <column name="Body" type="TEXT">
+      </column>
+      <column name="PopHeaders" type="TEXT">
+      </column>
+      <column name="EmailTo" type="TEXT">
+      </column>
+      <column name="EmailCc" type="TEXT">
+      </column>
+      <column name="EmailReplyTo" type="TEXT">
+      </column>
+      <column name="ContactID" type="INTEGER">
+      </column>
+      <column name="PriorityID" type="INTEGER">
+      </column>
+      <column name="ArchiveID" type="INTEGER">
+      </column>
+      <column name="OriginalTicketBoxID" type="INTEGER">
+      </column>
+      <column name="OriginalOwnerID" type="INTEGER">
+      </column>
+      <column name="OriginalTicketCategoryID" type="INTEGER">
+      </column>
+   </table>
+   <table name="InstantMessages">
+      <column name="InstantMessageID" type="INTEGER">
+      </column>
+      <column name="Body" type="TEXT">
+      </column>
+      <column name="FromAgentID" type="INTEGER">
+      </column>
+      <column name="ToAgentID" type="INTEGER">
+      </column>
+      <column name="TimeStamp" type="DATETIME">
+      </column>
+   </table>
+   <table name="IPRanges">
+      <column name="IPRangeID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="GroupID" type="INTEGER">
+      </column>
+      <column name="LowerRange" type="INTEGER">
+      </column>
+      <column name="UpperRange" type="INTEGER">
+      </column>
+   </table>
+   <table name="LogEntryTypes">
+      <column name="LogEntryTypeID" type="INTEGER">
+      </column>
+      <column name="TypeDescrip" type="VARCHAR(125)">
+      </column>
+      <column name="SeverityLevels" type="INTEGER">
+      </column>
+   </table>
+   <table name="LogSeverity">
+      <column name="LogSeverityID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(55)">
+      </column>
+   </table>
+   <table name="MatchFromAddresses">
+      <column name="MatchID" type="INTEGER">
+      </column>
+      <column name="EmailAddress" type="VARCHAR(255)">
+      </column>
+      <column name="RoutingRuleID" type="INTEGER">
+      </column>
+   </table>
+   <table name="MatchFromAddressP">
+      <column name="MatchID" type="INTEGER">
+      </column>
+      <column name="EmailAddress" type="VARCHAR(255)">
+      </column>
+      <column name="ProcessingRuleID" type="INTEGER">
+      </column>
+   </table>
+   <table name="MatchText">
+      <column name="MatchID" type="INTEGER">
+      </column>
+      <column name="MatchText" type="TEXT">
+      </column>
+      <column name="MatchLocation" type="TINYINT">
+      </column>
+      <column name="RoutingRuleID" type="INTEGER">
+      </column>
+   </table>
+   <table name="MatchTextP">
+      <column name="MatchID" type="INTEGER">
+      </column>
+      <column name="MatchText" type="TEXT">
+      </column>
+      <column name="MatchLocation" type="TINYINT">
+      </column>
+      <column name="ProcessingRuleID" type="INTEGER">
+      </column>
+   </table>
+   <table name="MatchToAddresses">
+      <column name="MatchID" type="INTEGER">
+      </column>
+      <column name="EmailAddress" type="VARCHAR(255)">
+      </column>
+      <column name="RoutingRuleID" type="INTEGER">
+      </column>
+   </table>
+   <table name="MatchToAddressP">
+      <column name="MatchID" type="INTEGER">
+      </column>
+      <column name="EmailAddress" type="VARCHAR(255)">
+      </column>
+      <column name="ProcessingRuleID" type="INTEGER">
+      </column>
+   </table>
+   <table name="MessageDestinations">
+      <column name="MessageDestinationID" type="INTEGER">
+      </column>
+      <column name="ServerAddress" type="VARCHAR(255)">
+      </column>
+      <column name="UseSMTPAuth" type="BIT">
+      </column>
+      <column name="AuthUser" type="VARCHAR(125)">
+      </column>
+      <column name="AuthPass" type="VARCHAR(125)">
+      </column>
+      <column name="SMTPPort" type="INTEGER">
+      </column>
+      <column name="IsActive" type="BIT">
+      </column>
+      <column name="ConnTimeoutSecs" type="INTEGER">
+      </column>
+      <column name="MaxOutboundMsgSize" type="INTEGER">
+      </column>
+      <column name="MaxSendRetryHours" type="INTEGER">
+      </column>
+      <column name="LastProcessInterval" type="DATETIME">
+      </column>
+      <column name="ProcessFreqMins" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(255)">
+      </column>
+   </table>
+   <table name="MessageSources">
+      <column name="MessageSourceID" type="INTEGER">
+      </column>
+      <column name="RemoteAddress" type="VARCHAR(255)">
+      </column>
+      <column name="RemotePort" type="INTEGER">
+      </column>
+      <column name="AuthUserName" type="VARCHAR(125)">
+      </column>
+      <column name="AuthPassword" type="VARCHAR(125)">
+      </column>
+      <column name="IsAPOP" type="BIT">
+      </column>
+      <column name="LeaveCopiesOnServer" type="BIT">
+      </column>
+      <column name="IsActive" type="BIT">
+      </column>
+      <column name="CheckFreqMins" type="INTEGER">
+      </column>
+      <column name="MaxInboundMsgSize" type="INTEGER">
+      </column>
+      <column name="ConnTimeoutSecs" type="INTEGER">
+      </column>
+      <column name="LastChecked" type="DATETIME">
+      </column>
+      <column name="MessageDestinationID" type="INTEGER">
+      </column>
+      <column name="MessageSourceTypeID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(255)">
+      </column>
+      <column name="UseReplyTo" type="BIT">
+      </column>
+   </table>
+   <table name="MessageSourceTypes">
+      <column name="MessageSourceTypeID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(32)">
+      </column>
+   </table>
+   <table name="MsgApprovalQueue">
+      <column name="MsgApprovalQueueID" type="INTEGER">
+      </column>
+      <column name="OutboundMessageID" type="INTEGER">
+      </column>
+      <column name="DateRequested" type="DATETIME">
+      </column>
+      <column name="DateHandled" type="DATETIME">
+      </column>
+      <column name="IsApproved" type="BIT">
+      </column>
+      <column name="RequestAgentID" type="INTEGER">
+      </column>
+      <column name="ApproverAgentID" type="INTEGER">
+      </column>
+      <column name="Note" type="TEXT">
+      </column>
+   </table>
+   <table name="Objects">
+      <column name="ObjectID" type="INTEGER">
+      </column>
+      <column name="ActualID" type="INTEGER">
+      </column>
+      <column name="ObjectTypeID" type="INTEGER">
+      </column>
+      <column name="BuiltIn" type="BIT">
+      </column>
+      <column name="UseDefaultRights" type="TINYINT">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+   </table>
+   <table name="ObjectTypes">
+      <column name="ObjectTypeID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(125)">
+      </column>
+   </table>
+   <table name="OutboundMessageAttachments">
+      <column name="OutboundMessageAttachmentID" type="INTEGER">
+      </column>
+      <column name="AttachmentID" type="INTEGER">
+      </column>
+      <column name="OutboundMessageID" type="INTEGER">
+      </column>
+   </table>
+   <table name="OutboundMessageContacts">
+      <column name="OutboundMessageContactID" type="INTEGER">
+      </column>
+      <column name="OutboundMessageID" type="INTEGER">
+      </column>
+      <column name="ContactID" type="INTEGER">
+      </column>
+   </table>
+   <table name="OutboundMessageQueue">
+      <column name="OutBoundMessageQueueID" type="INTEGER">
+      </column>
+      <column name="OutboundMessageID" type="INTEGER">
+      </column>
+      <column name="MessageDestinationID" type="INTEGER">
+      </column>
+      <column name="SpoolFileGenerated" type="BIT">
+      </column>
+      <column name="IsApproved" type="BIT">
+      </column>
+      <column name="DateSpooled" type="DATETIME">
+      </column>
+      <column name="LastAttemptedDelivery" type="DATETIME">
+      </column>
+   </table>
+   <table name="OutboundMessages">
+      <column name="OutboundMessageID" type="INTEGER">
+      </column>
+      <column name="TicketID" type="INTEGER">
+      </column>
+      <column name="EmailFrom" type="VARCHAR(255)">
+      </column>
+      <column name="EmailPrimaryTo" type="VARCHAR(255)">
+      </column>
+      <column name="EmailDateTime" type="DATETIME">
+      </column>
+      <column name="Subject" type="VARCHAR(255)">
+      </column>
+      <column name="MediaType" type="VARCHAR(125)">
+      </column>
+      <column name="MediaSubType" type="VARCHAR(125)">
+      </column>
+      <column name="DeletedBy" type="INTEGER">
+      </column>
+      <column name="DeletedTime" type="DATETIME">
+      </column>
+      <column name="IsDeleted" type="TINYINT">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="ReplyToMsgID" type="INTEGER">
+      </column>
+      <column name="ReplyToIDIsInbound" type="BIT">
+      </column>
+      <column name="OutboundMessageTypeID" type="INTEGER">
+      </column>
+      <column name="OutboundMessageStateID" type="INTEGER">
+      </column>
+      <column name="Body" type="TEXT">
+      </column>
+      <column name="EmailTo" type="TEXT">
+      </column>
+      <column name="EmailCc" type="TEXT">
+      </column>
+      <column name="EmailBcc" type="TEXT">
+      </column>
+      <column name="EmailReplyTo" type="TEXT">
+      </column>
+      <column name="TicketBoxHeaderID" type="INTEGER">
+      </column>
+      <column name="TicketBoxFooterID" type="INTEGER">
+      </column>
+      <column name="PriorityID" type="INTEGER">
+      </column>
+      <column name="ArchiveID" type="INTEGER">
+      </column>
+      <column name="SignatureID" type="INTEGER">
+      </column>
+      <column name="OriginalTicketBoxID" type="INTEGER">
+      </column>
+      <column name="DraftCloseTicket" type="TINYINT">
+      </column>
+      <column name="DraftRouteToMe" type="TINYINT">
+      </column>
+      <column name="TicketCategoryID" type="INTEGER">
+      </column>
+   </table>
+   <table name="OutboundMessageStates">
+      <column name="OutboundMsgStateID" type="INTEGER">
+      </column>
+      <column name="MessageStateName" type="VARCHAR(50)">
+      </column>
+   </table>
+   <table name="OutboundMessageTypes">
+      <column name="OutboundMessageTypeID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(64)">
+      </column>
+   </table>
+   <table name="PersonalData">
+      <column name="PersonalDataID" type="INTEGER">
+      </column>
+      <column name="ContactID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="PersonalDataTypeID" type="INTEGER">
+      </column>
+      <column name="DataValue" type="VARCHAR(255)">
+      </column>
+      <column name="Note" type="VARCHAR(255)">
+      </column>
+   </table>
+   <table name="PersonalDataTypes">
+      <column name="PersonalDataTypeID" type="INTEGER">
+      </column>
+      <column name="TypeName" type="VARCHAR(64)">
+      </column>
+      <column name="BuiltIn" type="BIT">
+      </column>
+   </table>
+   <table name="Priorities">
+      <column name="PriorityID" type="INTEGER">
+      </column>
+      <column name="Name" type="VARCHAR(50)">
+      </column>
+      <column name="SortIndex" type="INTEGER">
+      </column>
+   </table>
+   <table name="ProcessingRules">
+      <column name="ProcessingRuleID" type="INTEGER">
+      </column>
+      <column name="RuleDescrip" type="VARCHAR(125)">
+      </column>
+      <column name="IsEnabled" type="BIT">
+      </column>
+      <column name="OrderIndex" type="INTEGER">
+      </column>
+      <column name="HitCount" type="INTEGER">
+      </column>
+      <column name="PrePost" type="BIT">
+      </column>
+      <column name="ActionType" type="INTEGER">
+      </column>
+      <column name="ActionID" type="INTEGER">
+      </column>
+      <column name="MessageSourceTypeID" type="INTEGER">
+      </column>
+   </table>
+   <table name="ReportCustom">
+      <column name="CustomReportID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(50)">
+      </column>
+      <column name="IsEnabled" type="BIT">
+      </column>
+      <column name="ReportTypeID" type="INTEGER">
+      </column>
+      <column name="ReportObjectID" type="INTEGER">
+      </column>
+      <column name="BuiltIn" type="BIT">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+      <column name="CreatedBy" type="INTEGER">
+      </column>
+      <column name="DateEdited" type="DATETIME">
+      </column>
+      <column name="EditedBy" type="INTEGER">
+      </column>
+      <column name="Query" type="TEXT">
+      </column>
+   </table>
+   <table name="ReportObjects">
+      <column name="ReportObjectID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(50)">
+      </column>
+      <column name="AllowCustom" type="BIT">
+      </column>
+      <column name="IsEnabled" type="BIT">
+      </column>
+   </table>
+   <table name="ReportResultRows">
+      <column name="ReportResultRowsID" type="INTEGER">
+      </column>
+      <column name="ReportResultID" type="INTEGER">
+      </column>
+      <column name="Col1" type="VARCHAR(50)">
+      </column>
+      <column name="Col2" type="VARCHAR(50)">
+      </column>
+      <column name="Col3" type="INTEGER">
+      </column>
+      <column name="Col4" type="INTEGER">
+      </column>
+      <column name="Col5" type="INTEGER">
+      </column>
+   </table>
+   <table name="ReportResults">
+      <column name="ReportResultID" type="INTEGER">
+      </column>
+      <column name="ScheduledReportID" type="INTEGER">
+      </column>
+      <column name="ResultCode" type="INTEGER">
+      </column>
+      <column name="ResultFile" type="VARCHAR(255)">
+      </column>
+      <column name="DateRan" type="DATETIME">
+      </column>
+      <column name="DateFrom" type="DATETIME">
+      </column>
+      <column name="DateTo" type="DATETIME">
+      </column>
+   </table>
+   <table name="ReportScheduled">
+      <column name="ScheduledReportID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(50)">
+      </column>
+      <column name="ReportID" type="INTEGER">
+      </column>
+      <column name="TargetID" type="INTEGER">
+      </column>
+      <column name="Flag1" type="BIT">
+      </column>
+      <column name="Flag2" type="BIT">
+      </column>
+      <column name="TicketStateID" type="INTEGER">
+      </column>
+      <column name="IsCustom" type="BIT">
+      </column>
+      <column name="IsEnabled" type="BIT">
+      </column>
+      <column name="OwnerID" type="INTEGER">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+      <column name="DateEdited" type="DATETIME">
+      </column>
+      <column name="CreatedBy" type="INTEGER">
+      </column>
+      <column name="EditedBy" type="INTEGER">
+      </column>
+      <column name="LastRunTime" type="DATETIME">
+      </column>
+      <column name="LastResultCode" type="INTEGER">
+      </column>
+      <column name="NextRunTime" type="DATETIME">
+      </column>
+      <column name="RunFreq" type="INTEGER">
+      </column>
+      <column name="RunOn" type="INTEGER">
+      </column>
+      <column name="RunSun" type="BIT">
+      </column>
+      <column name="RunMon" type="BIT">
+      </column>
+      <column name="RunTue" type="BIT">
+      </column>
+      <column name="RunWed" type="BIT">
+      </column>
+      <column name="RunThur" type="BIT">
+      </column>
+      <column name="RunFri" type="BIT">
+      </column>
+      <column name="RunSat" type="BIT">
+      </column>
+      <column name="RunAtHour" type="INTEGER">
+      </column>
+      <column name="RunAtMin" type="INTEGER">
+      </column>
+      <column name="SumPeriod" type="INTEGER">
+      </column>
+      <column name="MaxResults" type="INTEGER">
+      </column>
+      <column name="SendAlertToOwner" type="BIT">
+      </column>
+      <column name="SendResultToEmail" type="BIT">
+      </column>
+      <column name="ResultEmailTo" type="VARCHAR(255)">
+      </column>
+      <column name="IncludeResultFile" type="BIT">
+      </column>
+      <column name="SaveResultToFile" type="BIT">
+      </column>
+      <column name="KeepNumResultFile" type="INTEGER">
+      </column>
+      <column name="AllowConsolidation" type="BIT">
+      </column>
+   </table>
+   <table name="ReportStandard">
+      <column name="StandardReportID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(50)">
+      </column>
+      <column name="IsEnabled" type="BIT">
+      </column>
+      <column name="CanSchedule" type="BIT">
+      </column>
+      <column name="ReportTypeID" type="INTEGER">
+      </column>
+      <column name="ReportObjectID" type="INTEGER">
+      </column>
+   </table>
+   <table name="ReportTypes">
+      <column name="ReportTypeID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(50)">
+      </column>
+      <column name="AllowCustom" type="BIT">
+      </column>
+      <column name="IsEnabled" type="BIT">
+      </column>
+   </table>
+   <table name="RoutingRules">
+      <column name="RoutingRuleID" type="INTEGER">
+      </column>
+      <column name="RuleDescrip" type="VARCHAR(125)">
+      </column>
+      <column name="IsEnabled" type="BIT">
+      </column>
+      <column name="OrderIndex" type="INTEGER">
+      </column>
+      <column name="AutoReplyEnable" type="BIT">
+      </column>
+      <column name="AutoReplyWithStdResponse" type="INTEGER">
+      </column>
+      <column name="AutoReplyQuoteMsg" type="BIT">
+      </column>
+      <column name="AutoReplyCloseTicket" type="BIT">
+      </column>
+      <column name="ForwardEnable" type="BIT">
+      </column>
+      <column name="ForwardFromAgent" type="INTEGER">
+      </column>
+      <column name="ForwardFromContact" type="BIT">
+      </column>
+      <column name="AssignToTicketBox" type="INTEGER">
+      </column>
+      <column name="AssignToAgentEnable" type="BIT">
+      </column>
+      <column name="AssignToAgent" type="INTEGER">
+      </column>
+      <column name="DeleteImmediatelyEnable" type="BIT">
+      </column>
+      <column name="DeleteImmediately" type="TINYINT">
+      </column>
+      <column name="HitCount" type="INTEGER">
+      </column>
+      <column name="PriorityID" type="INTEGER">
+      </column>
+      <column name="MessageSourceTypeID" type="INTEGER">
+      </column>
+      <column name="AutoReplyFrom" type="VARCHAR(255)">
+      </column>
+      <column name="AssignToAgentAlg" type="INTEGER">
+      </column>
+      <column name="AssignToTicketBoxAlg" type="INTEGER">
+      </column>
+      <column name="AssignUniqueTicketID" type="BIT">
+      </column>
+      <column name="AssignToTicketCategory" type="INTEGER">
+      </column>
+      <column name="AlertEnable" type="BIT">
+      </column>
+      <column name="AlertIncludeSubject" type="BIT">
+      </column>
+      <column name="AlertToAgentID" type="INTEGER">
+      </column>
+      <column name="AlertText" type="VARCHAR(255)">
+      </column>
+      <column name="ToOrFrom" type="BIT">
+      </column>
+      <column name="ConsiderAllOwned" type="BIT">
+      </column>
+      <column name="DoProcessingRules" type="BIT">
+      </column>
+   </table>
+   <table name="ServerParameters">
+      <column name="ServerParameterID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(255)">
+      </column>
+      <column name="DataValue" type="VARCHAR(255)">
+      </column>
+   </table>
+   <table name="Signatures">
+      <column name="SignatureID" type="INTEGER">
+      </column>
+      <column name="GroupID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="Name" type="VARCHAR(64)">
+      </column>
+      <column name="Signature" type="TEXT">
+      </column>
+   </table>
+   <table name="SRKeywordResults">
+      <column name="SRKeywordResultsID" type="INTEGER">
+      </column>
+      <column name="InboundMessageID" type="INTEGER">
+      </column>
+      <column name="StandardResponseID" type="INTEGER">
+      </column>
+      <column name="Score" type="INTEGER">
+      </column>
+   </table>
+   <table name="StandardResponses">
+      <column name="StandardResponseID" type="INTEGER">
+      </column>
+      <column name="Subject" type="VARCHAR(100)">
+      </column>
+      <column name="StdResponseCatID" type="INTEGER">
+      </column>
+      <column name="StandardResponse" type="TEXT">
+      </column>
+      <column name="IsApproved" type="BIT">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+      <column name="IsDeleted" type="TINYINT">
+      </column>
+      <column name="DeletedTime" type="DATETIME">
+      </column>
+      <column name="DeletedBy" type="INTEGER">
+      </column>
+      <column name="Note" type="TEXT">
+      </column>
+      <column name="DateModified" type="DATETIME">
+      </column>
+      <column name="ModifiedBy" type="INTEGER">
+      </column>
+      <column name="UseKeywords" type="BIT">
+      </column>
+      <column name="Keywords" type="VARCHAR(255)">
+      </column>
+   </table>
+   <table name="StandardResponseUsage">
+      <column name="StdResponseUsageID" type="INTEGER">
+      </column>
+      <column name="StandardResponseID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="DateUsed" type="DATETIME">
+      </column>
+   </table>
+   <table name="StdRespApprovalQueue">
+      <column name="StdRespApprovalQueueID" type="INTEGER">
+      </column>
+      <column name="DateRequested" type="DATETIME">
+      </column>
+      <column name="DateHandled" type="DATETIME">
+      </column>
+      <column name="IsApproved" type="BIT">
+      </column>
+      <column name="RequestAgentID" type="INTEGER">
+      </column>
+      <column name="ApproverAgentID" type="INTEGER">
+      </column>
+      <column name="Note" type="TEXT">
+      </column>
+      <column name="StandardResponseID" type="INTEGER">
+      </column>
+      <column name="EditsStdRspID" type="INTEGER">
+      </column>
+   </table>
+   <table name="StdResponseAttachments">
+      <column name="StdResponseAttachID" type="INTEGER">
+      </column>
+      <column name="StandardResponseID" type="INTEGER">
+      </column>
+      <column name="AttachmentID" type="INTEGER">
+      </column>
+   </table>
+   <table name="StdResponseCategories">
+      <column name="StdResponseCatID" type="INTEGER">
+      </column>
+      <column name="CategoryName" type="VARCHAR(50)">
+      </column>
+   </table>
+   <table name="StdResponseFavorites">
+      <column name="StdResponseFavoritesID" type="INTEGER">
+      </column>
+      <column name="StandardResponseID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+   </table>
+   <table name="StyleSheets">
+      <column name="StyleSheetID" type="INTEGER">
+      </column>
+      <column name="Name" type="VARCHAR(45)">
+      </column>
+      <column name="Filename" type="VARCHAR(255)">
+      </column>
+   </table>
+   <table name="sysdiagrams">
+      <column name="name" type="VARCHAR(255)">
+      </column>
+      <column name="principal_id" type="INTEGER">
+      </column>
+      <column name="diagram_id" type="INTEGER">
+      </column>
+      <column name="version" type="INTEGER">
+      </column>
+      <column name="definition" type="INTEGER">
+      </column>
+   </table>
+   <table name="TaskList">
+      <column name="TaskID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="TaskStatusID" type="INTEGER">
+      </column>
+      <column name="Subject" type="VARCHAR(125)">
+      </column>
+      <column name="TaskDescrip" type="VARCHAR(255)">
+      </column>
+      <column name="PercentageComplete" type="TINYINT">
+      </column>
+      <column name="DueDate" type="DATETIME">
+      </column>
+      <column name="StartDate" type="DATETIME">
+      </column>
+      <column name="Reminder" type="DATETIME">
+      </column>
+      <column name="TaskPriorityID" type="INTEGER">
+      </column>
+   </table>
+   <table name="TaskPriorities">
+      <column name="TaskPriorityID" type="INTEGER">
+      </column>
+      <column name="PriorityName" type="VARCHAR(50)">
+      </column>
+      <column name="IsDefault" type="BIT">
+      </column>
+   </table>
+   <table name="TaskStatuses">
+      <column name="TaskStatusID" type="INTEGER">
+      </column>
+      <column name="StatusDescrip" type="VARCHAR(25)">
+      </column>
+      <column name="IsDefault" type="BIT">
+      </column>
+   </table>
+   <table name="TicketActions">
+      <column name="TicketActionID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(255)">
+      </column>
+   </table>
+   <table name="TicketBoxes">
+      <column name="TicketBoxID" type="INTEGER">
+      </column>
+      <column name="Name" type="VARCHAR(50)">
+      </column>
+      <column name="Description" type="VARCHAR(255)">
+      </column>
+      <column name="AgeAlertingEnabled" type="BIT">
+      </column>
+      <column name="AgeAlertingThresholdMins" type="INTEGER">
+      </column>
+      <column name="ObjectID" type="INTEGER">
+      </column>
+      <column name="MaxRecordsSize" type="INTEGER">
+      </column>
+      <column name="RequireGetOldest" type="BIT">
+      </column>
+      <column name="LowWaterMark" type="INTEGER">
+      </column>
+      <column name="HighWaterMark" type="INTEGER">
+      </column>
+      <column name="AutoReplyEnable" type="BIT">
+      </column>
+      <column name="AutoReplyWithStdResponse" type="INTEGER">
+      </column>
+      <column name="AutoReplyThreshHoldMins" type="INTEGER">
+      </column>
+      <column name="AutoReplyQuoteMsg" type="BIT">
+      </column>
+      <column name="AutoReplyCloseTicket" type="BIT">
+      </column>
+      <column name="HeaderID" type="INTEGER">
+      </column>
+      <column name="FooterID" type="INTEGER">
+      </column>
+      <column name="DefaultEmailAddress" type="VARCHAR(255)">
+      </column>
+      <column name="WaterMarkStatus" type="TINYINT">
+      </column>
+      <column name="DefaultEmailAddressName" type="VARCHAR(50)">
+      </column>
+      <column name="OwnerID" type="INTEGER">
+      </column>
+   </table>
+   <table name="TicketBoxFooters">
+      <column name="FooterID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(125)">
+      </column>
+      <column name="Footer" type="TEXT">
+      </column>
+      <column name="IsDeleted" type="TINYINT">
+      </column>
+   </table>
+   <table name="TicketBoxHeaders">
+      <column name="HeaderID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(125)">
+      </column>
+      <column name="Header" type="TEXT">
+      </column>
+      <column name="IsDeleted" type="TINYINT">
+      </column>
+   </table>
+   <table name="TicketBoxOwners">
+      <column name="TicketBoxOwnerID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(50)">
+      </column>
+   </table>
+   <table name="TicketBoxRouting">
+      <column name="TicketBoxRoutingID" type="INTEGER">
+      </column>
+      <column name="RoutingRuleID" type="INTEGER">
+      </column>
+      <column name="TicketBoxID" type="INTEGER">
+      </column>
+      <column name="Percentage" type="INTEGER">
+      </column>
+   </table>
+   <table name="TicketBoxTicketBoxOwner">
+      <column name="TbTboID" type="INTEGER">
+      </column>
+      <column name="TicketBoxID" type="INTEGER">
+      </column>
+      <column name="TicketBoxOwnerID" type="INTEGER">
+      </column>
+   </table>
+   <table name="TicketBoxViews">
+      <column name="TicketBoxViewID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="TicketBoxID" type="INTEGER">
+      </column>
+      <column name="AgentBoxID" type="INTEGER">
+      </column>
+      <column name="ShowOwnedItems" type="BIT">
+      </column>
+      <column name="ShowClosedItems" type="BIT">
+      </column>
+      <column name="SortAscending" type="BIT">
+      </column>
+      <column name="SortField" type="INTEGER">
+      </column>
+      <column name="TicketBoxViewTypeID" type="INTEGER">
+      </column>
+   </table>
+   <table name="TicketBoxViewTypes">
+      <column name="TicketBoxViewTypeID" type="INTEGER">
+      </column>
+      <column name="Name" type="VARCHAR(55)">
+      </column>
+   </table>
+   <table name="TicketCategories">
+      <column name="TicketCategoryID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(255)">
+      </column>
+      <column name="ObjectID" type="INTEGER">
+      </column>
+      <column name="BuiltIn" type="BIT">
+      </column>
+   </table>
+   <table name="TicketContacts">
+      <column name="TicketContactID" type="INTEGER">
+      </column>
+      <column name="TicketID" type="INTEGER">
+      </column>
+      <column name="ContactID" type="INTEGER">
+      </column>
+   </table>
+   <table name="TicketHistory">
+      <column name="TicketHistoryID" type="INTEGER">
+      </column>
+      <column name="TicketID" type="INTEGER">
+      </column>
+      <column name="DateTime" type="DATETIME">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="TicketActionID" type="INTEGER">
+      </column>
+      <column name="ID1" type="INTEGER">
+      </column>
+      <column name="ID2" type="INTEGER">
+      </column>
+   </table>
+   <table name="TicketNotes">
+      <column name="TicketNoteID" type="INTEGER">
+      </column>
+      <column name="TicketID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+      <column name="Note" type="TEXT">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+   </table>
+   <table name="TicketNotesRead">
+      <column name="TicketNotesReadID" type="INTEGER">
+      </column>
+      <column name="TicketNoteID" type="INTEGER">
+      </column>
+      <column name="AgentID" type="INTEGER">
+      </column>
+   </table>
+   <table name="Tickets">
+      <column name="TicketID" type="INTEGER">
+      </column>
+      <column name="TicketStateID" type="INTEGER">
+      </column>
+      <column name="TicketBoxID" type="INTEGER">
+      </column>
+      <column name="OwnerID" type="INTEGER">
+      </column>
+      <column name="Subject" type="VARCHAR(255)">
+      </column>
+      <column name="Contacts" type="VARCHAR(255)">
+      </column>
+      <column name="PriorityID" type="INTEGER">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+      <column name="OpenTimestamp" type="DATETIME">
+      </column>
+      <column name="OpenMins" type="INTEGER">
+      </column>
+      <column name="AutoReplied" type="BIT">
+      </column>
+      <column name="AgeAlerted" type="BIT">
+      </column>
+      <column name="IsDeleted" type="TINYINT">
+      </column>
+      <column name="DeletedTime" type="DATETIME">
+      </column>
+      <column name="DeletedBy" type="INTEGER">
+      </column>
+      <column name="LockedBy" type="INTEGER">
+      </column>
+      <column name="UseTickler" type="BIT">
+      </column>
+      <column name="TicklerDateToReopen" type="DATETIME">
+      </column>
+      <column name="FolderID" type="INTEGER">
+      </column>
+      <column name="TicketCategoryID" type="INTEGER">
+      </column>
+   </table>
+   <table name="TicketStates">
+      <column name="TicketStateID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(25)">
+      </column>
+      <column name="HTMLColorName" type="VARCHAR(25)">
+      </column>
+   </table>
+   <table name="Transactions">
+      <column name="TransactionID" type="INTEGER">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+      <column name="TransactionTypeID" type="INTEGER">
+      </column>
+      <column name="ObjectID" type="INTEGER">
+      </column>
+      <column name="ParameterList" type="VARCHAR(255)">
+      </column>
+      <column name="Progress" type="INTEGER">
+      </column>
+   </table>
+   <table name="TransactionTypes">
+      <column name="TransactionTypeID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(255)">
+      </column>
+   </table>
+   <table name="UIDLData">
+      <column name="UIDLID" type="INTEGER">
+      </column>
+      <column name="MessageSourceID" type="INTEGER">
+      </column>
+      <column name="Identifier" type="VARCHAR(255)">
+      </column>
+      <column name="IsPartial" type="BIT">
+      </column>
+   </table>
+   <table name="VirusScanStates">
+      <column name="VirusScanStateID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(55)">
+      </column>
+   </table>
+   <table name="WaterMarkAlerts">
+      <column name="WaterMarkAlertID" type="INTEGER">
+      </column>
+      <column name="Description" type="VARCHAR(255)">
+      </column>
+      <column name="HitCount" type="INTEGER">
+      </column>
+      <column name="LowWaterMark" type="INTEGER">
+      </column>
+      <column name="HighWaterMark" type="INTEGER">
+      </column>
+      <column name="IsEnabled" type="BIT">
+      </column>
+      <column name="SendLowAlert" type="BIT">
+      </column>
+      <column name="WaterMarkStatus" type="TINYINT">
+      </column>
+      <column name="AlertOnTypeID" type="INTEGER">
+      </column>
+      <column name="AlertOnID" type="INTEGER">
+      </column>
+      <column name="AlertToTypeID" type="INTEGER">
+      </column>
+      <column name="AlertToID" type="INTEGER">
+      </column>
+      <column name="AlertMethodID" type="INTEGER">
+      </column>
+      <column name="EmailAddress" type="VARCHAR(255)">
+      </column>
+      <column name="FromEmailAddress" type="VARCHAR(255)">
+      </column>
+      <column name="DateCreated" type="DATETIME">
+      </column>
+      <column name="DateEdited" type="DATETIME">
+      </column>
+      <column name="CreatedByID" type="INTEGER">
+      </column>
+      <column name="EditedByID" type="INTEGER">
+      </column>
+   </table>
+</root>
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+   <table name="AccessControl">
+      <column name="AccessControlID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="AgentID" type="INTEGER" default="('0')">
+      </column>
+      <column name="GroupID" type="INTEGER" default="('0')">
+      </column>
+      <column name="AccessLevel" type="TINYINT" default="('0')">
+      </column>
+      <column name="ObjectID" type="INTEGER" default="('0')">
+      </column>
+   </table>
+   <table name="AgeAlerts">
+      <column name="AgeAlertID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="Description" type="VARCHAR(255)" default="('')">
+      </column>
+      <column name="HitCount" type="INTEGER" default="((0))">
+      </column>
+      <column name="AgeAlerted" type="BIT" default="((0))">
+      </column>
+      <column name="ThresholdMins" type="INTEGER" default="((0))">
+      </column>
+      <column name="ThresholdFreq" type="INTEGER" default="((0))">
+      </column>
+      <column name="IsEnabled" type="BIT" default="((1))">
+      </column>
+      <column name="NoAlertIfRepliedTo" type="BIT" default="((1))">
+      </column>
+      <column name="AlertOnTypeID" type="INTEGER" default="((0))">
+      </column>
+      <column name="AlertOnID" type="INTEGER" default="((0))">
+      </column>
+      <column name="AlertToTypeID" type="INTEGER" default="((0))">
+      </column>
+      <column name="AlertToID" type="INTEGER" default="('0')">
+      </column>
+      <column name="AlertMethodID" type="INTEGER" default="((0))">
+      </column>
+      <column name="EmailAddress" type="VARCHAR(255)" default="((0))">
+      </column>
+      <column name="FromEmailAddress" type="VARCHAR(255)" default="((0))">
+      </column>
+      <column name="DateCreated" type="DATETIME" default="(getdate())">
+      </column>
+      <column name="DateEdited" type="DATETIME" default="(getdate())">
+      </column>
+      <column name="CreatedByID" type="INTEGER" default="((0))">
+      </column>
+      <column name="EditedByID" type="INTEGER" default="((0))">
+      </column>
+   </table>
+   <table name="AgeAlertsSent">
+      <column name="AgeAlertSentID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="AgeAlertID" type="INTEGER" default="((0))">
+      </column>
+      <column name="TicketID" type="INTEGER" default="((0))">
+      </column>
+   </table>
+   <table name="AgentGroupings">
+      <column name="AgentGroupingID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="AgentID" type="INTEGER" default="('0')">
+      </column>
+      <column name="GroupID" type="INTEGER" default="('0')">
+      </column>
+   </table>
+   <table name="Agents">
+      <column name="AgentID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="LoginName" type="VARCHAR(50)" default="('0')">
+      </column>
+      <column name="Password" type="VARCHAR(50)" default="('0')">
+      </column>
+      <column name="Name" type="VARCHAR(128)" default="('0')">
+      </column>
+      <column name="IsEnabled" type="BIT" default="('1')">
+      </column>
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+   <table name="AccessControl">
+      <column name="AccessControlID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="AgentID" type="INTEGER" default="('0')">
+      </column>
+      <column name="GroupID" type="INTEGER" default="('0')">
+      </column>
+      <column name="AccessLevel" type="TINYINT" default="('0')">
+      </column>
+      <column name="ObjectID" type="INTEGER" default="('0')">
+      </column>
+   </table>
+   <table name="AgeAlerts">
+      <column name="AgeAlertID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="Description" type="VARCHAR(255)" default="('')">
+      </column>
+      <column name="HitCount" type="INTEGER" default="((0))">
+      </column>
+      <column name="AgeAlerted" type="BIT" default="((0))">
+      </column>
+      <column name="ThresholdMins" type="INTEGER" default="((0))">
+      </column>
+      <column name="ThresholdFreq" type="INTEGER" default="((0))">
+      </column>
+      <column name="IsEnabled" type="BIT" default="((1))">
+      </column>
+      <column name="NoAlertIfRepliedTo" type="BIT" default="((1))">
+      </column>
+      <column name="AlertOnTypeID" type="INTEGER" default="((0))">
+      </column>
+      <column name="AlertOnID" type="INTEGER" default="((0))">
+      </column>
+      <column name="AlertToTypeID" type="INTEGER" default="((0))">
+      </column>
+      <column name="AlertToID" type="INTEGER" default="('0')">
+      </column>
+      <column name="AlertMethodID" type="INTEGER" default="((0))">
+      </column>
+      <column name="EmailAddress" type="VARCHAR(255)" default="((0))">
+      </column>
+      <column name="FromEmailAddress" type="VARCHAR(255)" default="((0))">
+      </column>
+      <column name="DateCreated" type="DATETIME" default="(getdate())">
+      </column>
+      <column name="DateEdited" type="DATETIME" default="(getdate())">
+      </column>
+      <column name="CreatedByID" type="INTEGER" default="((0))">
+      </column>
+      <column name="EditedByID" type="INTEGER" default="((0))">
+      </column>
+   </table>
+   <table name="AgeAlertsSent">
+      <column name="AgeAlertSentID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="AgeAlertID" type="INTEGER" default="((0))">
+      </column>
+      <column name="TicketID" type="INTEGER" default="((0))">
+      </column>
+   </table>
+   <table name="AgentGroupings">
+      <column name="AgentGroupingID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="AgentID" type="INTEGER" default="('0')">
+      </column>
+      <column name="GroupID" type="INTEGER" default="('0')">
+      </column>
+   </table>
+   <table name="Agents">
+      <column name="AgentID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="LoginName" type="VARCHAR(50)" default="('0')">
+      </column>
+      <column name="Password" type="VARCHAR(50)" default="('0')">
+      </column>
+      <column name="Name" type="VARCHAR(128)" default="('0')">
+      </column>
+      <column name="IsEnabled" type="BIT" default="('1')">
+      </column>
+      <column name="ObjectID" type="INTEGER" default="('0')">
+      </column>
+      <column name="DefaultAgentAddressID" type="INTEGER" default="('0')">
+      </column>
+      <column name="MaxReportRowsPerPage" type="INTEGER" default="('25')">
+      </column>
+      <column name="StdResponseApprovalsRequired" type="BIT" default="('0')">
+      </column>
+      <column name="MessageApprovalsRequired" type="BIT" default="('0')">
+      </column>
+      <column name="QuoteMsgInReply" type="BIT" default="('1')">
+      </column>
+      <column name="ReplyQuotedPrefix" type="BIT" default="('1')">
+      </column>
+      <column name="NTDomain" type="VARCHAR(125)" default="('1')">
+      </column>
+      <column name="IsNTUser" type="INTEGER" default="('0')">
+      </column>
+      <column name="StyleSheetID" type="INTEGER" default="('1')">
+      </column>
+      <column name="IsDeleted" type="BIT" default="('0')">
+      </column>
+      <column name="UseIM" type="BIT" default="('1')">
+      </column>
+      <column name="EscalateToAgentID" type="INTEGER" default="('0')">
+      </column>
+      <column name="RequireGetOldest" type="BIT" default="('0')">
+      </column>
+      <column name="HasLoggedIn" type="BIT" default="('0')">
+      </column>
+      <column name="DefaultSignatureID" type="INTEGER" default="('0')">
+      </column>
+      <column name="ForceSpellCheck" type="BIT" default="('1')">
+      </column>
+      <column name="SignatureTopReply" type="BIT" default="('1')">
+      </column>
+      <column name="ShowMessagesInbound" type="BIT" default="('1')">
+      </column>
+      <column name="UsePreviewPane" type="BIT" default="('1')">
+      </column>
+      <column name="CloseTicket" type="TINYINT" default="('2')">
+      </column>
+      <column name="RouteToInbox" type="TINYINT" default="('2')">
+      </column>
+      <column name="OutboxHoldTime" type="INTEGER" default="('0')">
+      </column>
+      <column name="UseMarkAsRead" type="BIT" default="('0')">
+      </column>
+      <column name="MarkAsReadSeconds" type="INTEGER" default="('5')">
+      </column>
+   </table>
+   <table name="AlertEvents">
+      <column name="AlertEventID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="Description" type="VARCHAR(255)" default="('5')">
+      </column>
+      <column name="NeedTicketBoxID" type="BIT" default="('0')">
+      </column>
+   </table>
+   <table name="AlertMethods">
+      <column name="AlertMethodID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="Description" type="VARCHAR(255)" default="('0')">
+      </column>
+   </table>
+   <table name="AlertMsgs">
+      <column name="AlertMsgID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="AlertEventID" type="INTEGER" default="('0')">
+      </column>
+      <column name="AgentID" type="INTEGER" default="('0')">
+      </column>
+      <column name="TicketID" type="INTEGER" default="((0))">
+      </column>
+      <column name="Viewed" type="TINYINT" default="('0')">
+      </column>
+      <column name="DateCreated" type="DATETIME" default="(getdate())">
+      </column>
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+   <table name="AccessControl">
+      <column name="AccessControlID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="AgentID" type="INTEGER" default="('0')">
+      </column>
+      <column name="GroupID" type="INTEGER" default="('0')">
+      </column>
+      <column name="AccessLevel" type="TINYINT" default="('0')">
+      </column>
+      <column name="ObjectID" type="INTEGER" default="('0')">
+      </column>
+   </table>
+   <table name="AgeAlerts">
+      <column name="AgeAlertID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="Description" type="VARCHAR(255)" default="('')">
+      </column>
+      <column name="HitCount" type="INTEGER" default="((0))">
+      </column>
+      <column name="AgeAlerted" type="BIT" default="((0))">
+      </column>
+      <column name="ThresholdMins" type="INTEGER" default="((0))">
+      </column>
+      <column name="ThresholdFreq" type="INTEGER" default="((0))">
+      </column>
+      <column name="IsEnabled" type="BIT" default="((1))">
+      </column>
+      <column name="NoAlertIfRepliedTo" type="BIT" default="((1))">
+      </column>
+      <column name="AlertOnTypeID" type="INTEGER" default="((0))">
+      </column>
+      <column name="AlertOnID" type="INTEGER" default="((0))">
+      </column>
+      <column name="AlertToTypeID" type="INTEGER" default="((0))">
+      </column>
+      <column name="AlertToID" type="INTEGER" default="('0')">
+      </column>
+      <column name="AlertMethodID" type="INTEGER" default="((0))">
+      </column>
+      <column name="EmailAddress" type="VARCHAR(255)" default="((0))">
+      </column>
+      <column name="FromEmailAddress" type="VARCHAR(255)" default="((0))">
+      </column>
+      <column name="DateCreated" type="DATETIME" default="(getdate())">
+      </column>
+      <column name="DateEdited" type="DATETIME" default="(getdate())">
+      </column>
+      <column name="CreatedByID" type="INTEGER" default="((0))">
+      </column>
+      <column name="EditedByID" type="INTEGER" default="((0))">
+      </column>
+   </table>
+   <table name="AgeAlertsSent">
+      <column name="AgeAlertSentID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="AgeAlertID" type="INTEGER" default="((0))">
+      </column>
+      <column name="TicketID" type="INTEGER" default="((0))">
+      </column>
+   </table>
+   <table name="AgentGroupings">
+      <column name="AgentGroupingID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="AgentID" type="INTEGER" default="('0')">
+      </column>
+      <column name="GroupID" type="INTEGER" default="('0')">
+      </column>
+   </table>
+   <table name="Agents">
+      <column name="AgentID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="LoginName" type="VARCHAR(50)" default="('0')">
+      </column>
+      <column name="Password" type="VARCHAR(50)" default="('0')">
+      </column>
+      <column name="Name" type="VARCHAR(128)" default="('0')">
+      </column>
+      <column name="IsEnabled" type="BIT" default="('1')">
+      </column>
+      <column name="ObjectID" type="INTEGER" default="('0')">
+      </column>
+      <column name="DefaultAgentAddressID" type="INTEGER" default="('0')">
+      </column>
+      <column name="MaxReportRowsPerPage" type="INTEGER" default="('25')">
+      </column>
+      <column name="StdResponseApprovalsRequired" type="BIT" default="('0')">
+      </column>
+      <column name="MessageApprovalsRequired" type="BIT" default="('0')">
+      </column>
+      <column name="QuoteMsgInReply" type="BIT" default="('1')">
+      </column>
+      <column name="ReplyQuotedPrefix" type="BIT" default="('1')">
+      </column>
+      <column name="NTDomain" type="VARCHAR(125)" default="('1')">
+      </column>
+      <column name="IsNTUser" type="INTEGER" default="('0')">
+      </column>
+      <column name="StyleSheetID" type="INTEGER" default="('1')">
+      </column>
+      <column name="IsDeleted" type="BIT" default="('0')">
+      </column>
+      <column name="UseIM" type="BIT" default="('1')">
+      </column>
+      <column name="EscalateToAgentID" type="INTEGER" default="('0')">
+      </column>
+      <column name="RequireGetOldest" type="BIT" default="('0')">
+      </column>
+      <column name="HasLoggedIn" type="BIT" default="('0')">
+      </column>
+      <column name="DefaultSignatureID" type="INTEGER" default="('0')">
+      </column>
+      <column name="ForceSpellCheck" type="BIT" default="('1')">
+      </column>
+      <column name="SignatureTopReply" type="BIT" default="('1')">
+      </column>
+      <column name="ShowMessagesInbound" type="BIT" default="('1')">
+      </column>
+      <column name="UsePreviewPane" type="BIT" default="('1')">
+      </column>
+      <column name="CloseTicket" type="TINYINT" default="('2')">
+      </column>
+      <column name="RouteToInbox" type="TINYINT" default="('2')">
+      </column>
+      <column name="OutboxHoldTime" type="INTEGER" default="('0')">
+      </column>
+      <column name="UseMarkAsRead" type="BIT" default="('0')">
+      </column>
+      <column name="MarkAsReadSeconds" type="INTEGER" default="('5')">
+      </column>
+   </table>
+   <table name="AlertEvents">
+      <column name="AlertEventID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="Description" type="VARCHAR(255)" default="('5')">
+      </column>
+      <column name="NeedTicketBoxID" type="BIT" default="('0')">
+      </column>
+   </table>
+   <table name="AlertMethods">
+      <column name="AlertMethodID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="Description" type="VARCHAR(255)" default="('0')">
+      </column>
+   </table>
+   <table name="AlertMsgs">
+      <column name="AlertMsgID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="AlertEventID" type="INTEGER" default="('0')">
+      </column>
+      <column name="AgentID" type="INTEGER" default="('0')">
+      </column>
+      <column name="TicketID" type="INTEGER" default="((0))">
+      </column>
+      <column name="Viewed" type="TINYINT" default="('0')">
+      </column>
+      <column name="DateCreated" type="DATETIME" default="(getdate())">
+      </column>
+      <column name="Body" type="TEXT" default="(getdate())">
+      </column>
+      <column name="Subject" type="VARCHAR(255)" default="('')">
+      </column>
+   </table>
+   <table name="Alerts">
+      <column name="AlertID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="AlertEventID" type="INTEGER" default="('0')">
+      </column>
+      <column name="AlertMethodID" type="INTEGER" default="('0')">
+      </column>
+      <column name="AgentID" type="INTEGER" default="('0')">
+      </column>
+      <column name="GroupID" type="INTEGER" default="('0')">
+      </column>
+      <column name="TicketBoxID" type="INTEGER" default="('0')">
+      </column>
+      <column name="EmailAddress" type="VARCHAR(255)" default="('0')">
+      </column>
+      <column name="FromEmailAddress" type="VARCHAR(255)" default="('0')">
+      </column>
+   </table>
+   <table name="ApprovalObjectTypes">
+      <column name="ApprovalObjectTypeID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="Name" type="VARCHAR(55)" default="('0')">
+      </column>
+   </table>
+   <table name="Approvals">
+      <column name="ApprovalID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="RequestAgentID" type="INTEGER" default="('0')">
+      </column>
+      <column name="ApproverAgentID" type="INTEGER" default="('0')">
+      </column>
+      <column name="ApproverGroupID" type="INTEGER" default="('0')">
+      </column>
+      <column name="ApprovalObjectTypeID" type="INTEGER" default="('0')">
+      </column>
+   </table>
+   <table name="Archives">
+      <column name="ArchiveID" type="INTEGER" primarykey="1" identity="1">
+      </column>
+      <column name="DateCreated" type="DATETIME" default="('0')">
+      </column>
+      <column name="Purged" type="TINYINT" default="('0')">
+      </column>
+      <column name="ArcFilePath" type="VARCHAR(255)" default="('0')">
+      </column>
+      <column name="InMsgRecords" type="INTEGER" default="('0')">
+      </column>
+      <column name="InAttRecords" type="INTEGER" default="('0')">
+      </column>

@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7EF88651-A237-4678-A2D1-EB9A8B1E9649}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>16.0.33801.447</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>Debug\</OutDir>
+    <IntDir>Debug\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>Release\</OutDir>
+    <IntDir>Release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>C:\boost_1_72_0;..\..\lib\dcalib\includes;..\..\lib\chilkat\includes;..\mailflowlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NON_CONFORMING_SWPRINTFS;_DEBUG;_WINDOWS;_USRDLL;WIN32_LEAN_AND_MEAN;EMSISAPI_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>netapi32.lib;version.lib;dcabase_x86_debug.lib;dcawin_x86_debug.lib;dcaodbc_x32_debug.lib;mailflowlib_ansi_debug.lib;dkv15smsu.lib;zlib_x86_debug.lib;ChilkatDbg.lib;ws2_32.lib;dnsapi.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>C:\Program Files\deerfield.com\VisNetic MailFlow\Bin\emsisapi.dll</OutputFile>
+      <AdditionalLibraryDirectories>C:\boost_1_72_0\lib32-msvc-14.2;..\..\lib\dcalib\libs;..\..\lib\chilkat\libs;..\mailflowlib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>.\EMSIsapi.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>C:\Program Files\deerfield.com\VisNetic MailFlow\Bin/emsisapi.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <ImportLibrary>$(OutDir)emsisapi.lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <ShowProgress>NotSet</ShowProgress>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\boost_1_72_0;..\..\lib\dcalib\includes;..\..\lib\chilkat\includes;..\mailflowlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NON_CONFORMING_SWPRINTFS;NDEBUG;_WINDOWS;_USRDLL;WIN32_LEAN_AND_MEAN;EMSISAPI_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>netapi32.lib;version.lib;dcabase_x86.lib;dcawin_x86.lib;dcaodbc_x86.lib;dkv12smsu.lib;zlib_x86.lib;mailflowlib_ansi.lib;ws2_32.lib;crypt32.lib;ChilkatRel.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>C:\MailFlow\v6.9.4\bin\EMSIsapi.dll</OutputFile>
+      <AdditionalLibraryDirectories>C:\boost_1_72_0\lib32-msvc-14.2;..\..\lib\dcalib\libs;..\..\lib\chilkat\libs;..\mailflowlib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>.\EMSIsapi.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <ImportLibrary>$(OutDir)emsisapi.lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+    <PostBuildEvent>
+      <Message>Sign Tool</Message>
+      <Command>signtool.exe sign /csp "DigiCert Signing Manager KSP" /kc key_660081403 /f c:\certs\deerfield_communications_inc.crt /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 C:\MailFlow\v6.9.4\bin\EMSIsapi.dll</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="AboutPage.cpp" />
+    <ClCompile Include="AccessControl.cpp" />
+    <ClCompile Include="ACLPage.cpp" />
+    <ClCompile Include="AgeAlerts.cpp" />
+    <ClCompile Include="AgentAudit.cpp" />
+    <ClCompile Include="Agents.cpp" />
+    <ClCompile Include="Alert.cpp" />
+    <ClCompile Include="AlertConfig.cpp" />
+    <ClCompile Include="AlertList.cpp" />
+    <ClCompile Include="Attachment.cpp" />
+    <ClCompile Include="Authenticate.cpp" />
+    <ClCompile Include="AutoMessages.cpp" />
+    <ClCompile Include="AutoResponses.cpp" />
+    <ClCompile Include="CacheClasses.cpp" />
+    <ClCompile Include="ChangeTicket.cpp" />
+    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="ClientSoft.cpp" />
+    <ClCompile Include="Columns.cpp" />
+    <ClCompile Include="ContactDetails.cpp" />
+    <ClCompile Include="ContactGroups.cpp" />
+    <ClCompile Include="ContactHistory.cpp" />
+    <ClCompile Include="ContactNotes.cpp" />
+    <ClCompile Include="ContactSearch.cpp" />
+    <ClCompile Include="CustomDictionary.cpp" />
+    <ClCompile Include="CustomSettings.cpp" />
+    <ClCompile Include="CustomTicketBoxViews.cpp" />
+    <ClCompile Include="DateFilters.cpp" />
+    <ClCompile Include="DBMaintenance.cpp" />
+    <ClCompile Include="Demo.cpp" />
+    <ClCompile Include="Download.cpp" />
+    <ClCompile Include="Download3cxPlugin.cpp" />
+    <ClCompile Include="DownloadAcrobat.cpp" />
+    <ClCompile Include="DownloadSVG.cpp" />
+    <ClCompile Include="EMSIsapi.cpp" />
+    <ClCompile Include="EngineMonitor.cpp" />
+    <ClCompile Include="FileMap.cpp" />
+    <ClCompile Include="FormDump.cpp" />
+    <ClCompile Include="Groups.cpp" />
+    <ClCompile Include="HelpFrame.cpp" />
+    <ClCompile Include="InboundMessage.cpp" />
+    <ClCompile Include="IPRanges.cpp" />
+    <ClCompile Include="ISAPIData.cpp" />
+    <ClCompile Include="ISAPIThread.cpp" />
+    <ClCompile Include="JobQueue.cpp" />
+    <ClCompile Include="LogConfig.cpp" />
+    <ClCompile Include="Logout.cpp" />
+    <ClCompile Include="MailFlowServer.cpp" />
+    <ClCompile Include="MainFrame.cpp" />
+    <ClCompile Include="MarkupSTL.cpp" />
+    <ClCompile Include="MessageDestinations.cpp" />
+    <ClCompile Include="MessageList.cpp" />
+    <ClCompile Include="MessageSources.cpp" />
+    <ClCompile Include="MsgAttach.cpp" />
+    <ClCompile Include="MsgComp.cpp" />
+    <ClCompile Include="MsgCompAttach.cpp" />
+    <ClCompile Include="MultipleContacts.cpp" />
+    <ClCompile Include="MyAlerts.cpp" />
+    <ClCompile Include="MyContacts.cpp" />
+    <ClCompile Include="NewTicket.cpp" />
+    <ClCompile Include="NoteAttach.cpp" />
+    <ClCompile Include="OfficeHours.cpp" />
+    <ClCompile Include="OutboundMessage.cpp" />
+    <ClCompile Include="PagedList.cpp" />
+    <ClCompile Include="PersonalDataTypes.cpp" />
+    <ClCompile Include="PreferenceAgents.cpp" />
+    <ClCompile Include="PreferenceTicketboxes.cpp" />
+    <ClCompile Include="ProcessingRules.cpp" />
+    <ClCompile Include="QuarantinePage.cpp" />
+    <ClCompile Include="RegExTest.cpp" />
+    <ClCompile Include="Registration.cpp" />
+    <ClCompile Include="ReportBusy.cpp" />
+    <ClCompile Include="ReportCompareInbound.cpp" />
+    <ClCompile Include="ReportHistory.cpp" />
+    <ClCompile Include="ReportInboundMsgs.cpp" />
+    <ClCompile Include="ReportOpenTicketAge.cpp" />
+    <ClCompile Include="ReportOpenTickets.cpp" />
+    <ClCompile Include="ReportOutboundMsgs.cpp" />
+    <ClCompile Include="ReportResolveTime.cpp" />
+    <ClCompile Include="ReportRespTime.cpp" />
+    <ClCompile Include="Reports.cpp" />
+    <ClCompile Include="ReportStdResp.cpp" />
+    <ClCompile Include="ReportStdRespUsage.cpp" />
+    <ClCompile Include="ReportSysConfig.cpp" />
+    <ClCompile Include="ReportTicketBoxDetails.cpp" />
+    <ClCompile Include="ReportTicketCountSum.cpp" />
+    <ClCompile Include="ReportTicketDisp.cpp" />
+    <ClCompile Include="ReportTicketDist.cpp" />
+    <ClCompile Include="RoutingEngine.cpp" />
+    <ClCompile Include="RoutingRules.cpp" />
+    <ClCompile Include="ScheduleReport.cpp" />
+    <ClCompile Include="SecuritySettings.cpp" />
+    <ClCompile Include="Servers.cpp" />
+    <ClCompile Include="SessionInfo.cpp" />
+    <ClCompile Include="SessionMap.cpp" />
+    <ClCompile Include="SessionMonitor.cpp" />
+    <ClCompile Include="SharedObjects.cpp" />
+    <ClCompile Include="Signatures.cpp" />
+    <ClCompile Include="socket.cpp" />
+    <ClCompile Include="SpellCheck.cpp" />
+    <ClCompile Include="StdAfx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="StdRespCategories.cpp" />
+    <ClCompile Include="StdResponse.cpp" />
+    <ClCompile Include="SystemEmailAddress.cpp" />
+    <ClCompile Include="TBVInfo.cpp" />
+    <ClCompile Include="TestLogin.cpp" />
+    <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="ThreadPool.cpp" />
+    <ClCompile Include="Ticket.cpp" />
+    <ClCompile Include="TicketActions.cpp" />
+    <ClCompile Include="TicketBox.cpp" />
+    <ClCompile Include="TicketBoxFooters.cpp" />
+    <ClCompile Include="TicketBoxHeaders.cpp" />
+    <ClCompile Include="TicketBoxOwners.cpp" />
+    <ClCompile Include="TicketBoxView.cpp" />
+    <ClCompile Include="TicketCategories.cpp" />
+    <ClCompile Include="TicketFields.cpp" />
+    <ClCompile Include="TicketHistory.cpp" />
+    <ClCompile Include="TicketLinks.cpp" />
+    <ClCompile Include="TicketList.cpp" />
+    <ClCompile Include="TicketNotes.cpp" />
+    <ClCompile Include="TicketPrint.cpp" />
+    <ClCompile Include="TicketProperties.cpp" />
+    <ClCompile Include="TicketSearch.cpp" />
+    <ClCompile Include="Trash.cpp" />
+    <ClCompile Include="UnlockTicketPage.cpp" />
+    <ClCompile Include="unsub.cpp" />
+    <ClCompile Include="UploadMap.cpp" />
+    <ClCompile Include="UploadProgress.cpp" />
+    <ClCompile Include="URLDecoder.cpp" />
+    <ClCompile Include="URLMap.cpp" />
+    <ClCompile Include="ViewMsg.cpp" />
+    <ClCompile Include="ViewResults.cpp" />
+    <ClCompile Include="VirusConfig.cpp" />
+    <ClCompile Include="VMSIntegration.cpp" />
+    <ClCompile Include="VoipCall.cpp" />
+    <ClCompile Include="VoipConfig.cpp" />
+    <ClCompile Include="VoipDialingCodes.cpp" />
+    <ClCompile Include="VoipExtensions.cpp" />
+    <ClCompile Include="VoipServers.cpp" />
+    <ClCompile Include="WmAlerts.cpp" />
+    <ClCompile Include="WorkerThread.cpp" />
+    <ClCompile Include="XMLCache.cpp" />
+    <ClCompile Include="XMLDataClass.cpp" />
+    <ClCompile Include="XSLTranslator.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AboutPage.h" />
+    <ClInclude Include="AccessControl.h" />
+    <ClInclude Include="ACLPage.h" />
+    <ClInclude Include="AgeAlerts.h" />
+    <ClInclude Include="AgentAudit.h" />
+    <ClInclude Include="Agents.h" />
+    <ClInclude Include="Alert.h" />
+    <ClInclude Include="AlertConfig.h" />
+    <ClInclude Include="AlertList.h" />
+    <ClInclude Include="Attachment.h" />
+    <ClInclude Include="Authenticate.h" />
+    <ClInclude Include="AutoMessages.h" />
+    <ClInclude Include="AutoResponses.h" />
+    <ClInclude Include="CacheClasses.h" />
+    <ClInclude Include="CacheTemplates.h" />
+    <ClInclude Include="ChangeTicket.h" />
+    <ClInclude Include="Client.h" />
+    <ClInclude Include="ClientSoft.h" />
+    <ClInclude Include="Columns.h" />
+    <ClInclude Include="ContactDetails.h" />
+    <ClInclude Include="ContactGroups.h" />
+    <ClInclude Include="ContactHistory.h" />
+    <ClInclude Include="ContactNotes.h" />
+    <ClInclude Include="ContactSearch.h" />
+    <ClInclude Include="CustomDictionary.h" />
+    <ClInclude Include="CustomSettings.h" />
+    <ClInclude Include="CustomTicketBoxViews.h" />
+    <ClInclude Include="DateFilters.h" />
+    <ClInclude Include="DBMaintenance.h" />
+    <ClInclude Include="decode_2047.h" />
+    <ClInclude Include="Demo.h" />
+    <ClInclude Include="Download.h" />
+    <ClInclude Include="Download3cxPlugin.h" />
+    <ClInclude Include="DownloadAcrobat.h" />
+    <ClInclude Include="DownloadSVG.h" />
+    <ClInclude Include="EngineMonitor.h" />
+    <ClInclude Include="FileMap.h" />
+    <ClInclude Include="FormDump.h" />
+    <ClInclude Include="Groups.h" />
+    <ClInclude Include="HelpFrame.h" />
+    <ClInclude Include="InboundMessage.h" />
+    <ClInclude Include="IPRanges.h" />
+    <ClInclude Include="ISAPIData.h" />
+    <ClInclude Include="ISAPIThread.h" />
+    <ClInclude Include="JobQueue.h" />
+    <ClInclude Include="LogConfig.h" />
+    <ClInclude Include="Logout.h" />
+    <ClInclude Include="MailFlowServer.h" />
+    <ClInclude Include="MainFrame.h" />
+    <ClInclude Include="MarkupSTL.h" />
+    <ClInclude Include="MessageDestinations.h" />
+    <ClInclude Include="MessageList.h" />
+    <ClInclude Include="MessageSources.h" />
+    <ClInclude Include="MsgAttach.h" />
+    <ClInclude Include="MsgComp.h" />
+    <ClInclude Include="MsgCompAttach.h" />
+    <ClInclude Include="MultipleContacts.h" />
+    <ClInclude Include="MyAlerts.h" />
+    <ClInclude Include="MyContacts.h" />
+    <ClInclude Include="NewTicket.h" />
+    <ClInclude Include="NoteAttach.h" />
+    <ClInclude Include="OfficeHours.h" />
+    <ClInclude Include="OutboundMessage.h" />
+    <ClInclude Include="PagedList.h" />
+    <ClInclude Include="PersonalDataTypes.h" />
+    <ClInclude Include="PreferenceAgents.h" />
+    <ClInclude Include="PreferenceTicketboxes.h" />
+    <ClInclude Include="ProcessingRules.h" />
+    <ClInclude Include="QuarantinePage.h" />
+    <ClInclude Include="RegExTest.h" />
+    <ClInclude Include="Registration.h" />
+    <ClInclude Include="ReportBusy.h" />
+    <ClInclude Include="ReportCompareInbound.h" />
+    <ClInclude Include="ReportHistory.h" />
+    <ClInclude Include="ReportInboundMsgs.h" />
+    <ClInclude Include="ReportOpenTicketAge.h" />
+    <ClInclude Include="ReportOpenTickets.h" />
+    <ClInclude Include="ReportOutboundMsgs.h" />
+    <ClInclude Include="ReportResolveTime.h" />
+    <ClInclude Include="ReportRespTime.h" />
+    <ClInclude Include="Reports.h" />
+    <ClInclude Include="ReportStdResp.h" />
+    <ClInclude Include="ReportStdRespUsage.h" />
+    <ClInclude Include="ReportSysConfig.h" />
+    <ClInclude Include="ReportTicketBoxDetails.h" />
+    <ClInclude Include="ReportTicketCountSum.h" />
+    <ClInclude Include="ReportTicketDisp.h" />
+    <ClInclude Include="ReportTicketDist.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="RoutingEngine.h" />
+    <ClInclude Include="RoutingRules.h" />
+    <ClInclude Include="ScheduleReport.h" />
+    <ClInclude Include="SecuritySettings.h" />
+    <ClInclude Include="Servers.h" />
+    <ClInclude Include="SessionInfo.h" />
+    <ClInclude Include="SessionMap.h" />
+    <ClInclude Include="SessionMonitor.h" />
+    <ClInclude Include="SharedObjects.h" />
+    <ClInclude Include="Signatures.h" />
+    <ClInclude Include="socket.h" />
+    <ClInclude Include="SpellCheck.h" />
+    <ClInclude Include="ssce.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="StdRespCategories.h" />
+    <ClInclude Include="StdResponse.h" />
+    <ClInclude Include="SystemEmailAddress.h" />
+    <ClInclude Include="TBVInfo.h" />
+    <ClInclude Include="TestLogin.h" />
+    <ClInclude Include="Thread.h" />
+    <ClInclude Include="ThreadPool.h" />
+    <ClInclude Include="Ticket.h" />
+    <ClInclude Include="TicketActions.h" />
+    <ClInclude Include="TicketBox.h" />
+    <ClInclude Include="TicketBoxFooters.h" />
+    <ClInclude Include="TicketBoxHeaders.h" />
+    <ClInclude Include="TicketBoxOwners.h" />
+    <ClInclude Include="TicketBoxView.h" />
+    <ClInclude Include="TicketCategories.h" />
+    <ClInclude Include="TicketFields.h" />
+    <ClInclude Include="TicketHistory.h" />
+    <ClInclude Include="TicketLinks.h" />
+    <ClInclude Include="TicketList.h" />
+    <ClInclude Include="TicketNotes.h" />
+    <ClInclude Include="TicketPrint.h" />
+    <ClInclude Include="TicketProperties.h" />
+    <ClInclude Include="TicketSearch.h" />
+    <ClInclude Include="Trash.h" />
+    <ClInclude Include="UnlockTicketPage.h" />
+    <ClInclude Include="unsub.h" />
+    <ClInclude Include="UploadMap.h" />
+    <ClInclude Include="UploadProgress.h" />
+    <ClInclude Include="URLDecoder.h" />
+    <ClInclude Include="URLMap.h" />
+    <ClInclude Include="ViewMsg.h" />
+    <ClInclude Include="ViewResults.h" />
+    <ClInclude Include="VirusConfig.h" />
+    <ClInclude Include="VMSIntegration.h" />
+    <ClInclude Include="VoipCall.h" />
+    <ClInclude Include="VoipConfig.h" />
+    <ClInclude Include="VoipDialingCodes.h" />
+    <ClInclude Include="VoipExtensions.h" />
+    <ClInclude Include="VoipServers.h" />
+    <ClInclude Include="WmAlerts.h" />
+    <ClInclude Include="WorkerThread.h" />
+    <ClInclude Include="XMLCache.h" />
+    <ClInclude Include="XMLDataClass.h" />
+    <ClInclude Include="XSLTranslator.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="EMSIsapi.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="SSCE5332.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="EMSIsapi.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mailflowlib\mailflowlib.vcxproj">
+      <Project>{b6c95b67-8411-4006-8e34-b36cb49681b8}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

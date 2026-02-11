@@ -1,0 +1,1099 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+//	$Header: /root/MAILSTREAMLIBRARY/EMSIDs.h,v 1.2.2.1 2006/01/11 16:42:21 markm Exp $
+//
+//  Copyright © 2002 Deerfield.com, all rights reserved
+//
+////////////////////////////////////////////////////////////////////////////////
+//
+// Defined constants from the database schema
+//
+// Original Filename: MailFlow-Schema.xml
+//
+// Generated: Fri Mar 28 09:06:37 2003
+
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#ifndef DEERFIELD_EMS_IDS_H
+#define DEERFIELD_EMS_IDS_H
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// AccessControl table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// AgentGroupings table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Agents table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define AGENTS_LOGINNAME_LENGTH 51
+#define AGENTS_PASSWORD_LENGTH 51
+#define AGENTS_NAME_LENGTH 129
+#define AGENTS_REPLYQUOTEDPREFIX_LENGTH 3
+#define AGENTS_NTDOMAIN_LENGTH 126
+#define AGENTS_STATUS_TEXT_LENGTH 126
+
+typedef enum AgentsEnum
+{
+	EMS_AGENTID_ADMINISTRATOR = 1,
+} AgentsEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// AlertEvents table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define ALERTEVENTS_DESCRIPTION_LENGTH 256
+
+typedef enum AlertEventsEnum
+{
+	EMS_ALERT_EVENT_LOW_WATERMARK = 1,
+	EMS_ALERT_EVENT_HIGH_WATERMARK = 2,
+	EMS_ALERT_EVENT_AGE_ALERT = 3,
+	EMS_ALERT_EVENT_PROD_REGISTRATION = 4,
+	EMS_ALERT_EVENT_LOW_DISK_SPACE = 5,
+	EMS_ALERT_EVENT_INBOUND_DELIVERY = 6,
+	EMS_ALERT_EVENT_OUTBOUND_DELIVERY = 7,
+	EMS_ALERT_EVENT_CRITICAL_ERROR = 8,
+	EMS_ALERT_EVENT_TICKET_CREATED = 9,
+	EMS_ALERT_EVENT_TICKET_ESCALATED_TO_GROUP = 10,
+	EMS_ALERT_EVENT_REPORT_RAN = 11,
+	EMS_ALERT_EVENT_INBOUND_OWNED_TICKET = 12,
+	EMS_ALERT_EVENT_INBOUND_OWNED_CONTACT = 13,
+	EMS_ALERT_EVENT_TICKET_ASSIGNED = 14,
+	EMS_ALERT_EVENT_OUTBOUND_APPROVAL_REQUIRED = 15,
+	EMS_ALERT_EVENT_OUTBOUND_APPROVED = 16,
+	EMS_ALERT_EVENT_OUTBOUND_RETURNED = 17,
+} AlertEventsEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// AlertMethods table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define ALERTMETHODS_DESCRIPTION_LENGTH 256
+
+typedef enum AlertMethodsEnum
+{
+	EMS_ALERT_METHOD_INTERNAL_EMAIL = 1,
+	EMS_ALERT_METHOD_EXTERNAL_EMAIL = 2,
+} AlertMethodsEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// AlertMsgs table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Alerts table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define ALERTS_EMAILADDRESS_LENGTH 256
+#define ALERTS_FROMEMAILADDRESS_LENGTH 256
+#define ALERTMSGS_SUBJECT_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// ApprovalObjectTypes table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define APPROVALOBJECTTYPES_NAME_LENGTH 56
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Approvals table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Archives table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define ARCHIVES_ARCFILEPATH_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Attachments table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define ATTACHMENTS_ATTACHMENTLOCATION_LENGTH 256
+#define ATTACHMENTS_MEDIATYPE_LENGTH 126
+#define ATTACHMENTS_MEDIASUBTYPE_LENGTH 126
+#define ATTACHMENTS_CONTENTDISPOSITION_LENGTH 126
+#define ATTACHMENTS_FILENAME_LENGTH 256
+#define ATTACHMENTS_VIRUSNAME_LENGTH 126
+#define ATTACHMENTS_CONTENTID_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// ContactNotes table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Contacts table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define CONTACTS_NAME_LENGTH 256
+#define CONTACTS_COMPANYNAME_LENGTH 51
+#define CONTACTS_TITLE_LENGTH 21
+#define CONTACTS_WEBPAGEADDRESS_LENGTH 256
+#define CONTACTS_STREETADDRESS1_LENGTH 76
+#define CONTACTS_STREETADDRESS2_LENGTH 76
+#define CONTACTS_CITY_LENGTH 36
+#define CONTACTS_STATE_LENGTH 31
+#define CONTACTS_ZIPCODE_LENGTH 21
+#define CONTACTS_COUNTRY_LENGTH 56
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Auto Messages table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define AUTOMESSAGES_DESCRIPTION_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// CustomDictionary table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define CUSTOMDICTIONARY_WORD_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// ForwardCCAddresses table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define FORWARDCCADDRESSES_EMAILADDRESS_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// ForwardToAddresses table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define FORWARDTOADDRESSES_EMAILADDRESS_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Groups table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define GROUPS_GROUPNAME_LENGTH 51
+
+typedef enum GroupsEnum
+{
+	EMS_GROUPID_EVERYONE = 1,
+	EMS_GROUPID_ADMINISTRATORS = 2,
+} GroupsEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// IPRanges table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// InboundMessageAttachments table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// InboundMessageQueue table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// InboundMessages table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define INBOUNDMESSAGES_EMAILFROM_LENGTH 256
+#define INBOUNDMESSAGES_EMAILFROMNAME_LENGTH 129
+#define INBOUNDMESSAGES_EMAILPRIMARYTO_LENGTH 256
+#define INBOUNDMESSAGES_SUBJECT_LENGTH 256
+#define INBOUNDMESSAGES_MEDIATYPE_LENGTH 126
+#define INBOUNDMESSAGES_MEDIASUBTYPE_LENGTH 126
+#define INBOUNDMESSAGES_VIRUSNAME_LENGTH 126
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// InstantMessages table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// LogEntryTypes table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define LOGENTRYTYPES_TYPEDESCRIP_LENGTH 126
+
+typedef enum LogEntryTypesEnum
+{
+	EMS_LOG_OUTBOUND_MESSAGING = 1,
+	EMS_LOG_INBOUND_MESSAGING = 2,
+	EMS_LOG_MESSAGE_PROCESSING = 3,
+	EMS_LOG_ROUTING_RULES = 4,
+	EMS_LOG_ISAPI_EXTENSION = 5,
+	EMS_LOG_DATABASE_MAINTENANCE = 6,
+	EMS_LOG_SECURITY_VIOLATION = 7,
+	EMS_LOG_AUTHENTICATION = 8,
+	EMS_LOG_PRODUCT_REGISTRATION = 9,
+	EMS_LOG_VIRUS_SCANNING = 10,
+	EMS_LOG_TICKLER_SYSTEM = 11,
+	EMS_LOG_REPORTER_SYSTEM = 12,
+	EMS_LOG_DBMONITOR = 13,
+	EMS_LOG_WORKER_THREAD = 14,
+	EMS_LOG_WEBSESSION_THREAD = 15
+
+} LogEntryTypesEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// LogSeverity table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define LOGSEVERITY_DESCRIPTION_LENGTH 56
+
+typedef enum LogSeverityEnum
+{
+	EMS_LOG_SEVERITY_INFORMATIONAL = 1,
+	EMS_LOG_SEVERITY_WARNING = 2,
+	EMS_LOG_SEVERITY_ERROR = 3,
+	EMS_LOG_SEVERITY_CRITICAL_ERROR = 4,
+} LogSeverityEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Log table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define LOG_TEXT_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// MatchFromAddresses table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define MATCHFROMADDRESSES_EMAILADDRESS_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// MatchText table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// MatchToAddresses table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define MATCHTOADDRESSES_EMAILADDRESS_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// MessageDestinations table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define MESSAGEDESTINATIONS_SERVERADDRESS_LENGTH 256
+#define MESSAGEDESTINATIONS_AUTHUSER_LENGTH 126
+#define MESSAGEDESTINATIONS_AUTHPASS_LENGTH 126
+#define MESSAGEDESTINATIONS_DESCRIPTION_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// MessageSourceTypes table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define MESSAGESOURCETYPES_DESCRIPTION_LENGTH 33
+
+typedef enum MessageSourceTypesEnum
+{
+	EMS_MESSAGE_SOURCE_TYPE_POP3 = 1,
+	EMS_MESSAGE_SOURCE_TYPE_IMAP = 2,
+} MessageSourceTypesEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// MessageSources table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define MESSAGESOURCES_REMOTEADDRESS_LENGTH 256
+#define MESSAGESOURCES_AUTHUSERNAME_LENGTH 126
+#define MESSAGESOURCES_AUTHPASSWORD_LENGTH 126
+#define MESSAGESOURCES_DESCRIPTION_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// MsgApprovalQueue table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// ObjectTypes table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define OBJECTTYPES_DESCRIPTION_LENGTH 126
+
+typedef enum ObjectTypesEnum
+{
+	EMS_OBJECT_TYPE_AGENT = 1,
+	EMS_OBJECT_TYPE_TICKET_BOX = 2,
+	EMS_OBJECT_TYPE_CONTACT = 3,
+	EMS_OBJECT_TYPE_GROUP = 4,
+	EMS_OBJECT_TYPE_STD_RESP = 5,
+	EMS_OBJECT_TYPE_TICKET_CATEGORY = 6,
+	EMS_OBJECT_TYPE_STANDARD_REPORTS = 7,
+	EMS_OBJECT_TYPE_SCHEDULED_REPORTS = 8,	
+	EMS_OBJECT_TYPE_AUTO_TICKET_OPEN = 9,
+	EMS_OBJECT_TYPE_AGENT_AUDIT = 10,
+	EMS_OBJECT_TYPE_VOIP = 11,
+	EMS_OBJECT_TYPE_AGENT_PREFERENCES = 12,
+	EMS_OBJECT_TYPE_PREFERENCES_GENERAL = 13,
+	EMS_OBJECT_TYPE_PREFERENCES_TICKETBOX = 14,
+	EMS_OBJECT_TYPE_PREFERENCES_AGENT_VIEWS = 15,
+	EMS_OBJECT_TYPE_PREFERENCES_SIGNATURES = 16,
+	EMS_OBJECT_TYPE_PREFERENCES_MY_DICTIONARY = 17,
+	EMS_OBJECT_TYPE_PREFERENCES_MY_FOLDERS = 18,
+	EMS_OBJECT_TYPE_PREFERENCES_MY_ALERTS = 19,
+	EMS_OBJECT_TYPE_PREFERENCES_MY_CONTACTS = 20,
+	EMS_OBJECT_TYPE_ROUTE_REPLIES = 21,
+	EMS_OBJECT_TYPE_CLOSE_TICKET = 22,
+	EMS_OBJECT_TYPE_REQUEST_READ = 23,
+	EMS_OBJECT_TYPE_REQUEST_DELIVERY = 24,
+} ObjectTypesEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Objects table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+typedef enum ObjectsEnum
+{
+	EMS_OBJECTID_DEFAULT_AGENT = 1,
+	EMS_OBJECTID_DEFAULT_TICKETBOX = 2,
+	EMS_OBJECTID_DEFAULT_CONTACT = 3,
+	EMS_OBJECTID_DEFAULT_GROUP = 4,
+	EMS_OBJECTID_DEFAULT_STD_RESP = 5,
+	EMS_OBJECTID_EVERYONE_GROUP = 6,
+	EMS_OBJECTID_ADMINISTRATORS_GROUP = 7,
+	EMS_OBJECTID_UNASSIGNED_TICKETBOX = 8,
+	EMS_OBJECTID_ADMINISTRATOR_AGENT = 9,
+} ObjectsEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// OutboundMessageAttachments table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// OutboundMessageContacts table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// OutboundMessageQueue table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// OutboundMessageStates table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define OUTBOUNDMESSAGESTATES_MESSAGESTATENAME_LENGTH 51
+
+typedef enum OutboundMessageStatesEnum
+{
+	EMS_OUTBOUND_MESSAGE_STATE_DRAFT = 1,
+	EMS_OUTBOUND_MESSAGE_STATE_SENT = 2,
+	EMS_OUTBOUND_MESSAGE_STATE_UNTOUCHED = 3,
+	EMS_OUTBOUND_MESSAGE_STATE_RETRY = 4,
+	EMS_OUTBOUND_MESSAGE_STATE_FAILED = 5,
+	EMS_OUTBOUND_MESSAGE_STATE_INPROGRESS = 6,
+	EMS_OUTBOUND_MESSAGE_STATE_WAITINGAPPROVAL = 7,
+} OutboundMessageStatesEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// OutboundMessageTypes table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define OUTBOUNDMESSAGETYPES_DESCRIPTION_LENGTH 65
+
+typedef enum OutboundMessageTypesEnum
+{
+	EMS_OUTBOUND_MESSAGE_TYPE_NEW = 1,
+	EMS_OUTBOUND_MESSAGE_TYPE_FORWARD = 2,
+	EMS_OUTBOUND_MESSAGE_TYPE_REPLY = 3,
+} OutboundMessageTypesEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// OutboundMessages table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define OUTBOUNDMESSAGES_EMAILFROM_LENGTH 256
+#define OUTBOUNDMESSAGES_EMAILPRIMARYTO_LENGTH 256
+#define OUTBOUNDMESSAGES_SUBJECT_LENGTH 256
+#define OUTBOUNDMESSAGES_MEDIATYPE_LENGTH 126
+#define OUTBOUNDMESSAGES_MEDIASUBTYPE_LENGTH 126
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// PersonalData table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define PERSONALDATA_DATAVALUE_LENGTH 256
+#define PERSONALDATA_NOTE_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TimeZones table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TIMEZONES_DISPLAYNAME_LENGTH 101
+#define TIMEZONES_STANDARDNAME_LENGTH 101
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Dictionary table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define DICTIONARY_LANGUAGEID_LENGTH 3
+#define DICTIONARY_DESCRIPTION_LENGTH 51
+#define DICTIONARY_FILE_LENGTH 21
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// OAuthHosts table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define OAUTH_LENGTH 256
+#define OAUTH_SCOPE_LENGTH 513
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// PersonalDataTypes table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define PERSONALDATATYPES_TYPENAME_LENGTH 65
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TicketCategories table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TICKETCATEGORIES_DESCRIPTION_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TicketBoxOwners table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TICKETBOXOWNERS_DESCRIPTION_LENGTH 51
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TicketLinks table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define LINKNAME_LENGTH 51
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Priorities table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define PRIORITIES_NAME_LENGTH 51
+
+typedef enum PrioritiesEnum
+{
+	EMS_PRIORITY_HIGHEST = 1,
+	EMS_PRIORITY_HIGH = 2,
+	EMS_PRIORITY_NORMAL = 3,
+	EMS_PRIORITY_LOW = 4,
+	EMS_PRIORITY_LOWEST = 5,
+} PrioritiesEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// RoutingRules table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define ROUTINGRULES_RULEDESCRIP_LENGTH 126
+#define ROUTINGRULES_ALERTTEXT_LENGTH 255
+#define ROUTINGRULES_AUTOREPLYFROM_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// ProcessingRules table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define PROCESSINGRULES_RULEDESCRIP_LENGTH 126
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// DateFilters table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define REGULAR_EXPRESSION_LENGTH 513
+#define HEADER_LENGTH 50
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// ServerParameters table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define SERVERPARAMETERS_DESCRIPTION_LENGTH 256
+#define SERVERPARAMETERS_DATAVALUE_LENGTH 256
+
+typedef enum ServerParametersEnum
+{
+	EMS_SRVPARAM_ENABLE_DAILY_MAINTENANCE = 1,
+	EMS_SRVPARAM_ENABLE_DAILY_BACKUPS = 2,
+	EMS_SRVPARAM_ENABLE_DAILY_ARCHIVES = 3,
+	EMS_SRVPARAM_ENABLE_DAILY_PURGES = 4,
+	EMS_SRVPARAM_DAILY_MAINT_RUN_TIME = 5,
+	EMS_SRVPARAM_PURGE_CUTOFF = 6,
+	EMS_SRVPARAM_PURGE_LASTRUN = 7,
+	EMS_SRVPARAM_ARCHIVE_CUTOFF = 8,
+	EMS_SRVPARAM_ARCHIVE_LASTRUN = 9,
+	EMS_SRVPARAM_DEFAULT_MSGDEST_ID = 10,
+	EMS_SRVPARAM_ANTIVIRUS_ACTION = 11,
+	EMS_SRVPARAM_ANTIVIRUS_ENABLE = 12,
+	EMS_SRVPARAM_BACKUP_LASTRUN = 13,
+	EMS_SRVPARAM_MSGROUTER_STATE = 14,
+	EMS_SRVPARAM_MSGROUTER_CONTACTID = 15,
+	EMS_SRVPARAM_MSGROUTER_INBOUNDMSGID = 16,
+	EMS_SRVPARAM_MSGROUTER_RULEID = 17,
+	EMS_SRVPARAM_MSGROUTER_NEWTICKET = 18,
+	EMS_SRVPARAM_MSGROUTER_TICKETID = 19,
+	EMS_SRVPARAM_MAX_CON_POP3_THREADS = 20,
+	EMS_SRVPARAM_MAX_CON_SMTP_THREADS = 21,
+	EMS_SRVPARAM_LICENSE_KEY = 22,
+	EMS_SRVPARAM_SESSION_IP_LOCKING = 23,
+	EMS_SRVPARAM_DATABASE_VERSION = 24,
+	EMS_SRVPARAM_FORCE_HTTPS = 25,
+	EMS_SRVPARAM_VMS_INTEGRATION = 26,
+	EMS_SRVPARAM_VMS_WEBMAIL_URL = 27,
+	EMS_SRVPARAM_VMS_DSN = 28,
+	EMS_SRVPARAM_ISAPI_THREADS = 29,
+	EMS_SRVPARAM_LAST_MAILFLOW_REG_ALERT = 30,
+	EMS_SRVPARAM_LAST_ANTIVIRUS_REG_ALERT = 31,
+	EMS_SRVPARAM_DEF_RR_MATCH_AGENT = 32,
+	EMS_SRVPARAM_DEF_RR_MATCH_TICKETBOX = 33,
+	EMS_SRVPARAM_DEF_SYSTEM_EMAIL_ADDRESS = 34,
+	EMS_SRVPARAM_ANTIVIRUS_UNSCANNABLE_ACTION = 35,
+	EMS_SRVPARAM_ANTIVIRUS_SUSPICIOUS_ACTION = 36,
+	EMS_SRVPARAM_DEF_RR_MATCH_AGENTID = 37,
+	EMS_SRVPARAM_DEF_RR_MATCH_TICKETBOXID = 38,
+	EMS_SRVPARAM_ARCHIVE_REMOVE_TICKETS = 39,
+	EMS_SRVPARAM_DEFAULT_DATABASE_TIMEOUT = 40,
+	EMS_SRVPARAM_USE_CUTOFF_READ_DATE = 41,
+	EMS_SRVPARAM_CUTOFF_READ_DATE = 42,
+	EMS_SRVPARAM_MYTICKETS_READ_UPDATE = 43,
+	EMS_SRVPARAM_PUBLIC_TICKETS_READ_UPDATE = 44,
+	EMS_SRVPARAM_AGENTVIEWS_READ_UPDATE = 45,
+	EMS_SRVPARAM_DEF_RR_MATCH_TICKETCATEGORYID = 46,
+	EMS_SRVPARAM_ENABLE_SCHEDULED_REPORTS = 47,
+	EMS_SRVPARAM_AGENT_ACTIVITY_LOG = 48,
+	EMS_SRVPARAM_AGENT_ACTIVITY_AUTHENTICATION = 49,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_DELETE = 50,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_CREATE = 51,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_MOVE = 52,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_ESCALATE = 53,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_REASSIGN = 54,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_RESTORE = 55,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_OPEN = 56,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_CLOSE = 57,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_MESSAGE_ADD = 58,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_MESSAGE_DELETE = 59,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_MESSAGE_READ = 60,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_NOTE_ADD = 61,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_NOTE_DELETE = 62,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_NOTE_READ = 63,
+	EMS_SRVPARAM_AGENT_ACTIVITY_ALERT_READ = 64,
+	EMS_SRVPARAM_AGENT_ACTIVITY_ALERT_DELETE = 65,
+	EMS_SRVPARAM_MAX_TICKET_LOCK_TIME = 66,
+	EMS_SRVPARAM_TICKET_LIST_DATE = 67,
+	EMS_SRVPARAM_VOIP_INTEGRATION = 68,
+	EMS_SRVPARAM_DATABASE_LOGGING = 69,
+	EMS_SRVPARAM_DELETE_LOGS = 70,
+	EMS_SRVPARAM_DELETE_BACKUPS = 71,
+	EMS_SRVPARAM_MASTER_SERVER = 72,
+	EMS_SRVPARAM_ARCHIVE_PATH = 73,
+	EMS_SRVPARAM_BACKUP_PATH = 74,
+	EMS_SRVPARAM_LOG_PATH = 75,
+	EMS_SRVPARAM_MAINTENANCE_HIGH = 76,
+	EMS_SRVPARAM_MAINTENANCE_LOW = 77,
+	EMS_SRVPARAM_REPORT_PATH = 78,
+	EMS_SRVPARAM_INBOUND_ATTACH = 79,
+	EMS_SRVPARAM_OUTBOUND_ATTACH = 80,
+	EMS_SRVPARAM_SPOOL_FOLDER = 81,
+	EMS_SRVPARAM_TEMP_FOLDER = 82,
+	EMS_SRVPARAM_QUARANTINE_FOLDER = 83,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_MESSAGE_REVOKE = 84,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_MESSAGE_RELEASE = 85,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_MESSAGE_RETURN = 86,
+	EMS_SRVPARAM_3CX_PLUGIN_VERSION = 87,
+	EMS_SRVPARAM_MAILFLOW_CLIENT_VERSION = 88,
+	EMS_SRVPARAM_NOTE_ATTACH = 89,
+	EMS_SRVPARAM_TICKET_TRACKING = 90,
+	EMS_SRVPARAM_DEF_RR_NEW_TICKET = 91,
+	EMS_SRVPARAM_DEF_RR_MATCH_METHOD = 92,
+	EMS_SRVPARAM_ENABLE_TICKET_SEARCH_GETOLDEST = 93,
+	EMS_SRVPARAM_DEFAULT_CLOSE_TICKET_AFTER_SEND = 94,
+	EMS_SRVPARAM_DEFAULT_ROUTE_TO_ME = 95,
+	EMS_SRVPARAM_SESSION_TIMEOUT = 96,
+	EMS_SRVPARAM_SESSION_KEEP_ALIVE = 97,
+	EMS_SRVPARAM_DENY_TICKET_ONLINE = 98,
+	EMS_SRVPARAM_DENY_TICKET_AWAY = 99,
+	EMS_SRVPARAM_DENY_TICKET_NOTAVAIL = 100,
+	EMS_SRVPARAM_DENY_TICKET_OFFLINE = 101,
+	EMS_SRVPARAM_DENY_TICKET_OOO = 102,
+	EMS_SRVPARAM_ALLOW_TICKET_ADMIN = 103,
+	EMS_SRVPARAM_ALLOW_TICKET_AGENT = 104,
+	EMS_SRVPARAM_DEF_RR_ONLINE = 105,
+	EMS_SRVPARAM_DEF_RR_AWAY = 106,
+	EMS_SRVPARAM_DEF_RR_NOTAVAIL = 107,
+	EMS_SRVPARAM_DEF_RR_OFFLINE = 108,
+	EMS_SRVPARAM_DEF_RR_OOO = 109,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_MESSAGE_COPIED = 110,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_MERGE = 111,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_MESSAGE_SAVED = 112,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_LINK_CREATED = 113,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_LINK_DELETED = 114,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_LINKED = 115,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_UNLINKED = 116,
+	EMS_SRVPARAM_DATE_ENTRY_FORMAT = 117,
+	EMS_SRVPARAM_DEF_RR_CHECK_OPEN_OWNER = 118,
+	EMS_SRVPARAM_VERIFY_CONTACT_EMAIL_FREQUENCY = 119,
+	EMS_SRVPARAM_VERIFY_CONTACT_EMAIL_NOMX = 120,
+	EMS_SRVPARAM_VERIFY_CONTACT_EMAIL_CATCHALL = 121,
+	EMS_SRVPARAM_VERIFY_CONTACT_EMAIL_REMOVE = 122,
+	EMS_SRVPARAM_VERIFY_CONTACT_EMAIL_DELETE = 123,
+	EMS_SRVPARAM_VERIFY_CONTACT_EMAIL_DECREMENT = 124,
+	EMS_SRVPARAM_VERIFY_CONTACT_EMAIL_INCREMENT = 125,
+	EMS_SRVPARAM_VERIFY_HELO_HOST_NAME = 126,
+	EMS_SRVPARAM_VERIFY_CONNECT_TIMEOUT = 127,
+	EMS_SRVPARAM_UPDATE_FREQUENCY = 128,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_CHANGE_CATEGORY = 129,
+	EMS_SRVPARAM_AGENT_ACTIVITY_TICKET_CHANGE_FIELD = 130,	
+	EMS_SRVPARAM_ENABLE_EMAIL_VERIFICATION = 131,	
+	EMS_SRVPARAM_MASTER_WEBSESSIONS = 132,	
+	EMS_SRVPARAM_SESSION_FREQ = 133,
+	EMS_SRVPARAM_STATUS_FREQ = 134,
+	EMS_SRVPARAM_DB_FREQ = 135,
+	EMS_SRVPARAM_DB_WEBSESSIONS = 136,	
+	EMS_SRVPARAM_QUEUE_FULL = 137,
+	EMS_SRVPARAM_QUEUE_SIZE = 138,
+	EMS_SRVPARAM_ARCHIVE_ACCESS = 139,
+	EMS_SRVPARAM_ARCHIVE_MAX = 140,
+	EMS_SRVPARAM_CHARACTER_SET = 141,
+	EMS_SRVPARAM_MESSAGE_DATE = 142,
+	EMS_SRVPARAM_AGENT_EMAIL_BYPASS = 143,
+	EMS_SRVPARAM_SEARCH_REQUIRE_DATE = 144,
+	EMS_SRVPARAM_SESSION_LOGOFF_ALL = 145,
+	EMS_SRVPARAM_SESSION_EXPIRE_ALL = 146,
+	EMS_SRVPARAM_ALLOW_AGENT_LOGOFF = 147,
+	EMS_SRVPARAM_TIME_ZONE_ID = 148,
+	EMS_SRVPARAM_DEFAULT_DICTIONARY_ID = 149,
+	EMS_SRVPARAM_SERVER_ID = 1000,
+	EMS_SRVPARAM_ALERT_SENDER = 1001,
+	EMS_SRVPARAM_DB_MAINT = 1002,
+	EMS_SRVPARAM_DB_MONITOR = 1003,
+	EMS_SRVPARAM_MSG_COLLECTOR = 1004,
+	EMS_SRVPARAM_MSG_ROUTER = 1005,
+	EMS_SRVPARAM_MSG_SENDER = 1006,
+	EMS_SRVPARAM_REPORTER = 1007,
+	EMS_SRVPARAM_TICKET_MONITOR = 1008,
+	EMS_SRVPARAM_NUMBER_SERVERS = 1009
+
+} ServerParametersEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Signatures table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define SIGNATURES_NAME_LENGTH 65
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// StandardResponseUsage table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// StandardResponses table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define STANDARDRESPONSES_SUBJECT_LENGTH 101
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// StdRespApprovalQueue table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// StdResponseAttachments table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// StdResponseCategories table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define STDRESPONSECATEGORIES_CATEGORYNAME_LENGTH 51
+
+typedef enum StdResponseCategoriesEnum
+{
+	EMS_STDRESPCAT_DRAFTS = 1,
+} StdResponseCategoriesEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// StdResponseFavorites table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// StyleSheets table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define STYLESHEETS_NAME_LENGTH 46
+#define STYLESHEETS_FILENAME_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TaskList table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TASKLIST_SUBJECT_LENGTH 126
+#define TASKLIST_TASKDESCRIP_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TaskPriorities table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TASKPRIORITIES_PRIORITYNAME_LENGTH 51
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TaskStatuses table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TASKSTATUSES_STATUSDESCRIP_LENGTH 26
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TicketActions table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TICKETACTIONS_DESCRIPTION_LENGTH 256
+
+typedef enum TicketActionsEnum
+{
+	EMS_TICKETACTIONID_CREATED = 1,
+	EMS_TICKETACTIONID_MODIFIED = 2,
+	EMS_TICKETACTIONID_AGE_ALERTED = 3,
+	EMS_TICKETACTIONID_ESCALATED = 4,
+	EMS_TICKETACTIONID_ADD_MSG = 5,
+	EMS_TICKETACTIONID_DEL_MSG = 6,
+	EMS_TICKETACTIONID_DELETED = 7,
+	EMS_TICKETACTIONID_ARC_MSG = 8,
+	EMS_TICKETACTIONID_READ_MSG = 9,
+	EMS_TICKETACTIONID_ADD_NOTE = 10,
+	EMS_TICKETACTIONID_DEL_NOTE = 11,
+	EMS_TICKETACTIONID_READ_NOTE = 12,	
+	EMS_TICKETACTIONID_RESTORED = 13,
+	EMS_TICKETACTIONID_MOVED = 14,
+	EMS_TICKETACTIONID_REVOKE_MSG = 15,
+	EMS_TICKETACTIONID_RELEASE_MSG = 16,
+	EMS_TICKETACTIONID_RETURN_MSG = 17,
+	EMS_TICKETACTIONID_MERGED = 18,
+	EMS_TICKETACTIONID_SAVED_MSG = 19,
+	EMS_TICKETACTIONID_LINKED = 20,
+	EMS_TICKETACTIONID_UNLINKED = 21	
+} TicketActionsEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TicketBoxFooters table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TICKETBOXFOOTERS_DESCRIPTION_LENGTH 126
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TicketBoxHeaders table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TICKETBOXHEADERS_DESCRIPTION_LENGTH 126
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TicketBoxViewTypes table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TICKETBOXVIEWTYPES_NAME_LENGTH 56
+
+typedef enum TicketBoxViewTypesEnum
+{
+	EMS_INBOX = 1,
+	EMS_OUTBOX = 2,
+	EMS_SENT_ITEMS = 3,
+	EMS_DRAFTS = 4,
+	EMS_DELETED_ITEMS = 5,
+	EMS_PUBLIC = 6,
+	EMS_UNASSIGNED = 7,
+	EMS_ALERTS = 8,
+	EMS_COLUMN_DEFAULTS = 9,
+	EMS_APPROVALS = 10,
+	EMS_NOTES = 11,
+} TicketBoxViewTypesEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TicketBoxViews table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TicketBoxes table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TICKETBOXES_NAME_LENGTH 51
+#define TICKETBOXES_DESCRIPTION_LENGTH 256
+#define TICKETBOXES_DEFAULTEMAILADDRESS_LENGTH 256
+
+typedef enum TicketBoxesEnum
+{
+	EMS_TICKETBOX_UNASSIGNED = 1,
+} TicketBoxesEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TicketContacts table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TicketHistory table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TicketNotes table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TicketStates table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TICKETSTATES_DESCRIPTION_LENGTH 26
+#define TICKETSTATES_HTMLCOLORNAME_LENGTH 26
+
+typedef enum TicketStatesEnum
+{
+	EMS_TICKETSTATEID_CLOSED = 1,
+	EMS_TICKETSTATEID_OPEN = 2,
+	EMS_TICKETSTATEID_ONHOLD = 3,
+	EMS_TICKETSTATEID_ESCALATED = 4,
+	EMS_TICKETSTATEID_DELETED = 5,
+	EMS_TICKETSTATEID_REOPENED = 6,
+	EMS_TICKETSTATEID_WAITING = 7
+} TicketStatesEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Tickets table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TICKETS_SUBJECT_LENGTH 256
+#define TICKETS_CONTACTS_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TicketFields
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TICKETFIELDS_DESCRIPTION_LENGTH 51
+#define TICKETFIELDS_VALUE_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// TransactionTypes table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TRANSACTIONTYPES_DESCRIPTION_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Transactions table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define TRANSACTIONS_PARAMETERLIST_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// UIDLData table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define UIDLDATA_IDENTIFIER_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// VirusScanStates table
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define VIRUSSCANSTATES_DESCRIPTION_LENGTH 56
+
+typedef enum VirusScanStatesEnum
+{
+	EMS_VIRUS_SCAN_STATE_NOT_SCANNED = 1,
+	EMS_VIRUS_SCAN_STATE_VIRUS_FREE = 2,
+	EMS_VIRUS_SCAN_STATE_VIRUS_FOUND_FILE_DELETED = 3,
+	EMS_VIRUS_SCAN_STATE_VIRUS_FOUND_FILE_QUARANTINED = 4,
+	EMS_VIRUS_SCAN_STATE_VIRUS_FOUND_FILE_REPAIRED = 5,
+	EMS_VIRUS_SCAN_STATE_VIRUS_FOUND = 6,
+	EMS_VIRUS_SCAN_STATE_UNSCANNABLE = 7,
+	EMS_VIRUS_SCAN_STATE_SUSPICIOUS = 8,
+	EMS_VIRUS_SCAN_STATE_RESTORED = 9,
+} VirusScanStatesEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Voip tables
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define VOIPSERVER_DESCRIPTION_LENGTH 51
+#define VOIPSERVER_URL_LENGTH 256
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Server tables
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#define SERVER_DESCRIPTION_LENGTH 51
+#define SERVER_REGISTRATION_KEY_LENGTH 51
+#define SERVER_TASKTYPE_DESCRIPTION_LENGTH 51
+
+
+
+#endif // DEERFIELD_EMS_IDS_H

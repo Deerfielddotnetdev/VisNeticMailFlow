@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{2A3D01E8-3C60-4FAE-B257-5A1EB02F7C41}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>16.0.33801.447</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>Debug\</OutDir>
+    <IntDir>Debug\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>Release\</OutDir>
+    <IntDir>Release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\lib\dcalib\includes;..\mailflowlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>prehead.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>dcabase_x86_debug.lib;dcawin_x86_debug.lib;dcawinnt_x86_debug.lib;dcaodbc_x32_debug.lib;dcamailflow_x86_debug.lib;mailflowlib_unicode_debug.lib;zlib_x86_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>C:\Program Files\deerfield.com\VisNetic MailFlow\Bin\dbup.exe</OutputFile>
+      <AdditionalLibraryDirectories>..\..\lib\dcalib\libs;..\mailflowlib\DebugUnicode;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)dbupdater.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>true</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\lib\dcalib\includes;..\mailflowlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>prehead.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>dcabase_x86.lib;dcawin_x86.lib;dcawinnt_x86.lib;dcaodbc_x86.lib;dcamailflow_x86.lib;mailflowlib_unicode.lib;zlib_x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>C:\MailFlow\v6.9.4\bin\DBup.exe</OutputFile>
+      <AdditionalLibraryDirectories>..\..\lib\dcalib\libs;..\mailflowlib\ReleaseUnicode;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>true</ImageHasSafeExceptionHandlers>
+    </Link>
+    <PostBuildEvent>
+      <Message>Sign Tool</Message>
+      <Command>signtool.exe sign /csp "DigiCert Signing Manager KSP" /kc key_660081403 /f c:\certs\deerfield_communications_inc.crt /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 C:\MailFlow\v6.9.4\bin\DBup.exe</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="ConvertData.cpp" />
+    <ClCompile Include="CustomDictionaryFix.cpp" />
+    <ClCompile Include="dbconn.cpp" />
+    <ClCompile Include="EncryptAgentsPassword.cpp" />
+    <ClCompile Include="EncryptMessageDestPasswords.cpp" />
+    <ClCompile Include="EncryptMessageSrcPasswords.cpp" />
+    <ClCompile Include="ExportXML.cpp" />
+    <ClCompile Include="FullText.cpp" />
+    <ClCompile Include="Install.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="prehead.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="QuarantinPage.cpp" />
+    <ClCompile Include="regkey.cpp" />
+    <ClCompile Include="regvalue.cpp" />
+    <ClCompile Include="RestoreTicket.cpp" />
+    <ClCompile Include="SearchArchive.cpp" />
+    <ClCompile Include="TickeNoteGen.cpp" />
+    <ClCompile Include="TicketBoxAlg.cpp" />
+    <ClCompile Include="v2007.cpp" />
+    <ClCompile Include="V3000.cpp" />
+    <ClCompile Include="v3001.cpp" />
+    <ClCompile Include="v3002.cpp" />
+    <ClCompile Include="v3100.cpp" />
+    <ClCompile Include="v3500.cpp" />
+    <ClCompile Include="v3600.cpp" />
+    <ClCompile Include="V3610.cpp" />
+    <ClCompile Include="v3611.cpp" />
+    <ClCompile Include="v3800.cpp" />
+    <ClCompile Include="v4000.cpp" />
+    <ClCompile Include="v4500.cpp" />
+    <ClCompile Include="v4800.cpp" />
+    <ClCompile Include="v4810.cpp" />
+    <ClCompile Include="v4900.cpp" />
+    <ClCompile Include="v4910.cpp" />
+    <ClCompile Include="v4912.cpp" />
+    <ClCompile Include="v4914.cpp" />
+    <ClCompile Include="v4920.cpp" />
+    <ClCompile Include="v4921.cpp" />
+    <ClCompile Include="v4922.cpp" />
+    <ClCompile Include="v5000.cpp" />
+    <ClCompile Include="v5030.cpp" />
+    <ClCompile Include="v5100.cpp" />
+    <ClCompile Include="v6000.cpp" />
+    <ClCompile Include="v6001.cpp" />
+    <ClCompile Include="v6100.cpp" />
+    <ClCompile Include="v6102.cpp" />
+    <ClCompile Include="v6500.cpp" />
+    <ClCompile Include="v6501.cpp" />
+    <ClCompile Include="v6504.cpp" />
+    <ClCompile Include="v6505.cpp" />
+    <ClCompile Include="v6601.cpp" />
+    <ClCompile Include="v6603.cpp" />
+    <ClCompile Include="v6610.cpp" />
+    <ClCompile Include="v6900.cpp" />
+    <ClCompile Include="v6910.cpp" />
+    <ClCompile Include="v6920.cpp" />
+    <ClCompile Include="v6930.cpp" />
+    <ClCompile Include="v6950.cpp" />
+    <ClCompile Include="VThreeBuildFour.cpp" />
+    <ClCompile Include="VTwoBuildThree.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dbconn.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="prehead.h" />
+    <ClInclude Include="RegKey.h" />
+    <ClInclude Include="RegValue.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="resstring.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="main.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mailflowlib\mailflowlib.vcxproj">
+      <Project>{b6c95b67-8411-4006-8e34-b36cb49681b8}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

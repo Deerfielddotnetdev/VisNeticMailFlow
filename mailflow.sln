@@ -1,0 +1,66 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mailflowlib", "mailflowlib\mailflowlib.vcxproj", "{B6C95B67-8411-4006-8E34-B36CB49681B8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "emsresource", "emsresource\emsresource.vcxproj", "{2BD838BB-DA6D-4427-879B-9674BB931E91}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "emsisapi", "emsisapi\emsisapi.vcxproj", "{7EF88651-A237-4678-A2D1-EB9A8B1E9649}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mailflowengine", "mailflowengine\mailflowengine.vcxproj", "{474A3ADD-0046-44BE-BE80-84BA8D6A0765}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mailcomponent", "mailcomponent\mailcomponent.vcxproj", "{F04E82A4-5040-442C-A48F-E682D26B6A52}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbupdater", "dbupdater\dbupdater.vcxproj", "{2A3D01E8-3C60-4FAE-B257-5A1EB02F7C41}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mfinstall", "mfinstall\mfinstall.vcxproj", "{0B5AA9B7-7E1B-4D1D-BD8C-EFAA5C976429}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vmfadmintool", "vmfadmintool\vmfadmintool.vcxproj", "{E20EEFD2-78FF-4741-AC35-DFA98467368E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B6C95B67-8411-4006-8E34-B36CB49681B8}.Debug|x86.ActiveCfg = Debug|Win32
+		{B6C95B67-8411-4006-8E34-B36CB49681B8}.Debug|x86.Build.0 = Debug|Win32
+		{B6C95B67-8411-4006-8E34-B36CB49681B8}.Release|x86.ActiveCfg = Release|Win32
+		{B6C95B67-8411-4006-8E34-B36CB49681B8}.Release|x86.Build.0 = Release|Win32
+		{2BD838BB-DA6D-4427-879B-9674BB931E91}.Debug|x86.ActiveCfg = Debug|Win32
+		{2BD838BB-DA6D-4427-879B-9674BB931E91}.Debug|x86.Build.0 = Debug|Win32
+		{2BD838BB-DA6D-4427-879B-9674BB931E91}.Release|x86.ActiveCfg = Release|Win32
+		{2BD838BB-DA6D-4427-879B-9674BB931E91}.Release|x86.Build.0 = Release|Win32
+		{7EF88651-A237-4678-A2D1-EB9A8B1E9649}.Debug|x86.ActiveCfg = Debug|Win32
+		{7EF88651-A237-4678-A2D1-EB9A8B1E9649}.Debug|x86.Build.0 = Debug|Win32
+		{7EF88651-A237-4678-A2D1-EB9A8B1E9649}.Release|x86.ActiveCfg = Release|Win32
+		{7EF88651-A237-4678-A2D1-EB9A8B1E9649}.Release|x86.Build.0 = Release|Win32
+		{474A3ADD-0046-44BE-BE80-84BA8D6A0765}.Debug|x86.ActiveCfg = Debug|Win32
+		{474A3ADD-0046-44BE-BE80-84BA8D6A0765}.Debug|x86.Build.0 = Debug|Win32
+		{474A3ADD-0046-44BE-BE80-84BA8D6A0765}.Release|x86.ActiveCfg = Release|Win32
+		{474A3ADD-0046-44BE-BE80-84BA8D6A0765}.Release|x86.Build.0 = Release|Win32
+		{F04E82A4-5040-442C-A48F-E682D26B6A52}.Debug|x86.ActiveCfg = Debug|Win32
+		{F04E82A4-5040-442C-A48F-E682D26B6A52}.Debug|x86.Build.0 = Debug|Win32
+		{F04E82A4-5040-442C-A48F-E682D26B6A52}.Release|x86.ActiveCfg = Release|Win32
+		{F04E82A4-5040-442C-A48F-E682D26B6A52}.Release|x86.Build.0 = Release|Win32
+		{2A3D01E8-3C60-4FAE-B257-5A1EB02F7C41}.Debug|x86.ActiveCfg = Debug|Win32
+		{2A3D01E8-3C60-4FAE-B257-5A1EB02F7C41}.Debug|x86.Build.0 = Debug|Win32
+		{2A3D01E8-3C60-4FAE-B257-5A1EB02F7C41}.Release|x86.ActiveCfg = Release|Win32
+		{2A3D01E8-3C60-4FAE-B257-5A1EB02F7C41}.Release|x86.Build.0 = Release|Win32
+		{0B5AA9B7-7E1B-4D1D-BD8C-EFAA5C976429}.Debug|x86.ActiveCfg = Debug|Win32
+		{0B5AA9B7-7E1B-4D1D-BD8C-EFAA5C976429}.Debug|x86.Build.0 = Debug|Win32
+		{0B5AA9B7-7E1B-4D1D-BD8C-EFAA5C976429}.Release|x86.ActiveCfg = Release|Win32
+		{0B5AA9B7-7E1B-4D1D-BD8C-EFAA5C976429}.Release|x86.Build.0 = Release|Win32
+		{E20EEFD2-78FF-4741-AC35-DFA98467368E}.Debug|x86.ActiveCfg = Debug|Win32
+		{E20EEFD2-78FF-4741-AC35-DFA98467368E}.Debug|x86.Build.0 = Debug|Win32
+		{E20EEFD2-78FF-4741-AC35-DFA98467368E}.Release|x86.ActiveCfg = Release|Win32
+		{E20EEFD2-78FF-4741-AC35-DFA98467368E}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1FA2A81E-A916-4CFE-9841-561F9FDF547D}
+	EndGlobalSection
+EndGlobal

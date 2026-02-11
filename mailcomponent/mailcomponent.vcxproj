@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F04E82A4-5040-442C-A48F-E682D26B6A52}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>16.0.33801.447</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>Debug\</OutDir>
+    <IntDir>Debug\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>Release\</OutDir>
+    <IntDir>Release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>C:\boost_1_72_0;..\..\lib\dcalib\includes;..\..\lib\chilkat\includes;..\mailflowlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;_USRDLL;WIN32_LEAN_AND_MEAN;MAILCOMPONENT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;mailflowlib_unicode_debug.lib;dcawin_x86_debug.lib;dcawinnt_x86_debug.lib;dcabase_x86_debug.lib;dcaodbc_x32_debug.lib;dcamailflow_x86_debug.lib;dkv15smsu.lib;zlib_x86_debug.lib;mimepp_x86_debug.lib;wininet.lib;rpcrt4.lib;crypt32.lib;ChilkatDbg.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>C:\Program Files\deerfield.com\VisNetic MailFlow\Bin/mailcomponents.dll</OutputFile>
+      <Version />
+      <AdditionalLibraryDirectories>..\..\lib\dcalib\libs;..\..\lib\chilkat\libs;..\mailflowlib\DebugUnicode;C:\boost_1_72_0\lib32-msvc-14.2;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libcmt;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)mailcomponent.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <ImportLibrary>$(OutDir)mailcomponent.lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <ShowProgress>NotSet</ShowProgress>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\boost_1_72_0;..\..\lib\dcalib\includes;..\..\lib\chilkat\includes;..\mailflowlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;_USRDLL;WIN32_LEAN_AND_MEAN;MAILCOMPONENT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;mailflowlib_unicode.lib;dcawin_x86.lib;dcawinnt_x86.lib;dcaodbc_x86.lib;dcabase_x86.lib;dcamailflow_x86.lib;dkv12smsu.lib;zlib_x86.lib;mimepp_x86.lib;wininet.lib;rpcrt4.lib;crypt32.lib;ChilkatRel.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>C:\MailFlow\v6.9.4\bin\MailComponents.dll</OutputFile>
+      <AdditionalLibraryDirectories>..\..\lib\dcalib\libs;..\..\lib\chilkat\libs;..\mailflowlib\ReleaseUnicode;C:\boost_1_72_0\lib32-msvc-14.2;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <ImportLibrary>$(OutDir)mailcomponent.lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+    <PostBuildEvent>
+      <Message>Sign Tool</Message>
+      <Command>signtool.exe sign /csp "DigiCert Signing Manager KSP" /kc key_660081403 /f c:\certs\deerfield_communications_inc.crt /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 C:\MailFlow\v6.9.4\bin\MailComponents.dll</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Attachment.cpp" />
+    <ClCompile Include="AttachmentList.cpp" />
+    <ClCompile Include="base64\Base64Decoder.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="base64\Base64DecoderW.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="base64\Base64Encoder.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="base64\Base64EncoderW.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="EmailAddress.cpp" />
+    <ClCompile Include="EmailAddressList.cpp" />
+    <ClCompile Include="EmailDate.cpp" />
+    <ClCompile Include="EmailText.cpp" />
+    <ClCompile Include="FileEncoder.cpp" />
+    <ClCompile Include="InboundMessage.cpp" />
+    <ClCompile Include="KAVMsgScanner.cpp" />
+    <ClCompile Include="MailComponents.cpp" />
+    <ClCompile Include="md5c.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="md5class.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="MemMappedFile.cpp" />
+    <ClCompile Include="Message.cpp" />
+    <ClCompile Include="OutboundMessage.cpp" />
+    <ClCompile Include="POP3Connection.cpp" />
+    <ClCompile Include="PopAccount.cpp" />
+    <ClCompile Include="PopPollThread.cpp" />
+    <ClCompile Include="qp\QpDecoder.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="qp\QpDecoderW.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="qp\QpEncoder.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Registration.cpp" />
+    <ClCompile Include="RetrievalSession.cpp" />
+    <ClCompile Include="ServerParameters.cpp" />
+    <ClCompile Include="SMTPConnection.cpp" />
+    <ClCompile Include="SMTPDest.cpp" />
+    <ClCompile Include="SMTPPollThread.cpp" />
+    <ClCompile Include="SMTPSession.cpp" />
+    <ClCompile Include="SocketCore.cpp" />
+    <ClCompile Include="SocketLine.cpp" />
+    <ClCompile Include="SockUtil.cpp" />
+    <ClCompile Include="SourceFileStringRep.cpp" />
+    <ClCompile Include="StdAfx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="TempFile.cpp" />
+    <ClCompile Include="Utility.cpp" />
+    <ClCompile Include="VirusScanner.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Attachment.h" />
+    <ClInclude Include="AttachmentList.h" />
+    <ClInclude Include="base64\Base64Decoder.h" />
+    <ClInclude Include="base64\Base64DecoderW.h" />
+    <ClInclude Include="base64\Base64Encoder.h" />
+    <ClInclude Include="base64\Base64EncoderW.h" />
+    <ClInclude Include="base64\ByteBuffer.h" />
+    <ClInclude Include="base64\CharBuffer.h" />
+    <ClInclude Include="base64\CharBufferW.h" />
+    <ClInclude Include="decode_2047.h" />
+    <ClInclude Include="EmailAddress.h" />
+    <ClInclude Include="EmailAddressList.h" />
+    <ClInclude Include="EmailDate.h" />
+    <ClInclude Include="EmailText.h" />
+    <ClInclude Include="errorcodes.h" />
+    <ClInclude Include="FileEncoder.h" />
+    <ClInclude Include="gendefs.h" />
+    <ClInclude Include="global.h" />
+    <ClInclude Include="InboundMessage.h" />
+    <ClInclude Include="KAVMsgScanner.h" />
+    <ClInclude Include="MailComponents.h" />
+    <ClInclude Include="MD5.h" />
+    <ClInclude Include="md5class.h" />
+    <ClInclude Include="MemMappedFile.h" />
+    <ClInclude Include="Message.h" />
+    <ClInclude Include="OutboundMessage.h" />
+    <ClInclude Include="POP3Connection.h" />
+    <ClInclude Include="PopAccount.h" />
+    <ClInclude Include="PopPollThread.h" />
+    <ClInclude Include="qp\ByteBuffer.h" />
+    <ClInclude Include="qp\CharBuffer.h" />
+    <ClInclude Include="qp\CharBufferW.h" />
+    <ClInclude Include="qp\QpDecoder.h" />
+    <ClInclude Include="qp\QpDecoderW.h" />
+    <ClInclude Include="qp\QpEncoder.h" />
+    <ClInclude Include="qp\QpEncoderW.h" />
+    <ClInclude Include="Registration.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="RetrievalSession.h" />
+    <ClInclude Include="ServerParameters.h" />
+    <ClInclude Include="SMTPConnection.h" />
+    <ClInclude Include="SMTPDest.h" />
+    <ClInclude Include="SMTPPollThread.h" />
+    <ClInclude Include="SMTPSession.h" />
+    <ClInclude Include="SocketCore.h" />
+    <ClInclude Include="SocketLine.h" />
+    <ClInclude Include="SockUtil.h" />
+    <ClInclude Include="SourceFileStringRep.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="TempFile.h" />
+    <ClInclude Include="Utility.h" />
+    <ClInclude Include="VirusScanner.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MailResources.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mailflowlib\mailflowlib.vcxproj">
+      <Project>{b6c95b67-8411-4006-8e34-b36cb49681b8}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

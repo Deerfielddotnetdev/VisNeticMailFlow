@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugUnicode|Win32">
+      <Configuration>DebugUnicode</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseUnicode|Win32">
+      <Configuration>ReleaseUnicode</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B6C95B67-8411-4006-8E34-B36CB49681B8}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseUnicode|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugUnicode|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseUnicode|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugUnicode|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>16.0.33801.447</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>Debug\</OutDir>
+    <IntDir>Debug\</IntDir>
+    <TargetName>mailflowlib_ansi_debug</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>Release\</OutDir>
+    <IntDir>Release\</IntDir>
+    <TargetName>mailflowlib_ansi</TargetName>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugUnicode|Win32'">
+    <OutDir>$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <TargetName>mailflowlib_unicode_debug</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseUnicode|Win32'">
+    <OutDir>$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <TargetName>mailflowlib_unicode</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\lib\dcalib\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_LIB;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)mailflowlib_ansi_debug.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\lib\dcalib\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)mailflowlib_ansi.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugUnicode|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\lib\dcalib\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;_DEBUG;_LIB;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)mailflowlib_unicode_debug.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseUnicode|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\lib\dcalib\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)mailflowlib_unicode.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="ArchiveEntry.cpp" />
+    <ClCompile Include="ArchiveFns.cpp" />
+    <ClCompile Include="ArchiveTables.cpp" />
+    <ClCompile Include="AttachFns.cpp" />
+    <ClCompile Include="ContactFns.cpp" />
+    <ClCompile Include="CriticalSection.cpp" />
+    <ClCompile Include="data.cpp" />
+    <ClCompile Include="DateFns.cpp" />
+    <ClCompile Include="DCIKey.cpp" />
+    <ClCompile Include="DebugReporter.cpp" />
+    <ClCompile Include="EMSEvent.cpp" />
+    <ClCompile Include="EMSException.cpp" />
+    <ClCompile Include="EMSMutex.cpp" />
+    <ClCompile Include="EMSString.cpp" />
+    <ClCompile Include="KAVScan.cpp" />
+    <ClCompile Include="KAVScanNew.cpp" />
+    <ClCompile Include="LicenseMgr.cpp" />
+    <ClCompile Include="LogFns.cpp" />
+    <ClCompile Include="MessageIO.cpp" />
+    <ClCompile Include="ODBCConn.cpp" />
+    <ClCompile Include="ODBCQuery.cpp" />
+    <ClCompile Include="PurgeFns.cpp" />
+    <ClCompile Include="QueryClasses.cpp" />
+    <ClCompile Include="RegistryFns.cpp" />
+    <ClCompile Include="SecurityFns.cpp" />
+    <ClCompile Include="SerialFile.cpp" />
+    <ClCompile Include="Serializable.cpp" />
+    <ClCompile Include="SerializeException.cpp" />
+    <ClCompile Include="Serializer.cpp" />
+    <ClCompile Include="SerInboundMessage.cpp" />
+    <ClCompile Include="SerInboundMessageAttachment.cpp" />
+    <ClCompile Include="SerOutboundMessage.cpp" />
+    <ClCompile Include="SerOutboundMessageAttachment.cpp" />
+    <ClCompile Include="SingleCrit.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugUnicode|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseUnicode|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="StringFns.cpp" />
+    <ClCompile Include="TicketBoxViewFns.cpp" />
+    <ClCompile Include="TicketHistoryFns.cpp" />
+    <ClCompile Include="Trace.cpp" />
+    <ClCompile Include="WinRegistry.cpp" />
+    <ClCompile Include="zipper.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ArchiveEntry.h" />
+    <ClInclude Include="ArchiveFns.h" />
+    <ClInclude Include="ArchiveTables.h" />
+    <ClInclude Include="AttachFns.h" />
+    <ClInclude Include="AVPKeyStore.h" />
+    <ClInclude Include="ContactFns.h" />
+    <ClInclude Include="CriticalSection.h" />
+    <ClInclude Include="dataclasses.h" />
+    <ClInclude Include="DateFns.h" />
+    <ClInclude Include="DCIKey.h" />
+    <ClInclude Include="DebugReporter.h" />
+    <ClInclude Include="EMSEvent.h" />
+    <ClInclude Include="EMSException.h" />
+    <ClInclude Include="EMSIDs.h" />
+    <ClInclude Include="EMSMutex.h" />
+    <ClInclude Include="EMSString.h" />
+    <ClInclude Include="ErrorCodes.h" />
+    <ClInclude Include="gendefs.h" />
+    <ClInclude Include="KAVScan.h" />
+    <ClInclude Include="KAVScanNew.h" />
+    <ClInclude Include="LicenseMgr.h" />
+    <ClInclude Include="listclasses.h" />
+    <ClInclude Include="LogFns.h" />
+    <ClInclude Include="MailStreamEngine.h" />
+    <ClInclude Include="MailStreamLibrary.h" />
+    <ClInclude Include="MessageIO.h" />
+    <ClInclude Include="ODBCConn.h" />
+    <ClInclude Include="ODBCQuery.h" />
+    <ClInclude Include="PurgeFns.h" />
+    <ClInclude Include="QueryClasses.h" />
+    <ClInclude Include="RegistryFns.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="SecurityFns.h" />
+    <ClInclude Include="SerialFile.h" />
+    <ClInclude Include="Serializable.h" />
+    <ClInclude Include="SerializeException.h" />
+    <ClInclude Include="Serializer.h" />
+    <ClInclude Include="SerInboundMessage.h" />
+    <ClInclude Include="SerInboundMessageAttachment.h" />
+    <ClInclude Include="SerOutboundMessage.h" />
+    <ClInclude Include="SerOutboundMessageAttachment.h" />
+    <ClInclude Include="SingleCrit.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StringFns.h" />
+    <ClInclude Include="TicketBoxViewFns.h" />
+    <ClInclude Include="TicketHistoryFns.h" />
+    <ClInclude Include="Trace.h" />
+    <ClInclude Include="VariantArray.h" />
+    <ClInclude Include="WinRegistry.h" />
+    <ClInclude Include="zipper.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

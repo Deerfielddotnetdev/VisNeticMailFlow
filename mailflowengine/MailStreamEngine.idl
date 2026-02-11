@@ -1,0 +1,127 @@
+// MailStreamEngine.idl : IDL source for MailStreamEngine.dll
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (MailStreamEngine.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+	[
+		object,
+		uuid(5C804426-FB84-451B-A255-D131B6F194E1),
+		dual,
+		helpstring("IRoutingEngineComm Interface"),
+		pointer_default(unique)
+	]
+	interface IRoutingEngineComm : IDispatch
+	{
+		[id(1), helpstring("method ReloadConfig - Reload Workflow Engine Configuration from database")] 
+		HRESULT ReloadConfig( long nConfigurationItem );
+
+		[id(2), helpstring("method ProcessInboundQueue - Process all message sources")] 
+		HRESULT ProcessInboundQueue();
+
+		[id(3), helpstring("method ProcessOutboundQueue - Process all message destinations")] 
+		HRESULT ProcessOutboundQueue();
+
+		[id(5), helpstring("method Log")] HRESULT Log(long ErrorCode, BSTR Text);
+		[id(6), helpstring("method SendAlert")] HRESULT SendAlert(long AlertEventID, long TicketBoxID, BSTR Text);
+
+		[id(7), helpstring("method TestPOP3Auth - test POP3 authentication")] 
+		HRESULT TestPOP3Auth( BSTR HostName, long nPort, VARIANT_BOOL IsAPOP, BSTR UserName,
+		                      BSTR Password, long TimeoutSecs, long isSSL, [out,retval] long* pError );
+
+		[id(8), helpstring("method TestSMTPAuth - test SMTP authentication")] 
+		HRESULT TestSMTPAuth( BSTR HostName, long nPort, BSTR UserName,
+		                      BSTR Password, long TimeoutSecs, long isSSL, [out,retval] long* pError );
+
+
+		[id(9), helpstring("method DoDBMaintenance - Run database maintenance now")] 
+		HRESULT DoDBMaintenance( [out,retval] long* pError );
+
+		[id(10), helpstring("method RestoreArchive - Restore an archive")] 
+		HRESULT RestoreArchive( long ArchiveID, [out,retval] long* pError );
+
+		[id(11), helpstring("method RestoreBackup - Restore a backup file")] 
+		HRESULT RestoreBackup( BSTR BackupFile, [out,retval] long* pError );
+
+		[id(12), helpstring("method ScanFile - Virus scan a file on disk")]
+		HRESULT ScanFile( BSTR File, long Options, [out] BSTR* VirusName, [out] BSTR* QuarantineLoc,
+		                  [out,retval] long* pError );
+
+		[id(13), helpstring("method ScanString - Virus scan a string in memory")]
+		HRESULT ScanString( BSTR String, [out] BSTR* VirusName, [out] BSTR* CleanedString, 
+		                    [out,retval] long* pError );
+
+		[id(14), helpstring("method GetAVInfo - Get AV Version, date, and record count")]
+		HRESULT GetAVInfo( [out] BSTR* Version, [out] BSTR *RecordCount, 
+		                   [out] BSTR* LastUpdate, [out,retval] long* pError );
+
+	};
+	[
+		object,
+		uuid(32DCD893-06C9-4FF7-B1C6-5C4D913BCD35),
+		dual,
+		helpstring("IRoutingEngineAdmin Interface"),
+		pointer_default(unique)
+	]
+	interface IRoutingEngineAdmin : IDispatch
+	{
+		[id(1), helpstring("Authenticate user credentials")]
+		HRESULT Authenticate( [in] BSTR LogonName, 
+						      [in] BSTR Password, 
+		                      [out,retval] long* pResult );
+
+		[id(2), helpstring("Test ODBC Connection")]
+		HRESULT TestODBC( [in] BSTR Server, 
+		                  [in] long UseWIA, 
+						  [in] BSTR LogonName,
+						  [in] BSTR Password,
+						  [in] BSTR Domain,
+						  [in] BSTR Database,
+						  [out] BSTR* pErrMsg,
+		                  [out,retval] long* pResult );
+
+		[id(3), helpstring("GetServerParameter")]
+		HRESULT GetServerParameter( [in] long nID,
+									[out] BSTR* bstrValue,
+									[out,retval] long* pResult );
+
+		[id(4), helpstring("SetServerParameter")]
+		HRESULT SetServerParameter( [in] long nID,
+									[in] BSTR bstrValue,
+									[out,retval] long* pResult );
+
+		[id(5), helpstring("SetPassword")]	
+		HRESULT SetPassword( [in] BSTR User,		// Either "VMFAdmin" or "Administrator"
+		                     [in] BSTR Password,	// New password
+							 [out,retval] long* pResult );
+	};
+
+[
+	uuid(395873CD-6C24-44B3-B057-E0A944F6DE3B),
+	version(1.0),
+	helpstring("MailStreamEngine 1.0 Type Library")
+]
+library MAILSTREAMENGINELib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	[
+		uuid(B47C1233-2A8E-4D46-B983-3E8A10D17F75),
+		helpstring("RoutingEngineComm Class")
+	]
+	coclass RoutingEngineComm
+	{
+		[default] interface IRoutingEngineComm;
+	};
+	[
+		uuid(772926AD-F557-4010-A92C-E0DA95CB0AC6),
+		helpstring("RoutingEngineAdmin Class")
+	]
+	coclass RoutingEngineAdmin
+	{
+		[default] interface IRoutingEngineAdmin;
+	};
+};
