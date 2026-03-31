@@ -1,0 +1,456 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+	<html>
+	<head>
+	
+	<title>
+			<xsl:if test="root/AccessControlList/@DefaultObject = '1'">
+				<xsl:value-of select="root/DOCUMENT/TITLE"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;for All<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/AccessControlList/@Name"/>						
+			</xsl:if>
+			<xsl:if test="root/AccessControlList/@DefaultObject = '0'">
+				<xsl:value-of select="root/DOCUMENT/TITLE"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;for<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/AccessControlList/@Name"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;(<xsl:value-of select="root/AccessControlList/@ObjectType"/>)
+			</xsl:if>
+			<xsl:if test="not(root/AccessControlList/@DefaultObject)">
+				New Access Control List
+			</xsl:if>
+	</title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/accesscontrol.jmf"></script>
+	<script type="text/javascript" language="javascript">
+
+	</script>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	</head>
+
+	<body callOnLoad="adjustDoc();">
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="Action" value="update" />
+	<input type="hidden" name="ACLCollection" value=""/>
+	<input type="Hidden" name="AccessControlMaxID" value="{root/AccessControlList/@AccessControlMaxID}"/>
+	<input type="Hidden" name="ObjectID" value="{root/AccessControlList/@ObjectID}"/>
+
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+						<xsl:if test="root/AccessControlList/@DefaultObject = '1'">
+							<xsl:value-of select="root/DOCUMENT/TITLE"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;for All<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/AccessControlList/@Name"/>							
+						</xsl:if>
+						<xsl:if test="root/AccessControlList/@DefaultObject = '0'">
+							<xsl:value-of select="root/DOCUMENT/TITLE"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;for<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/AccessControlList/@Name"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;(<xsl:value-of select="root/AccessControlList/@ObjectType"/>)
+						</xsl:if>
+						<xsl:if test="not(root/AccessControlList/@DefaultObject)">
+							New Access Control List
+						</xsl:if>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="true"
+										 title="Save Rights" onclick="adjustForm()">
+										<nobr>
+										<img src="images/ico_save.gif" width="24" height="22" border="0" valign="bottom"/>
+										Save
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Show Help" onclick="openHelp('Administration/Security/Access_Control.htm');">
+										<nobr>
+										<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom"/>
+										Help
+										</nobr>
+				  						</div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto;">
+				<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0"><tr><td>
+				
+				<table style="width:100%;" border="0" cellspacing="0" cellpadding="0">
+					<xsl:if test="root/AccessControlList/@DefaultObject = '0' or not(root/AccessControlList/@DefaultObject) ">
+					<tr>
+						<td colspan="2">
+							<fieldset style="padding:10px;border-width:1px;border-color:black;">
+							<legend style="color:black">Access Control List Applies To:</legend>
+							<table style="width:100%;padding-top:4px;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td>Type:</td>
+									<td style="width:100%;">
+									
+									<xsl:choose>
+										<xsl:when test="/root/DOCUMENT/URLPARAMETERS/OBJECTTYPEID">
+											<input type="Hidden" name="ObjectTypeID" value="{/root/DOCUMENT/URLPARAMETERS/OBJECTTYPEID}"/>
+											<b><xsl:value-of select="/root/DefaultACLs/AccessControlList[@ObjectTypeID = /root/DOCUMENT/URLPARAMETERS/OBJECTTYPEID]/@ObjectType"/></b>
+										</xsl:when>
+										<xsl:otherwise>
+											<select style="width:100%;" name="ObjectTypeID" onchange="switchOptions()">
+											<xsl:for-each select="/root/DefaultACLs/AccessControlList[@ObjectTypeID!=3 and @ObjectTypeID &lt; 7]">
+												<option value="{@ObjectTypeID}">
+												<xsl:if test="@ObjectTypeID=/root/DOCUMENT/URLPARAMETERS/OBJECTTYPEID">
+												<xsl:attribute name="selected">true</xsl:attribute>
+												</xsl:if>
+												<xsl:value-of select="@ObjectType"/>
+												</option>
+											</xsl:for-each>
+											</select>
+										</xsl:otherwise>
+									</xsl:choose>
+									
+									</td>
+								</tr>
+								<tr>
+									<td>Object:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+									<td style="width:100%;">
+									
+									<xsl:choose>
+										<xsl:when test="not(/root/DOCUMENT/URLPARAMETERS/ID)">
+											
+											<select style="width:100%;" name="ID" id="otherbox">
+											<xsl:choose>
+												<xsl:when test="/root/AccessControlList/@ObjectType = 'TicketBox'">
+													<xsl:for-each select="/root/TicketBoxNames/TicketBox">
+														<option value="{@ID}">
+															<xsl:if test="@ID = /root/DOCUMENT/URLPARAMETERS/ID">
+																<xsl:attribute name="selected">true</xsl:attribute>
+															</xsl:if>
+															<xsl:value-of select="@Name"/>
+														</option>
+													</xsl:for-each>
+												</xsl:when>
+												<xsl:when test="/root/AccessControlList/@ObjectType = 'Ticket Category'">
+													<xsl:for-each select="/root/TicketCategoryNames/TicketCategory">
+														<option value="{@ID}">
+															<xsl:if test="@ID = /root/DOCUMENT/URLPARAMETERS/ID">
+																<xsl:attribute name="selected">true</xsl:attribute>
+															</xsl:if>
+															<xsl:value-of select="@Description"/>
+														</option>
+													</xsl:for-each>
+												</xsl:when>
+												<xsl:when test="/root/AccessControlList/@ObjectType = 'Group'">
+													<xsl:for-each select="/root/GroupNames/Group">
+														<option value="{@ID}">
+															<xsl:if test="@ID = /root/DOCUMENT/URLPARAMETERS/ID">
+																<xsl:attribute name="selected">true</xsl:attribute>
+															</xsl:if>
+															<xsl:value-of select="@Name"/>
+														</option>
+													</xsl:for-each>
+												</xsl:when>
+												<xsl:when test="/root/AccessControlList/@ObjectType = 'Standard Response Category'">
+													<xsl:for-each select="root/stdrespcategories/stdrespcategory">
+														<xsl:choose>
+															<xsl:when test="/root/DOCUMENT/URLPARAMETERS/ID = id">
+																<option selected="true">
+																	<xsl:attribute name="value"><xsl:value-of select="id"/></xsl:attribute>
+																	<xsl:value-of select="name" disable-output-escaping="yes"/>
+																</option>
+															</xsl:when>
+															<xsl:otherwise>
+																<option>
+																	<xsl:attribute name="value"><xsl:value-of select="id"/></xsl:attribute>
+																	<xsl:value-of select="name" disable-output-escaping="yes"/>
+																</option>
+															</xsl:otherwise>
+														</xsl:choose>
+													</xsl:for-each>
+												</xsl:when>
+												<xsl:otherwise>
+													<xsl:for-each select="/root/AgentNames/Agent">
+														<option value="{@ID}">
+															<xsl:if test="@ID = /root/DOCUMENT/URLPARAMETERS/ID">
+																<xsl:attribute name="selected">true</xsl:attribute>
+															</xsl:if>
+															<xsl:value-of select="@Name"/>
+														</option>
+													</xsl:for-each>
+												</xsl:otherwise>
+											</xsl:choose>
+											</select>
+										</xsl:when>
+					
+										<xsl:otherwise>			
+											<xsl:choose>
+												<xsl:when test="/root/AccessControlList/@ObjectType = 'TicketBox'">
+													<b><xsl:value-of select="/root/TicketBoxNames/TicketBox[@ID = /root/DOCUMENT/URLPARAMETERS/ID]/@Name"/></b>
+												</xsl:when>
+												<xsl:when test="/root/AccessControlList/@ObjectType = 'Group'">
+													<b><xsl:value-of select="/root/GroupNames/Group[@ID = /root/DOCUMENT/URLPARAMETERS/ID]/@Name"/></b>
+												</xsl:when>
+												<xsl:when test="/root/AccessControlList/@ObjectType = 'Ticket Category'">
+													<b><xsl:value-of select="/root/TicketCategoryNames/TicketCategory[@ID = /root/DOCUMENT/URLPARAMETERS/ID]/@Description"/></b>
+												</xsl:when>
+												<xsl:when test="/root/AccessControlList/@ObjectType = 'Standard Response Category'">
+													<xsl:for-each select="root/stdrespcategories/stdrespcategory">
+														<xsl:if test="/root/DOCUMENT/URLPARAMETERS/ID = id">
+															<b><xsl:value-of select="name" disable-output-escaping="yes"/></b>
+														</xsl:if>
+													</xsl:for-each>
+												</xsl:when>
+												<xsl:otherwise>
+													<b><xsl:value-of select="/root/AgentNames/Agent[@ID = /root/DOCUMENT/URLPARAMETERS/ID]/@Name"/></b>
+												</xsl:otherwise>
+											</xsl:choose>
+										</xsl:otherwise>
+										
+									</xsl:choose>
+												
+									</td>
+								</tr>
+							</table></fieldset>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" style="padding-top:10px;">
+							<input type="Radio" onclick="disablePage(this.value);" name="UseDefaultRights" value="1">
+							<xsl:if test="root/AccessControlList/@UseDefaultRights = '1'">
+							<xsl:attribute name="checked">true</xsl:attribute>
+							</xsl:if>
+							</input>&#32;Use Default Rights
+							<input type="Radio" onclick="disablePage(this.value);" name="UseDefaultRights" value="0">
+							<xsl:if test="root/AccessControlList/@UseDefaultRights = '0' or not(root/AccessControlList/@UseDefaultRights)">
+							<xsl:attribute name="checked">true</xsl:attribute>
+							</xsl:if>
+							</input>&#32;Use Custom Rights
+						</td>
+					</tr>
+					</xsl:if>
+					<tr>
+						<td height="20" colspan="2">&#32;</td>
+					</tr>
+
+			<xsl:for-each select="root/DefaultACLs/AccessControlList">
+					<tr id="{concat('defaultRights',@ObjectTypeID)}" style="display:none;">
+					<xsl:if test="/root/AccessControlList/@UseDefaultRights = '1' and /root/DOCUMENT/URLPARAMETERS/OBJECTTYPEID = @ObjectTypeID">
+					<xsl:attribute name="style">display:block</xsl:attribute>
+					</xsl:if>
+						<td colspan="2" style="padding-left:5px;">
+							[<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Administrators<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;]<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;has<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<span style="font-weight:bold;">delete</span><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;privileges.<br/>
+							<xsl:for-each select="AccessControlItem">
+								<xsl:if test="@GroupID != '0'">
+									[<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="@GroupName"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;]<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;has<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<span style="font-weight:bold;">
+									<xsl:if test="@AccessLevel = '0'">no</xsl:if>
+									<xsl:if test="@AccessLevel = '1'">list</xsl:if>
+									<xsl:if test="@AccessLevel = '2'">read</xsl:if>
+									<xsl:if test="@AccessLevel = '3'">edit</xsl:if>
+									<xsl:if test="@AccessLevel = '4'">delete</xsl:if>
+									</span><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;privileges.<br/>
+								</xsl:if>
+								<xsl:if test="@AgentID != '0'">
+									<xsl:value-of select="@AgentName"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;has<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<span style="font-weight:bold;">
+									<xsl:if test="@AccessLevel = '0'">no</xsl:if>
+									<xsl:if test="@AccessLevel = '1'">list</xsl:if>
+									<xsl:if test="@AccessLevel = '2'">read</xsl:if>
+									<xsl:if test="@AccessLevel = '3'">edit</xsl:if>
+									<xsl:if test="@AccessLevel = '4'">delete</xsl:if>
+									</span><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;privileges.<br/>
+								</xsl:if>
+							</xsl:for-each>
+						</td>
+					</tr>
+			</xsl:for-each>					
+
+					<tr id="customRights">
+					<xsl:if test="root/AccessControlList/@UseDefaultRights = '1'">
+					<xsl:attribute name="style">display:none;</xsl:attribute>
+					</xsl:if>
+						<td colspan="2">
+							<fieldset style="padding:0px;border-width:1px;border-color:black;">
+							<legend style="color:000000">Allow Access From:</legend><br/>
+							<table style="padding-left:10px;" id="ACLTable" width="100%" align="center" border="0" cellspacing="0" cellpadding="0">
+			
+								<td>Agent/Group</td>
+								<td align="center">None</td>
+								<td align="center">List</td>
+								<td align="center">Read</td>
+								<td align="center">Edit</td>
+								<td align="center">Delete</td>
+								<td align="center">&#32;</td>
+							
+								<tr><td height="10" colspan="7">&#32;</td></tr>
+								<tr id="0">
+									<td style="padding-left:10px;padding-right:10px;">
+										<select name="AgentOrGroup0" disabled="true">
+											<option>Group</option>
+										</select>
+										<select name="selectBox0" disabled="true">
+											<option>Administrators</option>
+										</select>
+									</td>
+									<td align="center">
+										<input type="Radio" name="AccessLevel0" value="0" disabled="true"></input>
+									</td>
+									<td align="center">
+										<input type="Radio" name="AccessLevel0" value="1" disabled="true"></input>
+									</td>
+									<td align="center">
+										<input type="Radio" name="AccessLevel0" value="2" disabled="true"></input>
+									</td>
+									<td align="center">
+										<input type="Radio" name="AccessLevel0" value="3" disabled="true"></input>
+									</td>
+									<td align="center">
+										<input type="Radio" name="AccessLevel0" value="4" disabled="true" checked="true"></input>
+									</td>
+									<td align="center">&#32;</td>
+								</tr>
+
+								<xsl:for-each select="root/AccessControlList/AccessControlItem">
+									<xsl:variable name="aciID" select="@ID"/>
+									<xsl:variable name="agentID" select="@AgentID"/>
+									<xsl:variable name="groupID" select="@GroupID"/>
+									<xsl:variable name="AccessLevel" select="@AccessLevel"/>
+
+								<tr id="{$aciID}">
+									<td style="padding-right:10px;">
+										<select onchange="switchSelect(this)" name="{concat('AgentOrGroup', $aciID)}">
+										<option value="Agent">
+										<xsl:if test="$agentID != '0'"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+										Agent</option>
+										<option value="Group">
+										<xsl:if test="$groupID != '0'"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+										Group</option>
+										</select>
+										<select id="selectBox{$aciID}">
+								<xsl:if test="$groupID = '0'">
+									<xsl:attribute name="name">Agent<xsl:value-of select="$aciID"/></xsl:attribute>
+									<xsl:for-each select="/root/AgentNames/Agent">
+									<xsl:choose>
+										<xsl:when test="@ID = $agentID">
+											<option>
+											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+											<xsl:attribute name="selected">true</xsl:attribute>
+											<xsl:value-of select="@Name"/>
+											</option>
+										</xsl:when>
+										<xsl:otherwise>
+											<option>
+											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+											<xsl:value-of select="@Name"/>
+											</option>
+										</xsl:otherwise>
+									</xsl:choose>
+									</xsl:for-each>
+								</xsl:if>
+								<xsl:if test="$agentID = '0'">
+									<xsl:attribute name="name">Group<xsl:value-of select="$aciID"/></xsl:attribute>
+									<xsl:for-each select="/root/GroupNames/Group">
+									<xsl:choose>
+										<xsl:when test="@ID = $groupID">
+											<option>
+											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+											<xsl:attribute name="selected">true</xsl:attribute>
+											<xsl:value-of select="@Name"/>
+											</option>
+										</xsl:when>
+										<xsl:otherwise>
+											<option>
+											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+											<xsl:value-of select="@Name"/>
+											</option>
+										</xsl:otherwise>
+									</xsl:choose>
+									</xsl:for-each>
+								</xsl:if>
+										</select>
+									</td>
+									<td align="center">
+										<input type="Radio" value="0">
+										<xsl:attribute name="name">AccessLevel<xsl:value-of select="$aciID"/></xsl:attribute>
+										<xsl:if test="$AccessLevel = '0'"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+										</input>
+									</td>
+									<td align="center">
+										<input type="Radio" value="1">
+										<xsl:attribute name="name">AccessLevel<xsl:value-of select="$aciID"/></xsl:attribute>
+										<xsl:if test="$AccessLevel = '1'"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+										</input>
+									</td>
+									<td align="center">
+										<input type="Radio" value="2">
+										<xsl:attribute name="name">AccessLevel<xsl:value-of select="$aciID"/></xsl:attribute>
+										<xsl:if test="$AccessLevel = '2'"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+										</input>
+									</td>
+									<td align="center">
+										<input type="Radio" value="3">
+										<xsl:attribute name="name">AccessLevel<xsl:value-of select="$aciID"/></xsl:attribute>
+										<xsl:if test="$AccessLevel = '3'"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+										</input>
+									</td>
+									<td align="center">
+										<input type="Radio" value="4">
+										<xsl:attribute name="name">AccessLevel<xsl:value-of select="$aciID"/></xsl:attribute>
+										<xsl:if test="$AccessLevel = '4'"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+										</input>
+									</td>
+									<td align="center">
+										<input type="Button" name="DelButton" class="childControlBtn" value="Remove" onclick="delRight();" rowIndex="0"/>
+									</td>
+								</tr>
+								</xsl:for-each>
+							</table>
+							<br/>
+							</fieldset>
+							<br/>
+							<input type="button" name="addACL" value="New" onclick="addRight();"/>
+						</td>
+					</tr>
+				</table>
+
+				</td></tr></table>
+			</div>
+			</td>
+		</tr>
+	</table>
+	
+	<xsl:for-each select="root/AgentNames/Agent">
+	<input type="hidden" name="hiAgentName" value="{@Name}" disabled="true"/>
+	<input type="hidden" name="hiAgentID" disabled="true" value="{@ID}"/>
+	</xsl:for-each>
+
+	<xsl:for-each select="root/GroupNames/Group">
+	<input type="hidden" name="hiGroupName" disabled="true" value="{@Name}"/>
+	<input type="hidden" name="hiGroupID" disabled="true" value="{@ID}"/>
+	</xsl:for-each>
+
+	<xsl:for-each select="root/DefaultACL/AccessControlList">
+	<input type="hidden" name="hiObjectTypeID" disabled="true" value="{@ObjectTypeID}"/><input type="hidden" name="hiObjectTypeName" disabled="true" value="{@ObjectType}"/>
+	</xsl:for-each>
+
+	<xsl:for-each select="root/TicketBoxNames/TicketBox">
+	<input type="hidden" name="hiTicketBoxID" disabled="true" value="{@ID}"/><input type="hidden" name="hiTicketBoxName" disabled="true" value="{@Name}"/>
+	</xsl:for-each>
+	
+	<xsl:for-each select="root/TicketCategoryNames/TicketCategory">
+	<input type="hidden" name="hiTicketCategoryID" disabled="true" value="{@ID}"/><input type="hidden" name="hiTicketCategoryName" disabled="true" value="{@Description}"/>
+	</xsl:for-each>
+	<xsl:for-each select="root/stdrespcategories/stdrespcategory">
+	<input type="hidden" name="hiStdRespCatID" disabled="true" value="{id}"/><input type="hidden" name="hiStdRespCatName" disabled="true" value="{name}"/>
+	</xsl:for-each>
+	</form>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

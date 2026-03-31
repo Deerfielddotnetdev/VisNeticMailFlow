@@ -1,0 +1,371 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/newmenu.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontroller.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontrollerrows.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/resize_handle.jmf"></script>
+	<script language="javascript">
+	var ButtonsToCheck = new Array(2);
+	function agentFunc(id, func)
+	{
+		if(glo_isBtnDisabled()){return false;}
+		var obj = document.getElementById(id);
+		if(obj)
+		{
+			if(obj.disabled == false)
+			{
+				if (func == 'new')
+				{
+					glo_launchModalWindow("modalframe.ems?file=editagent.ems", 600, 550, 'yes', 'no', 'no');
+				}
+				else
+				{
+					if (document.tabularForm.selectId.value!='')
+					{
+						if (func == 'delete') {
+							ans = confirm("Are you sure you want to delete this Agent?\n\nAny alerts currently associated with this agent will be \nassociated with the Admin.");
+							if (ans)
+							{
+								tabularForm.Action.value = 'delete';
+								//tabularForm.submit();
+								var postResults = glo_buildFormPost('tabularForm');
+								var proceed = postResults[0];
+								if (proceed==true)
+								{
+									glo_doReload("ListDivider");
+								}
+						
+							}
+						}
+						if (func == 'edit') 
+						{
+							glo_launchModalWindow("modalframe.ems?file=editagent.ems&amp;selectId="+parseInt(tabularForm.selectId.value), 600, 550, 'yes', 'no', 'no');
+						}
+					}
+				}
+			}
+		}
+	}
+	function tabRowDblClick()
+	{
+		glo_launchModalWindow("modalframe.ems?file=editagent.ems&amp;selectId="+parseInt(tabularForm.selectId.value), 600, 550, 'yes', 'no', 'no');
+	}
+	function doThis() {
+			if (document.tabularForm.RefreshLeftPane.value=="1")
+		{	parent.leftpane.location.reload();	}
+	}
+	function OnUpdate()
+	{
+		docInit(ButtonsToCheck);
+	}
+	function checkAuto()
+	{
+		if(document.getElementById('chkAuto').checked)
+		{
+			document.location.reload();
+		}			
+	}
+	function SetCookie()
+	{
+		var valString = new String();
+		if(document.getElementById('chkAuto').checked)
+		{
+			valString = "1";
+		}
+		else
+		{
+			valString = "0";
+		}			
+		setCookie("autoRefresh", valString, "01/01/2099");
+	}
+	function tSort(column,asc) 
+	{	
+		var newUrl = new String("./"+docName+"?");
+		newUrl = newUrl + "SortBy="+column+"&amp;SortAscending="+((asc == 1)?0:1);
+		newUrl = newUrl + "&amp;Action=sort";
+		document.location = newUrl;
+	}
+	function setTimer()
+	{
+		if (document.cookie &amp;&amp; getCookieCount("autoRefresh") > 0)
+		{
+			var nAuto = getCookieNum("autoRefresh", 1);
+			if(nAuto == "1")
+			{
+				document.getElementById('chkAuto').checked = true;
+			}
+		}
+		setInterval('checkAuto()', 10000 );
+	}
+	</script>
+	</head>
+
+	<body callBeforeOnLoad="doThis();docInitListCols();" callOnLoad="setTimer()">	
+	<form action="" method="post" name="tabularForm">
+		<input type="hidden" value="" name="selectId" />		
+		<input type="hidden" value="" name="Action" />
+		<input type="hidden" name="RefreshLeftPane" value="{root/RefreshLeftPane/@Value}" disabled="disabled" />		
+			
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+					<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td height="100%">										
+								<div class="toolBar" id="toolButton" name="toolButton"  title="Refresh" onclick="document.location.reload();">
+									<nobr>
+									<img src="images/ico_24x22_refresh.gif" width="24" height="22" border="0" valign="bottom" alt="Refresh"/>
+									</nobr>
+								</div>
+							</td>
+							<td height="100%" style="padding-left:5px;">										
+								<input id="chkAuto" type="checkbox" onclick="SetCookie();"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Auto refresh every 10 seconds<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+							</td>
+							<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+							<td>
+								<div class="toolBar" id="toolButton" name="toolButton" title="Create a new Agent">
+				  					<xsl:attribute name="onclick">
+										<xsl:choose>
+											<xsl:when test="(root/LicenseInfo/@EnabledAgents -1) &gt;= root/LicenseInfo/@LicensedAgents">alert('You have reached the maximum license size!');window.open('https:&#47;&#47;shop.deerfield.net/purchase/upgrades/vmfupgrade.aspx');</xsl:when>
+											<xsl:otherwise>agentFunc(id, 'new');</xsl:otherwise>
+										</xsl:choose>
+									</xsl:attribute>
+				  					<img src="images/ico_new.gif" />
+				  					New<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+				  				</div>
+							</td>
+							<td>
+				  				<div class="toolBar" id="toolButton" name="toolButton" xrequire="(gloListControl.ActiveRows.length==1)" title="Edit Agent" onclick="agentFunc(id, 'edit');">
+				  					<img src="images/ico_edit.gif" />
+				  					Edit<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+				  				</div>
+							</td>
+							<td>
+				  				<div class="toolBar" id="toolButton" name="toolButton" xrequire="(gloListControl.ActiveRows.length==1)" title="Delete selected Agent" onclick="agentFunc(id, 'delete');">
+				  					<img src="images/ico_delete.gif" />
+				  					Delete<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+				  				</div>
+							</td>
+							<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+							<td>
+		  				<div class="toolBar" id="toolButton" name="toolButton" title="Show Help" onclick="openHelp('Administration/Agent_Configuration/Agents.htm');">
+		  					<img src="images/ico_help.gif" />
+		  					Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+		  				</div>
+							</td>
+						</tr>
+					</table>
+					</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:hidden;">
+			<xsl:variable name="SortDirection">
+				<xsl:value-of select="root/Sort/@SortAscending"/>
+			</xsl:variable>
+			<xsl:variable name="SortImage">
+				<xsl:choose>
+				<xsl:when test="root/Sort/@SortAscending = 1">./images/ico-sortasc.gif</xsl:when>
+				<xsl:otherwise>./images/ico-sortdesc.gif</xsl:otherwise>
+				</xsl:choose>
+			</xsl:variable>
+				<div id="ListHolder" style="overflow:hidden;height:100%;width:100%;position:relative;">
+				<!-- table-layout:fixed - very important, without, table will extend off page -->
+				<table border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed;height:100%;width:100%;">
+					<tr>
+						<!-- no properties here, height will depend on contents -->
+						<td style="width:100%;">
+							<!-- position:relative - very important, without, table won't scroll -->
+							<table id="ListTableTop" border="0" cellspacing="0" cellpadding="0" style="position:relative;user-select:none;">
+								<tr id="ListHeaderRow">
+									<td class="listHeaderCell" width="90">
+									<xsl:if test="$SortDirection != '-1'">
+									<xsl:attribute name="onclick">tSort(1, <xsl:value-of select="$SortDirection"/>);</xsl:attribute>
+									</xsl:if>
+									<NOBR>
+										Enabled<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										<xsl:if test = "root/Sort/@SortBy = '1'">
+											<img src="{$SortImage}" width="8" height="7" vspace="3" border="0" style="padding-left:3px;padding-right:3px;"/>
+										</xsl:if>
+									</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+									<td class="listHeaderCell" width="90">
+									<xsl:if test="$SortDirection != '-1'">
+									<xsl:attribute name="onclick">tSort(2, <xsl:value-of select="$SortDirection"/>);</xsl:attribute>
+									</xsl:if>
+									<NOBR>
+										Status<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										<xsl:if test = "root/Sort/@SortBy = '2'">
+											<img src="{$SortImage}" width="8" height="7" vspace="3" border="0" style="padding-left:3px;padding-right:3px;"/>
+										</xsl:if>
+									</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+									<td class="listHeaderCell" width="120">
+									<xsl:if test="$SortDirection != '-1'">
+									<xsl:attribute name="onclick">tSort(3, <xsl:value-of select="$SortDirection"/>);</xsl:attribute>
+									</xsl:if>
+									<NOBR>
+										Agent Name<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										<xsl:if test = "root/Sort/@SortBy = '3'">
+											<img src="{$SortImage}" width="8" height="7" vspace="3" border="0" style="padding-left:3px;padding-right:3px;"/>
+										</xsl:if>
+									</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+									<td class="listHeaderCell" width="100">
+									<xsl:if test="$SortDirection != '-1'">
+									<xsl:attribute name="onclick">tSort(4, <xsl:value-of select="$SortDirection"/>);</xsl:attribute>
+									</xsl:if>
+									<NOBR>
+										Default Email Address<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										<xsl:if test = "root/Sort/@SortBy = '4'">
+											<img src="{$SortImage}" width="8" height="7" vspace="3" border="0" style="padding-left:3px;padding-right:3px;"/>
+										</xsl:if>	
+									</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+									<td class="listHeaderCell" width="100">
+									<xsl:if test="$SortDirection != '-1'">
+									<xsl:attribute name="onclick">tSort(5, <xsl:value-of select="$SortDirection"/>);</xsl:attribute>
+									</xsl:if>
+									<NOBR>
+										Login Name<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										<xsl:if test = "root/Sort/@SortBy = '5'">
+											<img src="{$SortImage}" width="8" height="7" vspace="3" border="0" style="padding-left:3px;padding-right:3px;"/>
+										</xsl:if>
+									</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+									<td class="listHeaderCell" width="90">
+									<xsl:if test="$SortDirection != '-1'">
+									<xsl:attribute name="onclick">tSort(6, <xsl:value-of select="$SortDirection"/>);</xsl:attribute>
+									</xsl:if>
+									<NOBR>
+										Type<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										<xsl:if test = "root/Sort/@SortBy = '6'">
+											<img src="{$SortImage}" width="8" height="7" vspace="3" border="0" style="padding-left:3px;padding-right:3px;"/>
+										</xsl:if>
+									</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+									<td class="listHeaderCell" width="100">
+									<xsl:if test="$SortDirection != '-1'">
+									<xsl:attribute name="onclick">tSort(5, <xsl:value-of select="$SortDirection"/>);</xsl:attribute>
+									</xsl:if>
+									<NOBR>
+										Last Logon<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										<xsl:if test = "root/Sort/@SortBy = '7'">
+											<img src="{$SortImage}" width="8" height="7" vspace="3" border="0" style="padding-left:3px;padding-right:3px;"/>
+										</xsl:if>
+									</NOBR>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<!-- set the height of this cell to 100%! -->
+						<td style="height:100%;overflow:hidden;vertical-align:top;">
+							<div id="ListDivider" style="width:100%;height:100%;overflow:auto;" class="listBack" onscroll="OnListDividerScroll(id);">
+							<table id="ListTableBot" style="user-select:none;" border="0" cellspacing="0" cellpadding="0" allowMultiple="false">
+							<xsl:for-each select="root/Agent">
+								<tr id="listRow" title="{@Name}" class="rowOff" glc_form_tabularForm_selectId="{@ID}" onClick="gloListControl.listRowClick(event);OnUpdate();" onDblClick="gloListControl.keepActiveRow();tabRowDblClick()" onMouseOver="tabRowOn()" onMouseOut="tabRowOff()">
+									<td id="listCell" class="cellOff">
+										<NOBR>
+										<xsl:if test="@IsEnabled = 1">
+											Yes
+										</xsl:if>
+										<xsl:if test="@IsEnabled = 0">
+											No
+										</xsl:if>				
+										</NOBR>
+									</td>		
+									<td id="listCell" class="cellOff">
+										<NOBR>
+										<img id="{concat('statusimg',@ID)}" src="images/ico_as{@StatusID}.gif" width="11" height="11" border="0" title="{@StatusText}" style="padding-right:3px;"/>
+										<xsl:value-of select="@StatusText"/>
+										</NOBR>
+									</td>
+									<td id="listCell" class="cellOff">
+										<NOBR>
+										<xsl:value-of select="@Name"/>
+										</NOBR>
+									</td>
+									<td id="listCell" class="cellOff">
+										<NOBR>
+										<xsl:value-of select="@DefaultEmailAddress"/>
+										<xsl:if test="@DefaultEmailAddress = ''">
+										<br/>
+										</xsl:if>	
+										</NOBR>
+									</td>			
+									<td id="listCell" class="cellOff">
+										<NOBR>
+										<xsl:value-of select="@LoginName"/>
+										</NOBR>
+									</td>
+									<td id="listCell" class="cellOff">
+										<NOBR>
+										<xsl:if test="@IsNTUser = 2">
+											VMS User
+										</xsl:if>				
+										<xsl:if test="@IsNTUser = 1">
+											AD User (
+											<xsl:value-of select="@NTDomain"/>
+											)
+										</xsl:if>
+										<xsl:if test="@IsNTUser = 0">
+											Local User
+										</xsl:if>
+										</NOBR>
+									</td>	
+								</tr>
+							</xsl:for-each>
+							<xsl:if test="not(root/Agent)">
+								<tr style="display:none;"><td><br/></td><td><br/></td><td><br/></td></tr>
+								<tr><td class="listBack" colspan="5"><i>No Agents Available</i></td></tr>
+							</xsl:if>
+							</table><!--listTableBot-->
+							</div><!--listDivider-->
+						</td>
+					</tr>
+				</table>
+				</div><!--listHolder-->
+
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	<script type="text/javascript">
+		ButtonsToCheck[0] = "cmdEditAgent";
+		ButtonsToCheck[1] = "cmdDeleteAgent";
+		docInit(ButtonsToCheck);
+	</script>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

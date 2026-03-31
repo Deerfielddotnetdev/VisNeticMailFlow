@@ -1,0 +1,55 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+	<html>
+	<head>
+	<title>Message Headers</title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="JavaScript" src="./javascript/global.jmf"></script>
+	<script language="javascript">
+		function getFields() {
+			var oWin;
+			if ( glo_whichBrowser() == "Internet Explorer" )
+			{
+				oWin = dialogArguments;
+			}
+			else if ( glo_whichBrowser() == "Safari"  )
+			{
+				oWin = window.parent.opener;
+			}
+			else if ( glo_whichBrowser() == "Chrome"  )
+			{
+				oWin = window.parent.opener;
+			}	
+			headerText.innerText = oWin.document.all.headersText.innerText;
+		}		
+	</script>
+	</head>
+	<body callonload="getFields();">
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					Message Headers
+					</xsl:with-param>
+				</xsl:call-template>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+				<table style="height:100%;width:100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td>
+							<textarea contenteditable="false" id="headerText" style="width:100%;height:100%;overflow:auto"></textarea>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	</body>
+	</html>
+	</xsl:template>
+</xsl:stylesheet>

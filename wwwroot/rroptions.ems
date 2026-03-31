@@ -1,0 +1,422 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"/>
+	<script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"></script>
+	<script>
+	
+	var g_bIsDirty = false;
+		
+	function docSubmitForm()
+	{
+		var mmVal=0;
+		for (var i=0; i &lt; document.tabularForm.MatchMethod.length; i++)
+		{
+			if (document.tabularForm.MatchMethod[i].checked)
+				{
+					mmVal = document.tabularForm.MatchMethod[i].value;
+				}
+		}
+		
+		if (mmVal == 2)
+		{
+			document.tabularForm.CreateNewTicket.value = "1";
+		}
+		else
+		{
+			document.tabularForm.CreateNewTicket.value = "0";
+		}	
+		
+		var postResults = glo_buildFormPost('tabularForm');
+		if (eval(postResults[0])==true)
+		{
+			g_bIsDirty = false;
+		}
+	}
+	
+	function docCheckIsDirty() 
+	{
+		if ( g_bIsDirty )
+			return "Your changes to the default routing rule options have not been saved!";
+
+		return false;
+	}
+
+	function setIsDirty(element)
+	{
+		if ( !g_bIsDirty &amp;&amp; element.readOnly != true )
+		{
+				g_bIsDirty = true;
+				glo_initMenuButtons();
+		}
+	}
+	
+	</script>
+	</head>
+
+	<body>
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="Action" value="update"/>
+	<input type="hidden" name="CreateNewTicket" value="{root/RoutingRule/@CreateNewTicket}" />
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="g_bIsDirty"  
+										 title="Save Default Routing Rule" onclick="docSubmitForm()"
+										  >
+											<nobr>
+												<img src="images/ico_save.gif" width="24" height="22" border="0"/>
+												Save
+											</nobr>
+										  </div>
+									</td>
+									<td height="100%">					
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Show Help" onclick="openHelp('Administration/Message_Handling/Default_Routing_Rule.htm')"
+										  >
+											<nobr>
+												<img src="images/ico_help.gif" width="24" height="22" border="0"/>
+												Help
+											</nobr>
+										  </div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto">
+				<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0"><tr><td>
+				
+				<table width="550px" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td>
+						The Default Routing Rule is the Routing Rule that takes effect when no Custom Routing 
+						Rules match an inbound message. The Default Routing rule can be used to assign both ownership 
+						and TicketBox location for an un-handled inbound email message.
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<table width="100%" cellspacing="0">
+								<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+								<tr>
+									<td width="100%" colspan="2" class="subSectionHeader" align="left">
+										Ticket Settings
+									</td>
+								</tr>
+								<tr>
+									<td width="100%" class="subSectionWrapper" align="left" colspan="2">
+										<table width="100%" cellpadding="0" cellspacing="0">
+											<tr>
+												<td colspan="2" valign="top" align="left" style="padding-left:8px;">
+													If Inbound Message does not contain Ticket Tracking Data:
+												</td>
+											</tr>											
+											<tr>
+												<td colspan="2" valign="top" align="left" style="padding-top:2px;padding-left:8px;">
+													<input type="radio" name="MatchMethod" value="2" onclick="setIsDirty(this)">
+														<xsl:if test="/root/RoutingRule/@MatchMethod = 2"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+													</input>
+													Create a new Ticket
+												</td>
+											</tr>																						
+											<tr>
+												<td colspan="2" valign="top" align="left" style="padding-top:2px;padding-left:8px;">
+													<input type="radio" name="MatchMethod" value="0" onclick="setIsDirty(this)">
+														<xsl:if test="/root/RoutingRule/@MatchMethod = 0"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+													</input>
+													Search in the TicketBox for a Ticket with matching subject and contact
+												</td>
+											</tr>																						
+											<tr>
+												<td colspan="2" valign="top" align="left" style="padding-top:2px;padding-left:8px;">
+													<input type="radio" name="MatchMethod" value="1" onclick="setIsDirty(this)">
+														<xsl:if test="/root/RoutingRule/@MatchMethod = 1"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+													</input>
+													Search in the TicketBox for an Outbound Message with matching subject and contact,<br/>
+													<span style="padding-left:24px;">otherwise Search in the TicketBox for a Ticket with matching subject and contact</span>
+												</td>
+											</tr>
+										</table>
+									</td>
+								</tr>
+								<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+								<tr>
+									<td width="100%" colspan="2" class="subSectionHeader" align="left">
+										Assign Ownership
+									</td>
+								</tr>
+								<tr>
+									<td width="100%" class="subSectionWrapper" align="left" colspan="2">
+										<table width="100%" cellpadding="0" cellspacing="0">
+											<tr>
+												<td style="padding-left:8px;">
+													Default Agent:
+													<select name="AssignToAgentId" onchange="setIsDirty(this)">
+														<option value="0">
+														<xsl:if test="/root/RoutingRule/@AssignToAgentID = 0"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+														--<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;NONE<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;--
+														</option>
+													<xsl:for-each select="root/AgentNames/Agent">
+													<xsl:choose>
+														<xsl:when test="@ID = /root/RoutingRule/@AssignToAgentID">
+														<option value="{@ID}" selected="true"><xsl:value-of select="@Name"/></option>
+														</xsl:when>
+														<xsl:otherwise>
+														<option value="{@ID}"><xsl:value-of select="@Name"/></option>
+														</xsl:otherwise>
+													</xsl:choose>
+													</xsl:for-each>
+													</select>
+												</td>
+											</tr>
+											<tr>
+												<td style="padding-left:8px;">
+													<table width="100%" border="0" cellspacing="0" cellpadding="0">
+														<tr style="padding-top:8px;">
+															<td valign="top">
+																<input type="radio" name="AssignOwnership" value="0" onclick="setIsDirty(this)">
+																	<xsl:if test="/root/RoutingRule/@AssignOwnership = 0"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+																</input>
+															</td>
+															<td>Assign to the Default Agent</td>
+														</tr>
+														<tr style="padding-top:8px;">
+															<td valign="top">
+																<input type="radio" name="AssignOwnership" value="1" onclick="setIsDirty(this)">
+																	<xsl:if test="/root/RoutingRule/@AssignOwnership = 1"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+																</input>
+															</td>
+															<td>
+																Assign to the Agent w/ matching email address if one found,<br/>
+																otherwise Assign to the Default Agent
+															</td>
+														</tr>
+														<tr style="padding-top:8px;">
+															<td valign="top">
+																<input type="radio" name="AssignOwnership" value="2" onclick="setIsDirty(this)">
+																	<xsl:if test="/root/RoutingRule/@AssignOwnership = 2"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+																</input>
+															</td>
+															<td>
+																Assign to the Contact owner if one exists,<br/>
+																otherwise Assign to the Default Agent
+															</td>
+														</tr>
+														<tr style="padding-top:8px;">
+															<td valign="top">
+																<input type="radio" name="AssignOwnership" value="3" onclick="setIsDirty(this)">
+																	<xsl:if test="/root/RoutingRule/@AssignOwnership = 3"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+																</input>
+															</td>
+															<td>
+																Assign to the Agent w/ matching email address if one found,<br/>
+																otherwise Assign to the Contact owner if one exists,<br/>
+																otherwise Assign to the Default Agent
+															</td>
+														</tr>
+														<tr style="padding-top:8px;">
+															<td valign="top">
+																<input type="radio" name="AssignOwnership" value="4" onclick="setIsDirty(this)">
+																	<xsl:if test="/root/RoutingRule/@AssignOwnership = 4"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+																</input>
+															</td>
+															<td>
+																Assign to the Contact owner if one exists,<br/>
+																otherwise Assign to the Agent w/ matching email address if one found,<br/>
+																otherwise Assign to the Default Agent
+															</td>
+														</tr>
+														<tr>
+															<td valign="top" colspan="2"  style="padding-top:10px;">
+																Do Not Assign Tickets to Agents with the following Status
+															</td>															
+														</tr>
+														<tr>
+															<td valign="top" colspan="2" style="padding-top:5px;">
+																<input id="chkOnline" name="chkOnline" type="checkbox" onclick="setIsDirty(this)">
+																	<xsl:if test="/root/RoutingRule/@chkOnline = '1'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if>
+																</input>
+																<span>Online</span>
+															</td>
+														</tr>
+														<tr>
+															<td valign="top" colspan="2">
+																<input id="chkAway" name="chkAway" type="checkbox" onclick="setIsDirty(this)">
+																	<xsl:if test="/root/RoutingRule/@chkAway = '1'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if>
+																</input>
+																<span>Away</span>
+															</td>
+														</tr>
+														<tr>
+															<td valign="top" colspan="2">
+																<input id="chkNotAvail" name="chkNotAvail" type="checkbox" onclick="setIsDirty(this)">
+																	<xsl:if test="/root/RoutingRule/@chkNotAvail = '1'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if>
+																</input>
+																<span>Not Available</span>
+															</td>
+														</tr>
+														<tr>
+															<td valign="top" colspan="2">
+																<input id="chkOffline" name="chkOffline" type="checkbox" onclick="setIsDirty(this)">
+																	<xsl:if test="/root/RoutingRule/@chkOffline = '1'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if>
+																</input>
+																<span>Offline</span>
+															</td>
+														</tr>
+														<tr>
+															<td valign="top" colspan="2">
+																<input id="chkOoo" name="chkOoo" type="checkbox" onclick="setIsDirty(this)">
+																	<xsl:if test="/root/RoutingRule/@chkOoo = '1'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if>
+																</input>
+																<span>Out of Office</span>
+															</td>
+														</tr>
+														<tr>
+															<td valign="top" colspan="2" style="padding-top:10px;">
+																<input id="chkOpenOwner" name="chkOpenOwner" type="checkbox" onclick="setIsDirty(this)">
+																	<xsl:if test="/root/RoutingRule/@chkOpenOwner = '1'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if>
+																</input>
+																<span>If Ticket Owner has above Status when System adds new Inbound Message, set Owner to None</span>
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+										</table>
+									</td>
+								</tr>
+								<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+								<tr>
+									<td width="100%" colspan="2" class="subSectionHeader" align="left">
+										Assign to TicketBox
+									</td>
+								</tr>
+								<tr>
+									<td width="100%" class="subSectionWrapper" align="left" colspan="2">
+										<table width="100%" cellpadding="0" cellspacing="0">
+											<tr>
+												<td style="padding-left:8px;">
+													Default TicketBox:
+													<select name="AssignToTicketBoxId" onchange="setIsDirty(this)">
+													<xsl:for-each select="root/TicketBoxNames/TicketBox">
+													<xsl:choose>
+														<xsl:when test="@ID = /root/RoutingRule/@AssignToTicketBoxID">
+														<option>
+															<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+															<xsl:attribute name="selected">true</xsl:attribute>
+															<xsl:value-of select="@Name"/>
+														</option>
+														</xsl:when>
+														<xsl:otherwise>
+														<option>
+															<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+															<xsl:value-of select="@Name"/>
+														</option>
+														</xsl:otherwise>
+													</xsl:choose>
+													</xsl:for-each>
+													</select>
+												</td>
+											</tr>
+											<tr>
+												<td style="padding-left:8px;">
+													<table width="100%" border="0" cellspacing="0" cellpadding="0">
+														<tr style="padding-top:8px;">
+															<td valign="top">
+																<input type="radio" name="AssignTicketBox" value="0" onclick="setIsDirty(this)">
+																	<xsl:if test="/root/RoutingRule/@AssignTicketBox = 0"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+																</input>
+															</td>
+															<td>Assign to the Default TicketBox</td>
+														</tr>
+														<tr style="padding-top:8px;">
+															<td valign="top">
+																<input type="radio" name="AssignTicketBox" value="1" onclick="setIsDirty(this)">
+																	<xsl:if test="/root/RoutingRule/@AssignTicketBox = 1"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+																</input>
+															</td>
+															<td>
+																Assign to the TicketBox w/ matching email address if one found,<br/>
+																otherwise Assign to the Default TicketBox
+															</td>
+														</tr>																												
+													</table>
+												</td>
+											</tr>											
+										</table>
+									</td>
+								</tr>
+								<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+								<tr>
+									<td width="100%" colspan="2" class="subSectionHeader" align="left">
+										Assign to Category
+									</td>
+								</tr>
+								<tr>
+									<td width="100%" class="subSectionWrapper" align="left" colspan="2">
+										<table width="100%" cellpadding="0" cellspacing="0">
+											<tr>
+												<td style="padding-left:8px;">
+													Default Category:
+													<select name="AssignToTicketCategoryId" onchange="setIsDirty(this)">
+													<xsl:for-each select="root/TicketCategoryNames/TicketCategory">
+													<xsl:choose>
+														<xsl:when test="@ID = /root/RoutingRule/@AssignToTicketCategory">
+														<option>
+															<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+															<xsl:attribute name="selected">true</xsl:attribute>
+															<xsl:value-of select="@Description"/>
+														</option>
+														</xsl:when>
+														<xsl:otherwise>
+														<option>
+															<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+															<xsl:value-of select="@Description"/>
+														</option>
+														</xsl:otherwise>
+													</xsl:choose>
+													</xsl:for-each>
+													</select>
+												</td>
+											</tr>
+										</table>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+
+				</td></tr></table>
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+</xsl:template>
+</xsl:stylesheet>

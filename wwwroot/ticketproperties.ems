@@ -1,0 +1,934 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+<html>
+<head>
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<link rel="stylesheet" type="text/css" href="{root/user/stylesheetname}"></link>
+	<link type="text/css" rel="StyleSheet" href="./stylesheets/datepicker.css"/>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<xsl:choose>
+	<xsl:when test="root/DOCUMENT/dateformat = '0'">
+	<script language="javascript" src="./javascript/datepicker.jmf"></script>
+	</xsl:when>
+	<xsl:otherwise>
+	<script language="javascript" src="./javascript/datepicker1.jmf"></script>
+	</xsl:otherwise>
+	</xsl:choose>	
+	<script type="text/javascript" language="javascript">
+    var windowFrom;
+    if(window.dialogArguments != null)
+		{
+			windowFrom = window.dialogArguments;
+		}
+		else if (window.parent.window.opener)
+    {
+    	windowFrom = window.parent.window.opener;
+    }
+    else
+    {
+    	top.close();
+    }
+		
+		function docSubmit()
+    {
+    if(document.tabularForm.chkUseTickler)
+    {
+	    var bEnable = (document.tabularForm.chkUseTickler.checked != true) ? false : true;
+	
+	    if(!objCreateTicklerDate.Update(true))
+	    return;
+    }
+
+    var postResults = glo_buildFormPost('tabularForm');
+    var proceed = postResults[0];
+		
+    if (proceed)
+    {
+	    var sTemp = windowFrom.document.location.href;
+	    var lastChar=sTemp.charAt(sTemp.length-1);
+	    if(lastChar == '#'){sTemp=sTemp.substring(0, sTemp.length - 1);}
+	    if (sTemp.toLowerCase().indexOf('ticket=') == -1)
+			{
+				sTemp = sTemp + "&amp;ticket="+document.tabularForm.ticketID.value;
+			}
+		  if(windowFrom.doReload)
+		  {
+		  	windowFrom.doReload();
+		  }
+		  else
+		  {
+		  	windowFrom.document.location.href = sTemp;
+		  }
+	    if (windowFrom.parent.frames.menu.updateTicketCount)
+			{
+				windowFrom.parent.frames.menu.updateTicketCount();
+			}			
+			glo_doClose();
+		}
+	}
+	
+	function docShowCustomFields()
+	{
+		var currentlyShown = (tCustomFields.style.display=='block'||tCustomFields.style.display=='');
+		if (currentlyShown)
+		{
+			tCustomFields.style.display='none';
+			CustomFieldsOn.style.display='none';
+			CustomFieldsOff.style.display='block';
+		}
+		else
+		{
+			tCustomFields.style.display='block';
+			CustomFieldsOn.style.display='block';
+			CustomFieldsOff.style.display='none';
+		}
+	}
+		
+	function docInitCustomFields( TicketBoxID  )
+	{
+		if ( TicketBoxID &lt; 1 )
+		{
+			var tbid = "<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/TBID"/>";
+			if ( tbid &gt; 0 )
+			{
+				TicketBoxID = tbid;
+			}
+			else
+			{
+				TicketBoxID = document.tabularForm.TicketBoxID.options[document.tabularForm.TicketBoxID.selectedIndex].value;
+			}			
+		}
+		
+		var XMLObject = null;
+		var Node = null;
+		var TicketFieldNodes = null;
+		var Options = null;
+		
+		// remove all rows from the table		
+		if(document.getElementById("tCustomFields").rows.length > 0)
+		{
+			for(var i = document.getElementById("tCustomFields").rows.length; i > 0;i--)
+			{
+				document.getElementById("tCustomFields").deleteRow(i -1);
+			}
+		}
+		
+		if(glo_whichBrowser()=="Internet Explorer")
+		{
+			XMLObject = document.getElementById("docXML").XMLDocument;
+		}
+		else
+		{
+			XMLObject = document.getElementById("docXML");
+		} 
+		
+		if ( XMLObject )
+		{
+			// get custom fields for the selected TicketBox
+			
+			if(glo_whichBrowser()=="Internet Explorer")
+			{
+				Node = XMLObject.selectNodes("/root/DATA/TicketFieldTicketBoxes/TicketFieldTicketBox[@TBID=" + TicketBoxID +"]");
+				<xsl:if test="not(contains(/root/DOCUMENT/URLPARAMETERS/TICKETID, ','))">
+				    TicketFieldNodes = XMLObject.selectNodes("/root/DATA/TicketFields/Field");
+				</xsl:if>
+				Options = XMLObject.selectNodes("/root/DATA/TicketFieldOptions/Option[@TBID=" + TicketBoxID +"]");
+			}
+			else
+			{
+				Node = XMLObject.selectNodes("//ticketfieldticketbox[@tbid="+ TicketBoxID +"]");
+				TicketFieldNodes = XMLObject.selectNodes("//field");
+				Options = XMLObject.selectNodes("//option[@tbid="+ TicketBoxID +"]");
+			}
+			
+			// add a table row for each custom field enabled for this TicketBox
+			var tTable = document.getElementById("tCustomFields");
+			var nextRowID = 1;
+			for ( i=0; i &lt; Node.length; i++ )
+			{
+				    var inputValue = '';
+				    var inputType = Node[i].getAttribute("TFTYPE");
+				    <xsl:if test="not(contains(/root/DOCUMENT/URLPARAMETERS/TICKETID, ','))">
+				        for ( var x=0; x &lt; TicketFieldNodes.length; x++ )
+				        {
+				            if ( Node[i].getAttribute("TFID") == TicketFieldNodes[x].getAttribute("TFID") )
+				            {
+				                inputValue = TicketFieldNodes[x].getAttribute("DataValue");
+				            }
+				        }
+				    </xsl:if>				    
+				    var NewRowID = parseInt(document.all.tCustomFields.rows.length);
+				    var NewRow = document.all.tCustomFields.insertRow(-1);
+				    NewRow.id = nextRowID;				    
+				    if ( Node[i].getAttribute("IsRequired") == "1" )
+				    {
+				        strX = '<span style="width:150px;align:right;white-space:nowrap;" title="This is a required field!"><span style="font-weight:bold;">*</span> ' + Node[i].getAttribute("TFNAME") +':<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span>';				    
+				    }
+				    else
+				    {
+				        strX = '<span style="width:150px;align:right;white-space:nowrap;">' + Node[i].getAttribute("TFNAME") +':<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span>';				    
+				    }
+				    var NewCell1 = NewRow.insertCell(-1);
+				    NewCell1.setAttribute("align", "right");
+				    NewCell1.setAttribute("width", "150px");
+				    NewCell1.innerHTML = strX;
+				    var inputName = 'input' + Node[i].getAttribute("TFID");
+				    if(inputType == 1)
+						{
+				    	strX = '<input name="'+inputName+'" type="text" style="width:100%" maxlength="255" value="'+inputValue+'"></input>';
+				    }
+				    else if(inputType == 2)
+						{
+							if(inputValue == 1)
+							{
+								strX = '<input name="'+inputName+'" type="checkbox" checked="checked" ></input>';
+							}
+							else
+							{
+								strX = '<input name="'+inputName+'" type="checkbox"></input>';
+							}						
+						}
+						else
+						{
+							strX = '<select name="'+inputName+'" style="width:100%">';
+							strX = strX + '<option value="0"></option>';
+							for ( var z=0; z &lt; Options.length; z++ )
+							{
+								if (Node[i].getAttribute("TFID") == Options[z].getAttribute("TFID"))
+						    {
+						        OptionValue = Options[z].getAttribute("OPTIONVALUE");
+						        TFOID = Options[z].getAttribute("TFOID");
+						        if(inputValue == TFOID)
+						        {
+						        	strX = strX + '<option value="'+ TFOID +'" selected="selected">'+OptionValue+'</option>';
+						        }
+						        else
+						        {
+						        	strX = strX + '<option value="'+ TFOID +'">'+OptionValue+'</option>';
+						        }
+						    }
+							}
+							strX = strX + '</select>';
+						}
+				    var NewCell3 = NewRow.insertCell(-1);
+				    NewCell3.setAttribute("align", "left");
+				    NewCell3.innerHTML = strX;
+				    nextRowID++;
+			}
+			
+			<xsl:if test="not(contains(/root/DOCUMENT/URLPARAMETERS/TICKETID, ','))">
+		    //Loop through again and add a row for any other fields previously set for this Ticket
+		    i=0;
+		    XMLObject = document.getElementById("docXML").XMLDocument;
+		    if ( XMLObject )
+		    {
+		        TicketFieldNodes = XMLObject.selectNodes("/root/DATA/TicketFields/Field");
+    		   		        
+		        for ( i=0; i &lt; TicketFieldNodes.length; i++ )
+		        {
+		            var inputID = document.getElementById('input' + TicketFieldNodes[i].getAttribute("TFID"));
+		            if(!inputID)
+		            {
+		                var inputValue = '';
+		                inputValue = TicketFieldNodes[i].getAttribute("DataValue");				               
+	                    var NewRowID = parseInt(document.all.tCustomFields.rows.length);
+		                var NewRow = document.all.tCustomFields.insertRow(-1);
+		                NewRow.id = nextRowID;				    
+		                strX = '<span style="width:150px;align:right;">' + TicketFieldNodes[i].getAttribute("TFNAME") +':<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span>';				    
+		                var NewCell1 = NewRow.insertCell(-1);
+		                NewCell1.setAttribute("align", "right");
+		                NewCell1.setAttribute("width", "150px");
+		                NewCell1.innerHTML = strX;
+		                var inputName = 'input' + TicketFieldNodes[i].getAttribute("TFID");				    
+		                strX = '<input name="'+inputName+'" type="text" style="width:100%" maxlength="255" value="'+inputValue+'"></input>';
+		                var NewCell3 = NewRow.insertCell(-1);
+		                NewCell3.setAttribute("align", "left");
+		                NewCell3.setAttribute("width", "100%");				    
+		                NewCell3.innerHTML = strX;			    			    				   				    
+		                nextRowID++;	
+		            }			            			    
+		        }
+		    }
+			</xsl:if>
+		}		
+	}
+
+	function docUpdateCustomFields()
+	{
+		<xsl:if test="root/DOCUMENT/URLPARAMETERS/METHOD = 'props'">
+			docInitCustomFields( document.tabularForm.TicketBoxID.options[document.tabularForm.TicketBoxID.selectedIndex].value );
+		</xsl:if>
+	}
+	
+	function ViewTicketHistory(tktids)
+	{
+		var callerWindowObj = dialogArguments;
+		callerWindowObj.parent.frames[0].glo_launchNewWindow("mailflow.ems?rightpane=ticketsearchresults.ems$action=search$hideleft=1$ticketid="+tktids+"$MAXLINES=100$nocancel=1");
+	}
+	function Escalate()
+	{
+		document.tabularForm.Action.value='escalate';
+		docSubmit();
+	}
+	
+	function CheckDisabled()
+	{
+		if(document.tabularForm.StateID)
+		{
+			var nState=0;
+			for (var i=0; i &lt; document.tabularForm.StateID.length; i++)
+		   {
+		   	if (document.tabularForm.StateID[i].selected)
+		     		{
+		     			nState = document.tabularForm.StateID[i].value;
+		     		}
+		   }
+			
+			if (nState == 1)
+			{
+				document.tabularForm.chkUseTickler.disabled = false;
+			}
+			else
+			{
+				document.tabularForm.chkUseTickler.checked = false;
+				document.tabularForm.chkUseTickler.disabled = true;
+			}
+		}	
+		<xsl:if test="root/user/access/autoopen = 0">
+			if(document.tabularForm.chkUseTickler)
+			{
+				document.tabularForm.chkUseTickler.checked = false;
+				document.tabularForm.chkUseTickler.disabled = true;
+			}
+		</xsl:if>
+		if(document.tabularForm.chkUseTickler)
+		{
+			var bEnable = (document.tabularForm.chkUseTickler.checked != true) ? false : true;
+		
+			fields = new Array();
+			fields[fields.length] = objCreateTicklerDate._input;
+			fields[fields.length] = objCreateTicklerDate._button;
+			fields[fields.length] = document.tabularForm.OpenHr;
+			fields[fields.length] = document.tabularForm.OpenMin;
+			fields[fields.length] = document.tabularForm.OpenAmPm;
+			
+			glo_disableForm(bEnable, fields);
+		}
+	}
+	
+	function printTicket()
+	{
+		if(glo_isBtnDisabled()){return false;}
+		var ticketID = document.tabularForm.ticketID.value;		
+		var urlStr = './modalframe.ems?file=printticketselect.ems&amp;ticketid='+ticketID;
+		glo_launchModalWindow(urlStr, 400, 300, 'yes', 'no', 'no');			
+	}
+	
+	function CheckOwner()
+	{
+		var myAgentID = "<xsl:value-of select="/root/user/id"/>";
+		var numFolders = "<xsl:value-of select="count(/root/myfolders/folder)"/>";
+		if(document.tabularForm.FolderID)
+		{
+			if(document.tabularForm.OwnerID.value != myAgentID)
+			{
+				document.tabularForm.FolderID.value = 0;
+				document.tabularForm.FolderID.options[0].text="Folders only available when you are the owner";
+				fields = new Array();
+				fields[fields.length] = document.tabularForm.FolderID;
+				glo_disableForm(false, fields);
+			}
+			else
+			{
+				if(numFolders != 0)
+				{
+					document.tabularForm.FolderID.options[0].text="My Tickets";
+					fields = new Array();
+					fields[fields.length] = document.tabularForm.FolderID;
+					glo_disableForm(true, fields);
+				}
+				else
+				{
+					document.tabularForm.FolderID.value = 0;
+					document.tabularForm.FolderID.options[0].text="No folders defined";
+					fields = new Array();
+					fields[fields.length] = document.tabularForm.FolderID;
+					glo_disableForm(false, fields);
+				}
+			}
+		}
+	}
+	</script>
+</head>
+
+<body>
+
+<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td style="width:100%">
+
+	<xsl:call-template name="default_titlebar">
+		<xsl:with-param name="title_text">
+			<xsl:choose>
+				<xsl:when test="contains(/root/DOCUMENT/URLPARAMETERS/TICKETID, ',')">
+					<xsl:choose>
+						<xsl:when test="/root/DOCUMENT/URLPARAMETERS/METHOD = 'close'">
+							Close Tickets [<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/TICKETID"/>]
+						</xsl:when>
+						<xsl:when test="/root/DOCUMENT/URLPARAMETERS/METHOD = 'owner'">
+							Reassign Tickets [<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/TICKETID"/>]
+						</xsl:when>
+						<xsl:when test="/root/DOCUMENT/URLPARAMETERS/METHOD = 'ticketbox'">
+							Move Tickets [<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/TICKETID"/>]
+						</xsl:when>
+						<xsl:when test="/root/DOCUMENT/URLPARAMETERS/METHOD = 'state'">
+							Change Tickets State [<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/TICKETID"/>]
+						</xsl:when>
+						<xsl:otherwise>
+							Properties for Tickets [<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/TICKETID"/>]
+						</xsl:otherwise>
+					</xsl:choose>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:choose>
+						<xsl:when test="/root/DOCUMENT/URLPARAMETERS/METHOD = 'close'">
+							Close Ticket [<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/TICKETID"/>]
+						</xsl:when>
+						<xsl:when test="/root/DOCUMENT/URLPARAMETERS/METHOD = 'owner'">
+							Reassign Ticket [<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/TICKETID"/>]
+						</xsl:when>
+						<xsl:when test="/root/DOCUMENT/URLPARAMETERS/METHOD = 'ticketbox'">
+							Move Ticket [<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/TICKETID"/>]
+						</xsl:when>
+						<xsl:when test="/root/DOCUMENT/URLPARAMETERS/METHOD = 'state'">
+							Change Ticket State [<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/TICKETID"/>]
+						</xsl:when>
+						<xsl:otherwise>
+							Properties for Ticket [<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/TICKETID"/>]
+						</xsl:otherwise>
+					</xsl:choose>
+				</xsl:otherwise>
+			</xsl:choose>
+		</xsl:with-param>
+	</xsl:call-template>
+</td>
+</tr>
+<tr>
+<td style="width:100%">
+
+	<table width="100%" class="menuColor" align="center" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+	<td style="height:32px" class="menubarx" nowrap="true">
+		<table class="menuColor" style="height:100%" align="left" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<xsl:choose>
+					<xsl:when test="/root/DOCUMENT/URLPARAMETERS/METHOD = 'close'">
+						<td height="100%">										
+							<div class="toolBar" id="toolButton" name="toolButton"  title="Close Ticket(s)" onclick="docSubmit();">
+								<nobr>
+									<img src="images/ico_ok.gif" width="24" height="22" border="0" valign="bottom" alt="Close Ticket(s)"/>
+									Close<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+								</nobr>
+							</div>											
+						</td>							
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:if test="/root/DOCUMENT/URLPARAMETERS/ALERTID > '0'">
+							<td height="100%">										
+								<div class="toolBar" id="toolButton" name="toolButton"  title="Save and Clear Alerts" onclick="docSubmit();">
+									<nobr>
+										<img src="images/ico_save.gif" width="24" height="22" border="0" valign="bottom" alt="Save and Clear Alerts"/>
+										Save and Clear Alerts<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+									</nobr>
+								</div>											
+							</td>	
+							<td height="100%">										
+								<div class="toolBar" id="toolButton" name="toolButton"  title="View Ticket" onclick="ViewTicketHistory({root/DOCUMENT/URLPARAMETERS/TICKETID});">
+									<nobr>
+										<img src="images/ico_magnify.gif" width="24" height="22" border="0" valign="bottom" alt="View Ticket"/>
+										View Ticket<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+									</nobr>
+								</div>											
+							</td>							
+						</xsl:if>
+						<xsl:if test="not(/root/DOCUMENT/URLPARAMETERS/ALERTID)">
+							<td height="100%">										
+								<div class="toolBar" id="toolButton" name="toolButton"  title="Save" onclick="docSubmit();">
+									<nobr>
+										<img src="images/ico_save.gif" width="24" height="22" border="0" valign="bottom" alt="Save"/>
+										Save<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+									</nobr>
+								</div>											
+							</td>							
+						</xsl:if>
+					</xsl:otherwise>
+				</xsl:choose>
+				<xsl:if test="/root/user/escalatetoagentid != '0' and (/root/DOCUMENT/URLPARAMETERS/METHOD = 'props' or /root/DOCUMENT/URLPARAMETERS/METHOD = 'state') and not(/root/Ticket/@StateID = '4')">
+					<td height="100%">										
+						<div class="toolBar" id="toolButton" name="toolButton"  title="Escalate" onclick="Escalate();">
+							<nobr>
+								<img src="images/ico_escalate.gif" width="24" height="22" border="0" valign="bottom" alt="Escalate"/>
+								Escalate<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+							</nobr>
+						</div>											
+					</td>						
+				</xsl:if>
+				<xsl:if test="/root/DOCUMENT/URLPARAMETERS/METHOD = 'props' and not(contains(/root/DOCUMENT/URLPARAMETERS/TICKETID, ','))">
+				<td height="100%">										
+					<div class="toolBar" id="toolButton" name="toolButton"  title="Print ticket" onclick="printTicket();">
+						<nobr>
+							<img src="images/ico_print.gif" width="24" height="22" border="0" valign="bottom" alt="Print the ticket"/>
+							Print<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+						</nobr>
+					</div>											
+				</td>
+				</xsl:if>
+				<td height="100%">										
+					<div class="toolBar" id="toolButton" name="toolButton"  title="Discard changes and close window" onclick="top.close();">
+						<nobr>
+							<img src="images/ico_cancel.gif" width="24" height="22" border="0" valign="bottom" alt="Discard changes and close window"/>
+							Cancel<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+						</nobr>
+					</div>											
+				</td>
+				<td height="100%">										
+					<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('My_Shortcuts/Hidden/Ticket_Properties.htm');">
+						<nobr>
+							<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom" alt="Show Help"/>
+							Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+						</nobr>
+					</div>											
+				</td>				
+			</tr>
+		</table>
+	</td>
+	</tr>
+	</table>
+</td>
+</tr>
+<tr>
+	<td style="height:100%;">
+		<table class="menuColor" style="table-layout:fixed;height:100%;width:100%;padding:5px;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="height:100%;">				
+				<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td style="height:100%;border-style:inset;border-width:1px;overflow:hidden;">
+							<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+									<div style="width:100%;height:100%;overflow:auto">
+									<form name="tabularForm">
+									<input type="hidden" name="Action" value="update" /> 
+									<input type="hidden" name="ticketID" value="{/root/DOCUMENT/URLPARAMETERS/TICKETID}" />
+									<table style="width:100%;" border="0" cellspacing="0" cellpadding="1">
+										<xsl:if test="root/DOCUMENT/URLPARAMETERS/METHOD = 'props' or root/DOCUMENT/URLPARAMETERS/METHOD = 'owner'">
+											<tr style="padding-top:5px;">
+                          <td align="right" width="150px"><span style="width:150px;align:right;">Owner:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span></td>
+                          <td id="ownerTD" align="left">
+													<select name="OwnerID" style="width:100%" onchange="CheckOwner();">
+													<xsl:if test="contains(/root/DOCUMENT/URLPARAMETERS/TICKETID,',')"><option value="-1"></option></xsl:if>
+														<option value="0">-- NONE --</option>
+													<xsl:for-each select="root/AgentNames/Agent">
+														<xsl:choose>
+														<xsl:when test="/root/Ticket/@OwnerID = @ID and not(contains(/root/DOCUMENT/URLPARAMETERS/TICKETID,','))">
+													 	<option selected="true" value="{@ID}"><xsl:value-of select="@Name" /></option>
+														</xsl:when>
+														<xsl:otherwise>
+														<option value="{@ID}"><xsl:value-of select="@Name" /></option>
+														</xsl:otherwise>
+														</xsl:choose>
+													</xsl:for-each>
+													</select>	
+												</td>
+											</tr>
+										</xsl:if>
+										
+										<xsl:if test="root/DOCUMENT/URLPARAMETERS/METHOD = 'props' or root/DOCUMENT/URLPARAMETERS/METHOD = 'folder'">
+											<tr>
+												<td align="right" width="150px"><span style="width:150px;align:right;">Folder:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span></td>
+			                  <td align="left">
+													<select name="FolderID" style="width:100%">
+													<xsl:if test="contains(/root/DOCUMENT/URLPARAMETERS/TICKETID,',')">
+														<option value="-1">
+														</option>
+													</xsl:if>
+														<option value="0"></option>
+													<xsl:for-each select="root/myfolders/folder">
+														<xsl:choose>
+															<xsl:when test="/root/Ticket/@FolderID = @id and not(contains(/root/DOCUMENT/URLPARAMETERS/TICKETID,','))">
+													 			<option selected="true" value="{@id}"><xsl:value-of select="name" /></option>
+															</xsl:when>
+															<xsl:otherwise>
+																<option value="{@id}"><xsl:value-of select="name" /></option>
+															</xsl:otherwise>
+														</xsl:choose>
+													</xsl:for-each>
+													</select> 
+												</td>
+											</tr>
+										</xsl:if>
+										<xsl:if test="not(contains(/root/DOCUMENT/URLPARAMETERS/TICKETID, ','))">
+											<xsl:if test="root/DOCUMENT/URLPARAMETERS/METHOD = 'props' or root/DOCUMENT/URLPARAMETERS/METHOD = 'subject'">
+												<tr>
+													<td align="right" width="150px" style="vertical-align:top;"><span style="width:150px;align:right;">Subject:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span></td>
+                          <td align="left">
+                              <input name="txtSubject" type="text" style="width:100%">
+															<xsl:attribute name="value"><xsl:value-of select="root/subject/@text"/>
+															</xsl:attribute>
+														</input>
+														<input name="chkSubject" type="checkbox"/>
+														Update the Subject of Messages in this Ticket
+													</td>
+												</tr>
+											</xsl:if>
+										</xsl:if>
+										<xsl:if test="root/DOCUMENT/URLPARAMETERS/METHOD = 'props' or root/DOCUMENT/URLPARAMETERS/METHOD = 'ticketbox'">
+											<tr>
+												<td align="right" width="150px"><span style="width:150px;align:right;">TicketBox:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span></td>
+                        <td align="left">
+                          <select onchange="docUpdateCustomFields();" name="TicketBoxID" style="width:100%;">
+													<xsl:if test="contains(/root/DOCUMENT/URLPARAMETERS/TICKETID,',')"><option value="-1"></option></xsl:if>
+													<xsl:for-each select="root/TicketBoxNames/TicketBox">
+														<xsl:choose>
+														<xsl:when test="/root/Ticket/@TicketBoxID = @ID and not(contains(/root/DOCUMENT/URLPARAMETERS/TICKETID,','))">
+													 	<option selected="true" value="{@ID}"><xsl:value-of select="@Name" /></option>
+														</xsl:when>
+														<xsl:otherwise>
+														<option value="{@ID}"><xsl:value-of select="@Name" /></option>
+														</xsl:otherwise>
+														</xsl:choose>
+													</xsl:for-each>
+													</select> 
+												</td>
+											</tr>
+										</xsl:if>
+									
+										<xsl:if test="root/DOCUMENT/URLPARAMETERS/METHOD = 'props' or root/DOCUMENT/URLPARAMETERS/METHOD = 'category'">
+											<tr>
+												<td align="right" width="150px"><span style="width:150px;align:right;">TicketCategory:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span></td>
+	                      <td align="left">
+	                          <select name="TicketCategoryID" style="width:100%">
+													<xsl:if test="contains(/root/DOCUMENT/URLPARAMETERS/TICKETID,',')"><option value="-1"></option></xsl:if>
+													<xsl:for-each select="/root/TicketCategoryNames/TicketCategory">
+														<xsl:choose>
+														<xsl:when test="/root/Ticket/@TicketCategoryID = @ID and not(contains(/root/DOCUMENT/URLPARAMETERS/TICKETID,','))">
+													 	<option selected="true" value="{@ID}"><xsl:value-of select="@Description" /></option>
+														</xsl:when>
+														<xsl:otherwise>
+														<option value="{@ID}"><xsl:value-of select="@Description" /></option>
+														</xsl:otherwise>
+														</xsl:choose>
+													</xsl:for-each>
+													</select> 
+												</td>
+											</tr>
+										</xsl:if>
+									
+										<xsl:if test="root/DOCUMENT/URLPARAMETERS/METHOD = 'props' or root/DOCUMENT/URLPARAMETERS/METHOD = 'priority'">
+											<tr>
+												<td align="right" width="150px"><span style="width:150px;align:right;">Priority:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span></td>
+                        <td align="left">
+                            <select name="PriorityID" style="width:100%">
+													<xsl:if test="contains(/root/DOCUMENT/URLPARAMETERS/TICKETID,',')"><option value="-1"></option></xsl:if>
+													<xsl:for-each select="root/TicketPriorities/Priority[@ID!=2 and @ID !=4]">
+														<xsl:choose>
+														<xsl:when test="/root/Ticket/@PriorityID = @ID and not(contains(/root/DOCUMENT/URLPARAMETERS/TICKETID,','))">
+													 	<option selected="true" value="{@ID}"><xsl:value-of select="@Description" /></option>
+														</xsl:when>
+														<xsl:otherwise>
+														<option value="{@ID}"><xsl:value-of select="@Description" /></option>
+														</xsl:otherwise>
+														</xsl:choose>
+													</xsl:for-each>
+													</select>	
+												</td>
+											</tr>
+										</xsl:if>
+									
+										<xsl:if test="root/DOCUMENT/URLPARAMETERS/METHOD = 'props' or root/DOCUMENT/URLPARAMETERS/METHOD = 'state'">
+											<tr>
+												<td align="right" width="150px"><span style="width:150px;align:right;">State:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span></td>
+                        <td align="left">
+                            <select name="StateID" style="width:100%" onchange="CheckDisabled()">
+														<xsl:if test="contains(/root/DOCUMENT/URLPARAMETERS/TICKETID,',')">
+														<option value="-1"></option>
+														</xsl:if>
+													<xsl:for-each select="root/TicketStates/State">
+														<xsl:if test="@ID != '5' and @ID != '6'">
+															<xsl:choose>
+															<xsl:when test="/root/Ticket/@StateID = @ID and not(contains(/root/DOCUMENT/URLPARAMETERS/TICKETID,','))">
+														 	<option selected="true" value="{@ID}"><xsl:value-of select="@Description" /></option>
+															</xsl:when>
+															<xsl:otherwise>
+															<option value="{@ID}"><xsl:value-of select="@Description" /></option>
+															</xsl:otherwise>
+															</xsl:choose>
+														</xsl:if>
+													</xsl:for-each>
+													</select>	
+												</td>
+											</tr>
+										</xsl:if>
+										<xsl:if test="root/DOCUMENT/URLPARAMETERS/METHOD = 'props'">
+										    <tr id="CustomFieldsOff" style="display:none;">																	
+			                    <td height="100%" width="100%" colspan="2" style="padding-left:5px;" id="menuButton" title="Click to display CustomFields" onclick="docShowCustomFields();">
+													<nobr>
+													<img src="images/ico_transparent.gif" width="6" height="6" border="0" alt="Click to display CustomFields"/>
+													<img src="images/ico_arrow6x.gif" width="6" height="6" border="0" alt="Click to display CustomFields"/>
+													<img src="images/ico_arrow6x.gif" width="6" height="6" border="0" alt="Click to display CustomFields"/>
+													<img src="images/ico_transparent.gif" width="6" height="6" border="0" alt="Click to display CustomFields"/>						
+													</nobr>
+													</td>																					
+                        </tr>
+                    </xsl:if>
+                      </table>
+                      <xsl:if test="root/DOCUMENT/URLPARAMETERS/METHOD = 'props'">
+                        <table class="menuColor" width="100%" cellpadding="1" cellspacing="0" border="0">
+                            <tbody id="tCustomFields"></tbody>
+                        </table>
+                      </xsl:if>															
+                      <table class="menuColor" width="100%" cellpadding="0" cellspacing="0" border="0">																																																
+                        <xsl:if test="root/DOCUMENT/URLPARAMETERS/METHOD = 'props'">
+                        <tr id="CustomFieldsOn">																	
+                          <td height="100%" width="100%" colspan="2" style="padding-left:5px;" id="menuButton" title="Click to hide Custom Fields" onclick="docShowCustomFields();">
+													<nobr>
+													<img src="images/ico_transparent.gif" width="6" height="6" border="0" alt="Click to hide CustomFields"/>
+													<img src="images/ico_arrow6x_up.gif" width="6" height="6" border="0" alt="Click to hide CustomFields"/>
+													<img src="images/ico_arrow6x_up.gif" width="6" height="6" border="0" alt="Click to hide CustomFields"/>
+													<img src="images/ico_transparent.gif" width="6" height="6" border="0" alt="Click to hide CustomFields"/>						
+													</nobr>
+												</td>			                                    																	
+		                                    </tr>
+		                                   </xsl:if>
+										<xsl:if test="root/DOCUMENT/URLPARAMETERS/METHOD = 'props' or root/DOCUMENT/URLPARAMETERS/METHOD = 'close' or root/DOCUMENT/URLPARAMETERS/METHOD = 'state'">
+											<xsl:if test="root/Ticket/@usetickler = '1'">
+											<tr>
+											<td align="left" style="width:100%;padding-top:5px;" colspan="2">This ticket is set to reopen on:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="/root/Ticket/@reopentime"/></td>
+											</tr>
+											</xsl:if>
+											<tr>
+                        <td align="left" style="width:100%;padding-top:5px;" colspan="2">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                  <td align="left" width="90px">
+                                      <input name="chkUseTickler" type="checkbox" onclick="CheckDisabled()">
+													            <xsl:if test="root/Ticket/@usetickler = '1'">
+														            <xsl:attribute name="checked">'checked'</xsl:attribute>
+													            </xsl:if>
+													            </input>
+													            Reopen on:
+                                  </td>
+                                 <td id="ticklercell" width="160px">
+												            <script type="text/javascript">
+													            var tickler = 0;
+													            <xsl:if test="/root/Ticket/@usetickler = 1">
+														            tickler = 1;
+													            </xsl:if>
+          														
+													            var start = new Date();
+													            if(tickler = 1)
+													            {						
+														            var odate = "<xsl:value-of select="/root/Ticket/@reopentime"/>";
+														            if(odate)
+														            {
+															            if(odate != "NULL")
+																            start = new Date(odate);
+															            else
+																            start.setDate(start.getDate() + 1);
+														            }
+														            else
+														            {
+															            start.setDate(start.getDate() + 1);
+														            }
+													            }
+													            else
+														            start.setDate(start.getDate() + 1);
+          															
+													            var objCreateTicklerDate = new DatePicker(start);
+													            document.getElementById("ticklercell").appendChild(objCreateTicklerDate.create("REOPEN_DATE"));
+												            </script>
+											            </td>
+											            <td>
+																	<select name="OpenHr">
+																		<option>
+																			<xsl:attribute name="value">1</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenHr = 1">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			01
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">2</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenHr = 2">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			02
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">3</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenHr = 3">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			03
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">4</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenHr = 4">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			04
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">5</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenHr = 5">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			05
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">6</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenHr = 6">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			06
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">7</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenHr = 7">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			07
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">8</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenHr = 8">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>																			
+																			08
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">9</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenHr = 9">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			09
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">10</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenHr = 10">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			10
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">11</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenHr = 11">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			11
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">12</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenHr = 12 or /root/Ticket/@OpenHr = 0">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			12
+																		</option>
+																	</select>
+																	<select name="OpenMin">
+																		<option>
+																			<xsl:attribute name="value">0</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenMin = 0">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>																		
+																			00
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">15</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenMin = 15">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			15
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">30</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenMin = 30">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			30
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">45</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenMin = 45">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			45
+																		</option>
+																	</select>
+																	<select name="OpenAmPm">
+																		<option>
+																			<xsl:attribute name="value">1</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenAmPm = 1">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>																			
+																			AM
+																		</option>
+																		<option>
+																			<xsl:attribute name="value">2</xsl:attribute>
+																			<xsl:if test="/root/Ticket/@OpenAmPm = 2">
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			</xsl:if>
+																			PM
+																		</option>
+																	</select>
+																	</td>											            
+                                </tr>
+                            </table>				
+                        </td>
+											</tr>																
+										</xsl:if>
+											<tr>
+												<td colspan="2" style="padding-top:5px;">
+													<nobr style="padding-left:1px;">Note:
+														<span style="font-weight:normal">(optional)</span>
+													</nobr>
+													<br/>
+													<textarea name="note" style="width:100%;height:150px;"></textarea>
+												</td>
+											</tr>													
+									</table>
+									</form>
+									</div>									
+									</td>
+									</tr>
+							</table>						
+						</td>
+					</tr>
+				</table>						
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+</table>
+<script type="text/javascript">
+	CheckDisabled();
+	CheckOwner();
+	if ( glo_whichBrowser() == "Internet Explorer" )
+	{
+		var elm = document.getElementById("ownerTD");
+		if ( elm ){ elm.width = "100%"; }
+	}
+	<xsl:if test="root/DOCUMENT/URLPARAMETERS/METHOD = 'props'">
+	    setTimeout("docUpdateCustomFields()",500);
+	</xsl:if>
+</script>
+</body>
+</html>
+
+</xsl:template>
+</xsl:stylesheet>

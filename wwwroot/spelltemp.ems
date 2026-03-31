@@ -1,0 +1,123 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+		<HTML>
+		<HEAD>
+			<TITLE>Checking Spelling</TITLE>
+			<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+			<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"></SCRIPT>
+			<script language="javascript">
+				gServerName = '<xsl:value-of select="/root/DOCUMENT/servername"/>';
+				gUseHttps = <xsl:value-of select="/root/DOCUMENT/usehttps"/>;
+				var s = "";
+				var dArg = null;
+	 			try
+	 			{
+		 			if (window.dialogArguments)
+		 			{
+						dArg = window.dialogArguments;
+					}
+					else if(window.opener)
+					{
+						dArg = window.opener;
+					}
+					else if(parent.window.opener)
+					{
+						dArg = parent.window.opener;
+					}
+					else
+					{
+						alert("Spell check failed!");
+						glo_doClose();
+					}
+				}
+				catch(e)
+				{
+					alert("Spell check failed!");
+					glo_doClose();
+				}
+				 
+				function getBody()
+				{
+					<xsl:choose>
+						<xsl:when test="/root/DOCUMENT/URLPARAMETERS/ISNOTE = '1'">
+							getNoteBody();
+						</xsl:when>
+						<xsl:otherwise>
+							getMsgBody();
+						</xsl:otherwise>
+					</xsl:choose>
+				}
+				
+				function getMsgBody()
+				{
+					s = dArg.editregion.innerText;
+					document.spell.ishtml.value = "0";
+					
+					var i = s.indexOf("-----Original Message-----");
+					if(dArg.document.forms["message"].elements)
+					{
+						var elms = dArg.document.forms["message"].elements;
+						for (var t = 0; t &lt; elms.length; t++)
+						{
+							var elmName = elms[t].name;
+							if ( elmName == "chkSpellOriginal" )
+							{
+								if ( elms[t].checked == false )
+								{
+									if(i != -1)
+										s = s.substring(0,i);
+								}
+							}
+						}						
+					}
+					document.spell.bodytext.value = s;
+					spell.submit();
+				}
+				
+				function getNoteBody()
+				{
+					s = dArg.tabularForm.note.value;
+					document.spell.ishtml.value = "0";
+					document.spell.bodytext.value = s;
+					spell.submit();
+				}
+			</script>
+
+
+		</HEAD>
+			<BODY LEFTMARGIN="0" RIGHTMARGIN="0" onload="getBody();" TOPMARGIN="0">
+
+	<div id="menusection">
+		<xsl:call-template name="default_titlebar">
+			<xsl:with-param name="title_text">
+			Spell Check
+			</xsl:with-param>
+		</xsl:call-template>
+	</div>
+			<table border="0" width="100%" cellpadding="1" cellspacing="0">
+				<tr>
+					<td class="largeFont">
+					<BR/>
+					<BR/>
+					<BR/>
+						Spell Checking message,<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;please wait...
+						<form name="spell" action="spellcheck.ems" method="post">						
+						<xsl:if test="/root/DOCUMENT/URLPARAMETERS/SEND"><xsl:attribute name="action">spellcheck.ems?send=true</xsl:attribute></xsl:if>
+						<xsl:if test="/root/DOCUMENT/URLPARAMETERS/ISNOTE = '1'"><xsl:attribute name="action">spellcheck.ems?isnote=1</xsl:attribute></xsl:if>
+						<xsl:if test="/root/DOCUMENT/URLPARAMETERS/DID">
+							<input type="hidden" name="did" value="{root/DOCUMENT/URLPARAMETERS/DID}"/>
+						</xsl:if>						
+							<input type="hidden" value="" name="bodytext"/>
+							<input type="hidden" value="" name="ishtml"/>
+						</form>
+					</td>
+				</tr>
+			</table>
+
+		</BODY>
+		</HTML>
+	</xsl:template>
+</xsl:stylesheet>

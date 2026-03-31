@@ -1,0 +1,306 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<xsl:variable name="readAccess">
+		<xsl:choose>
+			<xsl:when test="root/StdResponse/@Access = 2">Yes</xsl:when>
+			<xsl:when test="root/StdResponse/@Access = 3">Yes</xsl:when>
+			<xsl:when test="root/StdResponse/@Access = 4">Yes</xsl:when>
+			<xsl:otherwise>No</xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+	<xsl:variable name="editAccess">
+		<xsl:choose>
+			<xsl:when test="root/StdResponse/@Access = 3">Yes</xsl:when>
+			<xsl:when test="root/StdResponse/@Access = 4">Yes</xsl:when>
+			<xsl:otherwise>No</xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+	<xsl:variable name="deleteAccess">
+		<xsl:choose>
+			<xsl:when test="root/StdResponse/@Access = 4">Yes</xsl:when>
+			<xsl:otherwise>No</xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+
+	<html>
+	<head>
+	
+	<title>VisNetic MailFlow</title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script language="javascript">
+		function docNewResponse() {
+			var catId = "<xsl:value-of select="root/StdResponse/@CategoryID"/>";
+			location = "editstdresponse.ems?id=0&amp;categoryid="+catId;
+		}
+		function docEditResponse() {
+			var catId = "<xsl:value-of select="root/StdResponse/@CategoryID"/>";
+			location = "editstdresponse.ems?id=<xsl:value-of select="root/StdResponse/@ID"/>&amp;categoryid="+catId;
+		}
+		function docDelResponse() {
+			if(confirm("Are you sure you want to delete this response?")){
+				document.tabularForm.Action.value = "delete";
+				document.tabularForm.submit();
+				parent.frames.frameRightTop.location.href = parent.frames.frameRightTop.location;
+			}
+		}
+		function docAddResponseFav() {
+			document.tabularForm.Action.value = "addfavorite";
+			document.tabularForm.submit();
+		}
+		function docRemResponseFav() {
+			document.tabularForm.Action.value = "removefavorite";
+			document.tabularForm.submit();
+			
+		}
+		function docAdjPage() {
+			<xsl:choose>
+			<xsl:when test="root/StdResponse/@UpdateStdList = 1">
+				parent.frames.frameRightTop.location.href = parent.frames.frameRightTop.location;
+			</xsl:when>
+			<xsl:when test="root/StdResponse/@FavoriteMod = 1">
+				if (parent.frames.frameRightTop.location)
+				{
+					var strLocat = new String(parent.frames.frameRightTop.location);
+					if (strLocat.indexOf("stdresponselist.ems?id=-2")!=-1)
+					parent.frames.frameRightTop.location.href = parent.frames.frameRightTop.location;
+				}
+		
+			</xsl:when>
+			</xsl:choose>
+		}
+		function docInsertResponse() {
+			srID = document.tabularForm.stdresponseid.value;
+			srName = "<xsl:value-of select="root/StdResponse/SubjectRaw" disable-output-escaping="yes" />"; //document.tabularForm.stdresponsesubject.value;
+			parent.insertSR(srID, srName);
+		}	
+		
+	</script>
+	</head>
+
+
+	<body style="border:0px" onload="glo_fixSrBody();">
+	<xsl:attribute name="callOnLoad">
+	<!-- <xsl:if test="root/StdResponse/@ID != '0'"> -->
+	docAdjPage();
+	<!-- </xsl:if> -->
+	</xsl:attribute>
+
+
+<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td style="width:100%">
+
+	<xsl:call-template name="default_titlebar">
+		<xsl:with-param name="title_text">
+		<xsl:value-of select="root/StdResponse/Subject" disable-output-escaping="yes" />
+		</xsl:with-param>
+	</xsl:call-template>
+
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+	<td style="height:32px" class="menubarx" nowrap="true">
+		<table style="height:100%" align="left" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+
+			<xsl:if test="$readAccess = 'Yes'">
+				<xsl:if test="root/StdResponse/@ID != '0' and root/StdResponse/@CategoryID != '1'">
+					<td height="100%">
+						<div xrequire="(parent.pageFrom != 'ticketboxlist.ems')" class="toolBar" id="toolButton" name="toolButton"  title="Insert Standard Response" onclick="docInsertResponse();">
+							<nobr>
+							<img src="images/ico_insertstandardresponse.gif" width="24" height="22" border="0" valign="bottom" alt="Insert Standard Response"/>Insert<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+							</nobr>							
+						</div>
+					</td>
+				</xsl:if>
+
+				<xsl:if test="$editAccess = 'Yes' or root/StdResponse/@CategoryID = '1'">
+					<td height="100%">
+						<div class="toolBar" id="toolButton" name="toolButton"  title="New Standard Response" onclick="docNewResponse();">
+							<nobr>
+							<img src="images/ico_new.gif" width="24" height="22" border="0" valign="bottom" alt="New Standard Response"/>New<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+							</nobr>	
+						</div>
+					</td>
+				</xsl:if>
+
+				<xsl:if test="root/StdResponse/@ID != '0' ">
+
+					<xsl:if test="$editAccess = 'Yes' or root/StdResponse/@DraftAccess = '1'">
+						<td height="100%">
+							<div class="toolBar" id="toolButton" name="toolButton"  title="Edit Standard Response" onclick="docEditResponse();">
+								<nobr>
+								<img src="images/ico_edit.gif" width="24" height="22" border="0" valign="bottom" alt="Edit Standard Response"/>Edit<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+								</nobr>							
+							</div>
+						</td>
+					</xsl:if>
+
+					<xsl:if test="$deleteAccess = 'Yes' or root/StdResponse/@DraftAccess = '1' or /root/user/isadmin = '1'">
+						<td height="100%">
+							<div class="toolBar" id="toolButton" name="toolButton"  title="Delete Standard Response" onclick="docDelResponse();">
+								<nobr>
+								<img src="images/ico_delete.gif" width="24" height="22" border="0" valign="bottom" alt="Delete Standard Response"/>Delete<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+								</nobr>							
+							</div>
+						</td>
+					</xsl:if>
+
+					<xsl:choose>
+						<xsl:when test="root/StdResponse/@IsFavorite = '0' and root/StdResponse/@CategoryID != '1'">
+							<td height="100%">
+								<div class="toolBar" id="toolButton" name="toolButton"  title="Add to My Favorites" onclick="docAddResponseFav();">
+									<nobr>
+									<img src="images/ico_addtofavorites.gif" width="24" height="22" border="0" valign="bottom" alt="Add to My Favorites"/>Add to My Favorites<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+									</nobr>							
+								</div>
+							</td>
+						</xsl:when>
+						<xsl:when test="root/StdResponse/@IsFavorite = '1'">
+							<td height="100%">
+								<div class="toolBar" id="toolButton" name="toolButton"  title="Remove from My Favorites" onclick="docRemResponseFav();">
+									<nobr>
+									<img src="images/ico_removefromfavorites.gif" width="24" height="22" border="0" valign="bottom" alt="Remove from My Favorites"/>Remove from My Favorites<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+									</nobr>
+								</div>
+							</td>
+						</xsl:when>
+					</xsl:choose>
+				</xsl:if>
+
+			</xsl:if>
+						
+			<td height="100%">										
+				<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('my_shortcuts/standard_responses/introduction.htm');">
+					<nobr>
+					<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom" alt="Show Help"/>Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+					</nobr>
+				</div>											
+			</td>
+		</tr>
+		</table>
+	</td>
+	</tr>
+	</table>
+</td>
+</tr>
+
+<tr>
+<td style="height:100%;width:100%;overflow:hidden;vertical-align:top">
+<div style="width:100%;height:100%;overflow:auto">
+	
+	<xsl:if test="root/StdResponse/@ID != '0'">
+		<table style="width:100%;" border="0" cellspacing="0" cellpadding="0">
+		<form name="tabularForm" method="post" action="">
+		<input type="hidden" name="ID" value="{root/StdResponse/@ID}" />
+		<input type="hidden" name="Action" value="insert" />
+		<input type="Hidden" name="stdresponseid" value="{root/StdResponse/@ID}" />
+		<input type="Hidden" name="stdresponsesubject" value="{root/StdResponse/Subject}" />
+			<tr>
+				<td style="height:100%;width:100%;padding:10px;" align="center">
+					<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+						<tr>
+							<td class="subheader"><nobr>Standard Response Content</nobr></td>
+						</tr>
+						<tr>
+							<td style="padding-left: 10px; padding-right:10px; background-color: white;">
+								<br/>
+								<div id="srbody">
+									<xsl:value-of select="root/StdResponse/Body" disable-output-escaping="yes" />
+								</div>
+								<br/>
+								<br/>
+							</td>
+						</tr>
+						<tr>
+							<td><br/></td>
+						</tr>
+						<xsl:if test="root/Attachment">
+						<tr>
+							<td class="subheader">Attachments</td>
+						</tr>
+							<xsl:for-each select="root/Attachment">
+							<tr>
+								<td style="padding-left: 15px;padding-top:3px;">
+									<img src="images/ico_attach_16.gif" border="0" align="bottom"/>  
+									<xsl:value-of select="FileName" />
+								</td>
+							</tr>
+							</xsl:for-each>
+						<tr>
+							<td><br/></td>
+						</tr>
+						</xsl:if>
+						<tr>
+							<td class="subheader">Notes</td>
+						</tr>
+						<tr>
+							<td style="padding-left: 10px;">
+								<br/>
+								<xsl:value-of select="root/StdResponse/Note" disable-output-escaping="yes" />
+								<br/>
+								<br/>
+							</td>
+						</tr>
+						<tr>
+							<td><br/></td>
+						</tr>
+						
+						<tr>
+							<td class="subheader">Keywords</td>
+						</tr>
+						<tr>
+							<td style="padding-left: 10px;">
+								<br/>
+								<xsl:value-of select="root/StdResponse/keyword/keywords" disable-output-escaping="yes" />
+								<br/>
+								<br/>
+							</td>
+						</tr>
+						<tr>
+							<td><br/></td>
+						</tr>
+						
+						<tr>
+							<td class="subheader">Details</td>
+						</tr>
+						<tr>
+							<td	style="padding-left: 10px;padding-top:5px;">
+								<table BORDER="0" CELLSPACING="0" CELLPADDING="0">
+									<tr>
+										<td align="right"><nobr>Last Modified:</nobr></td>
+										<td style="padding-left:20px;"><nobr><xsl:value-of select="root/StdResponse/@LastModified"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;(<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/StdResponse/@ModifiedBy"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;)</nobr></td>
+									</tr>
+									<tr>
+										<td align="right">Created:</td>
+										<td style="padding-left:20px;"><nobr><xsl:value-of select="root/StdResponse/@DateCreated"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;(<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/StdResponse/@Author"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;)</nobr></td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td><br/></td>
+						</tr>
+						<tr>
+							<td><br/></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</form>
+		</table>
+	</xsl:if>
+
+</div>
+</td>
+</tr>
+</table>
+	
+</body>
+</html>
+
+</xsl:template>
+</xsl:stylesheet>

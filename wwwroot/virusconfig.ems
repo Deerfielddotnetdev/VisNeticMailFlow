@@ -1,0 +1,222 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+<html>
+<head>
+	
+
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript">
+		function docSubmit(formName)
+		{
+			var postResults = glo_buildFormPost(formName);
+			var proceed = postResults[0];
+			if (proceed==true)
+			{
+				document.location.reload();
+			}
+		}
+		function docChgEnable()
+		{
+			try {chgEnabled()}
+			catch(e){}
+		}
+		function chgEnabled()
+		{
+			if (document.tabularForm &amp;&amp; document.tabularForm.IsEnabled)
+			{
+				var enabled = (document.tabularForm.IsEnabled[0].checked)? true:false;
+				var fields = new Array();
+					fields[fields.length] = document.tabularForm.VirusFoundAction;
+					fields[fields.length] = document.tabularForm.SuspiciousAction;
+					fields[fields.length] = document.tabularForm.UnscannableAction;
+					fields[fields.length] = document.tabularForm.QuarantineFolder;
+					glo_disableForm(enabled,fields);
+			}
+		}
+	</script>
+</head>
+
+<body callonload="docChgEnable()">
+	
+<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td style="width:100%">
+
+	<xsl:call-template name="default_titlebar">
+		<xsl:with-param name="title_text">
+		<xsl:value-of select="root/DOCUMENT/TITLE"/>
+		</xsl:with-param>
+	</xsl:call-template>
+	
+	<table width="100%" align="center" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td style="height:32px" class="menubarx" nowrap="true">
+				<table style="height:100%" align="left" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td height="100%">					
+							<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+							 title="Save Configuration" onclick="docSubmit('tabularForm')"
+							  >
+								<nobr>
+									<img src="images/ico_save.gif" width="24" height="22" border="0"/>
+									Save
+								</nobr>
+							  </div>
+						</td>
+						<td height="100%">					
+							<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+							 title="Show Help" onclick="openHelp('Administration/Virus_Scanning/Settings.htm')"
+							  >
+								<nobr>
+									<img src="images/ico_help.gif" width="24" height="22" border="0"/>
+									Help
+								</nobr>
+							  </div>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</td>
+</tr>
+
+<tr>
+<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+<div style="width:100%;height:100%;overflow:auto">
+	<table style="width:100%;padding:10px" border="0" cellspacing="0" cellpadding="0"><tr><td>
+
+				<table width="100%" align="left" border="0" cellspacing="0" cellpadding="0">
+				<form name="tabularForm" method="post" action="">
+					<input type="hidden" name="Action" value="update" />
+					<tr>
+						<td class="subheader" colspan="2">AntiVirus Configuration</td>
+					</tr>
+					<tr><td height="20" colspan="2"></td></tr>
+					<tr>
+						<td style="padding-left:10px;">Enabled</td>
+						<td style="padding-left:10px;">
+							<input type="Radio" name="IsEnabled" value="1" onclick="chgEnabled();">
+							<xsl:if test="/root/VirusScanConfig/@Enable = 1 and /root/VirusScanConfig/@Installed = 1"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+							<xsl:if test="/root/VirusScanConfig/@Installed = 0"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+							</input>Yes
+							<input type="Radio" name="IsEnabled" value="0" onclick="chgEnabled();">
+							<xsl:if test="root/VirusScanConfig/@Enable = 0 or /root/VirusScanConfig/@Installed = 0"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+							</input>No
+						</td>
+					</tr>
+					<tr><td height="20" colspan="2"></td></tr>
+					<tr>
+						<td style="padding-left:10px;">If File Cannot be Scanned</td>
+						<td style="padding-left:10px;" valign="bottom">
+							<select name="UnscannableAction">
+					<xsl:variable name="CurUnscannableActionId" select="/root/VirusScanConfig/@UnscannableAction" />
+					<xsl:for-each select="root/OtherVirusScanActions/Action">
+						<xsl:choose>
+							<xsl:when test="@ID = $CurUnscannableActionId">
+								<option>
+								<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+								<xsl:attribute name="selected">true</xsl:attribute>
+								<xsl:value-of select="@Description"/>
+								</option>
+							</xsl:when>
+							<xsl:otherwise>
+								<option>
+								<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+								<xsl:value-of select="@Description"/>
+								</option>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:for-each>
+							</select><span style="padding-left:15px;">File</span>
+						</td>
+					</tr>
+					<tr><td height="20" colspan="2"></td></tr>
+					<tr>
+						<td style="padding-left:10px;">If File is Suspicious</td>
+						<td style="padding-left:10px;" valign="bottom">
+							<select name="SuspiciousAction">
+					<xsl:variable name="CurSuspiciousActionId" select="/root/VirusScanConfig/@SuspiciousAction" />
+					<xsl:for-each select="root/OtherVirusScanActions/Action">
+						<xsl:choose>
+							<xsl:when test="@ID = $CurSuspiciousActionId">
+								<option>
+								<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+								<xsl:attribute name="selected">true</xsl:attribute>
+								<xsl:value-of select="@Description"/>
+								</option>
+							</xsl:when>
+							<xsl:otherwise>
+								<option>
+								<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+								<xsl:value-of select="@Description"/>
+								</option>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:for-each>
+							</select><span style="padding-left:15px;">File</span>
+						</td>
+					</tr>
+
+					<tr><td height="20" colspan="2"></td></tr>
+					<tr>
+						<td style="padding-left:10px;">If Virus Found</td>
+						<td style="padding-left:10px;" valign="bottom">
+							<select name="VirusFoundAction">
+							<xsl:variable name="CurActionId" select="root/VirusScanConfig/@Action" />
+							<xsl:for-each select="root/VirusScanActions/Action">
+								<xsl:choose>
+									<xsl:when test="@ID = $CurActionId">
+										<option>
+										<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+										<xsl:attribute name="selected">true</xsl:attribute>
+										<xsl:value-of select="@Description"/>
+										</option>
+									</xsl:when>
+									<xsl:otherwise>
+										<option>
+										<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+										<xsl:value-of select="@Description"/>
+										</option>
+									</xsl:otherwise>
+								</xsl:choose>
+							</xsl:for-each>
+							</select><span style="padding-left:15px;">Infected File</span>
+						</td>
+					</tr>
+					<tr><td height="20" colspan="2"></td></tr>
+					<tr>
+						<td style="padding-left:10px;">Quarantine Path</td>
+						<td style="padding-left:10px;">
+							<input size="50" type="text" name="QuarantineFolder" value="{root/VirusScanConfig/@QuarantineFolder}"/>
+						</td>
+					</tr>
+					<tr><td height="20" colspan="2"></td></tr>
+					<tr>
+						<td style="padding-left:10px;" colspan="2">
+						Note:<br/>
+						<ul>
+						<li>Options apply only to message attachments.  Infected message bodies will always be deleted immediately.</li>
+						<li>Attachment files that cannot be quarantined will be deleted.</li>
+						<li>Attachment files that cannot be cleaned will be deleted.</li>
+						</ul>
+						</td>
+					</tr>
+				</form>
+				</table>
+
+				</td></tr></table>
+			</div>
+			</td>
+		</tr>
+	</table>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

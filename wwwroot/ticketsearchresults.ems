@@ -1,0 +1,1342 @@
+﻿<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN" indent="yes" />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+<html>
+<head>
+	
+<title>
+<xsl:choose>
+<xsl:when test="root/DOCUMENT/URLPARAMETERS/TICKETLINK = '1'">
+Tickets Linked to TicketID [<xsl:value-of select="root/DOCUMENT/URLPARAMETERS/TICKETID" />]
+</xsl:when>
+<xsl:when test="root/DOCUMENT/URLPARAMETERS/TICKETLINK = '2'">
+Tickets In Ticket Link [<xsl:value-of select="root/LinkTicket/@LinkName" />]
+</xsl:when>
+<xsl:otherwise>
+<xsl:value-of select="root/DOCUMENT/TITLE"/>
+</xsl:otherwise>
+</xsl:choose>
+</title>
+<link rel="stylesheet" type="text/css" href="{root/user/stylesheetname}"></link>
+<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script> 
+<script type="text/javascript" language="javascript" src="./javascript/keycode.jmf"></script>
+<script type="text/javascript" language="javascript" src="./javascript/rcmenu.jmf"></script>
+<script type="text/javascript" language="javascript" src="./javascript/ticketlist.jmf"></script>
+<script type="text/javascript" language="javascript" src="./javascript/messageimagepreload.jmf"></script>
+<script type="text/javascript" language="javascript" src="./javascript/listcontroller.jmf"></script>
+<script type="text/javascript" language="javascript" src="./javascript/listcontrollerrows.jmf"></script>
+<script type="text/javascript" language="javascript" src="./javascript/ticketmsgobjects.jmf"></script>
+<script type="text/javascript" language="javascript" src="./javascript/objecttree.jmf"></script>
+<script type="text/javascript" language="javascript" src="./javascript/xmenucontroller.jmf"></script>
+<script type="text/javascript" language="javascript" src="./javascript/resize_handle.jmf"></script>
+<script type="text/javascript" language="javascript">
+		
+/* global variables */ 
+var Tickets = new Array();
+
+var ticketboxid = ('<xsl:value-of select="/root/TicketBoxItemList/@TicketBoxID"/>' == '')? 0 : '<xsl:value-of select="/root/TicketBoxItemList/@TicketBoxID"/>';
+var ticketboxview = ('<xsl:value-of select="/root/TicketBoxItemList/@TicketBoxView"/>' == '')? 0 : '<xsl:value-of select="/root/TicketBoxItemList/@TicketBoxView"/>';
+var usecustomview = ('<xsl:value-of select="/root/TicketBoxItemList/@customviewid"/>' == '')? 0 : '<xsl:value-of select="/root/TicketBoxItemList/@customviewid"/>';
+var currentpage = '<xsl:value-of select="root/Page/@Current"/>';
+var changeTicketMsgId = ('<xsl:value-of select="root/ChangeTicket/@MsgID" />' == '')? 0 : '<xsl:value-of select="root/ChangeTicket/@MsgID" />';
+var changeTicketMsgType = '<xsl:value-of select="root/ChangeTicket/@MsgType" />';
+var changeTicketBoxView = '<xsl:value-of select="root/DOCUMENT/URLPARAMETERS/MSGTICKETBOXVIEW" />';
+var changeTicketShowDest = '<xsl:value-of select="root/DOCUMENT/URLPARAMETERS/MSGSHOWDEST" />';
+var changeTicketMergeId = '<xsl:value-of select="root/MergeTicket/@MergeID" />';
+var changeTicketLinkId = '<xsl:value-of select="root/LinkTicket/@LinkID" />';
+var changeTicketLinkName = '<xsl:value-of select="root/LinkTicket/@LinkName" />';
+var changeTicketLinkTbView = '<xsl:value-of select="root/LinkTicket/@LinkTbView" />';
+var sFileName = '<xsl:value-of select="root/DOCUMENT/FILENAME"/>';
+var evt;
+
+var usePreview = <xsl:value-of select="/root/user/usepreviewpane"/>;
+<xsl:if test = "/root/user/showmessagesinbound = 1">
+	var defaultMsgView = 'sequence';
+</xsl:if>
+<xsl:if test = "/root/user/showmessagesinbound = 0">
+	var defaultMsgView = 'threaded';
+</xsl:if>
+var ticketdblclick = <xsl:value-of select="/root/user/defaultticketdblclick"/>;
+var expclick = false;
+var xmlhttp = glo_createXMLhttpObject();	
+
+function doReload()
+{
+	glo_doReload('ListDivider',window.location.href);
+}
+
+function adjustColSpan()
+{
+	var listHead = document.getElementById("ListHeaderRow");
+	var arrTD = listHead.getElementsByTagName("TD");
+	var numCol = (arrTD.length);
+	var tblBot = document.getElementById("ListTableBot");
+	arrTD = tblBot.getElementsByTagName("TD");
+	for (var t = 0; t &lt; arrTD.length; t++)
+  {  
+      if(arrTD.item(t).getAttribute("id"))
+      {
+      	if(arrTD.item(t).getAttribute("id").indexOf("messagearea") != -1)
+      	{
+      		arrTD.item(t).colSpan = numCol;
+      	}
+      }
+  }
+	var tdReqOld = document.getElementById('tdReqGetOld');
+	if(tdReqOld)
+	{
+		tdReqOld.colSpan = numCol;
+	}
+	var trReqOld = document.getElementById('trReqGetOld');
+	if(trReqOld)
+	{
+		for (var i = 0; i &lt; numCol; i++)
+		{
+			var x=document.getElementById('trReqGetOld').insertCell(0);
+			x.innerHTML="<br />";
+		}
+	}
+	var tdNoTick = document.getElementById('tdNoTickets');
+	if(tdNoTick)
+	{
+		tdNoTick.colSpan = numCol;
+	}
+	var trNoTick = document.getElementById('trNoTickets');
+	if(trNoTick)
+	{
+		for (var i = 0; i &lt; numCol; i++)
+		{
+			var x=document.getElementById('trNoTickets').insertCell(0);
+			x.innerHTML="<br />";
+		}
+	}
+}
+	
+function printTicket()
+{
+	if(glo_isBtnDisabled()){return false;}
+	var singleSelected = (gloListControl.ActiveRows.length == 1)? true:false;
+	var ticketID = 0;
+	if(singleSelected)
+	{
+		var oTicket = Tickets[gloListControl.thisRow._index];
+		if(oTicket)
+		{
+			ticketID = oTicket.ticketid;
+			
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+	
+	var urlStr = './modalframe.ems?file=printticketselect.ems&amp;ticketid='+ticketID;
+	glo_launchModalWindow(urlStr, 400, 300, 'yes', 'no', 'no');			
+}
+
+function hideLeft()
+{
+	window.setTimeout('setLeft(0);',100);
+}
+
+function setLeft(numCols)
+{
+	parent.document.getElementById("complainer").cols = numCols + ",100%";
+}
+		
+function Escalate()
+{
+	document.tabularForm.Action.value='escalate';
+	docSubmit();
+}
+
+function redefineSearch()
+{
+	var newLoc = "ticketsearch.ems";
+	newLoc = newLoc + document.location.search;
+	newLoc = newLoc.replace("Action=search","Action=redefinesearch");
+	document.location = newLoc;
+}	
+
+function docDoThis()
+{
+	var newLoc = "ticketsearch.ems";
+	newLoc = newLoc + document.location.search;
+	newLoc = newLoc.replace("Action=search","Action=redefinesearch");
+	document.location = newLoc;
+}	
+
+function rightClick(tabIndex)
+{
+	if(gloListControl.ActiveRows.length == 0)
+	{
+		gloListControl.listRowClick(event);
+	}
+	else if(gloListControl.ActiveRows.length == 1)
+	{
+		if(gloListControl.thisRow._index != tabIndex)
+		{
+			gloListControl.listRowClick(event);
+		}
+	}
+	else
+	{
+		var isSelected = gloListControl.hasRow(tabIndex)
+		if(!isSelected)
+		
+		{
+			gloListControl.listRowClick(event);
+		}
+	}
+	init();
+return false;
+}
+function UpdateTicketToRead()
+{
+	if(glo_isBtnDisabled()){return false;}		
+	var singleSelected = (gloListControl.ActiveRows.length == 1)? true:false;
+	if(singleSelected)
+	{
+		var oTicket = Tickets[gloListControl.thisRow._index];
+		if(oTicket)
+		{
+			var ticketID = oTicket.ticketid;
+			var rowID = oTicket.rowId;
+			var numMsgs = oTicket.msgcount;
+			var numAttach = oTicket.attachcount;
+			var numNotes = oTicket.notecount;
+			updateTicketRead(ticketID, rowID, numMsgs, numNotes, 1);
+		}
+	}
+	else
+	{
+		for (var i = 0; i &lt; gloListControl.ActiveRows.length; i++)
+		{
+			var oTicket = Tickets[gloListControl.ActiveRows[i]];
+			if(oTicket)
+			{
+				var ticketID = oTicket.ticketid;
+				var rowID = oTicket.rowId;
+				var numMsgs = oTicket.msgcount;
+				var numAttach = oTicket.attachcount;
+				var numNotes = oTicket.notecount;
+				updateTicketRead(ticketID, rowID, numMsgs, numNotes, 1);
+			}
+		}
+	}
+parent.frames.menu.updateTicketCount();
+glo_doReload('ListDivider');
+}
+function UpdateTicketToUnRead()
+{
+	if(glo_isBtnDisabled()){return false;}
+	var singleSelected = (gloListControl.ActiveRows.length == 1)? true:false;
+	if(singleSelected)
+	{
+		var oTicket = Tickets[gloListControl.thisRow._index];
+		if(oTicket)
+		{
+			var ticketID = oTicket.ticketid;
+			var rowID = oTicket.rowId;
+			var numMsgs = oTicket.msgcount;
+			var numAttach = oTicket.attachcount;
+			var numNotes = oTicket.notecount;
+			updateTicketRead(ticketID, rowID, numMsgs, numNotes, 0);
+		}
+	}
+	else
+	{
+		for (var i = 0; i &lt; gloListControl.ActiveRows.length; i++)
+		{
+			var oTicket = Tickets[gloListControl.ActiveRows[i]];
+			if(oTicket)
+			{
+				var ticketID = oTicket.ticketid;
+				var rowID = oTicket.rowId;
+				var numMsgs = oTicket.msgcount;
+				var numAttach = oTicket.attachcount;
+				var numNotes = oTicket.notecount;
+				updateTicketRead(ticketID, rowID, numMsgs, numNotes, 0);
+			}
+		}
+	}
+parent.frames.menu.updateTicketCount();
+glo_doReload('ListDivider');
+}
+function UpdateUnReadMsg(ticketID)
+{
+	updateTicketAndMsgToRead(ticketID, 0);
+}
+function UpdateReadMsg(ticketID)
+{
+	updateTicketAndMsgToRead(ticketID,1);
+}
+function UpdateUnReadNote(ticketID, ticketNoteID)
+{
+	updateTicketAndNoteToRead(ticketID, ticketNoteID, 0);
+}
+function UpdateReadNote(ticketID, ticketNoteID)
+{
+	updateTicketAndNoteToRead(ticketID, ticketNoteID, 1);
+}
+function theEventHandler(e)
+	{
+	  if (!e)
+	    e = window.event;
+	    
+	  expclick = true;
+	
+		if(e.target)
+		{
+			var clickEvent = document.createEvent ("MouseEvent");
+	    clickEvent.initMouseEvent ("click", true, true, window, 0, 
+	                                e.screenX, e.screenY, e.clientX, e.clientY, 
+	                                e.ctrlKey, e.altKey, e.shiftKey, e.metaKey, 
+	                                0, null);
+	    if(glo_whichBrowser()=="Firefox")
+			{
+	    	evt = e;
+	    	e.target.parentElement.parentElement.parentElement.dispatchEvent (clickEvent);
+	    }
+	    else
+	    {
+	    	e.target.parentElement.parentElement.dispatchEvent (clickEvent);
+	    }
+	    
+	    var dblclickEvent = document.createEvent ("MouseEvent");
+	    dblclickEvent.initMouseEvent ("dblclick", true, true, window, 0, 
+	                                e.screenX, e.screenY, e.clientX, e.clientY, 
+	                                e.ctrlKey, e.altKey, e.shiftKey, e.metaKey, 
+	                                0, null);
+	    if(glo_whichBrowser()=="Firefox")
+			{
+	    	evt = e;
+	    	e.target.parentElement.parentElement.parentElement.dispatchEvent (dblclickEvent);
+	    }
+	    else
+	    {
+	    	e.target.parentElement.parentElement.dispatchEvent (dblclickEvent);
+	    }
+		}
+		else if(e.srcElement)
+		{
+			e.srcElement.parentElement.parentElement.click();
+		 	e.srcElement.parentElement.parentElement.fireEvent("ondblclick");
+		}
+			
+	 	if (e.stopPropagation)
+		{
+			e.stopPropagation();
+		}	
+	  else
+	  {
+	  	e.cancelBubble = true;
+	  }
+	}	
+</script>
+<style>
+	#men {
+	BORDER-RIGHT: 2px outset; BORDER-TOP: 2px outset; Z-INDEX: 1; LEFT: 0px; VISIBILITY: hidden; BORDER-LEFT: 2px outset; BORDER-BOTTOM: 2px outset; POSITION: absolute; TOP: 0px
+	}
+	#men A {
+	PADDING-RIGHT: 1px; PADDING-LEFT: 1px; PADDING-BOTTOM: 4px; MARGIN: 1px 1px 1px 16px; FONT: 12px sans-serif; WIDTH: 100%; PADDING-TOP: 3px; HEIGHT: 100%; TEXT-DECORATION: none
+	}
+	.ico {
+	BORDER-RIGHT: medium none; BORDER-TOP: medium none; FLOAT: left; BORDER-LEFT: medium none; BORDER-BOTTOM: medium none
+	}
+</style>
+</head>
+
+<body>
+<xsl:attribute name="callBeforeOnLoad">xMenuBuild();adjustColSpan();docInitListCols();</xsl:attribute>
+<xsl:attribute name="callOnLoad">createTickets();
+	<xsl:if test="/root/user/usepreviewpane = 1">
+		opensplit();		
+	</xsl:if>
+</xsl:attribute>
+<xsl:attribute name="callOnUnLoad">closesplit(true);</xsl:attribute>
+<form action="./ticketsearchresults.ems?CurrentPage={root/Page/@Current}&amp;TicketBoxView={root/TicketBoxItemList/@TicketBoxView}" method="post" name="tabularForm">
+<input type="hidden" value="" name="selectId">
+	<xsl:if test="/root/DOCUMENT/URLPARAMETERS/TICKET">
+		<xsl:attribute name="value"><xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/TICKET"/></xsl:attribute>
+	</xsl:if>
+</input>		
+<input type="hidden" value="" name="Action" />
+<input type="hidden" value="" name="ViewBy" />
+<input type="hidden" value="" name="SortBy" />
+<input type="hidden" value="" name="SortAscending" />
+
+<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td style="width:100%;">
+			<xsl:call-template name="default_titlebar">
+				<xsl:with-param name="title_text">
+				<xsl:value-of select="root/DOCUMENT/TITLE"/>
+				</xsl:with-param>
+			</xsl:call-template>
+						
+			
+			
+			<xsl:variable name="SortImage">
+				<xsl:choose>
+				<xsl:when test="root/TicketBoxItemList/@SortAscending = 1">/images/ico-sortasc.gif</xsl:when>
+				<xsl:otherwise>/images/ico-sortdesc.gif</xsl:otherwise>
+				</xsl:choose>
+			</xsl:variable>
+			
+			<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td style="height:32px;" class="menubarx" nowrap="true">
+						<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+							<tr>
+							<xsl:if test="not(root/DOCUMENT/URLPARAMETERS/NOCANCEL)">
+								<td height="100%">										
+									<div class="toolBar" id="toolButton" name="toolButton"  title="Redefine search criteria" onclick="docDoThis();">
+										<nobr>
+											<img src="images/ico_search.gif" width="24" height="22" border="0" valign="bottom" alt="Redefine search criteria"/>Redefine Search
+										</nobr>
+									</div>
+								</td>		
+								<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+							</xsl:if>
+								<td height="100%">										
+									<div class="toolBar" id="toolButton" name="toolButton"  title="Refresh" onclick="glo_doReload('ListHolder',window.location.href);">
+										<nobr>
+										<img src="images/ico_24x22_refresh.gif" width="24" height="22" border="0" valign="bottom" alt="Refresh"/>
+										</nobr>
+									</div>											
+								</td>
+								<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+								<td height="100%">										
+									<div class="toolBar" id="toolButton" name="toolButton"  title="Reset column widths" onclick="glo_resetColumns();glo_doReload('ListHolder',window.location.href);">
+										<nobr>
+											<img src="images/ico_resetcol.gif" width="24" height="22" border="0" valign="bottom" alt="Reset column widths"/>
+										</nobr>
+									</div>											
+								</td>		
+								<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+								
+							<xsl:if test="root/ChangeTicket/@MsgID != 0">
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length==1)" class="toolBar" id="toolButton" name="toolButton"  title="Select Destination Ticket" onclick="doChangeTicket();">
+										<nobr>
+											<img src="images/ico_selectdestinationticket.gif" width="24" height="22" border="0" valign="bottom" alt="Select destination ticket for ticket change"/>Select Destination Ticket
+										</nobr>
+									</div>											
+								</td>
+							</xsl:if>
+							<xsl:if test="root/MergeTicket/@MergeID">
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length==1)" class="toolBar" id="toolButton" name="toolButton"  title="Select Merge Ticket" onclick="doMergeTicket();">
+										<nobr>
+											<img src="images/ico_selectdestinationticket.gif" width="24" height="22" border="0" valign="bottom" alt="Select destination ticket for ticket merge"/>Select Merge Ticket
+										</nobr>
+									</div>											
+								</td>
+							</xsl:if>
+							<xsl:if test="root/LinkTicket/@LinkID">
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length==1)" class="toolBar" id="toolButton" name="toolButton"  title="Select Link Ticket" onclick="doLinkTicket();">
+										<nobr>
+											<img src="images/ico_selectlink.gif" width="24" height="22" border="0" valign="bottom" alt="Select destination ticket for ticket link"/>Select Link Ticket
+										</nobr>
+									</div>											
+								</td>
+							</xsl:if>
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length==1)" class="toolBar" id="toolButton" name="toolButton"  title="Displays the contact(s) associated with the selected ticket" onclick="ticketFunc('contact');">
+										<nobr>
+											<img src="images/ico_viewcontact.gif" width="24" height="22" border="0" valign="bottom" alt="Displays the contact(s) associated with the selected ticket"/>
+										</nobr>
+									</div>											
+								</td>									
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length==1)" class="toolBar" id="toolButton" name="toolButton"  title="Displays the ticket note editor for the selected ticket" onclick="ticketFunc('notes');">
+										<nobr>
+											<img src="images/ico_viewnotes.gif" width="24" height="22" border="0" valign="bottom" alt="Displays the ticket note editor for the selected ticket"/>
+										</nobr>
+									</div>											
+								</td>
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length==1)" class="toolBar" id="toolButton" name="toolButton"  title="Print the selected ticket" onclick="printTicket();">
+										<nobr>
+											<img src="images/ico_print.gif" width="24" height="22" border="0" valign="bottom" alt="Print the selected ticket"/>
+										</nobr>
+									</div>											
+								</td>
+
+								<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+								
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Assigns ownership of the selected ticket(s) to you.  The ticket(s) will be placed in your My Tickets folder." onclick="takeOwnership();">
+										<nobr>
+											<img src="images/ico_takeownership.gif" width="24" height="22" border="0" valign="bottom" alt="Assigns ownership of the selected ticket(s) to you.  The ticket(s) will be placed in your My Tickets folder."/>
+										</nobr>
+									</div>											
+								</td>
+									
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Reassign the selected ticket(s) to yourself or another agent" onclick="reassignTicket();">
+										<nobr>
+											<img src="images/ico_24x22_passowner.gif" width="24" height="22" border="0" valign="bottom" alt="Reassign the selected ticket(s) to yourself or another agent"/>
+										</nobr>
+									</div>											
+								</td>
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Move the selected ticket(s) to another TicketBox" onclick="moveTicket();">
+										<nobr>
+											<img src="images/ico_ticketmove.gif" width="24" height="22" border="0" valign="bottom" alt="Move the selected ticket(s) to another TicketBox"/>
+										</nobr>
+									</div>											
+								</td>
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Merge the selected ticket(s) with another ticket" onclick="mergeTicket(gloListControl.ActiveRows.length);">
+										<nobr>
+											<img src="images/ico_ticketmerge.gif" width="24" height="22" border="0" valign="bottom" alt="Merge the selected ticket(s) with another ticket"/>
+										</nobr>
+									</div>											
+								</td>
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Display Link options for the selected ticket(s)" onclick="linkTicket();">
+										<nobr>
+											<img src="images/ico_ticketlink.gif" width="24" height="22" border="0" valign="bottom" alt="Display Link options for the selected ticket(s)"/>
+										</nobr>
+									</div>
+								</td>
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Change the state of the selected ticket(s)" onclick="stateTicket();">
+										<nobr>
+											<img src="images/ico_ticket.gif" width="24" height="22" border="0" valign="bottom" alt="Change the state of the selected ticket(s)"/>
+										</nobr>
+									</div>											
+								</td>
+		
+								<xsl:if test = "not( /root/user/escalatetoagentid = '0' )" >
+									<td height="100%">										
+											<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Escalates the ticket(s) to the designated Agent or Escalation Group." onclick="escalate();">
+												<nobr>
+													<img src="images/ico_escalate.gif" width="24" height="22" border="0" valign="bottom" alt="Escalates the ticket(s) to the designated Agent or Escalation Group."/>
+												</nobr>
+											</div>											
+										</td>
+								</xsl:if>
+																										
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Displays the properties for the selected ticket(s)" onclick="ticketProps();">
+										<nobr>
+											<img src="images/ico_ticketproperties.gif" width="24" height="22" border="0" valign="bottom" alt="Displays the properties for the selected ticket(s)"/>
+										</nobr>
+									</div>											
+								</td>
+								
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="View Ticket in new window" onclick="viewTicket();">
+										<nobr>
+											<img src="images/ico_ticketview.gif" width="24" height="22" border="0" valign="bottom" alt="View Ticket in new window"/>
+										</nobr>
+									</div>											
+								</td>										
+									
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Mark all selected ticket items as read" onclick="UpdateTicketToRead();">
+										<nobr>
+											<img src="images/ico_ticket_read.gif" width="24" height="22" border="0" valign="bottom" alt="Mark all selected ticket items as read"/>
+										</nobr>
+									</div>											
+								</td>
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Mark all selected ticket items as unread" onclick="UpdateTicketToUnRead();">
+										<nobr>
+											<img src="images/ico_ticket_unread.gif" width="24" height="22" border="0" valign="bottom" alt="Mark all selected ticket items as unread"/>
+										</nobr>
+									</div>											
+								</td>
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Close the selected ticket(s)" onclick="closeTicket();">
+										<nobr>
+											<img src="images/ico_ok.gif" width="24" height="22" border="0" valign="bottom" alt="Close the selected ticket(s)"/>
+										</nobr>
+									</div>											
+								</td>
+
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Delete the selected ticket(s)" onclick="ticketFunc('delete');">
+										<nobr>
+											<img src="images/ico_delete.gif" width="24" height="22" border="0" valign="bottom" alt="Delete the selected ticket(s)"/>
+										</nobr>
+										<xsl:if test="/root/ChangeTicket">
+										<xsl:attribute name="xrequire">false</xsl:attribute>
+										</xsl:if>
+									</div>											
+								</td>
+								
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length==1)" class="toolBar" id="toolButton" name="toolButton"  title="Restore the selected ticket" onclick="ticketFunc('restore');">
+										<nobr>
+											<img src="images/ico_restoreTicket.gif" width="24" height="22" border="0" valign="bottom" alt="Restore the selected ticket"/>
+										</nobr>
+										<xsl:if test="/root/ChangeTicket">
+										<xsl:attribute name="xrequire">false</xsl:attribute>
+										</xsl:if>
+									</div>											
+								</td>
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Unlock the selected ticket(s)" onclick="ticketFunc('unlock');">
+										<nobr>
+											<img src="images/ico_unlockTicket.gif" width="24" height="22" border="0" valign="bottom" alt="Unlock the selected ticket(s)"/>
+										</nobr>
+										<xsl:if test="/root/ChangeTicket">
+										<xsl:attribute name="xrequire">false</xsl:attribute>
+										</xsl:if>
+									</div>											
+								</td>
+								<xsl:if test="root/DOCUMENT/URLPARAMETERS/TICKETLINK = '2'">
+								<td height="100%">										
+									<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Remove the Selected Ticket(s) from this Ticket Link" onclick="linkTicketAction('delTicketFromLink');">
+										<nobr>
+											<img src="images/ico_delfromlink.gif" width="24" height="22" border="0" valign="bottom" alt="Remove the Selected Ticket(s) from this Ticket Link"/>
+										</nobr>
+									</div>
+								</td>
+								</xsl:if>
+								<xsl:if test="/root/DOCUMENT/URLPARAMETERS/SORTBY">
+								<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+								
+								<td height="100%">
+									<xsl:variable name="SortDir">
+										<xsl:choose>
+										<xsl:when test="not(/root/DOCUMENT/URLPARAMETERS/SORTASCENDING)">Ascending</xsl:when>
+										<xsl:when test="/root/DOCUMENT/URLPARAMETERS/SORTASCENDING = 1">Ascending</xsl:when>
+										<xsl:otherwise>Descending</xsl:otherwise>
+										</xsl:choose>
+									</xsl:variable>
+									
+									<xsl:variable name="SortedBy">
+										<xsl:choose>
+										<xsl:when test="not(/root/DOCUMENT/URLPARAMETERS/SORTBY)">Date</xsl:when>
+										<xsl:when test="/root/DOCUMENT/URLPARAMETERS/SORTBY = '0'">Contact</xsl:when>
+										<xsl:when test="/root/DOCUMENT/URLPARAMETERS/SORTBY = '1'">Date</xsl:when>
+										<xsl:when test="/root/DOCUMENT/URLPARAMETERS/SORTBY = '2'">Subject</xsl:when>
+										<xsl:when test="/root/DOCUMENT/URLPARAMETERS/SORTBY = '3'">TicketBox</xsl:when>
+										<xsl:when test="/root/DOCUMENT/URLPARAMETERS/SORTBY = '4'">Ticket Category</xsl:when>
+										<xsl:when test="/root/DOCUMENT/URLPARAMETERS/SORTBY = '5'">Ticket ID</xsl:when>
+										<xsl:when test="/root/DOCUMENT/URLPARAMETERS/SORTBY = '6'">Ticket Priority</xsl:when>
+										<xsl:when test="/root/DOCUMENT/URLPARAMETERS/SORTBY = '7'">Ticket State</xsl:when>
+										</xsl:choose>
+									</xsl:variable>
+									Search Results Sorted By: <b><xsl:value-of select="$SortedBy"/> (<xsl:value-of select="$SortDir"/>)</b>
+								</td>
+								<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+								
+								<td height="100%">
+									<div id="numTickets"></div>
+								</td>
+								</xsl:if>
+								
+								<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+																	
+								<td height="100%">										
+									<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('Overview/Tickets.htm');">
+										<nobr>
+											<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom" alt="Show Help"/>
+										</nobr>
+									</div>											
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+		<div style="width:100%;height:100%;overflow:hidden;">
+			<div id="ListHolder" style="overflow:hidden;height:100%;width:100%;position:relative;">
+			<table border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed;height:100%;width:100%;">
+				<tr>
+					<td style="width:100%;">
+						<table id="ListTableTop" border="0" cellspacing="0" cellpadding="0">
+						<xsl:attribute name="style">
+							<xsl:choose>
+							<xsl:when test="/root/DOCUMENT/useragent != 'MSIE'">width:0px;position:relative;user-select:none;table-layout:fixed;</xsl:when>
+							<xsl:otherwise>width:0px;position:relative;user-select:none;</xsl:otherwise>
+							</xsl:choose>
+						</xsl:attribute>	
+							<tr id="ListHeaderRow">
+								<td class="listHeaderCell" xNoResize="true" style="padding-left:0px!important;padding-top:2px;width:23px;" valign="middle">
+								<nobr style="padding-left:4px;padding-right:4px;"><img src="./images/ico_expand_col.gif" width="11" height="11" border="0"/></nobr>
+								</td>
+					
+								<td class="listHeaderCell" style="padding-left:0px !important;padding-right:0px !important;" valign="middle" xNoResize="true" title="Ticket State">
+								<nobr style="padding-left:1px;">
+								<img src="images/ico_status_col.gif" width="16" height="16" border="0" alt="Ticket State"/>
+								</nobr>
+								</td>
+								
+								<td class="listHeaderCell" style="padding-left:0px !important;" xNoResize="true" title="Ticket Priority" valign="middle">
+								<nobr>
+								<img src="images/ico_priority_col.gif" width="16" height="16" border="0" alt="Ticket Priority"/>
+								</nobr>
+								</td>
+					
+								<td class="listHeaderCell" style="padding-left:0px !important;" xNoResize="true" title="Ticket Notes">
+								<nobr>
+								<img src="images/ico_notes_col.gif" width="16" height="16" border="0" alt="Ticket Notes"/>
+								</nobr>
+								</td>
+								
+								<xsl:if test="root/DOCUMENT/URLPARAMETERS/TICKETLINK > '0'">
+								<td class="listHeaderCell">
+								<xsl:attribute name="width">
+									<xsl:choose>
+									<xsl:when test="/root/DOCUMENT/useragent != 'MSIE'">20%</xsl:when>
+									<xsl:otherwise>100px</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>
+								<nobr>
+								Link Name
+								</nobr>										
+								<xsl:call-template name="list_resizeHandle"/>
+								</td>
+								</xsl:if>
+								
+								<td class="listHeaderCell" xNoResize="true" style="padding-left:0px !important;width:57px;">
+								<nobr style="padding-left:3px;padding-right:16px;">
+								TicketID
+								</nobr>
+								</td>
+					
+								<td class="listHeaderCell" xNoResize="true" style="padding-left:0px !important;">
+								<nobr style="padding-left:3px;">
+								<img src="images/ico_15x_msgcol.gif" alt="Message Count" width="16" height="16" border="0"/>
+								</nobr>
+								</td>
+					
+								<td class="listHeaderCell" xNoResize="true" style="padding-left:0px !important;">
+								<nobr style="padding-left:3px;">
+								<img src="images/ico_attach_col.gif" alt="Message Count" width="16" height="16" border="0"/>
+								</nobr>
+								</td>
+					
+								<td class="listHeaderCell">
+								<xsl:attribute name="width">
+									<xsl:choose>
+									<xsl:when test="/root/DOCUMENT/useragent != 'MSIE'">20%</xsl:when>
+									<xsl:otherwise>100px</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>										
+								<nobr>
+								Subject
+								</nobr>										
+								<xsl:call-template name="list_resizeHandle"/>
+								</td>
+					
+								<td class="listHeaderCell">
+								<xsl:attribute name="width">
+									<xsl:choose>
+									<xsl:when test="/root/DOCUMENT/useragent != 'MSIE'">15%</xsl:when>
+									<xsl:otherwise>85px</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>										
+								<nobr>
+								Contact
+								</nobr>										
+								<xsl:call-template name="list_resizeHandle"/>
+								</td>
+					
+								<td class="listHeaderCell">
+								<xsl:attribute name="width">
+									<xsl:choose>
+									<xsl:when test="/root/DOCUMENT/useragent != 'MSIE'">10%</xsl:when>
+									<xsl:otherwise>50px</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>
+								<nobr>
+								Date
+								</nobr>
+								<xsl:call-template name="list_resizeHandle"/>
+								</td>
+								
+								<td class="listHeaderCell">
+								<xsl:attribute name="width">
+									<xsl:choose>
+									<xsl:when test="/root/DOCUMENT/useragent != 'MSIE'">10%</xsl:when>
+									<xsl:otherwise>50px</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>										
+								<nobr>
+								Category
+								</nobr>
+								<xsl:call-template name="list_resizeHandle"/>
+								</td>
+								
+								<td class="listHeaderCell">
+								<xsl:attribute name="width">
+									<xsl:choose>
+									<xsl:when test="/root/DOCUMENT/useragent != 'MSIE'">10%</xsl:when>
+									<xsl:otherwise>50px</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>										
+								<nobr>
+								Owner
+								</nobr>
+								<xsl:call-template name="list_resizeHandle"/>
+								</td>
+								
+								<td class="listHeaderCell">
+								<xsl:attribute name="width">
+									<xsl:choose>
+									<xsl:when test="/root/DOCUMENT/useragent != 'MSIE'">10%</xsl:when>
+									<xsl:otherwise>60px</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>										
+								<nobr style="float:left">
+								TicketBox
+								</nobr>
+								<xsl:call-template name="list_resizeHandle"/>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td style="height:100%;overflow:hidden;vertical-align:top;">
+						<div id="ListDivider" style="width:100%;height:100%;overflow:auto;" class="listBack" onscroll="OnListDividerScroll(id);">
+						<table id="ListTableBot" border="0" cellspacing="0" cellpadding="0" allowMultiple="true">
+						<xsl:attribute name="style">
+							<xsl:choose>
+							<xsl:when test="/root/DOCUMENT/useragent != 'MSIE'">border-collapse:collapse;width:0px;user-select:none;table-layout:fixed;</xsl:when>
+							<xsl:otherwise>border-collapse:collapse;width:0px;user-select:none;</xsl:otherwise>
+							</xsl:choose>
+						</xsl:attribute>
+							<xsl:choose>
+							<xsl:when test="root/TicketBoxItemList/Item">
+							<xsl:for-each select="root/TicketBoxItemList/Item">
+					
+								<object id="TicketObject" style="display: none;" border="0" height="0" width="0" 
+								 rowId="{position()-1}" ticketid="{@ID}" subject="{@Subject}" date="{@Date}"
+								 contact="{@Contact}" lockedby="{@LockedBy}" statename="{@StateName}" 
+								 priorityname="{@PriorityName}" msgcount="{@MsgCount}" attachcount="{@AttachCount}" notecount="{@NoteCount}" 
+								 defaultThreaded="{/root/user/showmessagesinbound}" requiresUpdate="0" isdeleted="{@IsDeleted}"
+								/>
+								
+							<tr id="listRow" name="TicketObject"
+							 glc_form_tabularForm_selectId="{@ID}"
+							 glc_rowtype="ticket"
+							 onclick="gloListControl.listRowClick(event)" ondblclick="gloListControl.ticketDblClick(event);" oncontextmenu="rightClick(tabIndex); return false;"
+							 onmouseover="tabRowOn();" onmouseout="tabRowOff()"
+							 tabIndex="{position()-1}" tabRowId="{position()-1}" ticketId="{@ID}" subject="{@Subject}"
+					 		 contact="{@Contact}" statename="{@StateName}" priorityname="{@PriorityName}" date="{@Date}" 
+							 lockedby="{@LockedBy}" msgcount="{@MsgCount}" attachcount="{@AttachCount}" notecount="{@NoteCount}" hasunread="{@hasunread}" 
+							 hasunreadnotes="{@hasunreadnotes}" requiresUpdate="0" isdeleted="{@IsDeleted}" lockedbyname="{@LockedByName}" style="border-bottom: 1px solid #fff;">
+							<xsl:choose>
+								<xsl:when test="@hasunread = '1' or @hasunreadnotes = '1'">
+									<xsl:attribute name="class">ticketOffUnRead</xsl:attribute>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:attribute name="class">ticketOff</xsl:attribute>
+								</xsl:otherwise>
+							</xsl:choose>
+					
+								<td name="expando" id="listCell" class="ticketCellOff" style="padding-left:0px!important;" align="center" title="Click to expand this ticket">
+								<nobr>
+								<img onclick="theEventHandler(event);" name="msgindicator{@ID}" src="./images/plus.gif" width="11" height="11" alt="Click to expand this ticket" border="0"/>
+								</nobr>
+								</td>
+								<td name="statename" id="listCell" class="ticketCellOff" title="{@StateName}">
+									<xsl:attribute name="style">
+										<xsl:choose>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:3px !important</xsl:when>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Safari' and /root/DOCUMENT/useros = 'OS X'">text-indent:0px;</xsl:when>
+										<xsl:otherwise>padding-left:1px !important</xsl:otherwise>
+										</xsl:choose>
+									</xsl:attribute>										
+									<nobr>
+									<xsl:choose>
+									<xsl:when test="@LinkCount = '0'">
+									<img src="./images/ico_state_{@State}.gif" alt="{@StateName}" height="16" width="16" />
+									</xsl:when>
+									<xsl:otherwise>
+									<img src="./images/ico_link_{@State}.gif" alt="{@StateName}" height="16" width="16" />
+									</xsl:otherwise>
+									</xsl:choose>										
+									</nobr>
+								</td>
+								<td name="priorityname" id="listCell" class="ticketCellOff" style="padding-right:0px !important;">
+								<xsl:attribute name="title">
+									<xsl:choose>
+									<xsl:when test="@Priority &lt; 3">High</xsl:when>
+									<xsl:when test="@Priority &gt; 3">Low</xsl:when>
+									<xsl:otherwise>Normal</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>
+								<xsl:attribute name="style">
+									<xsl:choose>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:2px !important</xsl:when>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Safari' and /root/DOCUMENT/useros = 'OS X'">text-indent:0px;</xsl:when>
+										<xsl:otherwise>padding-left:1px !important</xsl:otherwise>
+										</xsl:choose>
+								</xsl:attribute>
+									<nobr>
+									<img src="images/ico_priority_{@Priority}.gif" width="15" height="15" border="0" />
+									</nobr>
+								</td>
+								<xsl:choose>
+								<xsl:when test="@NoteCount != 0">
+									<td name="notesect" id="listCell" class="ticketCellOff" title="{@NoteCount} Note(s) in Ticket, {@unreadnotecount} Note(s) unread">
+										<xsl:attribute name="style">
+											<xsl:choose>
+												<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:5px !important</xsl:when>
+												<xsl:otherwise>padding-left:4px !important</xsl:otherwise>
+												</xsl:choose>
+										</xsl:attribute>
+										<nobr class="listCellNOBR">
+										<span name="hasNotes"><xsl:value-of select="@NoteCount"/></span>
+										</nobr>
+									</td>
+								</xsl:when>
+								<xsl:otherwise>
+									<td name="notesect" id="listCell" class="ticketCellOff" title="This ticket does not have notes">
+										<xsl:attribute name="style">
+											<xsl:choose>
+												<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:5px !important</xsl:when>
+												<xsl:otherwise>padding-left:4px !important</xsl:otherwise>
+												</xsl:choose>
+										</xsl:attribute>
+										<nobr class="listCellNOBR">
+										<span name="hasNotes"><xsl:value-of select="@NoteCount"/></span>
+										</nobr>
+									</td>
+								</xsl:otherwise>
+								</xsl:choose>
+								
+								<xsl:if test="@LinkDescr">
+								<td name="linkdescr" id="listCell" class="ticketCellOff" title="{@LinkDescr}">
+									<xsl:attribute name="style">
+										<xsl:choose>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:2px !important</xsl:when>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Safari' and /root/DOCUMENT/useros = 'OS X'">padding-left:0px !important;text-indent:5px;</xsl:when>
+										<xsl:otherwise>padding-left:3px !important</xsl:otherwise>
+										</xsl:choose>
+									</xsl:attribute>										
+									<nobr><xsl:value-of select="@LinkDescr" disable-output-escaping="yes"/></nobr>
+								</td>
+								</xsl:if>	
+								
+								<td name="ticketid" id="listCell" class="ticketCellOff" allowSelect="true">
+									<xsl:attribute name="style">
+										<xsl:choose>
+											<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:3px !important</xsl:when>
+											<xsl:when test="/root/DOCUMENT/useragent = 'Safari' and /root/DOCUMENT/useros = 'OS X'">padding-left:1px !important;text-indent:0px;</xsl:when>
+											<xsl:otherwise>padding-left:4px !important</xsl:otherwise>
+										</xsl:choose>
+									</xsl:attribute>
+									<xsl:attribute name="title">
+										<xsl:choose>
+										<xsl:when test="not(/root/TicketBoxItemList/@TicketLink = 0)">
+										<xsl:choose>
+										<xsl:when test="@LinkCount = '0'">
+										TicketID <xsl:value-of select="@ID"/>
+										</xsl:when>
+										<xsl:otherwise>
+										<xsl:choose>
+										<xsl:when test="@LinkCount = '1'">
+										TicketID <xsl:value-of select="@ID"/> is linked in [<xsl:value-of select="@LinkCount"/>] Ticket Link
+										</xsl:when>
+										<xsl:otherwise>
+										TicketID <xsl:value-of select="@ID"/> is linked in [<xsl:value-of select="@LinkCount"/>] Ticket Links
+										</xsl:otherwise>
+										</xsl:choose>
+										</xsl:otherwise>
+										</xsl:choose>
+										</xsl:when>
+										<xsl:otherwise>
+											TicketID <xsl:value-of select="@ID"/>
+										</xsl:otherwise>
+										</xsl:choose>
+									</xsl:attribute>
+									<nobr style="padding-right:2px;">
+									<xsl:value-of select="@ID"/>
+									</nobr>
+								</td>
+								<td name="messagecount" id="listCell" class="ticketCellOff" title="{@MsgCount} Message(s) in Ticket, {@unreadcount} Message(s) unread">
+									<xsl:attribute name="style">
+										<xsl:choose>
+											<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:0px !important</xsl:when>
+											<xsl:when test="/root/DOCUMENT/useragent = 'Safari' and /root/DOCUMENT/useros = 'OS X'">padding-left:0px !important;text-indent:3px;</xsl:when>
+											<xsl:otherwise>padding-left:4px !important</xsl:otherwise>
+											</xsl:choose>
+									</xsl:attribute>
+									<nobr class="listCellNOBR">
+									<xsl:value-of select="@MsgCount"/>
+									</nobr>
+								</td>
+								<td name="attachcount" id="listCell" class="ticketCellOff" title="{@AttachCount} Message Attachment(s)">
+									<xsl:attribute name="style">
+										<xsl:choose>
+											<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:4px !important</xsl:when>
+											<xsl:when test="/root/DOCUMENT/useragent = 'Safari' and /root/DOCUMENT/useros = 'OS X'">padding-left:0px !important;text-indent:3px;</xsl:when>
+											<xsl:otherwise>padding-left:4px !important</xsl:otherwise>
+											</xsl:choose>
+									</xsl:attribute>
+									<nobr class="listCellNOBR">
+									<xsl:value-of select="@AttachCount"/>
+									</nobr>
+								</td>
+								<td name="subject" id="listCell" class="ticketCellOff" title="{@Subject}">
+									<xsl:attribute name="style">
+										<xsl:choose>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:2px !important</xsl:when>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Safari' and /root/DOCUMENT/useros = 'OS X'">padding-left:0px !important;text-indent:5px;</xsl:when>
+										<xsl:otherwise>padding-left:3px !important</xsl:otherwise>
+										</xsl:choose>
+									</xsl:attribute>										
+									<nobr><xsl:value-of select="@Subject" disable-output-escaping="yes"/></nobr>
+								</td>
+								<td name="contact" id="listCell" class="ticketCellOff" title="{@Contact}">	
+									<xsl:attribute name="style">
+										<xsl:choose>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:5px !important</xsl:when>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Safari' and /root/DOCUMENT/useros = 'OS X'">padding-left:0px !important;text-indent:10px;</xsl:when>
+										<xsl:otherwise>padding-left:3px !important</xsl:otherwise>
+										</xsl:choose>
+									</xsl:attribute>										
+									<nobr><xsl:value-of select="@Contact" disable-output-escaping="yes"/></nobr>
+								</td>
+								<td name="date" id="listCell" class="ticketCellOff" title="{@Date}">
+									<xsl:attribute name="style">
+										<xsl:choose>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:5px !important</xsl:when>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Safari' and /root/DOCUMENT/useros = 'OS X'">padding-left:0px !important;text-indent:15px;</xsl:when>
+										<xsl:otherwise>padding-left:3px !important</xsl:otherwise>
+										</xsl:choose>
+									</xsl:attribute>										
+									<nobr>
+									<xsl:value-of select="@Date"/>
+									</nobr>
+								</td>
+								<td name="category" id="listCell" class="ticketCellOff" title="{@TicketCategoryName}">	
+									<xsl:attribute name="style">
+										<xsl:choose>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:5px !important</xsl:when>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Safari' and /root/DOCUMENT/useros = 'OS X'">padding-left:0px !important;text-indent:20px;</xsl:when>
+										<xsl:otherwise>padding-left:3px !important</xsl:otherwise>
+										</xsl:choose>
+									</xsl:attribute>										
+									<nobr>
+									<xsl:value-of select="@TicketCategoryName"/>
+									</nobr>
+								</td>
+								<td name="owner" id="listCell" class="ticketCellOff" title="{@Owner}">
+									<xsl:attribute name="style">
+										<xsl:choose>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:5px !important</xsl:when>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Safari' and /root/DOCUMENT/useros = 'OS X'">padding-left:0px !important;text-indent:25px;</xsl:when>
+										<xsl:otherwise>padding-left:3px !important</xsl:otherwise>
+										</xsl:choose>
+									</xsl:attribute>										
+									<nobr><xsl:value-of select="@Owner"/></nobr>
+								</td>
+								<td name="ticketbox" id="listCell" class="ticketCellOff" title="{@TicketBox}">
+									<xsl:attribute name="style">
+										<xsl:choose>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:5px !important</xsl:when>
+										<xsl:when test="/root/DOCUMENT/useragent = 'Safari' and /root/DOCUMENT/useros = 'OS X'">padding-left:0px !important;text-indent:25px;</xsl:when>
+										<xsl:otherwise>padding-left:3px !important</xsl:otherwise>
+										</xsl:choose>
+									</xsl:attribute>
+									<nobr>
+									<xsl:value-of select="@TicketBox"/>
+									</nobr>
+								</td>
+							</tr>
+							<tr>
+								<td height="0" colspan="12">
+								<div id="messagearea{@ID}" style="display:none; border:3px inset;">
+									<table border="0" class="menuColor" width="100%" cellpadding="0" cellspacing="0">
+										<tr height="15" orientation="top" tabfamily="tabholder{@ID}">
+											<td id="sequencetab{@ID}" style="padding-left: 5px;" >
+												Show messages: 
+												<input type="radio" id="imsgviewtype{@ID}" name="msgviewtype{@ID}" 
+												 onClick="Tickets[{position()-1}].changeView('sequence')">
+												 <xsl:if test = "/root/user/showmessagesinbound = 1">
+													<xsl:attribute name="checked">true</xsl:attribute>
+												 </xsl:if>
+												</input>
+												by Inbound
+												<input type="radio" id="hmsgviewtype{@ID}" name="msgviewtype{@ID}" 
+												onClick="Tickets[{position()-1}].changeView('threaded');">
+								 				 <xsl:if test = "/root/user/showmessagesinbound = 0">
+													<xsl:attribute name="checked">true</xsl:attribute>
+												 </xsl:if>
+												 </input>
+												by Thread
+											</td>
+										</tr>
+									</table>
+							<div id="threadedMsgs{@ID}" style="display:none; border:1px inset;padding-top:4px;padding-bottom:4px;"></div>
+							<div id="sequenceMsgs{@ID}" style="display:none; border:1px inset;padding-top:4px;padding-bottom:4px;"></div>
+							<div id="noteslabel" style="padding-left:5px;padding-top:2px;padding-bottom:2px;" class="menuColor">Ticket Notes</div>
+							<div id="notes{@ID}" style="padding-left: 5px; display:block; border:1px inset;padding-top:4px;">No notes for this ticket</div>
+							<div id="sysNotesBranch{@ID}" style="padding-left: 5px;padding-top:2px;padding-bottom:2px; display:block;" class="menuColor">
+									<img name="sysnoteindicator{@ID}" onclick="Tickets[{position()-1}].openSysNotes(event);"
+									 style="cursor: hand;" src="./images/plus.gif" width="11" height="11" alt="Click to view ticket events" border="0"/>Ticket Events</div>
+										<div id="sysnotes{@ID}" style="padding-left: 5px;border:1px inset; padding-top:4px; display:none;">
+										No System Notes</div>
+					
+								</div>
+								</td>
+							</tr>
+							</xsl:for-each>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:choose>
+							<xsl:when test="/root/TicketBoxItemList/@RequireGetOldest = 1">
+							<tr style="display:none;">
+								<td><br/></td><td><br/></td><td><br/></td><td><br/></td><td><br/></td>
+								<td><br/></td><td><br/></td><td><br/></td><td><br/></td><td><br/></td>
+								<td><br/></td><td><br/></td>
+								<xsl:if test="root/DOCUMENT/URLPARAMETERS/TICKETLINK > '0'">
+								<td><br/></td>
+								</xsl:if>
+							</tr>
+							<tr>
+								<td colspan="12" class="listBack" style="padding-left:4px;">
+								<xsl:if test="root/DOCUMENT/URLPARAMETERS/TICKETLINK > '0'">
+									<xsl:attribute name="colspan">13</xsl:attribute>
+								</xsl:if>
+								<b>Your access rights require that you use the &quot;Get Oldest&quot; 
+								button to view tickets. <BR/>Click &quot;Get Oldest&quot; to move tickets
+								to your &quot;My Tickets&quot; ticketbox.</b>
+								</td>
+							</tr>
+							</xsl:when>
+							<xsl:otherwise>
+							<tr id="trNoTickets"></tr>
+							<tr>
+								<td id="tdNoTickets" class="listBack" style="padding-left:5px;padding-top:15px;width:100%;"><i>No Tickets To Display</i></td>
+							</tr>
+							</xsl:otherwise>
+							</xsl:choose>
+							</xsl:otherwise>
+							</xsl:choose>
+						</table><!--listTableBot-->
+						</div><!--listDivider-->
+					</td>
+				</tr>
+			</table>
+			</div>
+
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td style="border:1px outset;width:100%;">
+			<TABLE BORDER="0" WIDTH="100%" CELLPADDING="0" CELLSPACING="0">
+				<TR>
+					<TD style="padding-left:10px;">
+					<xsl:if test="/root/More/@Description">
+						<b><xsl:value-of select="/root/More/@Description"/> Click <a href="#" onclick="docDoThis();">here </a> to redefine your search criteria.</b>
+					</xsl:if>
+					</TD>
+				</TR>
+			</TABLE>
+		</td>
+	</tr>
+</table>
+</form>
+<form action="" method="post" style="position: absolute;" name="treeForm">
+	<input type="hidden" name="selectId" value="" />
+</form>
+<script language="JavaScript" type="text/javascript">
+	if ( !glo_isMobile() )
+	{
+		usePrev = <xsl:value-of select="/root/user/usepreviewpane"/>;
+		rcMenu_title=""
+		rcMenu_titlecol1=""
+		rcMenu_titlecol2=""
+		rcMenu_titletext=""
+		rcMenu_bg="<xsl:value-of select="/root/user/menubackcolor"/>";
+		rcMenu_bgov="navy"
+		rcMenu_cl="black"
+		rcMenu_clov="white"
+		rcMenu_width=160
+			
+		doDelete="delete"
+		doRestore="restore"
+		doHelp="Overview/Tickets.htm"
+		rcMenu_init()
+		rcMenu_item('Refresh','./images/ico_refresh.gif','javascript:doReload()')
+		rcMenu_item('hr','','')
+		rcMenu_item('Take Ownership','./images/ico_take.gif','javascript:takeOwnership()')
+		<xsl:if test = "not( /root/user/escalatetoagentid = '0' )" >
+			rcMenu_item('Escalate','./images/ico_esc.gif','javascript:escalate()')
+		</xsl:if>
+		<xsl:if test="not(/root/TicketBoxItemList/@TicketLink = '0')">
+			rcMenu_item('Ticket Link','./images/ico_link_2.gif','javascript:linkTicket()');
+		</xsl:if>
+		rcMenu_item('Properties','./images/ico_properties.gif','javascript:ticketProps()')
+		rcMenu_item('View','./images/ico_state_6.gif','javascript:viewTicket()');
+		rcMenu_item('Close','./images/ico_close2.gif','javascript:closeTicket()')
+		rcMenu_item('Delete','./images/ico_del.gif','javascript:ticketFunc(doDelete)')
+		rcMenu_item('Mark as Read','./images/sys_9_read.gif','javascript:UpdateTicketToRead();rcmen.hide()')
+		rcMenu_item('Mark as Unread','./images/sys_9_unread.gif','javascript:UpdateTicketToUnRead();rcmen.hide()')
+		rcMenu_item('Restore','./images/ico_restore.gif','javascript:ticketFunc(doRestore)')
+		rcMenu_item('Select All','./images/ico_state_2.gif','javascript:selectAllTickets();rcmen.hide()')
+		rcMenu_item('hr','','')
+		rcMenu_item('Help','./images/ico_help2.gif','javascript:openHelp(doHelp)')
+		rcMenu_close()
+		
+		doHelp2="Overview/Messages.htm"
+		showAlert="This function is only available when the message\npreview pane is enabled or when you open the\nmessage in a new window!";
+		rcMenu2_init()
+		rcMenu2_item('Refresh','./images/ico_refresh.gif','javascript:doReload()')
+		rcMenu2_item('hr','','')
+		rcMenu2_item('Open in new Window','./images/ico_openmsg.gif','javascript:hdlTreeDblClick(MsgObj)')
+		if(usePrev)
+		{
+			rcMenu2_item('Reply','./images/ico_rep.gif','javascript:parent.splitpane.msgframe.reply()')
+			rcMenu2_item('Reply All','./images/ico_rep.gif','javascript:parent.splitpane.msgframe.replyAll()')
+			rcMenu2_item('Forward','./images/ico_for.gif','javascript:parent.splitpane.msgframe.msgforward()')
+			rcMenu2_item('Mark as Read','./images/ico_msg_state_3.gif','javascript:parent.splitpane.msgframe.onRead();rcmen2.hide()')
+			rcMenu2_item('Mark as Unread','./images/ico_msg_state_5.gif','javascript:parent.splitpane.msgframe.onUnRead();rcmen2.hide()')
+			rcMenu2_item('Delete','./images/ico_del.gif','javascript:parent.splitpane.msgframe.deleteTicket()')
+			rcMenu2_item('Move','./images/ico_move.gif','javascript:parent.splitpane.msgframe.changeTicket()')
+			rcMenu2_item('Print','./images/ico_msg_print.gif','javascript:parent.splitpane.msgframe.funcPrintMsg()')
+		}
+		else
+		{
+			rcMenu2_item('Reply','./images/ico_rep.gif','javascript:alert(showAlert)')
+			rcMenu2_item('Reply All','./images/ico_rep.gif','javascript:alert(showAlert)')
+			rcMenu2_item('Forward','./images/ico_for.gif','javascript:alert(showAlert)')
+			rcMenu2_item('Mark as Read','./images/ico_msg_state_3.gif','javascript:alert(showAlert)')
+			rcMenu2_item('Mark as Unread','./images/ico_msg_state_5.gif','javascript:alert(showAlert)')
+			rcMenu2_item('Delete','./images/ico_del.gif','javascript:alert(showAlert)')
+			rcMenu2_item('Move','./images/sys_5_outbound.gif','javascript:alert(showAlert)')
+			rcMenu2_item('Print','./images/ico_msg_print.gif','javascript:alert(showAlert)')
+		}
+		rcMenu2_item('hr','','')
+		rcMenu2_item('Help','./images/ico_help2.gif','javascript:openHelp(doHelp2)')
+		rcMenu2_close()
+		
+		rcMenu3_init()
+		rcMenu3_item('Refresh','./images/ico_refresh.gif','javascript:doReload()')
+		rcMenu3_item('hr','','')
+		rcMenu3_item('Open in new Window','./images/ico_openmsg.gif','javascript:hdlTreeDblClick(MsgObj)')
+		if(usePrev)
+		{
+			rcMenu3_item('Reply','./images/ico_rep.gif','javascript:parent.splitpane.msgframe.reply()')
+			rcMenu3_item('Reply All','./images/ico_rep.gif','javascript:parent.splitpane.msgframe.replyAll()')
+			rcMenu3_item('Forward','./images/ico_for.gif','javascript:parent.splitpane.msgframe.msgforward()')
+			rcMenu3_item('Send Again','./images/ico_for.gif','javascript:parent.splitpane.msgframe.sendAgain()')
+			rcMenu3_item('Delete','./images/ico_del.gif','javascript:parent.splitpane.msgframe.deleteTicket()')
+			rcMenu3_item('Move','./images/ico_move.gif','javascript:parent.splitpane.msgframe.changeTicket()')
+			rcMenu3_item('Print','./images/ico_msg_print.gif','javascript:parent.splitpane.msgframe.funcPrintMsg()')
+		}
+		else
+		{
+			rcMenu3_item('Reply','./images/ico_rep.gif','javascript:alert(showAlert)')
+			rcMenu3_item('Reply All','./images/ico_rep.gif','javascript:alert(showAlert)')
+			rcMenu3_item('Forward','./images/ico_for.gif','javascript:alert(showAlert)')
+			rcMenu3_item('Send Again','./images/ico_for.gif','javascript:alert(showAlert)')
+			rcMenu3_item('Delete','./images/ico_del.gif','javascript:alert(showAlert)')
+			rcMenu3_item('Move','./images/sys_5_outbound.gif','javascript:alert(showAlert)')
+			rcMenu3_item('Print','./images/ico_msg_print.gif','javascript:alert(showAlert)')
+		}
+		rcMenu3_item('hr','','')
+		rcMenu3_item('Help','./images/ico_help2.gif','javascript:openHelp(doHelp2)')
+		rcMenu3_close()
+		
+		rcMenu4_init()
+		rcMenu4_item('Refresh','./images/ico_refresh.gif','javascript:doReload()')
+		rcMenu4_item('hr','','')
+		rcMenu4_item('Open in new Window','./images/ico_openmsg.gif','javascript:hdlTreeDblClick(MsgObj)')
+		if(usePrev)
+		{
+			rcMenu4_item('Reply','./images/ico_rep.gif','javascript:parent.splitpane.msgframe.reply()')
+			rcMenu4_item('Reply All','./images/ico_rep.gif','javascript:parent.splitpane.msgframe.replyAll()')
+			rcMenu4_item('Forward','./images/ico_for.gif','javascript:parent.splitpane.msgframe.msgforward()')
+			rcMenu4_item('Send Again','./images/ico_for.gif','javascript:parent.splitpane.msgframe.sendAgain()')
+			rcMenu4_item('Delete','./images/ico_del.gif','javascript:parent.splitpane.msgframe.deleteTicket()')
+			rcMenu4_item('Move','./images/ico_move.gif','javascript:parent.splitpane.msgframe.changeTicket()')
+			rcMenu4_item('Print','./images/ico_msg_print.gif','javascript:parent.splitpane.msgframe.funcPrintMsg()')
+		}
+		else
+		{
+			rcMenu4_item('Reply','./images/ico_rep.gif','javascript:alert(showAlert)')
+			rcMenu4_item('Reply All','./images/ico_rep.gif','javascript:alert(showAlert)')
+			rcMenu4_item('Forward','./images/ico_for.gif','javascript:alert(showAlert)')
+			rcMenu4_item('Send Again','./images/ico_for.gif','javascript:alert(showAlert)')
+			rcMenu4_item('Delete','./images/ico_del.gif','javascript:alert(showAlert)')
+			rcMenu4_item('Move','./images/sys_5_outbound.gif','javascript:alert(showAlert)')
+			rcMenu4_item('Print','./images/ico_msg_print.gif','javascript:alert(showAlert)')
+		}
+		rcMenu4_item('hr','','')
+		rcMenu4_item('Help','./images/ico_help2.gif','javascript:openHelp(doHelp2)')
+		rcMenu4_close()
+		
+		rcMenu5_init()
+		rcMenu5_item('Refresh','./images/ico_refresh.gif','javascript:doReload()')
+		rcMenu5_item('hr','','')
+		rcMenu5_item('Open in new Window','./images/ico_openmsg.gif','javascript:hdlTreeDblClick(MsgObj)')
+		if(usePrev)
+		{
+			rcMenu5_item('Edit','./images/ico_ed.gif','javascript:parent.splitpane.msgframe.openDraft()')
+			rcMenu5_item('Delete','./images/ico_del.gif','javascript:parent.splitpane.msgframe.deleteTicket()')
+			rcMenu5_item('Move','./images/ico_move.gif','javascript:parent.splitpane.msgframe.changeTicket()')
+			rcMenu5_item('Print','./images/ico_msg_print.gif','javascript:parent.splitpane.msgframe.funcPrintMsg()')
+		}
+		else
+		{
+			rcMenu5_item('Edit','./images/ico_ed.gif','javascript:alert(showAlert)')
+			rcMenu5_item('Delete','./images/ico_del.gif','javascript:alert(showAlert)')
+			rcMenu5_item('Move','./images/sys_5_outbound.gif','javascript:alert(showAlert)')
+			rcMenu5_item('Print','./images/ico_msg_print.gif','javascript:alert(showAlert)')
+		}
+		rcMenu5_item('hr','','')
+		rcMenu5_item('Help','./images/ico_help2.gif','javascript:openHelp(doHelp2)')
+		rcMenu5_close()
+		
+		
+		rcMenu6_init()
+		rcMenu6_item('Refresh','./images/ico_refresh.gif','javascript:doReload()')
+		rcMenu6_item('hr','','')
+		rcMenu6_item('Open in new Window','./images/ico_openmsg.gif','javascript:hdlTreeDblClick(MsgObj)')
+		if(usePrev)
+		{
+			rcMenu6_item('Reply','./images/ico_rep.gif','javascript:parent.splitpane.msgframe.reply()')
+			rcMenu6_item('Reply All','./images/ico_rep.gif','javascript:parent.splitpane.msgframe.replyAll()')
+			rcMenu6_item('Forward','./images/ico_for.gif','javascript:parent.splitpane.msgframe.msgforward()')
+			rcMenu6_item('Delete','./images/ico_del.gif','javascript:parent.splitpane.msgframe.deleteTicket()')
+			rcMenu6_item('Move','./images/ico_move.gif','javascript:parent.splitpane.msgframe.changeTicket()')
+			rcMenu6_item('Print','./images/ico_msg_print.gif','javascript:parent.splitpane.msgframe.funcPrintMsg()')
+		}
+		else
+		{
+			rcMenu6_item('Reply','./images/ico_rep.gif','javascript:alert(showAlert)')
+			rcMenu6_item('Reply All','./images/ico_rep.gif','javascript:alert(showAlert)')
+			rcMenu6_item('Forward','./images/ico_for.gif','javascript:alert(showAlert)')
+			rcMenu6_item('Delete','./images/ico_del.gif','javascript:alert(showAlert)')
+			rcMenu6_item('Move','./images/sys_5_outbound.gif','javascript:alert(showAlert)')
+			rcMenu6_item('Print','./images/ico_msg_print.gif','javascript:alert(showAlert)')
+		}
+		rcMenu6_item('hr','','')
+		rcMenu6_item('Help','./images/ico_help2.gif','javascript:openHelp(doHelp2)')
+		rcMenu6_close()
+	}
+	<xsl:if test="/root/DOCUMENT/URLPARAMETERS/HIDELEFT = '1'">
+		hideLeft();
+	</xsl:if>
+	
+</script>
+</body>
+</html>
+</xsl:template>
+</xsl:stylesheet>

@@ -1,0 +1,81 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="iso-8859-1" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"/>
+<xsl:template match="/">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>Search Standard Response Library</title>
+		<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+		<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+		<script type="text/javascript">
+			function onStartSearchClick()
+			{
+				if(parent.frames.frameLeft.document.getElementById("-3Item").click)
+				{
+					parent.frames.frameLeft.document.getElementById("-3Item").click();
+				}
+				else
+				{
+					fireEvent(parent.frames.frameLeft.document.getElementById("-3Item"),"click");
+				}
+				document.frmSearchStandardResponse.submit();
+			}
+			function onButtonMouseOver()
+			{
+				document.getElementById("btnSearch").className = "HiLightButton";
+			}
+			function onButtonMouseOut()
+			{
+				document.getElementById("btnSearch").className = "NoHiLightButton";
+			}
+			function onButtonMouseDown()
+			{
+				document.getElementById("btnSearch").className = "HiLightInsetButton";
+			}
+			function onButtonMouseUp()
+			{
+				document.getElementById("btnSearch").className = "HiLightButton";
+			}
+			function keyPress()
+			{
+				if(window.event.keyCode == 13)
+				{
+					onStartSearchClick();
+					window.event.keyCode = 0;
+					return true;
+				}
+			}
+		</script>
+	</head>
+	<body onkeypress="keyPress();">
+		<form style="position:relative;top:0px;" name="frmSearchStandardResponse" target="frameRightTop" method="post" action="stdresponselist.ems?id=-3">
+			<div class="Menu">
+				<div style="width:100px;" class="NoHiLightButton" id="btnSearch" title="Start Search" onclick="onStartSearchClick();" onmouseover="onButtonMouseOver();" onmouseout="onButtonMouseOut();" onmousedown="onButtonMouseDown();" onmouseup="onButtonMouseUp();">
+					<img src="images/ico_search.gif" width="24" height="22" alt="Start Search"/>
+					Start Search
+				</div>
+			</div>
+			<div style="position:absolute;top:40px;left:10px;">
+				<div id="lblSubject" class="Label">Subject :</div>
+				<input id="txtSubject" class="Text" name="txtSubject" type="text"/>
+				<input name="optSubject" class="RadioContains" type="radio" value="0" checked="checked"/><span class="ContainsLabel">Contains</span>
+				<input name="optSubject" class="RadioExact" value="1" type="radio"/><span class="ExactLabel">Exact</span>
+			</div>
+			<div style="position:relative;top:65px;left:10px;">
+				<div id="lblContent" class="Label">Where content contains :</div>
+				<input id="txtContent" class="Text" name="txtContent" type="text"/>
+			</div>
+			<div style="position:relative;top:90px;left:10px;">
+				<div id="lblNotes" class="Label">Where note contains :</div>
+				<input id="txtNote" class="Text" name="txtNote" type="text"/>
+			</div>
+		</form>
+		<script type="text/javascript">
+			document.getElementById("lblSubject").style.width = "145px";
+			document.getElementById("lblContent").style.width = "145px";
+		</script>
+	</body>
+</html>
+
+</xsl:template>
+</xsl:stylesheet>

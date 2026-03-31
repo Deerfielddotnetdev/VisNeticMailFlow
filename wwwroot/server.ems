@@ -1,0 +1,459 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+<html>
+<head>
+
+<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"/>
+<script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"></script>
+<script type="text/javascript" language="javascript">
+	function stopService()
+	{
+		document.tabularForm.Action.value = 'svcstop';
+		var postResults = glo_buildFormPost('tabularForm');
+    if (eval(postResults[0])==true)
+    {
+	    <xsl:if test="root/Server/@ID &gt; '0'">
+	    		var serverID = "<xsl:value-of select="root/Server/@ID" />";
+	    		parent.frames.rightpane.location = ('servers.ems?ID='+serverID);			    		
+	    </xsl:if>
+	    <xsl:if test="not(root/Server)">
+	    	dialogArguments.parent.frames.rightpane.location = 'servers.ems';
+	    	top.close();		    	
+	    </xsl:if>			    			    	    
+    }
+	}
+	function startService()
+	{
+		document.tabularForm.Action.value = 'svcstart';
+		var postResults = glo_buildFormPost('tabularForm');
+    if (eval(postResults[0])==true)
+    {
+	    <xsl:if test="root/Server/@ID &gt; '0'">
+	    		var serverID = "<xsl:value-of select="root/Server/@ID" />";
+	    		parent.frames.rightpane.location = ('servers.ems?ID='+serverID);			    		
+	    </xsl:if>
+	    <xsl:if test="not(root/Server)">
+	    	dialogArguments.parent.frames.rightpane.location = 'servers.ems';
+	    	top.close();		    	
+	    </xsl:if>			    			    	    
+    }
+	}
+	function adjustForm()
+	{
+	    var submitform = true;
+		
+	    if (document.tabularForm.Description.value=="")
+	    {
+		    alert("You must set the description for this server!");
+		    document.tabularForm.Description.focus();
+		    submitform = false;		
+	    }		
+	    
+	    if (document.getElementById('ServerType').options[document.getElementById('ServerType').selectedIndex].value == 0)
+	    {
+		 	if (document.getElementById('ServerType').disabled == 'false')
+		 	{
+		   	submitform = confirm("Are you sure you want to set this server as the Master?");  	
+		   }
+	    }		
+	    
+	    if (submitform)
+	    {
+		    var postResults = glo_buildFormPost('tabularForm');
+		    if (eval(postResults[0])==true)
+		    {
+			    <xsl:if test="root/Server/@ID &gt; '0'">
+			    		var serverID = "<xsl:value-of select="root/Server/@ID" />";
+			    		parent.frames.rightpane.location = ('servers.ems?ID='+serverID);
+			    </xsl:if>
+			    <xsl:if test="not(root/Server)">
+			    	dialogArguments.parent.frames.rightpane.location = 'servers.ems';
+			    	top.close();
+			    </xsl:if>
+		    }
+	    }
+	}
+	function openMS() {
+		glo_launchModalWindow('./modalframe.ems?file=messagesources.ems',600, 400, 'yes', 'no', 'no');
+	}
+	
+	function openMD() {
+		glo_launchModalWindow('./modalframe.ems?file=messagedestinations.ems',600, 400, 'yes', 'no', 'no');
+	}
+	
+	function setButtons() {
+		if (document.getElementById('chkMsgSnd').checked == false)
+		{
+			document.getElementById('mdButton').disabled = true;
+		}
+		else
+		{
+			document.getElementById('mdButton').disabled = false;
+		}
+		if (document.getElementById('chkMsgCol').checked == false)
+		{
+			document.getElementById('msButton').disabled = true;
+		}
+		else
+		{
+			document.getElementById('msButton').disabled = false;
+		}
+			
+	}
+	
+</script>	
+</head>
+
+<body>
+<form name="tabularForm" method="post" action="">
+<input type="hidden" name="Action">
+<xsl:if test="root/Server/@ID &gt; '0'"><xsl:attribute name="value">update</xsl:attribute></xsl:if>
+<xsl:if test="not(root/Server)"><xsl:attribute name="value">insert</xsl:attribute></xsl:if>
+</input>	
+<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td style="width:100%">
+        <xsl:call-template name="default_titlebar">
+	        <xsl:with-param name="title_text">
+	        <xsl:value-of select="root/DOCUMENT/TITLE"/>
+	        </xsl:with-param>
+        </xsl:call-template>
+            <table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td style="height:32px;" class="menubarx" nowrap="true">
+                        <table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+	                        <tr>
+		                        <td height="100%">
+			                        <div class="toolBar" id="toolButton" name="toolButton" 
+			                         xrequire="true"  
+			                         title="Save Server" onclick="adjustForm()"
+			                          >
+				                        <nobr>
+					                        <img src="images/ico_save.gif" width="24" height="22" border="0"/>
+					                        Save
+				                        </nobr>
+			                          </div>
+		                        </td>
+		                        <xsl:if test="not(/root/Server)">
+			                        <td height="100%">					
+				                        <div class="toolBar" id="toolButton" name="toolButton" 
+				                         xrequire="true"  
+				                         title="Cancel" onclick="glo_doClose();"
+				                          >
+					                        <nobr>
+						                        <img src="images/ico_cancel.gif" width="24" height="22" border="0"/>
+						                        Cancel
+					                        </nobr>
+				                          </div>
+			                        </td>
+			                    </xsl:if> 
+		                        <td height="100%">					
+			                        <div class="toolBar" id="toolButton" name="toolButton" 
+			                         xrequire="true"  
+			                         title="Show Help" 
+			                         onclick="openHelp('administration/mailflow_servers/servers.htm')"
+			                          >
+				                        <nobr>
+					                        <img src="images/ico_help.gif" width="24" height="22" border="0"/>
+					                        Help
+				                        </nobr>
+			                          </div>
+		                        </td>
+	                        </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+            <div style="width:100%;height:100%;overflow:auto">
+                <table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>
+                            <table width="100%;" border="0" cellspacing="0" cellpadding="0">                        	
+                                <tr>
+                                    <td style="padding-left:10px;padding-right:10px;">
+                                        <table width="100%" cellspacing="0">
+                                            <tr><td height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+                                            <tr>
+	                                            <td width="100%" class="subSectionHeader" align="left">
+		                                            Global Server Properties
+	                                            </td>
+                                            </tr>
+                                            <tr>
+	                                            <td width="100%" class="subSectionWrapper" align="left">
+		                                            <table width="100%" cellpadding="0" cellspacing="0">
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Inbound Attachment Folder:</td>
+				                                            <td width="80%" align="left">
+					                                            <input size="80" maxlength="255" type="text" name="InboundAttach" value="{root/Server/@InboundAttach}"/>					                                            
+				                                            </td>
+				                                        </tr>
+				                                        <tr><td height="5"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Outbound Attachment Folder:</td>
+				                                            <td width="80%" align="left">
+					                                            <input size="80" maxlength="255" type="text" name="OutboundAttach" value="{root/Server/@OutboundAttach}"/>					                                            
+				                                            </td>
+			                                            </tr>
+			                                            <tr><td height="5"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Note Attachment Folder:</td>
+				                                            <td width="80%" align="left">
+					                                            <input size="80" maxlength="255" type="text" name="NoteAttach" value="{root/Server/@NoteAttach}"/>					                                            
+				                                            </td>
+			                                            </tr>
+			                                            <tr><td height="5"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Backup Folder:</td>
+				                                            <td width="80%" align="left">
+					                                            <input size="80" maxlength="255" type="text" name="BackupFolder" value="{root/Server/@BackupFolder}"/>					                                            
+				                                            </td>
+				                                        </tr>
+				                                        <tr><td height="5"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Archive Folder:</td>
+				                                            <td width="80%" align="left">
+					                                            <input size="80" maxlength="255" type="text" name="ArchiveFolder" value="{root/Server/@ArchiveFolder}"/>					                                            
+				                                            </td>
+				                                        </tr>				                                        	                                            						                                    	                                               	                                            				
+		                                            </table>
+	                                            </td>
+                                            </tr>                                            
+                                            <tr><td height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+                                            <tr>
+	                                            <td width="100%" class="subSectionHeader" align="left">
+		                                            <xsl:value-of select="root/Server/@Description"/> Properties
+	                                            </td>
+                                            </tr>
+                                            <tr>
+	                                            <td width="100%" class="subSectionWrapper" align="left">
+		                                            <table width="100%" cellpadding="0" cellspacing="0">
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Description:</td>
+				                                            <td width="80%" align="left">
+					                                            <input size="80" maxlength="50" type="text" disabled="disabled" name="Description" value="{root/Server/@Description}"/>					                                            
+				                                            </td>
+			                                            </tr>
+			                                            <tr><td height="5"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">VisNetic MailFlow Engine Service:</td>
+				                                            <td width="80%" align="left">
+					                                            [<xsl:value-of select="root/Server/@ServiceStatus"/>]<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;-<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+					                                            <xsl:if test="root/Server/@ServiceStatus = 'Running'">
+					                                           		<input type="Button" id="svcBtnStop" name="svcBtnStop" class="childControlBtn" value="Stop Service" onclick="stopService();"/>
+					                                           	</xsl:if>
+					                                           	<xsl:if test="root/Server/@ServiceStatus = 'Stopped'">
+					                                           		<input type="Button" id="svcBtnStart" name="svcBtnStart" class="childControlBtn" value="Start Service" onclick="startService();"/>
+					                                           	</xsl:if>
+				                                            </td>
+			                                            </tr>
+			                                            <tr><td height="5"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Type:</td>
+				                                            <td width="80%" align="left">
+				                                            <xsl:variable name="MSID" select="/root/Server/@MasterServerID"/>
+					                                            <select id="ServerType" name="ServerType">
+																					<xsl:if test="/root/Server/@ID = $MSID">
+																						<xsl:attribute name="disabled">true</xsl:attribute>																						
+																					</xsl:if>
+																					<option value="0">
+																					<xsl:if test="/root/Server/@ID = $MSID">
+																						<xsl:attribute name="selected">true</xsl:attribute>																						
+																					</xsl:if>																					
+																					Master
+																					</option>
+																					<option value="1">
+																					<xsl:if test="not(/root/Server/@ID = $MSID)">
+																						<xsl:attribute name="selected">true</xsl:attribute>
+																					</xsl:if>
+																					Secondary
+																					</option>
+																				</select>
+				                                            </td>
+			                                            </tr>
+			                                            <!--
+			                                            <tr><td height="5"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Registration Key:</td>
+				                                            <td width="80%" align="left">
+					                                            <input size="80" maxlength="50" type="text" name="RegistrationKey" value="{root/Server/@RegistrationKey}"/>					                                            
+				                                            </td>
+			                                            </tr>
+			                                            <xsl:if test="/root/Server">
+		                        						<tr><td height="5"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+				                                            <td width="80%" align="left">
+					                                            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+					                                            	<tr>
+																					<td width="20%" style="padding-left:10px;"><span style="font-weight:bold;">Status:</span><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+																					<td width="80%" align="left">																										
+																					<xsl:value-of select="root/Registration/@Status"/>
+																					<xsl:if test="root/Registration/@Status != 'Key is valid'">
+																					<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<a href='https://shop.deerfield.net/purchase/upgrades/visneticupgrade.aspx?gp=30&amp;upg=1&amp;key={root/Server/@RegistrationKey}' target='_blank' class="adminMenu" style="font-weight:bold;">[Purchase License]</a>
+																					</xsl:if>
+																					</td>
+																				</tr>
+																				<tr>
+																					<td width="20%" style="padding-left:10px;"><span style="font-weight:bold;">Type:</span><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+																					<td width="80%" align="left"><xsl:value-of select="root/Registration/@KeyType"/>
+																					<xsl:if test="root/Registration/@KeyType != 'Registered'">
+																					<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<a href='http://shop.deerfield.net/purchase/addcart.aspx?gp=65,67,68' target='_blank' class="adminMenu" style="font-weight:bold;">[Purchase Online]</a>
+																					</xsl:if>
+																					</td>
+																				</tr>
+																				<tr>
+																					<td width="20%" style="padding-left:10px;"><span style="font-weight:bold;">Create Date:</span><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+																					<td width="80%" align="left"><xsl:value-of select="root/Registration/@Created"/></td>
+																				</tr>
+																				<tr>
+																					<td width="20%" style="padding-left:10px;"><span style="font-weight:bold;">Expire Date:</span><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+																					<td width="80%" align="left"><xsl:value-of select="root/Registration/@Expires"/>
+																					<xsl:if test="root/Registration/@Status != 'Upgrade protection has expired'">
+																						<xsl:if test="root/Registration/@KeyType != 'Evaluation'">
+																						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<a href='https://shop.deerfield.net/purchase/upgrades/visneticupgrade.aspx?gp=30&amp;upg=1&amp;key={root/Server/@RegistrationKey}' target='_blank' class="adminMenu" style="font-weight:bold;">[Renew Maintenance]</a>
+																						</xsl:if>
+																					</xsl:if>
+																					</td>
+																				</tr>
+																				<tr>
+																					<td width="20%" style="padding-left:10px;"><span style="font-weight:bold;">License Size:</span><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+																					<td width="80%" align="left"><xsl:value-of select="root/Registration/@UserSize"/> Agents
+																					<xsl:if test="root/Registration/@KeyType != 'Evaluation'">
+																					<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<a href='https://shop.deerfield.net/purchase/upgrades/visneticupgrade.aspx?gp=30&amp;upg=0&amp;key={root/Server/@RegistrationKey}' target='_blank' class="adminMenu" style="font-weight:bold;">[Upgrade License Size]</a>
+																					</xsl:if>
+																					</td>
+																				</tr>			      
+								                                	  </table>					                                            
+							                                 	 </td>
+						                                    	</tr>
+						                                    	</xsl:if>
+						                                -->
+						                                <tr><td height="5"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Spool Folder:</td>
+				                                            <td width="80%" align="left">
+					                                            <input size="80" maxlength="255" type="text" name="SpoolFolder" value="{root/Server/@SpoolFolder}"/>					                                            
+				                                            </td>
+				                                            <tr><td height="5"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Temp Folder:</td>
+				                                            <td width="80%" align="left">
+					                                            <input size="80" maxlength="255" type="text" name="TempFolder" value="{root/Server/@TempFolder}"/>					                                            
+				                                            </td>
+			                                            </tr>
+			                                            </tr>						                                    	                                               	                                            				
+		                                            </table>
+	                                            </td>
+                                            </tr>
+                                            <xsl:if test="/root/Server">		                        						
+                                            <tr><td height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+                                            <tr>
+	                                            <td width="100%" class="subSectionHeader" align="left">
+		                                            <xsl:value-of select="root/Server/@Description"/> Server Tasks
+	                                            </td>
+                                            </tr>
+                                            <tr>
+	                                            <td width="100%" class="subSectionWrapper" align="left">
+		                                            <table width="100%" cellpadding="0" cellspacing="0">
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Database Maintenance:</td>
+				                                            <td width="80%" align="left">
+					                                            <input id="chkDBMaint" name="chkDBMaint" type="checkbox">
+																				<xsl:if test="root/Server/@DBMaint = '1'">
+																					<xsl:attribute name="checked">checked</xsl:attribute>
+																					<xsl:attribute name="disabled">true</xsl:attribute>
+																				</xsl:if>																												
+																			  </input>
+				                                            </td>
+			                                            </tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Message Destinations:</td>
+				                                            <td width="80%" align="left">
+					                                            <input id="chkMsgSnd" name="chkMsgSnd" type="checkbox" onclick="setButtons();">
+																				<xsl:if test="root/Server/@MsgSnd = '1'">
+																					<xsl:attribute name="checked">checked</xsl:attribute>																					
+																				</xsl:if>																												
+																			</input>
+																			<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																			<input type="Button" id="mdButton" name="mdButton" class="childControlBtn" value="Assign" onclick="openMD();"/> 
+				                                            </td>
+			                                            </tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Message Router:</td>
+				                                            <td width="80%" align="left">
+					                                            <input id="chkMsgRtr" name="chkMsgRtr" type="checkbox">
+																				<xsl:if test="root/Server/@MsgRtr = '1'">
+																					<xsl:attribute name="checked">checked</xsl:attribute>
+																					<xsl:attribute name="disabled">true</xsl:attribute>
+																				</xsl:if>																												
+																			</input>
+				                                            </td>
+			                                            </tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Message Sources:</td>
+				                                            <td width="80%" align="left">
+					                                            <input id="chkMsgCol" name="chkMsgCol" type="checkbox"  onclick="setButtons();">
+																				<xsl:if test="root/Server/@MsgCol = '1'">
+																					<xsl:attribute name="checked">checked</xsl:attribute>																					
+																				</xsl:if>																												
+																			</input>
+																			<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																			<input type="Button" id="msButton" name="msButton" class="childControlBtn" value="Assign" onclick="openMS();"/> 
+				                                            </td>
+			                                            </tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Scheduled Reports:</td>
+				                                            <td width="80%" align="left">
+					                                            <input id="chkReporter" name="chkReporter" type="checkbox">
+																				<xsl:if test="root/Server/@Reporter = '1'">
+																					<xsl:attribute name="checked">checked</xsl:attribute>
+																					<xsl:attribute name="disabled">true</xsl:attribute>
+																				</xsl:if>																												
+																			</input>
+				                                            </td>
+			                                            </tr>
+			                                            <tr>
+				                                            <td width="20%" style="padding-left:10px;">Ticket Monitor:</td>
+				                                            <td width="80%" align="left">
+					                                            <input id="chkTktMon" name="chkTktMon" type="checkbox">
+																			  	<xsl:if test="root/Server/@TktMon = '1'">
+																					<xsl:attribute name="checked">checked</xsl:attribute>
+																					<xsl:attribute name="disabled">true</xsl:attribute>
+																				</xsl:if>																												
+																			 </input>
+				                                            </td>
+			                                            </tr>			                                                                               	                                            				
+		                                            </table>
+	                                            </td>
+                                            </tr>
+                                           	</xsl:if>
+                                        </table>
+                                    </td>
+                                </tr>	
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </td>
+    </tr>
+</table>
+</form>
+<xsl:if test="/root/Server">
+<script type="text/javascript" language="javascript">
+	setButtons();
+</script>
+</xsl:if>
+</body>
+</html>
+
+</xsl:template>
+</xsl:stylesheet>

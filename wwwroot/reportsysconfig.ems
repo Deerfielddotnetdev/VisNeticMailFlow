@@ -1,0 +1,148 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+<html>
+<head>
+
+	
+
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"></SCRIPT>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	
+	<script LANGUAGE="javascript">
+	function Print()
+	{
+		//open the actual window to print the message;
+		window.open("printreport.ems","new","height=550,width=650,scrollbars=yes,status=no,toolbar=no,menubar=no,location=no");
+	}
+	function DownloadCSV()
+	{
+		document.tabularForm.target = "DLFrame";
+		document.tabularForm.Action.value = "download";		
+		document.tabularForm.submit();	
+		document.tabularForm.target = "";
+		document.tabularForm.Action.value = "";
+	}	
+	</script>
+	</head>
+
+<body>
+<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+<form name="tabularForm" method="get" action="">
+	<input type="hidden" name="Action"/>	
+</form>	
+<tr> 
+<td style="width:100%;"> 
+
+	<xsl:call-template name="default_titlebar">
+		<xsl:with-param name="title_text">
+		<xsl:value-of select="root/DOCUMENT/TITLE"/>
+		</xsl:with-param>
+	</xsl:call-template>
+
+	<table width="100%" align="center" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td style="height:32px" class="menubarx" nowrap="true">
+				<table style="height:100%" align="left" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td height="100%">					
+							<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+								title="Print Report" onclick="Print()"
+								 >
+								<nobr>
+									<img src="images/ico_print.gif" width="24" height="22" border="0"/>
+									Print
+								</nobr>
+							</div>
+						</td>
+						<td height="100%">					
+							<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+							 title="Download Report as File" onclick="DownloadCSV()"
+							  >
+								<nobr>
+									<img src="images/ico_download.gif" width="24" height="22" border="0" align="bottom"/>
+									Download
+								</nobr>
+							  </div>
+						</td>
+		
+						<td height="100%">					
+							<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+							title="Show Help" onclick="openHelp('Administration/Reporting/System_Configuration.htm')"
+							 >
+								<nobr>
+									<img src="images/ico_help.gif" width="24" height="22" border="0"/>
+									Help
+								</nobr>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</td>
+</tr>
+
+<tr> 
+<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;"> 
+<div align="center" style="width:100%;height:100%;overflow:auto"> 
+<table style="width:100%" border="0" cellpadding="0" cellspacing="0">
+<tr> 
+<td align="center"> 
+
+	<br/><br/>
+	<div id="title_div">
+	<span style="font-size: 2em">Mailflow Configuration Report</span>
+	</div>
+	<br/><br/>
+
+	<div id="results">
+	<table id="results_table" border="1" style="border-collapse:collapse;border-style:outset" width="90%" bordercolor="#000000" cellpadding="4" cellspacing="0" >
+
+	<tr bgcolor="#D1D1D1">
+	<td width="40%" style="border-bottom:1px solid black;padding-bottom:2px;"><b>Parameter</b></td>
+	<td style="border-bottom:1px solid black;padding-bottom:2px;"><b>Value</b></td>
+	</tr>
+
+	<xsl:for-each select="root/Row">
+	
+		<tr>
+			<xsl:choose>
+				<xsl:when test="position() mod 2 = 0">
+					<xsl:attribute name="STYLE">background-color:#FFFFDD;</xsl:attribute>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:attribute name="STYLE">background-color:#FFFFFF;</xsl:attribute>
+				</xsl:otherwise>
+			</xsl:choose>
+
+			<td width="40%" style="border-bottom:1px solid black;padding-bottom:2px;"><xsl:value-of select="@Description"/></td>
+			<td style="border-bottom:1px solid black;padding-bottom:2px;"><xsl:value-of select="@Value"/></td>
+		</tr>
+			
+	</xsl:for-each>
+		
+	</table>
+	</div>
+	
+	<br/><br/>
+	
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+</table>
+<div id="statusbar" style="display:none"></div>
+
+<iframe src="download_blank.htm" name="DLFrame" style="display:none"/>
+</body>
+</html>
+
+</xsl:template>
+</xsl:stylesheet>

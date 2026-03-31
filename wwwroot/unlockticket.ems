@@ -1,0 +1,46 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="iso-8859-1" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"/>
+<xsl:template match="/">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>Custom Settings</title>
+		<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+		<script type="text/javascript" src="./javascript/global.jmf"></script>
+		<script type="text/javascript">
+			function Verify()
+			{
+				// Verify with administrator that they want to unlock this ticket
+				if(window.confirm("Are you sure you want to unlock this ticket?"))
+				{
+					document.frmUnlockTicket.action.value = "unlock";
+					return true;
+				}
+				
+				document.frmUnlockTicket.action.value = "";
+				return false;
+			}
+		</script>
+	</head>
+	
+	<body>
+		<form style="position:relative;top:0px;" name="frmUnlockTicket" method="post" action="" onsubmit="return(Verify());">
+			<input name="action" type="hidden"/>
+			<div style="width:400px;height:27px;position:absolute;top:7px;left:7px;">
+				<span>Enter the ticket id of the ticket to unlock : </span>
+				<input name="txtTicketID" type="text" onKeyPress="return(ValidateTextBox());"/>
+			</div>
+			<div style="width:400px;height:27px;position:absolute;top:34px;left:7px;">
+				<input type="submit" value="Unlock"/>
+			</div>
+			<xsl:if test="root/unlockticket">
+				<div style="width:400px;height:27px;position:absolute;top:68px;left:7px;">
+					<span><xsl:value-of select="/root/unlockticket/result"/></span>
+				</div>
+			</xsl:if>
+		</form>
+	</body>
+</html>
+
+</xsl:template>
+</xsl:stylesheet>

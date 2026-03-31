@@ -1,0 +1,94 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	<title>View Alert</title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script> 
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script language="javascript">
+		function ViewTicketHistory(tktids)
+		{
+			if(window.dialogArguments != null)
+			{
+				var callerWindowObj = dialogArguments;
+				callerWindowObj.parent.frames[0].glo_launchNewWindow("mailflow.ems?rightpane=ticketsearchresults.ems$action=search$hideleft=1$ticketid="+tktids+"$MAXLINES=100$nocancel=1");
+			}
+			else
+			{
+				glo_launchNewWindow("mailflow.ems?rightpane=ticketsearchresults.ems$action=search$hideleft=1$ticketid="+tktids+"$MAXLINES=100$nocancel=1");
+			}			
+		}
+		
+		function ViewReportDetails(rrid)
+		{
+			if(window.dialogArguments != null)
+			{
+				var callerWindowObj = dialogArguments;
+				callerWindowObj.parent.frames[0].glo_launchModalWindow('./modalframe.ems?file=viewreportdetails.ems&amp;ID='+rrid,800, 700, 'yes', 'no', 'yes');
+				glo_doClose();
+			}
+			else
+			{
+				glo_launchModalWindow('./modalframe.ems?file=viewreportdetails.ems&amp;ID='+rrid,800, 700, 'yes', 'no', 'yes');
+			}			
+		}		
+		
+	</script>
+	<style>
+		a:visited{color:black;}
+		a{color:black;}
+	</style>
+
+	</head>
+
+	<body>
+	
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td style="width:100%">
+
+		<xsl:call-template name="default_titlebar">
+			<xsl:with-param name="title_text">
+				<xsl:value-of select="root/AlertMsg/@Subject" />
+			</xsl:with-param>
+		</xsl:call-template>
+		
+	</td>
+	</tr>
+	
+	<tr>
+	<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+	<div style="width:100%;height:100%;overflow:auto">
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td id="messageInfo" style="padding:10px">
+			<xsl:choose>
+			<xsl:when test="root/AlertMsg/alerteventid != 3">
+				<textarea cols="100" rows="14" readonly="readonly" class="Alert">
+				<xsl:value-of select="root/AlertMsg/Body" disable-output-escaping="yes" />
+				</textarea>
+			</xsl:when>
+			<xsl:when test="root/AlertMsg/alerteventid != 9">
+				<textarea cols="100" rows="14" readonly="readonly" class="Alert">
+				<xsl:value-of select="root/AlertMsg/Body" disable-output-escaping="yes" />
+				</textarea>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="root/AlertMsg/Body" disable-output-escaping="yes" />
+			</xsl:otherwise>
+			</xsl:choose>
+			</td>
+		</tr>
+	</table>
+	</div>
+	</td>
+	</tr>
+	</table>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

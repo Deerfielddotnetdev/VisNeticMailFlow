@@ -1,0 +1,852 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+	
+<html>
+<head>
+<title>Spell Check</title>
+<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+<xsl:if test="/root/DOCUMENT/useragent != 'MSIE'">
+<script type="text/javascript" language="javascript" src="./javascript/rangycore.jmf"></script>
+<script type="text/javascript" language="javascript" src="./javascript/rangytextrange.jmf"></script>
+</xsl:if>
+<script language="javascript">
+	var wordlist = new Array();
+	var sourcewindow;
+	if (window.dialogArguments)
+	{
+		sourcewindow = window.dialogArguments;
+	}
+	else if (window.parent.opener)
+	{
+		sourcewindow = window.parent.opener;
+	}
+	var thisElm;
+	var isNote = false;		
+	<xsl:choose>
+		<xsl:when test="/root/DOCUMENT/URLPARAMETERS/ISNOTE = '1'">
+			thisElm = sourcewindow.document.tabularForm.note;
+			isNote = true;
+		</xsl:when>
+		<xsl:otherwise>
+			thisElm = sourcewindow.document.getElementById("editregion");	
+		</xsl:otherwise>
+	</xsl:choose>
+	
+	var nStart = 0;
+	var nEnd = 0;
+	
+	// iterate over all words and misspellings on load
+	<xsl:for-each select="root/misspelled_word">
+	// ********************** begin next word ****************************
+		thisSuggestion = '';
+		
+		<xsl:for-each select="suggestion">
+		thisSuggestion = thisSuggestion + '<xsl:value-of select="@word"/>,';
+		</xsl:for-each>
+		
+		wordlist[wordlist.length] = new oWord("<xsl:value-of select="@word"/>",thisSuggestion);
+	</xsl:for-each>
+
+	var lastPos = 0;
+	var sumCorrected = 0;
+	var sumMisspelled = 0;
+			
+	var di = 0;
+						
+	function oWord(bad,good)
+	{						
+		/* *********************************************************
+			oWord Object
+			The oWord object contains a single misspelled word and
+			an array of matching suggestions.  A "marker" property
+			is also provided for word masking and searching.				
+		************************************************************ */
+				 
+		// ************** Object Properties ************** 
+		this.word = bad; 
+		this.suggestions = new Array();
+		this.marker = '';		
+				
+		// local vars
+		parseStart = 0;
+		parseEnd = 0;
+				
+		// get the bad word list
+		while(parseEnd != -1)
+		{
+			//iterate over "good" and find matches, add to array.
+			parseEnd = good.indexOf(',',parseStart);
+			if (parseEnd == -1)
+			{
+				break;
+			}
+
+			this.suggestions[this.suggestions.length] = good.substring(parseStart,parseEnd);
+			parseEnd = parseEnd + 1;
+			parseStart = parseEnd;
+		}
+			
+		// setup the marker property.
+		for (i=0; i &lt; this.word.length ; i++)
+		{
+			// create a marker equal to the width of the text, which will reduce display shift
+			this.marker = this.marker + '|';
+		}
+			
+		// ************** Map to Object Methods ************** 
+		oWord.prototype.showWord = showWord;				// populates the display
+
+		// ************** Object Methods ************** 
+	
+				
+		// method: showWord();
+		// updates the GUI to display the list of suggested words and the "bad" word.
+
+		function showWord()
+		{
+			if ( typeof goodword == 'undefined' )
+			{
+				goodword = document.getElementById("goodword");
+				badword = document.getElementById("badword");
+				controls = document.getElementById("controls");
+				words = document.getElementById("words");
+				nowords = document.getElementById("nowords");				
+			}
+			
+			goodword.length = 0;  						// clear good word suggestion box
+					
+			if(this.suggestions.length != 0)
+			{
+				suggestions = this.suggestions;			// shorthand	
+				badword.innerText = this.word;			// show the bad word
+							
+				// display the proper dialog
+				controls.style.display="block";
+				//nocontrols.style.display="none";
+				words.style.display="block";
+				nowords.style.display="none";							
+						
+				// iterate and add suggestions
+				i = -1;
+				while(i != suggestions.length-1)
+				{  		
+					i++;
+					newOption = new Option();				// create and add a new option;
+					newOption.text = this.suggestions[i];
+					newOption.value = this.suggestions[i];
+					goodword.options[goodword.options.length] = newOption; 
+				}
+			}
+			else 
+			{
+				badword.innerText = this.word;		// show the bad word
+				// no suggestions, hide the dialog.
+				controls.style.display="block";
+				//controls.style.display="none";
+				//nocontrols.style.display="block";
+				words.style.display="none";
+				nowords.style.display="block";
+			}
+		}	
+	}
+			
+	function oDoc()
+	{
+		/* *********************************************************
+		oDoc Object
+		The oDoc object is used to search and access portions of
+		the document.  Functions and methods explained herein.			
+		************************************************************ */
+				
+		// ************** Object Properties ************** 
+				
+		if (sourcewindow.document.body.createTextRange)
+		{
+			this.range = sourcewindow.document.body.createTextRange();		// textrange object
+		}
+		else if (document.createRange)
+		{
+			this.range = rangy.createRangyRange();
+      this.range.selectNodeContents(sourcewindow.document.body);				
+		}
+		
+		if ( this.range.text.length )
+		{					
+			this.text = this.range.text;				// text of the textrange
+			this.textstart = 0;							// starting char of the text property in relation to the document
+			this.textend = this.range.text.length;		// ending char of the text property in relation to the document
+		}
+		else if ( this.range.commonAncestorContainer.textContent )
+		{
+			this.text = this.range.commonAncestorContainer.textContent;				// text of the textrange
+			this.textstart = 0;							// starting char of the text property in relation to the document
+			this.textend = this.range.commonAncestorContainer.textContent.length;		// ending char of the text property in relation to the document
+		}
+		else if ( this.range.commonAncestorContainer.value )
+		{
+			this.text = this.range.commonAncestorContainer.value;				// text of the textrange
+			this.textstart = 0;							// starting char of the text property in relation to the document
+			this.textend = this.range.commonAncestorContainer.value.length;		// ending char of the text property in relation to the document
+		}
+		
+		if ( this.range.htmlText )
+		{
+			this.html = this.range.htmlText;			// html of the textrange
+			this.htmlstart = 0;							// starting char of the html property in relation to the textrange
+			this.htmlend = this.range.htmlText.length;	// starting char of the html property in relation to the textrange
+		}
+		else if ( this.range.commonAncestorContainer.innerHTML )
+		{
+			this.html = this.range.commonAncestorContainer.innerHTML;			// html of the textrange
+			this.htmlstart = 0;							// starting char of the html property in relation to the textrange
+			this.htmlend = this.range.commonAncestorContainer.innerHTML.length;	// starting char of the html property in relation to the textrange
+		}
+				
+		this.currentWord = null;					// reference to the current word
+		this.wordDim = -1;							// reference to the dimension of the word object
+		this.totalMisspelled = 0;					// total misspellings
+		this.totalCorrections = 0;					// total corrections
+		this.lastReplacement = 0;					// last replacement property
+		this.newWords = 0;							// new words, added to custom dictionary
+		this.wordcount = <xsl:value-of select="/root/Summary/@WordCount"/>; // total words
+				
+		this.htmlMarkPos = -1;						// marker position in the html document.
+		this.textMarkPos = -1;						// marker position in the text of the range.
+		this.bookmark = null;						// sting for bookmark
+				
+		// ************** Map to Object Methods  ************** 
+		oDoc.prototype.seek = seek;						// finds a word
+		oDoc.prototype.resetDocument = resetDocument;	// resets the document range
+		oDoc.prototype.next = next;						// adjusts the range
+		oDoc.prototype.ignore = ignore;					// ignores a selection, adjusts range
+		oDoc.prototype.replace = replace;				// replaces a suggestion
+		oDoc.prototype.debug = debug;					// displays debug information
+		oDoc.prototype.newWord = newWord;				// sets the search word to a new word
+		oDoc.prototype.nextWord = nextWord;				// sets the search word to the next word
+		oDoc.prototype.addWord = addWord;				// adds a word to the custom dictionary
+		oDoc.prototype.showStats = showStats;			// adds a word to the custom dictionary
+													
+		/* ****************** OBJECT METHODS ********************** */
+		
+		// method: resetDocument();
+		// obtains an updated document textrange and resets the properties of the object
+		function resetDocument()
+		{
+			// capture the range
+			if (sourcewindow.document.body.createTextRange)
+			{
+				this.searchRange = sourcewindow.document.body.createTextRange();
+				this.documentRange = sourcewindow.document.body.createTextRange();
+			}
+			else if (document.createRange)
+			{
+				//thisElm.focus();
+				this.searchRange = rangy.createRangyRange();
+        this.searchRange.selectNodeContents(sourcewindow.document.body);
+        this.documentRange = rangy.createRangyRange();
+        this.documentRange.selectNodeContents(sourcewindow.document.body);				
+			}
+			
+			if ( this.documentRange.moveToElementText )
+			{
+				// adjust the range so that it is only what we need
+				this.documentRange.moveToElementText(thisElm);
+				this.searchRange.moveToElementText(thisElm);
+			}
+			else
+			{
+				this.documentRange.selectNodeContents(thisElm);
+				this.searchRange.selectNodeContents(thisElm);
+			}
+					
+			// set a default bookmark
+			if ( this.documentRange.getBookmark )
+			{
+				this.bookmark = this.documentRange.getBookmark();
+			}
+			else if ( window.getSelection )
+			{
+				//thisElm.focus();
+				var selection = sourcewindow.getSelection();					
+				if (selection.rangeCount > 0)
+				{
+        	this.bookmark = selection.getRangeAt (0);
+        }
+			}
+					
+			// reset properties relating to the document
+			if ( this.range.htmlText )
+			{
+				this.htmlstart = 0;
+				this.htmlend = this.range.htmlText.length;				
+				this.textstart = 0;
+				this.textend = this.range.text.length;
+			}
+			else if ( this.range.commonAncestorContainer.innerHTML )
+			{
+				this.htmlstart = 0;						
+				this.htmlend = this.range.commonAncestorContainer.innerHTML.length;
+				this.textstart = 0;
+				this.textend = this.range.commonAncestorContainer.textContent.length;
+			}				
+				
+			this.htmlMarkPos = -1;						
+			this.textMarkPos = -1;
+			
+			return true;
+		}
+				
+		function newWord(di)
+		{
+			this.wordDim = di;									
+			this.currentWord = wordlist[this.wordDim].word;	
+			wordlist[this.wordDim].showWord();  // update gui using oWord.showWord() method
+		}
+				
+		function nextWord()
+		{
+			<![CDATA[
+			if(this.wordDim < wordlist.length -1 )
+			{
+				// more text is availible, go to it
+				this.wordDim++;
+				this.newWord(this.wordDim);
+				return true;
+			}
+			else
+			{
+				// the end, display the stats
+				if (window.getSelection)
+				{
+				  if (window.getSelection().empty)
+				  {  
+				    sourcewindow.getSelection().empty();
+				  }
+				  else if (window.getSelection().removeAllRanges)
+				  {
+				    sourcewindow.getSelection().removeAllRanges();
+				  }
+				}
+				else if (document.selection)
+				{  
+				  if (document.selection.empty)
+				  {  
+				    sourcewindow.document.selection.empty();
+				  }
+				}
+				this.showStats();
+				return false;
+			}			
+			]]>
+		}
+				
+		/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+		method: seek();
+		this function will search the text range.
+		the start of the text range should begin at the end of the last word
+		the end of the text range should end at the end of the document (lastword-end) = doclength	*/
+		
+		function seek()
+		{
+			var findOptions = {
+	        caseSensitive: true,
+	        withinRange: null,
+	        wholeWordsOnly: true,
+	        wrap: false,
+	        direction: "forward",
+	        wordOptions: null,
+	        characterOptions: null
+	    };
+			boolFound = false;
+			if (this.searchRange.findText)
+			{
+				if (sourcewindow.document.body.createTextRange)
+				{
+					boolFound = this.searchRange.findText(this.currentWord,9999999999999999,6);
+				}
+				else
+				{
+					if(isNote)
+					{
+						var pattern = "\\b(" + this.currentWord + ")\\b";
+						var nPos = thisElm.value.substr(nEnd,thisElm.value.length).search(pattern);
+						if(nPos != -1)
+						{
+							boolFound = true;
+							nStart = nPos + nEnd;
+							nEnd = nPos + nEnd + this.currentWord.length;
+						}
+					}
+					else
+					{
+						boolFound = this.searchRange.findText(this.currentWord,findOptions);
+					}
+				}
+			}			
+			
+			if(boolFound == false)
+			{
+				if (this.searchRange.findText)
+				{
+					boolFound = this.searchRange.findText(this.currentWord,9999999999999999,0);
+				}
+			}
+			
+			if (boolFound == true)
+			{									
+				if(isNote)
+				{
+					if(window.getSelection)
+					{
+						set_selection(thisElm,nStart,nEnd);
+					}
+					else
+					{
+						set_selection(thisElm,this.searchRange.startOffset,this.searchRange.endOffset);
+					}
+					
+				}
+				else
+				{
+					if (this.searchRange.select)
+					{
+						this.searchRange.select();											
+					}
+					else
+					{
+						if (window.getSelection)
+						{
+						  var sel = rangy.getSelection(sourcewindow);
+							sel.setSingleRange(this.searchRange);					 
+	          }					
+					}
+				}
+				
+				this.totalMisspelled++;										
+																				
+				// seek position and mark
+				if ( this.searchRange.text.length )
+				{
+					this.searchRange.text = wordlist[this.wordDim].marker;
+					this.textMarkPos = this.documentRange.text.indexOf(wordlist[this.wordDim].marker);
+					this.htmlMarkPos = this.documentRange.htmlText.indexOf(wordlist[this.wordDim].marker);					
+				}
+								
+				// find and replace marker
+				if (this.searchRange.select &amp;&amp; this.searchRange.moveStart)
+				{
+					this.searchRange.collapse(true);				
+					this.searchRange.moveStart('character', -wordlist[this.wordDim].word.length);
+					this.searchRange.select();
+					this.searchRange.text = wordlist[this.wordDim].word;
+				}
+								
+				// select word
+				if (this.searchRange.select &amp;&amp; this.searchRange.moveStart)
+				{
+					this.searchRange.collapse(true);
+					this.searchRange.moveStart('character', -wordlist[this.wordDim].word.length);
+					this.searchRange.select();
+				}
+								
+				// scroll to it.
+				if ( this.searchRange.scrollIntoView )
+				{
+					this.searchRange.scrollIntoView();
+				}				
+			}
+			else
+			{					
+				wordBool = this.nextWord();
+			}															
+		}
+
+		// method: next();
+		// finds the next word in the document
+		
+		function next() 
+		{
+			/* this will move to the next word.*/
+			this.searchRange.collapse(false);
+			if (this.searchRange.select &amp;&amp; this.searchRange.moveEnd)
+			{
+				this.searchRange.moveEnd('character',(this.documentRange.text.length - (this.textMarkPos + this.lastReplacement.length)));
+				this.bookmark = this.searchRange.getBookmark();
+				this.documentRange.moveToBookmark(this.bookmark);
+			}
+			replacewordtext.value = '';
+		}
+				
+		//method: replace();
+		//replaces the selected word
+		function replace()
+		{
+			/* this will replace a word with a selection.*/
+					
+			var optdim = 0;
+			var replaceword = '';
+			var retVal = null;
+					
+			replaceword = replacewordtext.value;
+					
+			if (replaceword != '')
+			{
+				if (this.searchRange.text == wordlist[this.wordDim].word)
+				{
+					// the correct word is selected
+					this.lastReplacement = replaceword;
+					this.searchRange.text = this.lastReplacement;
+					this.totalCorrections++;
+					wordBool = this.nextWord();
+					replacewordtext.value = '';
+					if (wordBool == true)
+					{
+						this.seek();
+					}
+				}
+				else
+				{
+					if(isNote)
+					{
+						replace_selection(thisElm,replaceword);						
+					}
+					else
+					{
+						replaceSelectedText(replaceword);						
+					}
+					
+					this.lastReplacement = replaceword;
+					this.totalCorrections++;
+					wordBool = this.nextWord();
+					replacewordtext.value = '';
+					if (wordBool == true)
+					{
+						this.seek();
+					}								
+				}
+			}
+			else
+			{
+				// user has not selected a replacement, warn them
+				alert('You must select a word to replace the misspelling');
+			}
+		}
+				
+		// method: ignore();
+		// ignores the selected word
+		function ignore() 
+		{
+			/* this simply ignores.*/
+			this.lastReplacement = this.currentWord;
+			wordBool = this.nextWord();
+			if (wordBool == true)
+			{
+				this.next();
+				this.seek();
+			}
+		}
+				
+		// method: debug();
+		// dumps properties to alert
+		function debug()
+		{
+			debug = 'oDoc Debug Information\n';
+			debug = debug + '\nText Start: ' + this.textstart;
+			debug = debug + '\nText End: ' + this.textend;
+			debug = debug + '\nHTML Start: ' + this.htmlstart;
+			debug = debug + '\nText End: ' + this.htmlend;
+			//alert(debug);
+		}
+				
+		// method: showStats();
+		// displays statistics on the spellcheck function */
+		function showStats()
+		{
+			var stats = '';
+			spellpanel.style.display="none";
+			spellstats.style.display = "block";
+					
+			misspelled.innerHTML = this.totalMisspelled;
+			corrected.innerHTML = this.totalCorrections;
+			newwordcount.innerHTML = this.newWords;
+			totalwordcount.innerHTML = this.wordcount;
+			default_titlebar_text.children[0].innerText = "Spell Check Results";
+		}
+
+		// method: addWord();
+		// adds a word to the dictionary
+		function addWord()
+		{
+			<xsl:choose>
+			<xsl:when test="/root/user/access/prefmydict='4'">		
+			var Turl = 'customdictionary.ems?agentid=<xsl:value-of select="root/user/id"/>&amp;postXML=1';
+			document.addwords.word.value = wordlist[this.wordDim].word;
+			var postResults = glo_buildFormPost('addwords',Turl);
+			var proceed = postResults[0];
+			if (proceed==true)
+			{
+				var tempList = new Array();
+				for (var xi=0; xi &lt; wordlist.length; xi++)
+				{
+					if (wordlist[xi].word != document.addwords.word.value)
+					tempList[tempList.length] = wordlist[xi];
+				}
+				wordlist.length = 0;
+				for (var ix=0; ix &lt; tempList.length; ix++)
+				{
+					wordlist[wordlist.length] = tempList[ix];
+				}
+				this.newWords++;
+				this.wordDim--;
+			}
+			thisdoc.ignore();
+			</xsl:when>
+			<xsl:otherwise>
+				alert("You do not have permission to add this entry!");
+			</xsl:otherwise>
+			</xsl:choose>
+		}
+
+	}
+	
+	function initSpell()
+	{
+		if (wordlist.length)
+		{
+			spellpanel.style.display="block";
+			thisdoc = new oDoc();
+			thisdoc.resetDocument();
+			thisdoc.newWord(0);
+			thisdoc.seek();
+		}
+		else
+		{
+			if ( sourcewindow.document.message )
+			{
+				sourcewindow.document.message.scResult.setAttribute('value', 'true' );
+			}				
+			window.returnValue = true;
+			<xsl:choose>
+				<xsl:when test="/root/DOCUMENT/URLPARAMETERS/SEND">
+					glo_doClose();
+				</xsl:when>
+				<xsl:otherwise>
+					thisdoc = new oDoc();
+					thisdoc.showStats();
+				</xsl:otherwise>
+			</xsl:choose>
+		}
+	}
+			
+	function getOpt()
+	{
+		optdim = 0;
+		if ( typeof replacewordtext == 'undefined' )
+		{
+			replacewordtext = document.getElementById("replacewordtext");
+		}
+		while(optdim != goodword.options.length)
+		{
+			// find selected in the option list
+			if (goodword.options[optdim].selected == true)
+			{
+				replacewordtext.value = goodword.options[optdim].value;
+				break;
+			}
+			else
+			{
+				optdim++;
+			}
+		}
+	}
+	
+	function setReturn(theVal)
+	{
+		if ( sourcewindow.document.message )
+		{
+			sourcewindow.document.message.scResult.setAttribute('value', theVal );	
+		}					
+		window.returnValue = theVal;
+	}
+	
+	function get_selection(e)
+	{
+	    //Mozilla and DOM 3.0
+	    if('selectionStart' in e)
+	    {
+	        var l = e.selectionEnd - e.selectionStart;
+	        return { start: e.selectionStart, end: e.selectionEnd, length: l, text: e.value.substr(e.selectionStart, l) };
+	    }
+	    //IE
+	    else if(document.selection)
+	    {
+	        e.focus();
+	        var r = document.selection.createRange();
+	        var tr = e.createTextRange();
+	        var tr2 = tr.duplicate();
+	        tr2.moveToBookmark(r.getBookmark());
+	        tr.setEndPoint('EndToStart',tr2);
+	        if (r == null || tr == null) return { start: e.value.length, end: e.value.length, length: 0, text: '' };
+	        var text_part = r.text.replace(/[\r\n]/g,'.'); //for some reason IE doesn't always count the \n and \r in the length
+	        var text_whole = e.value.replace(/[\r\n]/g,'.');
+	        var the_start = text_whole.indexOf(text_part,tr.text.length);
+	        return { start: the_start, end: the_start + text_part.length, length: text_part.length, text: r.text };
+	    }
+	    //Browser not supported
+	    else return { start: e.value.length, end: e.value.length, length: 0, text: '' };
+	}
+	
+	function replace_selection(e,replace_str)
+	{
+	    selection = get_selection(e);
+	    var start_pos = selection.start;
+	    var end_pos = start_pos + replace_str.length;
+	    e.value = e.value.substr(0, start_pos) + replace_str + e.value.substr(selection.end, e.value.length);
+	    set_selection(e,start_pos,end_pos);
+	    return {start: start_pos, end: end_pos, length: replace_str.length, text: replace_str};
+	}
+	
+	function set_selection(e,start_pos,end_pos)
+	{
+	    //Mozilla and DOM 3.0
+	    if('selectionStart' in e)
+	    {
+	        e.focus();
+	        e.selectionStart = start_pos;
+	        e.selectionEnd = end_pos;
+	    }
+	    //IE
+	    else if(document.selection)
+	    {
+	        e.focus();
+	        var tr = e.createTextRange();
+	
+	        //Fix IE from counting the newline characters as two seperate characters
+	        var stop_it = start_pos;
+	        for (i=0; i &lt; stop_it; i++) if( e.value[i].search(/[\r\n]/) != -1 ) start_pos = start_pos - .5;
+	        stop_it = end_pos;
+	        for (i=0; i &lt; stop_it; i++) if( e.value[i].search(/[\r\n]/) != -1 ) end_pos = end_pos - .5;
+	
+	        tr.moveEnd('textedit',-1);
+	        tr.moveStart('character',start_pos);
+	        tr.moveEnd('character',end_pos - start_pos);
+	        tr.select();
+	    }
+	    return get_selection(e);
+	}
+	
+	function replaceSelectedText(replacementText)
+	{
+    var sel, range;
+    if (window.getSelection)
+    {
+      sel = sourcewindow.getSelection();
+      if (sel.rangeCount)
+      {
+        range = sel.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(document.createTextNode(replacementText));
+      }
+    }
+    else if (document.selection &amp;&amp; document.selection.createRange)
+    {
+      range = document.selection.createRange();
+      range.text = replacementText;
+    }
+	}
+</script>
+</head>
+	
+<body callonload="initSpell();">
+
+<div id="menusection">
+	<xsl:call-template name="default_titlebar">
+		<xsl:with-param name="title_text">
+		Spell Check
+		</xsl:with-param>
+	</xsl:call-template>
+</div>
+
+<div style="display:none;" id="spellstats">
+	
+	<div style="padding:10px;">
+		Misspelled words: <span id="misspelled"></span><br/>
+		Corrected words: <span id="corrected"></span><br/>
+		Added to dictionary: <span id="newwordcount"></span><br/>
+		<b>Total Words: <span id="totalwordcount"></span></b><br/>
+	</div>
+
+	<br/><br/><br/><br/><br/><br/>
+	
+	<div align="center">
+		
+		<xsl:choose>
+			<xsl:when test="/root/DOCUMENT/URLPARAMETERS/SEND">
+				<input type="button" class="childControlBtn" value="Edit Message" onclick="setReturn(false);glo_doClose()"/>
+				<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<input type="button" class="childControlBtn" value="Send Message" onclick="setReturn(true);glo_doClose()"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<input type="button" style="width:90" class="childControlBtn" value="Close" onclick="setReturn(true);glo_doClose()"/>
+			</xsl:otherwise>
+		</xsl:choose>
+	</div>
+</div>
+
+<div style="display:none; padding: 10px;" id="spellpanel">
+<table border="0" width="95%" cellpadding="1" cellspacing="0">
+	<tr>
+		<td width="100" align="left" valign="top">Not Found:</td>
+		<td ><span id="badword"></span></td>
+		<td rowspan="3" align="left" valign="top">
+			<BR/>
+			<div style="display:block;" id="controls">
+				<input type="button" class="childControlBtn" style="width: 90;" onClick="thisdoc.ignore();" value="Ignore"/><BR/>
+				<input type="button" class="childControlBtn" style="width: 90;"  onClick="thisdoc.replace();" value="Change"/><BR/>
+				<input type="button" class="childControlBtn" style="width: 90;"  onClick="thisdoc.addWord();" value="Add"/><BR/><br/>
+				<xsl:choose>
+				<xsl:when test="/root/DOCUMENT/URLPARAMETERS/SEND">
+				<input type="button" class="childControlBtn" style="width: 90;" onClick="setReturn(false);glo_doClose();" value="Edit Message"/><BR/>
+				<input type="button" class="childControlBtn" style="width: 90;" onClick="setReturn(true);glo_doClose();" value="Send Message"/><BR/>
+				</xsl:when>
+				<xsl:otherwise>
+				<input type="button" class="childControlBtn" style="width: 90;" onClick="setReturn(false);glo_doClose();" value="Cancel"/><BR/>
+				</xsl:otherwise>
+				</xsl:choose>
+			</div>
+		</td>
+	</tr>
+	<tr>	
+		<td align="left" valign="top">Replace with:</td>				
+		<td><input type="text" style="width:150;" id="replacewordtext" name="replacewordtext"/></td>
+	</tr>
+	<tr>
+		<td align="left" valign="top">Suggestions:</td>
+		<td align="left" valign="top">
+			<div style="display:block;" id="words">
+				<select onChange="getOpt();" id="goodword" name="goodword" style="width:150; height:100;" size="5">
+				</select>
+			</div>
+				
+			<div style="display:none;" id="nowords">
+				<b>No alternate suggestions found!</b>
+			</div>
+		</td>
+	</tr>
+</table>
+</div>
+
+<form name="addwords" method="post" action="">
+<input type="hidden" value="" name="wordlist"/>
+<input type="hidden" value="" name="word"/>
+<input type="hidden" value="insert" name="Action"/>
+</form>
+
+</body>
+</html>
+
+</xsl:template>
+</xsl:stylesheet>
+

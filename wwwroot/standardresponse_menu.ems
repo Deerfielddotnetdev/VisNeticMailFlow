@@ -1,0 +1,62 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:template match="/">
+
+<html>
+	<head>
+		<title></title>
+		<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+		<script type="text/javascript" src="./javascript/global.jmf"></script>
+		<script type="text/javascript" src="./javascript/standardresponse_menu.jmf"></script>
+	</head>
+	<body>
+		<form class="StandardResponseMenu" name="tabularForm" method="post" action="">
+			<input type="hidden" name="selectId" value=""/>
+			<input type="hidden" name="Opt" value=""/>
+			<input type="hidden" name="Action" value=""/>
+			<table class="StandardResponseMenu" border="0px" cellpadding="0px" cellspacing="0px">
+				<tr>
+					<xsl:if test="/root/user/isadmin = 1">
+					<td>
+						<div id="btnNew" style="width:75px;" class="NoHiLightButton" title="New Category" onclick="onNewClick();" onmouseover="onButtonMouseOver(id);" onmouseout="onButtonMouseOut(id);" onmousedown="onButtonMouseDown(id);" onmouseup="onButtonMouseUp(id);">
+							<img src="images/ico_new.gif" width="24" height="22" alt="New Category"/>
+							New
+						</div>
+					</td>
+					<td>
+						<div id="btnRename" style="width:75px;" class="NoHiLightButton" title="Rename Category" onclick="onRenameClick();" onmouseover="onButtonMouseOver(id);" onmouseout="onButtonMouseOut(id);" onmousedown="onButtonMouseDown(id);" onmouseup="onButtonMouseUp(id);">
+							<img src="images/ico_edit.gif" width="24" height="22" alt="Rename Category"/>
+							Rename
+						</div>
+					</td>
+					<td>
+						<div id="btnDelete" style="width:75px;" class="NoHiLightButton" title="Delete Category" onclick="onDeleteClick();" onmouseover="onButtonMouseOver(id);" onmouseout="onButtonMouseOut(id);" onmousedown="onButtonMouseDown(id);" onmouseup="onButtonMouseUp(id);">
+							<img src="images/ico_delete.gif" width="24" height="22" alt="Delete Category"/>
+							Delete
+						</div>
+					</td>
+					</xsl:if>
+					<td>
+						<div id="btnSearch" style="width:75px;" class="NoHiLightButton" title="Search Library" onclick="onSearchClick();" onmouseover="onButtonMouseOver(id);" onmouseout="onButtonMouseOut(id);" onmousedown="onButtonMouseDown(id);" onmouseup="onButtonMouseUp(id);">
+							<img src="images/ico_search.gif" width="24" height="22" alt="Search Library"/>
+							Search
+						</div>
+					</td>
+					<td>
+						<div id="btnIntro" style="width:75px;" class="NoHiLightButton" title="Show Help" onclick="openHelp('My_Shortcuts/Standard_Responses/Introduction.htm');" onmouseover="onButtonMouseOver(id);" onmouseout="onButtonMouseOut(id);" onmousedown="onButtonMouseDown(id);" onmouseup="onButtonMouseUp(id);">
+							<img src="images/ico_help.gif" width="24" height="22" alt="Show Help"/>
+							Help
+						</div>
+					</td>
+				</tr>
+			</table>
+		</form>
+		<script type="text/javascript">
+			document.getElementById("btnRename").style.display = "none";
+			document.getElementById("btnDelete").style.display = "none";
+		</script>
+	</body>
+</html>
+
+</xsl:template>
+</xsl:stylesheet>

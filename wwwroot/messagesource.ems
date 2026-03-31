@@ -1,0 +1,538 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script language="JavaScript" type="text/javascript" src="./javascript/testlogin.jmf"></script>
+	<script language="JavaScript" type="text/javascript">
+	var nID = <xsl:value-of select='root/MessageSource/@ID'/>;
+	var nRefreshTokenExists = <xsl:value-of select='root/MessageSource/@RefreshTokenExists'/>;
+	function docSubmitForm()
+	{
+		searchString = tabularForm.RemoteAddress.value;
+		if (searchString == "")
+		{
+			alert("A Server Address has not been specified!");
+			tabularForm.RemoteAddress.focus();
+		}
+		else
+		{
+			pattern = /[^\.\w]/g;
+			result = pattern.exec(searchString);
+			if (result!=null &amp;&amp; result != '-')
+			{
+				alert("The Server Address cannot contain the following character:\n"+"	"+result);
+				tabularForm.RemoteAddress.focus();
+			}
+			else
+			{
+				var postResults = glo_buildFormPost('tabularForm');
+				if (eval(postResults[0])==true)
+				{
+					glo_setOpenerLocation();
+					glo_doClose();
+				}
+
+			}
+		}
+	}
+	
+	function disable(){
+		var enabled = document.tabularForm.IsActive.checked;
+		var fields = new Array();
+		fields[fields.length] = document.tabularForm.RemoteAddress;
+		fields[fields.length] = document.tabularForm.Description;
+		fields[fields.length] = document.tabularForm.MessageSourceType;
+		fields[fields.length] = document.tabularForm.RemotePort;
+		fields[fields.length] = document.tabularForm.AuthUserName;
+		fields[fields.length] = document.tabularForm.AuthPassword;
+		fields[fields.length] = document.tabularForm.IsAPOP;
+		fields[fields.length] = document.tabularForm.IsSSL;
+		fields[fields.length] = document.tabularForm.OfficeHours;
+		fields[fields.length] = document.tabularForm.SetHours;
+		fields[fields.length] = document.tabularForm.CheckFreqMins;
+		fields[fields.length] = document.tabularForm.ConnTimeoutSecs;
+		fields[fields.length] = document.tabularForm.UseReplyTo;
+		fields[fields.length] = document.tabularForm.MaxMsgSize;
+		fields[fields.length] = document.tabularForm.MessageDestination;
+		fields[fields.length] = document.tabularForm.LeaveCopiesOnServer;		
+		fields[fields.length] = document.tabularForm.SkipDownloadDays;	
+		fields[fields.length] = document.tabularForm.DupMsg;
+		<xsl:if test="root/DOCUMENT/HOSTED_VERSION">
+		fields[fields.length] = document.tabularForm.DateFilters;
+		fields[fields.length] = document.tabularForm.SetFilters;
+		</xsl:if>
+		fields[fields.length] = document.tabularForm.ServerID;
+		fields[fields.length] = document.tabularForm.ZipAttach;
+		fields[fields.length] = document.tabularForm.ckUseToken;
+		
+		if (enabled &amp;&amp; document.tabularForm.LeaveCopiesOnServer.checked == true )
+		{
+			fields[fields.length] = document.tabularForm.LeaveCopiesDays;
+		}
+		else if (!enabled)
+		{
+			fields[fields.length] = document.tabularForm.LeaveCopiesDays;
+		}
+		
+		if (enabled &amp;&amp; document.tabularForm.ckUseToken.checked == true )
+		{
+			fields[fields.length] = document.tabularForm.OAuthHostID;
+		}
+		else if (!enabled)
+		{
+			fields[fields.length] = document.tabularForm.OAuthHostID;			
+		}
+		
+		glo_disableForm(enabled,fields);
+		if (enabled &amp;&amp; document.tabularForm.LeaveCopiesOnServer.checked == false)
+		{
+			var fields = new Array();
+			fields[fields.length] = document.tabularForm.LeaveCopiesDays;
+			glo_disableForm(false,fields);
+		}
+		if (enabled &amp;&amp; document.tabularForm.ckUseToken.checked == false)
+		{
+			var fields = new Array();
+			fields[fields.length] = document.tabularForm.OAuthHostID;
+			glo_disableForm(false,fields);
+		}
+		if (enabled &amp;&amp; document.tabularForm.ckUseToken.checked == true)
+		{
+			var fields = new Array();
+			fields[fields.length] = document.tabularForm.AuthPassword;
+			glo_disableForm(false,fields);
+		}
+		if ((enabled &amp;&amp; document.tabularForm.OfficeHours.options[document.tabularForm.OfficeHours.selectedIndex].value == 0) || nID == 0)
+		{
+			var fields = new Array();
+			fields[fields.length] = document.tabularForm.SetHours;
+			glo_disableForm(false,fields);
+		}
+		if (enabled &amp;&amp; document.tabularForm.MessageSourceType.options[document.tabularForm.MessageSourceType.selectedIndex].value != 1)
+		{
+			var fields = new Array();
+			fields[fields.length] = document.tabularForm.IsAPOP;
+			glo_disableForm(false,fields);
+		}
+	}
+	function setHours()
+	{
+		glo_launchModalWindow("modalframe.ems?file=officehours.ems&amp;TypeID=3&amp;ActualID="+nID, 500, 300, 'yes', 'no', 'no');
+	}
+	
+	function chkOauth2()
+	{
+		if(nRefreshTokenExists == 0 &amp;&amp; document.tabularForm.ckUseToken.checked == true)
+		{
+			alert("You must Save then request a Token for this Message Source\nvia the VisNetic MailFlow Administration Tool.\n\nThe Tool can be found on the VisNetic MailFlow Application Server \"Start Menu\" VisNetic MailFlow Group.\n\nNote: Right click the Tool icon and \"Run as Administrator\".");
+		}
+	}
+	
+	function setFilters()
+	{
+		glo_launchModalWindow("modalframe.ems?file=datefilters.ems", 700, 350, 'yes', 'no', 'no');
+	}
+	
+	</script>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	</head>
+
+	<body callOnLoad="disable();">
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="Action">
+	<xsl:if test="root/MessageSource/@ID = '0'">
+	<xsl:attribute name="value">insert</xsl:attribute>
+	</xsl:if>
+	<xsl:if test="root/MessageSource/@ID &gt; '0'">
+	<xsl:attribute name="value">update</xsl:attribute>
+	</xsl:if>
+	</input>
+
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Save Message Source"
+										 onclick="docSubmitForm()"
+										  >
+											<nobr>
+												<img src="images/ico_save.gif" width="24" height="22" border="0"/>
+												Save
+											</nobr>
+										  </div>
+									</td>
+									<td height="100%">					
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Cancel" 
+										 onclick="glo_doClose();"
+										  >
+											<nobr>
+												<img src="images/ico_cancel.gif" width="24" height="22" border="0"/>
+												Cancel
+											</nobr>
+										  </div>
+									</td>
+									<td height="100%">					
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Test Login" 
+										 onclick="testLogin('source')"
+										  >
+											<nobr>
+												<img src="images/ico_testlogin.gif" width="24" height="22" border="0"/>
+												Test Login
+											</nobr>
+										  </div>
+									</td>
+									<td height="100%">					
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Show Help" 
+										 onclick="openHelp('Administration/Hidden/Msg_Handling/Create_Edit_a_Message_Source.htm')"
+										  >
+											<nobr>
+												<img src="images/ico_help.gif" width="24" height="22" border="0"/>
+												Help
+											</nobr>
+										  </div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto;">
+				<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0"><tr><td>
+				
+				<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td nowrap="true" style="padding-left:6px;padding-bottom:5px" colspan="2">
+							<input type="checkbox" onClick="disable();" value="1" name="IsActive">
+							<xsl:if test="root/MessageSource/@IsActive = '1'">
+								<xsl:attribute name="CHECKED">true</xsl:attribute>
+							</xsl:if>
+							Enabled
+							</input>
+						</td>
+					</tr>
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Process:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<select name="OfficeHours" onchange="disable()">
+								<option>
+									<xsl:attribute name="value">0</xsl:attribute>
+									<xsl:if test="root/MessageSource/@OfficeHours = '0'">
+										<xsl:attribute name="selected">true</xsl:attribute>
+									</xsl:if>Always
+								</option>
+								<option>
+									<xsl:attribute name="value">1</xsl:attribute>
+									<xsl:if test="root/MessageSource/@OfficeHours = '1'">
+										<xsl:attribute name="selected">true</xsl:attribute>
+									</xsl:if>During Office Hours
+								</option>
+								<option>
+									<xsl:attribute name="value">2</xsl:attribute>
+									<xsl:if test="root/MessageSource/@OfficeHours = '2'">
+										<xsl:attribute name="selected">true</xsl:attribute>
+									</xsl:if>Outside Office Hours
+								</option>
+						</select>
+						<input type="button" name="SetHours" value="Set Hours" class="childControlBtn" onclick="setHours();"/>
+						</td>
+					</tr>
+					<tr style="padding-bottom:2px">
+						<td nowrap="true" style="padding-left:10px;">Type:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<select name="MessageSourceType" onchange="disable()">
+					<xsl:variable name="CurMsgSrcId" select="root/MessageSource/@MessageSourceType" />
+					<xsl:for-each select="root/MessageSourceTypes/SourceType">
+						<xsl:choose>
+							<xsl:when test="@ID = $CurMsgSrcId">
+								<option>
+									<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+									<xsl:attribute name="selected">true</xsl:attribute>
+									<xsl:value-of select="@Description"/>
+								</option>
+							</xsl:when>
+							<xsl:otherwise>
+								<option>
+									<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+									<xsl:value-of select="@Description"/>
+								</option>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:for-each>
+							</select>
+						</td>
+					</tr>
+
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Server Address:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input size="27" maxlength="255" type="text" name="RemoteAddress" value="{root/MessageSource/RemoteAddress}" />
+							<script language="javascript">
+								document.tabularForm.RemoteAddress.focus();
+							</script>
+						</td>
+					</tr>
+
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Description:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input size="27" maxlength="64" type="text" name="Description" />
+							<script>
+							document.tabularForm.Description.value = "<xsl:value-of select="root/MessageSource/Description" disable-output-escaping="yes" />";
+							</script>
+						</td>
+					</tr>
+
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Port:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input size="8" type="text" name="RemotePort" value="{root/MessageSource/@RemotePort}" />
+						</td>
+					</tr>	
+					
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Use SSL/TLS:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input type="checkbox" value="1" name="IsSSL">
+							<xsl:if test="root/MessageSource/@IsSSL = '1'">
+								<xsl:attribute name="CHECKED">true</xsl:attribute>
+							</xsl:if>
+							</input>
+						</td>
+					</tr>
+					
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Authenticate with Token:</td>
+						<td nowrap="true" style="padding-left:10px;padding-bottom:3px;">
+							<input type="checkbox" onclick="disable();chkOauth2();" value="1" name="ckUseToken">
+							<xsl:if test="not(root/MessageSource/@OAuthHostID = '0')">
+								<xsl:attribute name="CHECKED">true</xsl:attribute>
+							</xsl:if>
+							</input>
+							Provider:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+							<select name="OAuthHostID">
+								<xsl:for-each select="root/OauthHosts/OauthHost">
+								<xsl:choose>
+									<xsl:when test="@ID = /root/MessageSource/@OAuthHostID">
+									<option>
+										<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+										<xsl:attribute name="selected">true</xsl:attribute>
+										<xsl:value-of select="@Description"/>
+									</option>
+									</xsl:when>
+									<xsl:otherwise>
+									<option>
+										<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+										<xsl:value-of select="@Description"/>
+									</option>
+									</xsl:otherwise>
+								</xsl:choose>
+								</xsl:for-each>
+							</select>
+						</td>
+					</tr>
+
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">User Name:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input size="27" maxlength="125" type="text" name="AuthUserName" value="{root/MessageSource/AuthUserName}" />
+						</td>
+					</tr>
+
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Password:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input size="27" maxlength="125" type="password" name="AuthPassword" value="{root/MessageSource/AuthPassword}" />
+						</td>
+					</tr>
+
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Use APOP:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input type="checkbox" value="1" name="IsAPOP">
+							<xsl:if test="root/MessageSource/@IsAPOP = '1'">
+								<xsl:attribute name="CHECKED">true</xsl:attribute>
+							</xsl:if>
+							</input>
+						</td>
+					</tr>
+
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Leave Copies On Server:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input type="checkbox" onclick="disable();" value="1" name="LeaveCopiesOnServer">
+							<xsl:if test="root/MessageSource/@LeaveCopiesOnServer = '1'">
+								<xsl:attribute name="CHECKED">true</xsl:attribute>
+							</xsl:if>
+							</input>
+							for
+							<input size="3" maxlength="4" type="text" name="LeaveCopiesDays" value="{root/MessageSource/@LeaveCopiesDays}" />
+							day(s)
+						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;(default:0 = infinity)
+						</td>
+					</tr>
+					
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Ignore Duplicate Messages:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input type="checkbox" value="1" name="DupMsg">
+							<xsl:if test="root/MessageSource/@DupMsg = '1'">
+								<xsl:attribute name="CHECKED">true</xsl:attribute>
+							</xsl:if>
+							</input>
+						</td>
+					</tr>
+					
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Ignore Messages Older Than:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input size="3" maxlength="4" type="text" name="SkipDownloadDays" value="{root/MessageSource/@SkipDownloadDays}" />
+							day(s)
+						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;(default:7 [0 = disabled])
+						</td>
+					</tr>
+					
+					
+					
+					<xsl:if test="root/DOCUMENT/HOSTED_VERSION">
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Process Date Filters:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input type="checkbox" value="1" name="DateFilters">
+							<xsl:if test="root/MessageSource/@DateFilters = '1'">
+								<xsl:attribute name="CHECKED">true</xsl:attribute>
+							</xsl:if>
+							</input>
+							<input type="button" name="SetFilters" value="Set Filters" class="childControlBtn" onclick="setFilters();"/>
+						</td>
+					</tr>
+					</xsl:if>
+					
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Use "Reply To:" email address as contact address:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input type="checkbox" value="1" name="UseReplyTo">
+							<xsl:if test="root/MessageSource/@usereplyto = '1'">
+								<xsl:attribute name="CHECKED">true</xsl:attribute>
+							</xsl:if>
+							</input>
+						</td>
+					</tr>
+
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Check Interval:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input size="8" type="text" name="CheckFreqMins" value="{root/MessageSource/@CheckFreqMins}" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+							minutes <xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;(default: 2)
+						</td>
+					</tr>
+
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Connection Timeout:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input size="8" type="text" name="ConnTimeoutSecs" value="{root/MessageSource/@ConnTimeoutSecs}" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+							seconds <xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;(default: 300)
+						</td>
+					</tr>
+
+					<tr style="padding-bottom:2px">
+						<td nowrap="true" style="padding-left:10px;">Max Message Size:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input size="8" type="text" name="MaxMsgSize" value="{root/MessageSource/@MaxMsgSize}" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+							kilobytes <xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;(default: 5000)
+						</td>
+					</tr>
+					
+					<tr style="padding-bottom:2px">
+						<td nowrap="true" style="padding-left:10px;">Zip Attachments Threshold:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<input size="8" type="text" name="ZipAttach" value="{root/MessageSource/@ZipAttach}" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+							(default: 0 = do not zip)
+						</td>
+					</tr>
+					
+					<tr>
+						<td nowrap="true" style="padding-left:10px">Message Source Server:</td>
+						<td nowrap="true" style="padding-left:10px;;padding-bottom:3px">
+						<select name="ServerID">
+							<xsl:for-each select="root/Servers/Server">
+							<xsl:choose>
+								<xsl:when test="@ID = /root/MessageSource/@ServerID">
+								<option>
+									<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+									<xsl:attribute name="selected">true</xsl:attribute>
+									<xsl:value-of select="@Description"/>
+								</option>
+								</xsl:when>
+								<xsl:otherwise>
+								<option>
+									<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+									<xsl:value-of select="@Description"/>
+								</option>
+								</xsl:otherwise>
+							</xsl:choose>
+							</xsl:for-each>
+						</select>
+						</td>
+					</tr>
+
+					<tr>
+						<td nowrap="true" style="padding-left:10px;">Message Destination:</td>
+						<td nowrap="true" style="padding-left:10px;">
+							<select name="MessageDestination">
+					<xsl:variable name="CurMsgDestId" select="root/MessageSource/@MessageDestination" />
+					<xsl:for-each select="root/MessageDestinations/MessageDestination">
+						<xsl:choose>
+							<xsl:when test="@ID = $CurMsgDestId">
+								<option>
+									<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+									<xsl:attribute name="selected">true</xsl:attribute>
+									<xsl:value-of select="@Address" disable-output-escaping="yes"/>
+								</option>
+							</xsl:when>
+							<xsl:otherwise>
+								<option>
+									<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+									<xsl:value-of select="@Address" disable-output-escaping="yes"/>
+								</option>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:for-each>
+							</select>
+						</td>
+					</tr>					
+				</table>
+
+				</td></tr></table>
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+</xsl:template>
+</xsl:stylesheet>

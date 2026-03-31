@@ -1,0 +1,60 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+	<html>
+	<head>
+	<title>Signatures</title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/tabs.jmf"></script>
+	<script type="text/javascript" language="javascript">
+	var docIncreaseWaitCount = 1;
+	function docSetTabs() {
+		tabs.style.top = headersection.offsetHeight + 8;
+		tabs.style.display = "block";
+	}
+	</script>
+	<link rel="stylesheet" type="text/css" href="{root/user/stylesheetname}"></link>
+	</head>
+	<body callOnLoad="tabInit();docSetTabs();">
+	<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+	<!--<xsl:if test="root/DOCUMENT/URLPARAMETERS/DOCSHOWTITLE">-->
+		<tr>
+			<td id="headersection">
+			<xsl:call-template name="default_titlebar">
+				<xsl:with-param name="title_text">
+				Signatures
+				</xsl:with-param>
+			</xsl:call-template>
+			</td>
+		</tr>
+	<!--</xsl:if>-->
+		<tr>
+			<td style="height:100%;">
+				<div id="tabs" style="display:none;position:absolute!important;top:8px!important;">
+					<span id="tab1" turl="signatures_agent.ems" class="tabActive">Agents</span>
+					<span id="tab2" turl="signatures_group.ems" class="tab">Groups</span>
+				</div>
+				<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+					<tr><td id="tab_holder" style="height:24px;d"><br/></td></tr>
+					<tr>
+						<td id="tab_canvas" class="tabActiveColor" style="height:100%;border-style:outset;border-width:1px;padding:10px;overflow:hidden;">
+							<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td style="height:100%;border-style:inset;border-width:1px;overflow:hidden;">
+									<iframe id="tabWindow" name="tabWindow" style="" frameborder="0" src="signatures_agent.ems" height="100%" width="100%" scrolling="No"></iframe>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+
+	</body>
+	</html>
+</xsl:template>
+</xsl:stylesheet>

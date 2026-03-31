@@ -1,0 +1,980 @@
+﻿<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	<title>
+		<xsl:choose>
+			<xsl:when test="root/LinkTicket/@LinkID">
+				Ticket Search - Search for a ticket to link the selected ticket(s) to
+			</xsl:when>
+			<xsl:when test="root/MergeTicket/@MergeID">
+				Ticket Search - Search for a ticket to merge the selected ticket(s) with
+			</xsl:when>
+			<xsl:when test="root/ChangeTicket/@MsgID &gt; '0'">
+				Ticket Search - Search for a ticket to move the selected message to
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="root/DOCUMENT/TITLE"/>
+			</xsl:otherwise>
+		</xsl:choose>
+	</title>
+	
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"/>
+	<link type="text/css" rel="StyleSheet" href="./stylesheets/datepicker.css"/>
+	
+	<script LANGUAGE="javascript" src="./javascript/global.jmf"/>
+	<xsl:choose>
+	<xsl:when test="root/DOCUMENT/dateformat = '0'">
+	<script language="javascript" src="./javascript/datepicker.jmf"></script>
+	</xsl:when>
+	<xsl:otherwise>
+	<script language="javascript" src="./javascript/datepicker1.jmf"></script>
+	</xsl:otherwise>
+	</xsl:choose>
+	<script language="javascript">		
+		
+		function startSearch() 
+		{
+			var bRequireDate = '<xsl:value-of select="/root/Parameters/@RequireDate"/>';
+			// validate the ticket ID
+			if ( document.tabularForm.ticketid.value.length > 0 )
+			{
+				var objRegExp = /^\d*$/;
+				document.tabularForm.ticketid.value = document.tabularForm.ticketid.value.trim();
+				
+				if (!objRegExp.test(document.tabularForm.ticketid.value))
+				{
+					alert( "Ticket ID must be a positive integer" );
+					document.tabularForm.ticketid.focus();
+					document.tabularForm.ticketid.select();
+					return;
+				}
+			}
+			
+			if(document.getElementById('chkFullText').checked)
+			{
+				document.tabularForm.fulltext.value = 1;
+			}
+			if(bRequireDate == true)
+			{
+				if(document.tabularForm.subject_exact[0].checked &amp;&amp; (document.tabularForm.subject.value.length>0 || document.tabularForm.subject2.value.length>0))
+				{
+					if ( document.tabularForm.use_created_date[0].checked == true &amp;&amp; document.tabularForm.use_opened_date[0].checked == true &amp;&amp; document.tabularForm.use_email_date[0].checked == true)
+					{
+						alert( "If searching Ticket Subject Contains, you must define at least one Date Range!" );
+						return;
+					}
+				}
+				
+				if(document.tabularForm.msgsubject_exact[0].checked &amp;&amp; document.tabularForm.msgsubject.value.length>0)
+				{
+					if ( document.tabularForm.use_created_date[0].checked == true &amp;&amp; document.tabularForm.use_opened_date[0].checked == true &amp;&amp; document.tabularForm.use_email_date[0].checked == true)
+					{
+						alert( "If searching Message Subject Contains, you must define at least one Date Range!" );
+						return;
+					}
+				}
+				
+				if(document.tabularForm.message_body.value.length>0)
+				{
+					if ( document.tabularForm.use_created_date[0].checked == true &amp;&amp; document.tabularForm.use_opened_date[0].checked == true &amp;&amp; document.tabularForm.use_email_date[0].checked == true)
+					{
+						alert( "If searching Message Body Contains, you must define at least one Date Range!" );
+						return;
+					}
+				}
+				
+				if(document.tabularForm.ticket_note.value.length>0)
+				{
+					if ( document.tabularForm.use_created_date[0].checked == true &amp;&amp; document.tabularForm.use_opened_date[0].checked == true &amp;&amp; document.tabularForm.use_email_date[0].checked == true)
+					{
+						alert( "If searching Ticket Note Contains, you must define at least one Date Range!" );
+						return;
+					}
+				}
+			}
+			
+			if ( document.tabularForm.use_created_date[0].checked != true )
+			{
+				// validate start date
+				if (!objCreateStartDate.Update(true))
+					return;
+
+				if (!objCreateEndDate.Update(true))
+					return;
+			}
+
+			if ( document.tabularForm.use_opened_date[0].checked != true )
+			{
+				// validate start date
+				if (!objOpenStartDate.Update())
+					return;
+				
+				// validate end date
+				if (!objOpenEndDate.Update())
+					return;
+			}
+			
+			if ( document.tabularForm.use_email_date[0].checked != true )
+			{
+				// validate start date
+				if (!objEmailStartDate.Update())
+					return;
+				
+				// validate end date
+				if (!objEmailEndDate.Update())
+					return;
+			}
+			
+			var IdArr = document.tabularForm.ticketfieldid.options[document.tabularForm.ticketfieldid.selectedIndex].value.split(",");
+			var IdType = IdArr[1];
+			var tfv = document.getElementById("tfv");
+			if(IdType == 0)
+			{
+				document.tabularForm.TicketFieldValue.value = 0;
+			}
+			else if(IdType == 1)
+			{
+				document.tabularForm.TicketFieldValue.value = tfv.value;
+			}
+			else if(IdType == 2)
+			{
+				if(tfv.checked)
+				{
+					document.tabularForm.TicketFieldValue.value = 1;
+				}
+				else
+				{
+					document.tabularForm.TicketFieldValue.value = 0;
+				}
+			}
+			else
+			{
+				document.tabularForm.TicketFieldValue.value = tfv.options[tfv.selectedIndex].value;
+			}
+						
+			if ( this.parent.parent.theMainContain )
+			{
+			     this.parent.parent.docSetLoading(false);
+			}
+			document.tabularForm.submit();
+		}
+		
+		function checkDisable() 
+		{
+			var bEnable = (document.tabularForm.use_opened_date[0].checked != true);
+			
+			fields = new Array();
+			fields[fields.length] = objOpenStartDate._input;
+			fields[fields.length] = objOpenStartDate._button;
+			fields[fields.length] = objOpenEndDate._input;
+			fields[fields.length] = objOpenEndDate._button;
+			glo_disableForm(bEnable,fields);
+
+			bEnable = (document.tabularForm.use_created_date[0].checked != true);
+			
+			fields = new Array();
+			fields[fields.length] = objCreateStartDate._input;
+			fields[fields.length] = objCreateStartDate._button;
+			fields[fields.length] = objCreateEndDate._input;
+			fields[fields.length] = objCreateEndDate._button;
+			glo_disableForm(bEnable,fields);
+			
+			bEnable = (document.tabularForm.use_email_date[0].checked != true);
+			
+			fields = new Array();
+			fields[fields.length] = objEmailStartDate._input;
+			fields[fields.length] = objEmailStartDate._button;
+			fields[fields.length] = objEmailEndDate._input;
+			fields[fields.length] = objEmailEndDate._button;
+			glo_disableForm(bEnable,fields);
+			
+			for (var i=0; i &lt; document.tabularForm.subject_exact.length; i++)
+		  {
+		  	if (document.tabularForm.subject_exact[i].checked)
+		    {
+		    	bEnable = document.tabularForm.subject_exact[i].value;
+		    }
+		  }
+		  
+		  var vSubject2 = document.getElementById("subject2");
+		  var vAndOr = document.getElementById("andor");
+		  if(bEnable==1)
+		  {
+		  	vSubject2.disabled=true;
+		  	vSubject2.style.backgroundColor = "#D3D3D3";
+		  	vAndOr.disabled=true;
+		  	vAndOr.style.backgroundColor = "#D3D3D3";		  	
+		  }
+		  else
+		  {
+		  	vSubject2.disabled=false;
+		  	vSubject2.style.backgroundColor = "#FFFFFF";
+		  	vAndOr.disabled=false;
+		  	vAndOr.style.backgroundColor = "#FFFFFF";
+		  }			
+		}
+
+		function keyPress()
+		{
+			if(window.event.keyCode == 13)
+			{
+				startSearch();
+				window.event.keyCode = 0;
+				return true;
+			}
+		}
+		function docInitCustomFields(tfid,tftypeid)
+    {
+    	var tftdex = document.getElementById("tdtfexact");
+    	var tfval = document.getElementById("tfvalue");
+    	while (tfval.hasChildNodes())
+    	{
+      	tfval.removeChild(tfval.lastChild);
+      }
+    	if(tftypeid == 0)
+    	{
+    		var i = document.createElement("input");
+				i.setAttribute('type',"hidden");
+				i.setAttribute('name',"tfv");
+				i.setAttribute('id',"tfv");
+				i.setAttribute('value',"0");
+				tfval.appendChild(i);
+    		tfval.style.display = 'none';
+    		tftdex.style.display = 'none';
+    	}
+    	else
+    	{
+    		if(tftypeid == 1)
+    		{
+    			var i = document.createElement("input");
+					i.setAttribute('type',"text");
+					i.setAttribute('name',"tfv");
+					i.setAttribute('id',"tfv");
+					tfval.appendChild(i);
+					tftdex.style.display = 'block';
+    		}
+    		else if(tftypeid == 2)
+    		{
+    			var i = document.createElement("input");
+					i.setAttribute('type',"checkbox");
+					i.setAttribute('name',"tfv");
+					i.setAttribute('id',"tfv");
+					tfval.appendChild(i);
+					tftdex.style.display = 'none';
+    		}
+    		else if(tftypeid == 3)
+    		{
+    			var XMLObject = null;
+					var Options = null;
+					if(glo_whichBrowser()=="Internet Explorer")
+					{
+						XMLObject = document.getElementById("docXML").XMLDocument;
+					}
+					else
+					{
+						XMLObject = document.getElementById("docXML");
+					}
+					if ( XMLObject )
+					{
+						if(glo_whichBrowser()=="Internet Explorer")
+						{
+							Options = XMLObject.selectNodes("/root/DATA/TicketFieldOptions/TicketFieldOption[@TFID=" + tfid +"]");
+						}
+						else
+						{
+							Options = XMLObject.selectNodes("//ticketfieldoption[@tfid="+ tfid +"]");
+						}
+					}
+    			var i = document.createElement("select");
+					i.setAttribute('name',"tfv");
+					i.setAttribute('id',"tfv");
+					var option = document.createElement("option");
+			    option.value = 0;
+			    option.text = "";
+			    i.appendChild(option);
+			    for ( var z=0; z &lt; Options.length; z++ )
+					{
+						var opt = document.createElement("option");
+						opt.value = Options[z].getAttribute("tfoid");
+			    	opt.text = Options[z].getAttribute("optionvalue");
+			    	i.appendChild(opt);
+					}		
+					tfval.appendChild(i);
+					tftdex.style.display = 'none';
+    		}
+    		tfval.style.display = 'block';
+    	}
+		}
+
+		function docUpdateCustomFields()
+		{
+			var IdArr = document.tabularForm.ticketfieldid.options[document.tabularForm.ticketfieldid.selectedIndex].value.split(",");
+			docInitCustomFields(IdArr[0],IdArr[1]);
+		}
+	
+	</script>
+	</head>
+
+	<body callOnLoad="checkDisable();" onkeypress="keyPress();">
+	<form name="tabularForm" method="get" action="./ticketsearchresults.ems">
+	<input type="hidden" name="Action" value="search"/>
+	<input type="hidden" name="msgId" value="{root/ChangeTicket/@MsgID}"/>
+	<input type="hidden" name="msgType" value="{root/ChangeTicket/@MsgType}"/>	
+	<input type="hidden" name="msgShowDest" value="{root/DOCUMENT/URLPARAMETERS/SHOWDEST}"/>
+	<input type="hidden" name="msgTicketBoxView" value="{root/DOCUMENT/URLPARAMETERS/TICKETBOXVIEW}"/>
+	<input type="hidden" name="TicketFieldValue" value=""/>
+	<input type="hidden" name="fulltext" value="0"/>
+	
+	<xsl:if test="root/MergeTicket/@MergeID">
+		<input type="hidden" name="mergeId" value="{root/MergeTicket/@MergeID}"/>
+	</xsl:if>
+	<xsl:if test="root/LinkTicket/@LinkID">
+		<input type="hidden" name="linkId" value="{root/LinkTicket/@LinkID}"/>
+		<input type="hidden" name="linkName" value="{root/LinkTicket/@LinkName}"/>
+		<input type="hidden" name="linkTbView" value="{root/LinkTicket/@LinkTbView}"/>				
+	</xsl:if>
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Begin Search" onclick="startSearch();">
+											<nobr>
+												<img src="images/ico_search.gif" width="24" height="22" border="0" valign="bottom" alt="Begin Search"/>Search
+											</nobr>
+										</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('My_Shortcuts/Ticket_Search.htm', 0);">
+											<nobr>
+												<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom" alt="Show Help"/>Help
+											</nobr>
+										</div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto;">				
+				<xsl:if test="not(/root/DOCUMENT/URLPARAMETERS/ACTION)">
+					<xsl:if test="root/ChangeTicket/@MsgID &gt; '0'">
+					<div>
+						<table BORDER="0" CELLPADDING="0" CELLSPACING="0">
+							<tr>
+								<td style="padding-left: 10px;padding-top: 10px;">
+									Search for a ticket to move the selected message to
+								</td>
+							</tr>
+						</table>
+					</div>
+					</xsl:if>
+					<xsl:if test="root/MergeTicket/@MergeID">
+					<div>
+						<table BORDER="0" CELLPADDING="0" CELLSPACING="0">
+							<tr>
+								<td style="padding-left: 10px;padding-top: 10px;">	
+									Search for a ticket to merge the selected ticket(s) with
+								</td>
+							</tr>
+						</table>
+					</div>
+					</xsl:if>
+					<xsl:if test="root/LinkTicket/@LinkID">
+					<div>
+						<table BORDER="0" CELLPADDING="0" CELLSPACING="0">
+							<tr>
+								<td style="padding-left: 10px;padding-top: 10px;">	
+									Search for a ticket to link the selected ticket(s) to
+								</td>
+							</tr>
+						</table>
+					</div>
+					</xsl:if>
+				</xsl:if>					
+				<table border="0" cellpadding="0" cellspacing="0">
+					<tr><td height="10" colspan="3"><br/></td></tr>
+					<tr>
+						<td style="padding-left:10px;">Ticket ID :</td>
+						<td style="padding-left:10px;width:300px;">
+							<input size="10" maxlength="10" type="text" name="ticketid" value="{root/DOCUMENT/URLPARAMETERS/TICKETID}"/>
+							<img src="./images/trans.gif" alt="" width="10px"/>
+							<select name="ticketidmatch">
+								<option value="0"><xsl:if test="root/DOCUMENT/URLPARAMETERS/TICKETIDMATCH = 0"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>Equal To</option>
+								<option value="1"><xsl:if test="root/DOCUMENT/URLPARAMETERS/TICKETIDMATCH = 1"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>Less Than</option>
+								<option value="2"><xsl:if test="root/DOCUMENT/URLPARAMETERS/TICKETIDMATCH = 2"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>Greater Than</option>
+							</select>
+							</td>
+						<td style="padding-left: 10px;"><br/></td>
+					</tr>		
+					<tr>
+						<td style="padding-left:10px;">Ticket Subject :</td>
+						<td style="padding-left:10px;">
+							<input size="40" maxlength="255" type="text" name="subject" value="{root/DOCUMENT/URLPARAMETERS/SUBJECT}"/>
+						</td>
+						<td style="padding-left: 10px;">
+							<input type="radio" id="subject_exact" name="subject_exact" onClick="checkDisable()" value="0"> 
+								<xsl:if test="not(root/DOCUMENT/URLPARAMETERS/SUBJECT_EXACT) or root/DOCUMENT/URLPARAMETERS/SUBJECT_EXACT = 0">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+								Contains 
+							</input>	
+							<input type="radio" id="subject_exact" name="subject_exact" onClick="checkDisable()" value="1">
+								<xsl:if test="root/DOCUMENT/URLPARAMETERS/SUBJECT_EXACT = 1">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+								Exact
+							</input>
+						</td>
+					</tr>
+					<tr>
+						<td style="padding-left:10px;"></td>
+						<td style="padding-left:10px;">
+							<select id="andor" name="andor" style="width:100px">
+							<option value="0">
+								<xsl:if test="root/DOCUMENT/URLPARAMETERS/ANDOR = '0'">
+									<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								And
+							</option>
+							<option value="1">
+								<xsl:if test="root/DOCUMENT/URLPARAMETERS/ANDOR = '1'">
+									<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								Or
+							</option>
+							</select>
+						</td>
+						<td style="padding-left:10px;"></td>
+					</tr>
+					<tr>
+						<td style="padding-left:10px;"></td>
+						<td style="padding-left:10px;">
+							<input size="40" maxlength="255" type="text" id="subject2" name="subject2" value="{root/DOCUMENT/URLPARAMETERS/SUBJECT2}"/>
+						</td>
+						<td style="padding-left: 10px;"></td>
+					</tr>		
+					<tr>
+						<td style="padding-left:10px;">Contact Name :</td>
+						<td style="padding-left:10px;">
+							<input size="40" maxlength="255" type="text" name="contact_name" value="{root/DOCUMENT/URLPARAMETERS/CONTACT_NAME}"/>
+						</td>
+						
+						<td style="padding-left: 10px;">
+							<input type="radio" name="contact_name_exact" value="0"> 
+								<xsl:if test="not(root/DOCUMENT/URLPARAMETERS/CONTACT_NAME_EXACT) or root/DOCUMENT/URLPARAMETERS/CONTACT_NAME_EXACT = 0">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+								Contains 
+							</input>	
+							<input type="radio" name="contact_name_exact" value="1">
+								<xsl:if test="root/DOCUMENT/URLPARAMETERS/CONTACT_NAME_EXACT = 1">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+								Exact
+							</input>
+						</td>
+					</tr>
+		
+					<tr>
+						<td style="padding-left:10px;">Contact Email Address :</td>
+						<td style="padding-left:10px;">
+							<input size="40" maxlength="255" type="text" name="contact_email" value="{root/DOCUMENT/URLPARAMETERS/CONTACT_EMAIL}"/>
+						</td>
+						<td style="padding-left:10px;">
+							<input type="radio" name="contact_email_exact" value="0"> 
+								<xsl:if test="not(root/DOCUMENT/URLPARAMETERS/CONTACT_EMAIL_EXACT) or root/DOCUMENT/URLPARAMETERS/CONTACT_EMAIL_EXACT = 0">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+								Contains 
+							</input>	
+							<input type="radio" name="contact_email_exact" value="1">
+								<xsl:if test="root/DOCUMENT/URLPARAMETERS/CONTACT_EMAIL_EXACT = 1">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+								Exact
+							</input>
+						</td>
+					</tr>
+					
+					<tr>
+						<td style="padding-left:10px;">Ticket Note Contains :</td>
+						<td style="padding-left:10px;" colspan="2">	
+							<input size="40" maxlength="255" type="text" name="ticket_note" value="{root/DOCUMENT/URLPARAMETERS/TICKET_NOTE}"/>
+						</td>
+					</tr>
+		
+					<tr>
+						<td style="padding-left:10px;">Owner :</td>
+						<td style="padding-left:10px;" colspan="2">
+							<select name="ownerid">
+								<option value="-1">All Owners</option>
+								<option value="0">
+									<xsl:if test="/root/DOCUMENT/URLPARAMETERS/OWNERID = 0">
+										<xsl:attribute name="selected">true</xsl:attribute>
+									</xsl:if>
+									Not Owned
+								</option>
+								<xsl:for-each select="root/AgentNames/Agent">
+									<option value="{@ID}">
+										<xsl:if test="/root/DOCUMENT/URLPARAMETERS/OWNERID = @ID">
+											<xsl:attribute name="selected">true</xsl:attribute>
+										</xsl:if>
+										<xsl:value-of select="@Name"/>
+									</option>
+								</xsl:for-each>
+							</select>
+						</td>
+					</tr>
+		
+					<tr>
+						<td style="padding-left:10px;">TicketBox :</td>
+						<td style="padding-left:10px;" colspan="2">
+							<select name="ticketboxid">
+								<option value="0">All TicketBoxes</option>
+									<xsl:for-each select="root/TicketBoxNames/TicketBox">
+										<option value="{@ID}">
+											<xsl:if test="/root/DOCUMENT/URLPARAMETERS/TICKETBOXID = @ID">
+												<xsl:attribute name="selected">true</xsl:attribute>
+											</xsl:if>
+											<xsl:value-of select="@Name"/>
+										</option>
+								</xsl:for-each>
+							</select>
+						</td>
+					</tr>
+		
+					<tr>
+						<td style="padding-left:10px;">Ticket Priority :</td>
+						<td style="padding-left:10px;" colspan="2">
+							<select name="priorityid">
+								<option value="0">All Ticket Priorities</option>
+								<xsl:for-each select="root/TicketPriorities/Priority">
+									<option value="{@ID}">
+										<xsl:if test="/root/DOCUMENT/URLPARAMETERS/PRIORITYID = @ID">
+											<xsl:attribute name="selected">true</xsl:attribute>
+										</xsl:if>
+										<xsl:value-of select="@Description"/>
+									</option>
+								</xsl:for-each>
+							</select>
+						</td>
+					</tr>
+		
+					<tr>
+						<td style="padding-left:10px;">Ticket State :</td>
+						<td style="padding-left:10px;" colspan="2">
+							<select name="stateid">
+								<option value="0">All Ticket States</option>
+								<xsl:for-each select="root/TicketStates/State">
+								<option value="{@ID}">
+									<xsl:if test="/root/DOCUMENT/URLPARAMETERS/STATEID = @ID">
+										<xsl:attribute name="selected">true</xsl:attribute>
+									</xsl:if>
+									<xsl:value-of select="@Description"/>
+								</option>
+								</xsl:for-each>
+							</select>
+						</td>
+					</tr>
+					
+					<tr>
+						<td style="padding-left:10px;">Ticket Category :</td>
+						<td style="padding-left:10px;" colspan="2">
+							<select name="ticketcategoryid">
+								<option value="-1">All Ticket Categories</option>
+								<xsl:for-each select="root/TicketCategoryNames/TicketCategory">
+								<option value="{@ID}">
+									<xsl:if test="/root/DOCUMENT/URLPARAMETERS/TICKETCATEGORYID = @ID">
+										<xsl:attribute name="selected">true</xsl:attribute>
+									</xsl:if>
+									<xsl:value-of select="@Description"/>
+								</option>
+								</xsl:for-each>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td style="padding-left:10px;">Ticket Lock State :</td>
+						<td style="padding-left:10px;" colspan="2">
+							<select name="ticketlockstateid">
+								<option value="-1">All Locked States</option>
+								<option value="0">Locked</option>
+								<option value="1">Unlocked</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td style="padding-left:10px;">Custom Ticket Field :</td>
+						<td style="padding-left:10px;">
+							<table border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td>
+										<select name="ticketfieldid" onchange="docUpdateCustomFields();">
+											<option value="0,0"></option>
+											<xsl:for-each select="root/TicketFields/TicketField">
+											<option value="{@ID},{@TYPE}">
+												<xsl:if test="/root/DOCUMENT/URLPARAMETERS/TICKETFIELDID = @ID">
+													<xsl:attribute name="selected">true</xsl:attribute>
+												</xsl:if>
+												<xsl:value-of select="@Description"/>
+											</option>
+											</xsl:for-each>
+										</select>
+									</td>
+									<td style="padding-left:5px;">
+										<span id="tfvalue" style="display:none;">
+											
+										</span>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td id="tdtfexact" style="padding-left: 10px;display:none;">
+							<input type="radio" name="tf_exact" value="0"> 
+								<xsl:if test="not(root/DOCUMENT/URLPARAMETERS/TF_EXACT) or root/DOCUMENT/URLPARAMETERS/TF_EXACT = 0">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+								Contains 
+							</input>	
+							<input type="radio" name="tf_exact" value="1">
+								<xsl:if test="root/DOCUMENT/URLPARAMETERS/TF_EXACT = 1">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+								Exact
+							</input>
+						</td>
+					</tr>
+					<tr><td height="15" colspan="3"></td></tr>
+					<tr>
+						<td style="padding-left:10px;">Search Messages :</td>
+						<td style="padding-left:10px;">
+							<select name="messagetype">
+								<option value="0">
+								<xsl:if test="/root/DOCUMENT/URLPARAMETERS/MESSAGETYPE = 0"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+								All Messages
+								</option>
+								<option value="1">
+								<xsl:if test="/root/DOCUMENT/URLPARAMETERS/MESSAGETYPE = 1"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+								Inbound
+								</option>
+								<option value="2">
+								<xsl:if test="/root/DOCUMENT/URLPARAMETERS/MESSAGETYPE = 2"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+								Outbound
+								</option>
+							</select>
+						</td>
+					</tr>		
+					<tr>
+						<td style="padding-left:10px;">Message Subject :</td>
+						<td style="padding-left:10px;">
+							<input size="40" maxlength="255" type="text" name="msgsubject" value="{root/DOCUMENT/URLPARAMETERS/MSGSUBJECT}"/>
+						</td>
+						<td style="padding-left: 10px;">
+							<input type="radio" name="msgsubject_exact" value="0"> 
+								<xsl:if test="not(root/DOCUMENT/URLPARAMETERS/MSGSUBJECT_EXACT) or root/DOCUMENT/URLPARAMETERS/MSGSUBJECT_EXACT = 0">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+								Contains 
+							</input>	
+							<input type="radio" name="msgsubject_exact" value="1">
+								<xsl:if test="root/DOCUMENT/URLPARAMETERS/MSGSUBJECT_EXACT = 1">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+								Exact
+							</input>
+						</td>
+					</tr>
+		
+					<tr>
+						<td style="padding-left:10px;">Message Body Contains :</td>
+						<td style="padding-left:10px;">
+							<input size="40" maxlength="255" type="text" name="message_body" value="{root/DOCUMENT/URLPARAMETERS/MESSAGE_BODY}"/>
+						</td>
+					</tr>
+		
+					<tr><td height="15" colspan="3"></td></tr>
+		
+					<tr>
+						<td style="padding-left:10px;">Date Ticket Created :</td>
+						<td style="padding-left:10px;" colspan="2">
+							<input type="radio" value="0" onClick="checkDisable()" name="use_created_date">
+								<xsl:if test="not(root/DOCUMENT/URLPARAMETERS/USE_CREATED_DATE) or root/DOCUMENT/URLPARAMETERS/USE_CREATED_DATE = 0">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+							</input>
+							All Dates
+						</td>
+					</tr>
+		
+					<tr>
+						<td style="padding-left: 30px;">Between Dates :</td>
+						<td style="padding-left: 7px;" colspan="2">
+							<table>
+								<tr>
+									<td>
+										<input type="radio" value="1" onClick="checkDisable()" name="use_created_date"> 
+											<xsl:if test="root/DOCUMENT/URLPARAMETERS/USE_CREATED_DATE = 1">
+												<xsl:attribute name="checked">true</xsl:attribute>
+											</xsl:if>
+										</input>
+									</td>
+									<td id="create_start_date_cell">
+										<script type="text/javascript">
+											<xsl:choose>
+												<xsl:when test="/root/DOCUMENT/URLPARAMETERS/USE_CREATED_DATE = 1">
+													var objCreateStartDate = new DatePicker("<xsl:value-of select='/root/DOCUMENT/URLPARAMETERS/CREATE_START_DATE'/>");
+												</xsl:when>
+												<xsl:otherwise>
+													var start = new Date();
+													start.setDate(start.getDate() - 7);
+													var objCreateStartDate = new DatePicker(start);
+												</xsl:otherwise>
+											</xsl:choose>
+											document.getElementById("create_start_date_cell").appendChild(objCreateStartDate.create("CREATE_START_DATE"));
+										</script>
+									</td>
+									<td>&#32;And&#32;</td>
+									<td id="create_end_date_cell">
+										<script type="text/javascript">
+											<xsl:choose>
+												<xsl:when test="/root/DOCUMENT/URLPARAMETERS/USE_CREATED_DATE = 1">
+													var objCreateEndDate = new DatePicker("<xsl:value-of select='/root/DOCUMENT/URLPARAMETERS/CREATE_END_DATE'/>");
+												</xsl:when>
+												<xsl:otherwise>
+													var objCreateEndDate = new DatePicker(new Date());
+												</xsl:otherwise>
+											</xsl:choose>
+											document.getElementById("create_end_date_cell").appendChild(objCreateEndDate.create("CREATE_END_DATE"));
+										</script>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+		
+					<tr><td height="15" colspan="3"></td></tr>
+		
+					<tr>
+						<td style="padding-left: 10px;">Date Last Opened :</td>
+						<td style="padding-left: 10px;" colspan="2">
+							<input type="radio" value="0" checked="true" onClick="checkDisable()" name="use_opened_date">
+								<xsl:if test="not(root/DOCUMENT/URLPARAMETERS/USE_OPENED_DATE) or root/DOCUMENT/URLPARAMETERS/USE_OPENED_DATE = 0">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+							</input>
+							All Dates
+						</td>
+					</tr>
+		
+					<tr>
+						<td style="padding-left:30px;">Between Dates :</td>
+						<td  style="padding-left:7px;" colspan="2">
+							<table>
+								<tr>
+									<td>
+										<input type="radio" value="1" onClick="checkDisable()" name="use_opened_date"> 
+											<xsl:if test="root/DOCUMENT/URLPARAMETERS/USE_OPENED_DATE = 1">
+												<xsl:attribute name="checked">true</xsl:attribute>
+											</xsl:if>
+										</input>
+									</td>
+									<td id="open_start_date_cell">
+										<script type="text/javascript">
+											<xsl:choose>
+												<xsl:when test="/root/DOCUMENT/URLPARAMETERS/USE_OPENED_DATE = 1">
+													var objOpenStartDate = new DatePicker("<xsl:value-of select='/root/DOCUMENT/URLPARAMETERS/OPEN_START_DATE'/>");
+												</xsl:when>
+												<xsl:otherwise>
+													var start = new Date();
+													start.setDate(start.getDate() - 7);
+													var objOpenStartDate = new DatePicker(start);
+												</xsl:otherwise>
+											</xsl:choose>
+											document.getElementById("open_start_date_cell").appendChild(objOpenStartDate.create("OPEN_START_DATE"));
+										</script>
+									</td>
+									<td>&#32;And&#32;</td>
+									<td id="open_end_date_cell">
+										<script type="text/javascript">
+											<xsl:choose>
+												<xsl:when test="/root/DOCUMENT/URLPARAMETERS/USE_OPENED_DATE = 1">
+													var objOpenEndDate = new DatePicker("<xsl:value-of select='/root/DOCUMENT/URLPARAMETERS/OPEN_END_DATE'/>");
+												</xsl:when>
+												<xsl:otherwise>
+													var objOpenEndDate = new DatePicker(new Date());
+												</xsl:otherwise>
+											</xsl:choose>
+											document.getElementById("open_end_date_cell").appendChild(objOpenEndDate.create("OPEN_END_DATE"));
+										</script>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+			
+		
+					<tr><td height="15" colspan="3"></td></tr>
+		
+					<tr>
+						<td style="padding-left: 10px;">Inbound Message Date :</td>
+						<td style="padding-left: 10px;" colspan="2">
+							<input type="radio" value="0" checked="true" onClick="checkDisable()" name="use_email_date">
+								<xsl:if test="not(root/DOCUMENT/URLPARAMETERS/USE_EMAIL_DATE) or root/DOCUMENT/URLPARAMETERS/USE_EMAIL_DATE = 0">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+							</input>
+							All Dates
+						</td>
+					</tr>
+		
+					<tr>
+						<td style="padding-left:30px;">Between Dates :</td>
+						<td  style="padding-left:7px;" colspan="2">
+							<table>
+								<tr>
+									<td>
+										<input type="radio" value="1" onClick="checkDisable()" name="use_email_date"> 
+											<xsl:if test="root/DOCUMENT/URLPARAMETERS/USE_EMAIL_DATE = 1">
+												<xsl:attribute name="checked">true</xsl:attribute>
+											</xsl:if>
+										</input>
+									</td>
+									<td id="email_start_date_cell">
+										<script type="text/javascript">
+											<xsl:choose>
+												<xsl:when test="/root/DOCUMENT/URLPARAMETERS/USE_EMAIL_DATE = 1">
+													var objEmailStartDate = new DatePicker("<xsl:value-of select='/root/DOCUMENT/URLPARAMETERS/EMAIL_START_DATE'/>");
+												</xsl:when>
+												<xsl:otherwise>
+													var start = new Date();
+													start.setDate(start.getDate() - 7);
+													var objEmailStartDate = new DatePicker(start);
+												</xsl:otherwise>
+											</xsl:choose>
+											document.getElementById("email_start_date_cell").appendChild(objEmailStartDate.create("EMAIL_START_DATE"));
+										</script>
+									</td>
+									<td>&#32;And&#32;</td>
+									<td id="email_end_date_cell">
+										<script type="text/javascript">
+											<xsl:choose>
+												<xsl:when test="/root/DOCUMENT/URLPARAMETERS/USE_EMAIL_DATE = 1">
+													var objEmailEndDate = new DatePicker("<xsl:value-of select='/root/DOCUMENT/URLPARAMETERS/EMAIL_END_DATE'/>");
+												</xsl:when>
+												<xsl:otherwise>
+													var objEmailEndDate = new DatePicker(new Date());
+												</xsl:otherwise>
+											</xsl:choose>
+											document.getElementById("email_end_date_cell").appendChild(objEmailEndDate.create("EMAIL_END_DATE"));
+										</script>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr><td height="15" colspan="3"></td></tr>
+					<tr>
+						<td style="padding-left:10px;">Use SQL Full-Text Searches :</td>
+						<td style="padding-left:10px;">			
+							<input type="checkbox" name="chkFullText" id="chkFullText">
+							<xsl:if test="root/DOCUMENT/URLPARAMETERS/FULLTEXT = '1' or (not(root/DOCUMENT/URLPARAMETERS/FULLTEXT) and root/Parameters/@FullText = '1')">
+							<xsl:attribute name="checked">checked</xsl:attribute>
+							</xsl:if>
+							<xsl:if test="root/Parameters/@FullText = '0'">
+							<xsl:attribute name="disabled">true</xsl:attribute>
+							</xsl:if>
+						</input>
+						</td>
+						<td style="padding-left: 10px;"><br/></td>
+					</tr>
+					<tr>
+						<td style="padding-left:10px;">Max number of Results  :</td>
+						<td style="padding-left:10px;" colspan="2">
+							<input type="text" name="maxlines" maxlength="5" size="5">
+								<xsl:choose>
+									<xsl:when test="root/DOCUMENT/URLPARAMETERS/MAXLINES">
+										<xsl:attribute name="value"><xsl:value-of select="root/DOCUMENT/URLPARAMETERS/MAXLINES"/></xsl:attribute>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:attribute name="value"><xsl:value-of select="root/Parameters/@MaxRecs"/></xsl:attribute>
+									</xsl:otherwise>
+								</xsl:choose>
+							</input>
+						</td>
+					</tr>
+					<tr>
+						<td style="padding-left:10px;">Sort Results By :</td>
+						<td style="padding-left:10px;">
+							
+							
+							<select name="sortby">
+								<option value="0"><xsl:if test="root/DOCUMENT/URLPARAMETERS/SORTBY = 0"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>Contact</option>
+								<xsl:choose>
+									<xsl:when test="not(root/DOCUMENT/URLPARAMETERS/SORTBY)">
+										<option value="1"><xsl:attribute name="selected">true</xsl:attribute>Date</option>	
+									</xsl:when>
+									<xsl:otherwise>
+										<option value="1"><xsl:if test="root/DOCUMENT/URLPARAMETERS/SORTBY = 1"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>Date</option>
+									</xsl:otherwise>
+								</xsl:choose>
+								<option value="2"><xsl:if test="root/DOCUMENT/URLPARAMETERS/SORTBY = 2"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>Subject</option>
+								<option value="3"><xsl:if test="root/DOCUMENT/URLPARAMETERS/SORTBY = 3"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>TicketBox</option>
+								<option value="4"><xsl:if test="root/DOCUMENT/URLPARAMETERS/SORTBY = 4"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>Ticket Category</option>
+								<option value="5"><xsl:if test="root/DOCUMENT/URLPARAMETERS/SORTBY = 5"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>Ticket ID</option>								
+								<option value="6"><xsl:if test="root/DOCUMENT/URLPARAMETERS/SORTBY = 6"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>Ticket Priority</option>
+								<option value="7"><xsl:if test="root/DOCUMENT/URLPARAMETERS/SORTBY = 7"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>Ticket State</option>															
+							</select>
+							</td>
+						<td style="padding-left: 10px;"><br/></td>
+					</tr>
+					<tr>
+						<td style="padding-left:10px;">Sort Order :</td>
+						<td style="padding-left:10px;">
+							<select name="sortascending">
+								<option value="1"><xsl:if test="root/DOCUMENT/URLPARAMETERS/SORTASCENDING = 0"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>Ascending</option>
+								<option value="0"><xsl:if test="root/DOCUMENT/URLPARAMETERS/SORTASCENDING = 0"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>Descending</option>								
+							</select>
+							</td>
+						<td style="padding-left: 10px;"><br/></td>
+					</tr>
+					<tr>
+						<td style="padding-left:10px;">Database Timeout (seconds) :</td>
+						<td style="padding-left:10px;">
+			
+							<input size="10" maxlength="10" type="text" name="odbc_timeout">
+								<xsl:choose>
+									<xsl:when test="root/DOCUMENT/URLPARAMETERS/ODBC_TIMEOUT">
+										<xsl:attribute name="value"><xsl:value-of select="root/DOCUMENT/URLPARAMETERS/ODBC_TIMEOUT"/></xsl:attribute>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:attribute name="value"><xsl:value-of select="root/Parameters/@ODBC_TIMEOUT"/></xsl:attribute>
+									</xsl:otherwise>
+								</xsl:choose>
+							</input>
+						</td>
+						<td style="padding-left: 10px;"><br/></td>
+					</tr>					
+				</table>
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

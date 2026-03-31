@@ -1,0 +1,377 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript">
+		function docSubmit(formName)
+		{
+			var postResults = glo_buildFormPost(formName);
+			var proceed = postResults[0];
+			if (proceed==true)
+			{
+				document.location.reload();
+			}
+		}
+	</script>
+	</head>
+
+	<body>
+
+<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td style="width:100%">
+
+	<xsl:call-template name="default_titlebar">
+		<xsl:with-param name="title_text">
+		<xsl:value-of select="root/DOCUMENT/TITLE"/>
+		</xsl:with-param>
+	</xsl:call-template>
+	
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td style="height:32px" class="menubarx" nowrap="true">
+				<table style="height:100%" align="left" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td height="100%">					
+							<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+							 title="Show Help" onclick="openHelp('Administration/Product_Registration/AntiVirus_Plug-in.htm')"
+							  >
+								<nobr>
+									<img src="images/ico_help.gif" width="24" height="22" border="0"/>
+									Help
+								</nobr>
+							  </div>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</td>
+</tr>
+
+<tr>
+<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+<div style="width:100%;height:100%;overflow:auto">
+	
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td style="padding:10px;">
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td align="center" colspan="2"><img src="images/AV_logo.gif" border="1"/></td>
+					</tr>
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+<xsl:choose>
+	<xsl:when test="root/AntiVirus/@Installed = '0'">
+					<tr>
+						<td colspan="2">
+			<br/>
+			AntiVirus Plug-in is <span align="" style="font-weight: bold;"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;reliable antivirus protection</span>,<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160; powered by Kaspersky Labs. Known for its ability to rapidly identify new viruses and update antivirus signatures, Kaspersky Labs is a leader in data-security technologies and software. 
+			<br/><br/>
+			Because it is installed on the MailFlow server, rather than on the client computer, AntiVirus Plug-in is <span align="" style="font-weight: bold;"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;a superior antivirus solution</span>,<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160; able to protect systems from email born viruses. 
+			<br/><br/>
+			Once identified, infected email can be repaired, deleted or quarantined.
+			<br/><br/>
+			AntiVirus Plug-in is <span align="" style="font-weight: bold;"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;supported by Kaspersky's continually updated virus signature list</span>.  Designed to download only the necessary update information in a small download, AntiVirus is able to update quickly, with <span align="" style="font-weight: bold;"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;minimum bandwidth requirements</span>.  Making it easier to download and install virus updates makes the job of protecting the network from email viruses easier.
+			<br/><br/>
+			A<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<span align="" style="font-weight: bold;">scheduler</span><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;further enhances AntiVirus Plug-ins ability to secure an entire networks email. Set by default to update itself daily, AntiVirus Plug-in can support any update frequency, even to the minute.
+			<br/><br/>
+			<a href="{/root/root/AntiVirus/PurchaseLink/.}" target="_blank" id="link">Protect MailFlow Now!</a>
+			<BR/>
+						</td>
+					</tr>
+	</xsl:when>
+	<xsl:when test="root/AntiVirus/@Installed = '1' and root/AntiVirus/@NoKey = '1'">
+					<tr>
+						<td colspan="2">
+						<br/>
+						The AntiVirus Plug-in is installed, but not registered. Enter your registration key in the dialog below or click the "Generate Trial Key" button to enable a 30-day evaluation.
+						</td>
+					</tr>
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<tr>
+						<td class="subheader" colspan="2">Registration</td>
+					</tr>
+			<xsl:if test="root/postresults">
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;" colspan="2">
+						<xsl:if test="root/postresults/code != '0'">
+						<span style="color:red;"><xsl:value-of select="root/postresults/description"/></span>
+						</xsl:if>
+						<xsl:if test="root/postresults/code = '0'">
+						<span style="color:green;"><xsl:value-of select="root/postresults/description"/></span>
+						</xsl:if>
+						</td>
+					</tr>
+			</xsl:if>
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+				<form name="registerForm" method="post" action="">
+					<input type="hidden" name="Action" value="register" />
+					<tr>
+						<td colspan="2" style="padding:10px;font-weight:bold;">
+						<input type="text" maxlength="34" size="42" name="pluginkey"/>
+						<input class="childControlBtn" type="Button" value="Register" onclick="docSubmit('registerForm')"/>
+						<input class="childControlBtn" type="Button" value="Generate Trial Key" onclick="registerForm.Action.value='generatekey';docSubmit('registerForm')"/>
+						</td>
+					</tr>
+				</form>
+	</xsl:when>
+	<xsl:when test="root/AntiVirus/@Installed = '1' and root/AntiVirus/@EvalKeyExpired = '1'">
+					<tr>
+						<td colspan="2">
+						<br/>
+						Your AntiVirus Plug-in evaluation has expired.  Enter your registration key in the dialog below or click the "Purchase AV Plug-in" link to register.
+						<br/><span style="font-size:smaller">Note: The AntiVirus Plug-in has been disabled.</span>
+						<br/><br/>
+						<a href="{/root/root/AntiVirus/PurchaseLink/.}" target="_blank" id="link">Purchase AntiVirus Plug-in</a>
+						<BR/>
+
+						</td>
+					</tr>
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<tr>
+						<td class="subheader" colspan="2">Registration</td>
+					</tr>
+			<xsl:if test="root/postresults">
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;" colspan="2">
+						<xsl:if test="root/postresults/code != '0'">
+						<span style="color:red;"><xsl:value-of select="root/postresults/description"/></span>
+						</xsl:if>
+						<xsl:if test="root/postresults/code = '0'">
+						<span style="color:green;"><xsl:value-of select="root/postresults/description"/></span>
+						</xsl:if>
+						</td>
+					</tr>
+			</xsl:if>
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<form name="registerForm" method="post" action="">
+					<input type="hidden" name="Action" value="register" />
+					<tr>
+						<td colspan="2" style="padding:10px;font-weight:bold;">
+						<input type="text" maxlength="34" size="42" name="pluginkey"/>
+						<input class="childControlBtn" type="Button" value="Register" onclick="docSubmit('registerForm')"/>
+						</td>
+					</tr>
+				</form>
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<tr>
+						<td class="subheader" colspan="2"><nobr>Registration Details</nobr></td>
+					</tr>
+
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Key:</td>
+						<td style="padding:10px;cursor:text;" allowSelect="true"><xsl:value-of select="root/AntiVirus/@Key"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Status:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@Status"/></td>
+					</tr>
+
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Type:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@KeyType"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Create Date:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@Created"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Expire Date:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@Expires"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<a href="https://shop.deerfield.net/purchase/upgrades/antivirusupgrade.aspx?gp=34" target="_blank" id="link" class="adminMenu" style="font-weight:bold;">[Renew AntiVirus Subscription Now!]</a></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">User Size:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@UserSize"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Engine Version:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@EngineVersion"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Database Record Count:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@DataBaseRecCount"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Database Date:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@DataBaseCurDate"/></td>
+					</tr>
+	</xsl:when>
+	<xsl:when test="root/AntiVirus/@Installed = '1' and root/AntiVirus/@RegKeyExpired = '1'">
+					<tr>
+						<td colspan="2">
+						<br/>
+						Your AntiVirus Plug-in registration key has expired.  Enter your new registration key in the dialog below or click the "Renew AV Subscription" link to renew your subscription.
+						<br/><span style="font-size:smaller">Note: The AntiVirus Plug-in is operating in reduced functionality mode. Full functionality will be reinstated upon entry of valid registration details.</span>
+						<br/><br/>
+						<a href="{/root/root/AntiVirus/UpgradeLink/.}" target="_blank" id="link">Renew AntiVirus Subscription Now!</a>
+						<BR/>
+						</td>
+					</tr>
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<tr>
+						<td class="subheader" colspan="2">Registration</td>
+					</tr>
+			<xsl:if test="root/postresults">
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;" colspan="2">
+						<xsl:if test="root/postresults/code != '0'">
+						<span style="color:red;"><xsl:value-of select="root/postresults/description"/></span>
+						</xsl:if>
+						<xsl:if test="root/postresults/code = '0'">
+						<span style="color:green;"><xsl:value-of select="root/postresults/description"/></span>
+						</xsl:if>
+						</td>
+					</tr>
+			</xsl:if>
+				<form name="registerForm" method="post" action="">
+					<input type="hidden" name="Action" value="register" />
+					<tr>
+						<td colspan="2" style="padding:10px;font-weight:bold;">
+						<input type="text" maxlength="34" size="42" name="pluginkey"/>
+						<input class="childControlBtn" type="Button" value="Register" onclick="docSubmit('registerForm')"/>
+						</td>
+					</tr>
+				</form>
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<tr>
+						<td class="subheader" colspan="2"><nobr>Registration Details</nobr></td>
+					</tr>
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Key:</td>
+						<td style="padding:10px;cursor:text;" allowSelect="true"><xsl:value-of select="root/AntiVirus/@Key"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Status:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@Status"/></td>
+					</tr>
+
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Type:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@KeyType"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Create Date:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@Created"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Expire Date:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@Expires"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<a href="https://shop.deerfield.net/purchase/upgrades/antivirusupgrade.aspx?gp=34" target="_blank" id="link" class="adminMenu" style="font-weight:bold;">[Renew AntiVirus Subscription Now!]</a></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">User Size:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@UserSize"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Engine Version:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@EngineVersion"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Database Record Count:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@DataBaseRecCount"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Database Date:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@DataBaseCurDate"/></td>
+					</tr>
+	</xsl:when>
+	<xsl:when test="root/AntiVirus/@Installed = '1' and root/AntiVirus/@RegKeyExpired = '0' and root/AntiVirus/@EvalKeyExpired = '0'">
+					<tr>
+						<td class="subheader" colspan="2">Registration</td>
+					</tr>
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+				<form name="registerForm" method="post" action="">
+					<input type="hidden" name="Action" value="register" />
+					<tr>
+						<td colspan="2" style="padding:10px;font-weight:bold;">
+						<input type="text" maxlength="34" size="42" name="pluginkey"/>
+						<input class="childControlBtn" type="Button" value="Register" onclick="docSubmit('registerForm')"/>
+						</td>
+					</tr>
+				</form>
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			<xsl:if test="root/postresults">
+					<tr>
+						<td class="subheader" colspan="2">Registration</td>
+					</tr>
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;" colspan="2">
+						<xsl:if test="root/postresults/code != '0'">
+						<span style="color:red;"><xsl:value-of select="root/postresults/description"/></span>
+						</xsl:if>
+						<xsl:if test="root/postresults/code = '0'">
+						<span style="color:green;"><xsl:value-of select="root/postresults/description"/></span>
+						</xsl:if>
+						</td>
+					</tr>
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			</xsl:if>
+					<tr>
+						<td class="subheader" colspan="2"><nobr>Registration Details</nobr></td>
+					</tr>
+					<tr><td height="20" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Key:</td>
+						<td style="padding:10px;cursor:text;" allowSelect="true"><xsl:value-of select="root/AntiVirus/@Key"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Status:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@Status"/></td>
+					</tr>
+
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Type:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@KeyType"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Create Date:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@Created"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Expire Date:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@Expires"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<a href="https://shop.deerfield.net/purchase/upgrades/antivirusupgrade.aspx?gp=34" target="_blank" id="link" class="adminMenu" style="font-weight:bold;">[Renew AntiVirus Subscription Now!]</a></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">User Size:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@UserSize"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Engine Version:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@EngineVersion"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Database Record Count:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@DataBaseRecCount"/></td>
+					</tr>
+					<tr>
+						<td style="padding:10px;font-weight:bold;">Database Date:</td>
+						<td style="padding:10px;"><xsl:value-of select="root/AntiVirus/@DataBaseCurDate"/></td>
+					</tr>
+	</xsl:when>
+</xsl:choose>
+				</table>
+			</td>
+		</tr>
+	</table>
+	</div>
+</td>
+</tr>
+</table>
+
+	</body>
+	</html>
+	</xsl:template>
+</xsl:stylesheet>

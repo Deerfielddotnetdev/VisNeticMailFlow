@@ -1,0 +1,2673 @@
+﻿<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	<title></title>
+	<link rel="stylesheet" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/treetoggle.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/xmenucontroller.jmf"></script>
+	<script type="text/javascript" language="javascript">
+	
+	var ticketboxxmlhttp = glo_createXMLhttpObject();	
+	var pollinterval = 5000;
+	var pollval = 0;
+	var updatefreq = '<xsl:value-of select="root/DOCUMENT/updatefreq"/>';
+	var pollfreq = 6;
+	try
+	{
+		if(updatefreq &gt; 0)
+		{
+			pollfreq = Math.round(updatefreq/5);
+			if(pollfreq &lt; 2){pollfreq=2;}
+		}
+		else
+		{
+			pollfreq = 0;
+		}
+	}
+	catch(e){pollfreq = 6;}
+	var updateRightPane = 1;
+	var RequestTID = null;
+	var TimeoutTID = null;
+	var curSelObj = null;
+		
+	function ViewNotes(viewID)
+	{
+		glo_launchModelessWindow('./modalframe.ems?file=contactnotes.ems&amp;TicketBoxView=' + viewID, 650, 400, 'yes', 'no', 'no');
+	}
+	
+	function showMaint()
+	{
+		glo_launchModalWindow('dbmaintenanceresults.ems', 350, 110, 'no', 'no', 'no');		
+	}
+	
+	function docRollUpClick(di)
+	{
+		var icount = 0;
+		<xsl:choose>
+		<xsl:when test="/root/user/isadmin = 1">
+		icount = 3;
+		</xsl:when>
+		<xsl:when test="/root/user/access/stdreports &lt; 2">
+		icount = 1;
+		</xsl:when>
+		<xsl:otherwise>
+		icount = 2;
+		</xsl:otherwise>
+		</xsl:choose>
+		
+		if(getCookieNum("leftmenuBtn", getCookieCount("leftmenuBtn")) == di &amp;&amp; di==0)
+		{
+			updateTicketCount();
+		}
+		if(getCookieNum("leftmenuBtn", getCookieCount("leftmenuBtn")) == di &amp;&amp; di==1)
+		{
+			toggleReports();
+		}
+		if(getCookieNum("leftmenuBtn", getCookieCount("leftmenuBtn")) == di &amp;&amp; di==2)
+		{
+			toggleAll();
+		}
+		
+		for (var x = 0; x &lt; icount; x++)
+		{
+			var idName = x + "rollUpBtn";
+			var idNameX = x + "rollUpBtnX";
+			var idContent = x + "rollUpContent";
+				
+			var irb = document.getElementById(idName);
+				
+			var xrb = document.getElementById(idNameX);
+				
+			var ruc = document.getElementById(idContent);
+			
+			if(x &lt; di)
+			{
+				irb.style.display = "block";
+				xrb.style.display = "none";
+				ruc.style.display = "none";
+			}
+			if(x == di)
+			{
+				irb.style.display = "block";
+				xrb.style.display = "none";
+				ruc.style.display = "block";
+			}
+			if(x &gt; di)
+			{
+				irb.style.display = "none";
+				xrb.style.display = "block";
+				ruc.style.display = "none";
+			}					
+		}
+		
+		setCookie("leftmenuBtn", di, "01/01/2099", null);
+		
+		rcOpenDim = di;
+		parent.docResizeLeft();
+	}
+	/*---------------------------------------------------------------------------\                     
+	||  Comments:	Sets a timer to update all TicketBox counts.  If reset is
+	||				true the Timeout timer is set which will cancel the XMLHTTP
+	||				request if the timeout interval is reached.
+	\*--------------------------------------------------------------------------*/
+	function SetTimer(reset) 
+	{
+		if( RequestTID != null ) { clearInterval(RequestTID); RequestTID = null; }
+		if( TimeoutTID != null ) { clearInterval(TimeoutTID); TimeoutTID = null; }
+
+		if (reset)
+		{
+			TimeoutTID = setInterval('updateTicketCountTimeout()', pollinterval );
+		}
+		else
+		{
+			RequestTID = setInterval('updateTicketCount(1)', pollinterval);
+		}
+	}
+
+	/*---------------------------------------------------------------------------\                     
+	||  Comments:	Updates all TicketBox counts by making an asynch XMLHTTP 
+	||				request...
+	\*--------------------------------------------------------------------------*/
+	function updateTicketCount(val) 
+	{	
+		if(typeof val == "undefined"){val=2;}
+		updateRightPane = 1;
+		var bDoCountUpdate = false;
+		var selUp = 0;
+		
+		if(val == 2)
+		{
+			updateRightPane = 0;
+		}
+		var bDoAgentStatus = false;
+		
+		if (ticketboxxmlhttp)
+		{
+			SetTimer(true);
+			var TimeStamp = new Date();
+			if((pollval >= pollfreq &amp;&amp; val == 1 &amp;&amp; pollfreq != 0) || val == 2 || val == 0)
+			{
+				pollval=0;
+				bDoCountUpdate = true;
+				var URL = '<xsl:value-of select="root/TicketBoxList/@URL"/>' + '&amp;type=0&amp;time='+TimeStamp.getTime();
+			}
+			else if (val == 3)
+			{
+				bDoAgentStatus = true;
+				selUp = 1;
+				var URL = '<xsl:value-of select="root/TicketBoxList/@URL"/>' + '&amp;type=1&amp;time='+TimeStamp.getTime();				
+			}
+			else
+			{
+				if(pollfreq != 0){pollval++;}
+			}
+			
+			if(bDoAgentStatus || bDoCountUpdate)
+			{
+				try
+				{
+					ticketboxxmlhttp.open('GET', URL, true);
+					if(ticketboxxmlhttp.overrideMimeType){ ticketboxxmlhttp.overrideMimeType('text/xml'); }
+					ticketboxxmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+					if(ticketboxxmlhttp.responseType){ticketboxxmlhttp.responseType= 'msxml-document'; }
+					ticketboxxmlhttp.onreadystatechange = function () 
+					{
+						if (ticketboxxmlhttp.readyState == 4)
+						{
+							if(ticketboxxmlhttp.responseText.indexOf("document.loginform.username.focus") != -1)
+							{
+								top.location='login.ems?sessiontimeout=1';
+							}
+							else if(selUp == 0)
+							{
+								doTicketUpdate(ticketboxxmlhttp.responseXML);
+							}
+							else
+							{
+								selUp = 0;
+								doStatusUpdate(ticketboxxmlhttp.responseXML);
+							}
+							SetTimer();
+						}
+		   		};
+		   		ticketboxxmlhttp.send(null);
+	   		}
+				catch(e){}
+	   	}
+	   	else
+	   	{
+	   		SetTimer();
+	   	}
+		}
+	}
+
+	/*---------------------------------------------------------------------------\
+	||  Comments:	Called by the update timer and will cancel the XMLHTTP 
+	||				request if the timeout interval is reached	              
+	\*--------------------------------------------------------------------------*/
+	function updateTicketCountTimeout()
+	{		
+		if (  ticketboxxmlhttp )
+			ticketboxxmlhttp.abort();
+		
+		SetTimer();
+	}
+	
+	function UpdateNonAdminLink(id)
+	{
+		if(curSelObj)
+		{
+			curSelObj.className = "leftmenuNoHiLight";
+			curSelObj = document.getElementById(id);
+			curSelObj.className = "leftmenuHiLight";
+		}
+		else
+		{
+			curSelObj = document.getElementById(id);
+			curSelObj.className = "leftmenuHiLight";
+		}				
+	}
+
+<xsl:if test="/root/user/isadmin = 1">
+	function UpdateAdminLink(id)
+	{
+		if(curSelObj)
+		{
+			curSelObj.className = "leftmenuNoHiLight";
+			curSelObj = document.getElementById(id);
+			curSelObj.className = "leftmenuHiLight";
+		}
+		else
+		{
+			curSelObj = document.getElementById(id);
+			curSelObj.className = "leftmenuHiLight";
+		}
+	}
+</xsl:if>
+	
+	function getIsSelected()
+	{
+		if(!document.getElementsByClassName)
+		{
+			document.getElementsByClassName=function(cn)
+			{
+				var allT=document.getElementsByTagName('*'), allCN=[], i=0, a;
+		    while(a=allT[i++])
+		    {
+		    	a.className==cn?allCN[allCN.length]=a:null;
+		    }
+				return allCN
+			}
+		}
+
+		if(document.getElementsByClassName)
+		{
+			var theElements = document.getElementsByClassName("leftmenuHiLight");
+			if ( theElements.length == 1 )
+			{
+				var theID = theElements[0].id; 
+				if ( theID == "nobrInbox" || theID == "nobrOutbox" || theID == "nobrDrafts" || theID == "nobrApprovals" || theID == "nobrAlerts")
+				{
+					var nTemp = theElements[0].childNodes[2].id.substring(5,theElements[0].childNodes[2].id.length);
+					return theID + nTemp;
+				}
+				else
+				{
+					return theID;
+				}								
+			}
+			else
+			{
+				return "";
+			}			
+		}		
+	}
+	
+	function doSelectedUpdate()
+	{
+		if ( updateRightPane == 1 )
+		{
+			var doUpdate = 1;
+			var imgs = parent.rightpane.document.getElementsByTagName("img");
+	   
+	    for (var i = 0; i &lt; imgs.length; i++)
+	    {
+	    	if ( imgs[i].src.indexOf("minus.gif") != -1 )
+	    	{
+	    		doUpdate = 0;
+	    	}    	
+	    }
+			
+			if ( doUpdate )
+			{
+				parent.rightpane.doReload();	
+			}
+		}
+	}
+	
+	function doTicketUpdate(XML) 
+	{
+		var nStatus;
+		var isSelected = getIsSelected();
+		
+		try
+		{
+			// Public TicketBoxes
+			<xsl:for-each select="/root/TicketBoxList/TicketBox">		
+			if (XML.evaluate)
+			{   
+		    var xPathRes = XML.evaluate ( "//TicketBox[@ViewID='<xsl:value-of select="@ViewID"/>']", XML, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+				var tBox = xPathRes.iterateNext ();
+		    while (tBox)
+		    {
+		    	nCount = tBox.getAttribute ("Count");
+	        nUnread = tBox.getAttribute ("unread_count");
+	        nStatus = tBox.getAttribute ("Status");
+		      tBox = xPathRes.iterateNext ()
+	    	}
+	    }
+	    else
+	    {
+	    	nCount = XML.selectSingleNode("/root/TicketBoxList/TicketBox[@ViewID='<xsl:value-of select="@ViewID"/>']/@Count").value;
+				nUnread = XML.selectSingleNode("/root/TicketBoxList/TicketBox[@ViewID='<xsl:value-of select="@ViewID"/>']/@unread_count").value;
+				nStatus = XML.selectSingleNode("/root/TicketBoxList/TicketBox[@ViewID='<xsl:value-of select="@ViewID"/>']/@Status").value;		
+	  	}
+			if (document.all.count<xsl:value-of select="@ViewID"/>.innerHTML != nCount )
+			{
+				document.all.count<xsl:value-of select="@ViewID"/>.innerHTML = nCount;
+				if ( isSelected == "nobrTicketsView" + <xsl:value-of select="@ViewID"/> )
+				{
+					doSelectedUpdate();
+				}	
+			}
+			if(nUnread == -1 || nUnread == null)
+				document.all.unreadCount<xsl:value-of select="@ViewID"/>.style.display = "none";
+			else
+				document.all.unreadCount<xsl:value-of select="@ViewID"/>.style.display = "inline";
+				
+			if (document.all.unreadCount<xsl:value-of select="@ViewID"/>.innerHTML != nUnread + "/" )
+			{
+				document.all.unreadCount<xsl:value-of select="@ViewID"/>.innerHTML = nUnread + "/";
+				if ( isSelected == "nobrTicketsView" + <xsl:value-of select="@ViewID"/> )
+				{
+					doSelectedUpdate();
+				}	
+			}
+			updateImage(<xsl:value-of select="@ViewID"/>,nStatus);
+			</xsl:for-each>	
+			
+			<xsl:for-each select="/root/TicketBoxList/Agent">
+			<xsl:variable name="tblAgent" select="@ID"/>
+			var nAgentID = <xsl:value-of select="@ID"/>;
+			var nStatusID;
+			var sStatusText;
+			var nLoggedIn=0;
+			if (XML.evaluate)
+			{   
+		    var xPathRes = XML.evaluate ( "//Agent[@ID='<xsl:value-of select="@ID"/>']", XML, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+				var tBox = xPathRes.iterateNext ();
+		    while (tBox)
+		    {
+		    	nLoggedIn = tBox.getAttribute ("LoggedIn");
+		    	nStatusID = tBox.getAttribute ("StatusID");
+		    	if(nStatusID &lt; 1 || nStatusID &gt; 6)
+		    	{
+		    		nStatusID = 1;
+		    		sStatusText = "Online";
+		    	}
+		    	else
+		    	{
+		    		sStatusText = tBox.getAttribute ("StatusText");
+		    	}
+		    	if(nLoggedIn == 1)
+		    	{
+		    		sStatusText = "Logged In - " + sStatusText;
+		    	}
+		    	else
+		    	{
+		    		sStatusText = "Logged Out - " + sStatusText;
+		    	}
+		      tBox = xPathRes.iterateNext ()
+	    	}
+	    }
+	    else
+	    {
+	    	nLoggedIn = XML.selectSingleNode("/root/TicketBoxList/Agent[@ID='<xsl:value-of select="@ID"/>']/@LoggedIn").value;
+	    	nStatusID = XML.selectSingleNode("/root/TicketBoxList/Agent[@ID='<xsl:value-of select="@ID"/>']/@StatusID").value;
+	    	if(nStatusID &lt; 1 || nStatusID &gt; 6)
+	    	{
+	    		nStatusID = 1;
+	    		sStatusText = "Online";
+	    	}
+	    	else
+	    	{
+	    		sStatusText = XML.selectSingleNode("/root/TicketBoxList/Agent[@ID='<xsl:value-of select="@ID"/>']/@StatusText").value;
+	    	}
+	    	if(nLoggedIn == 1)
+	    	{
+	    		sStatusText = "Logged In - " + sStatusText;
+	    	}
+	    	else
+	    	{
+	    		sStatusText = "Logged Out - " + sStatusText;
+	    	}
+	  	}
+			<xsl:choose>
+			<xsl:when test="@ID != /root/user/id">
+				updateStatusImage(nAgentID, nStatusID, sStatusText);
+			</xsl:when>
+			<xsl:otherwise>		
+				document.getElementById("StatusMenuImg").src="images/ico_as"+nStatusID+".gif";		
+				document.getElementById("StatusMenuHolder").title=sStatusText;			
+			</xsl:otherwise>
+			</xsl:choose>
+			<xsl:for-each select="TicketBox">
+			<xsl:if test=" @TypeID != '3'">
+			
+			if (XML.evaluate)
+			{   
+		    var xPathRes = XML.evaluate ( "//TicketBox[@ViewID='<xsl:value-of select="@ViewID"/>']", XML, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+				var tBox = xPathRes.iterateNext ();
+		    while (tBox)
+		    {
+		    	nCount = tBox.getAttribute ("Count");
+	        tBox = xPathRes.iterateNext ()
+	    	}
+	    }
+	    else
+	    {
+	    	nCount = XML.selectSingleNode("/root/TicketBoxList/Agent/TicketBox[@ViewID='<xsl:value-of select="@ViewID"/>']/@Count").value;    						
+	  	}
+					
+			<xsl:choose>		
+			<xsl:when test="@TypeID = '1'">
+				if (XML.evaluate)
+				{   
+			    var xPathRes = XML.evaluate ( "//TicketBox[@ViewID='<xsl:value-of select="@ViewID"/>']", XML, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+					var tBox = xPathRes.iterateNext ();
+			    while (tBox)
+			    {
+			    	nUnread = tBox.getAttribute ("unread_count");
+		        tBox = xPathRes.iterateNext ()
+		    	}
+		    }
+		    else
+		    {
+		    	nUnread = XML.selectSingleNode("/root/TicketBoxList/Agent/TicketBox[@ViewID='<xsl:value-of select="@ViewID"/>']/@unread_count").value;					
+		  	}
+				if(nUnread == -1)
+					document.all.unreadCount<xsl:value-of select="@ViewID"/>.style.display = "none";
+				else
+					document.all.unreadCount<xsl:value-of select="@ViewID"/>.style.display = "inline";
+					
+				if (document.all.count<xsl:value-of select="@ViewID"/>.innerHTML != nCount )
+				{
+					document.all.count<xsl:value-of select="@ViewID"/>.innerHTML = nCount;
+					if ( isSelected == "nobrInbox" + <xsl:value-of select="@ViewID"/> )
+					{
+						doSelectedUpdate();
+					}	
+				}		
+				if (document.all.unreadCount<xsl:value-of select="@ViewID"/>.innerHTML != nUnread + "/" )
+				{
+					document.all.unreadCount<xsl:value-of select="@ViewID"/>.innerHTML = nUnread + "/";
+					if ( isSelected == "nobrInbox" + <xsl:value-of select="@ViewID"/> )
+					{
+						doSelectedUpdate();
+					}	
+				}					
+			
+				//My Folders
+				<xsl:for-each select="myfolders/folder">
+				
+				if (XML.evaluate)
+				{   
+			    var xPathRes = XML.evaluate ( "//folder[@id='<xsl:value-of select="@id"/>']/ticketcount", XML, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+					var tBox = xPathRes.iterateNext ();
+			    while (tBox)
+			    {
+			    	nChildCount = tBox.textContent;
+		        tBox = xPathRes.iterateNext ()
+		    	}
+		    	var xPathRes = XML.evaluate ( "//folder[@id='<xsl:value-of select="@id"/>']/unreadticketcount", XML, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+					var tBox = xPathRes.iterateNext ();
+			    while (tBox)
+			    {
+			    	nUnreadChildCount = tBox.textContent;
+		        tBox = xPathRes.iterateNext ()
+		    	}
+		    }
+		    else
+		    {
+		    	nChildCount = XML.selectSingleNode("/root/TicketBoxList/Agent/TicketBox[@Name='My Tickets']/myfolders/folder[@id='<xsl:value-of select="@id"/>']/ticketcount").text;
+					nUnreadChildCount = XML.selectSingleNode("/root/TicketBoxList/Agent/TicketBox[@Name='My Tickets']/myfolders/folder[@id='<xsl:value-of select="@id"/>']/unreadticketcount").text;					
+		  	}
+												
+				if(nUnreadChildCount == -1)
+					document.all.childUnreadCount<xsl:value-of select="@id"/>.style.display = "none";
+				else
+					document.all.childUnreadCount<xsl:value-of select="@id"/>.style.display = "inline";
+				
+				if (document.all.childCount<xsl:value-of select="@id"/>.innerHTML != nChildCount )
+				{
+					document.all.childCount<xsl:value-of select="@id"/>.innerHTML = nChildCount;
+					if ( isSelected == "spanMyFolder" + <xsl:value-of select="@id"/> )
+					{
+						doSelectedUpdate();
+					}	
+				}		
+				if (document.all.childUnreadCount<xsl:value-of select="@id"/>.innerHTML != nUnreadChildCount + "/" )
+				{
+					document.all.childUnreadCount<xsl:value-of select="@id"/>.innerHTML = nUnreadChildCount + "/";
+					if ( isSelected == "spanMyFolder" + <xsl:value-of select="@id"/> )
+					{
+						doSelectedUpdate();
+					}	
+				}
+			
+			</xsl:for-each>
+			</xsl:when>
+			<xsl:otherwise>
+				if (typeof document.all.count<xsl:value-of select="@ViewID"/> != "undefined")
+				{
+					if (document.all.count<xsl:value-of select="@ViewID"/>.innerHTML != nCount )
+					{
+						document.all.count<xsl:value-of select="@ViewID"/>.innerHTML = nCount;
+						if ( <xsl:value-of select="@TypeID"/> == "2" )
+						{
+							if ( isSelected == "nobrOutbox" + <xsl:value-of select="@ViewID"/> )
+							{
+								doSelectedUpdate();
+							}	
+						}
+						if ( <xsl:value-of select="@TypeID"/> == "4" )
+						{
+							if ( isSelected == "nobrDrafts" + <xsl:value-of select="@ViewID"/> )
+							{
+								doSelectedUpdate();
+							}	
+						}
+						if ( <xsl:value-of select="@TypeID"/> == "10" )
+						{
+							if ( isSelected == "nobrApprovals" + <xsl:value-of select="@ViewID"/> )
+							{
+								doSelectedUpdate();
+							}	
+						}				
+					}
+				}
+				
+				//Alerts
+				<xsl:if test="@TypeID = '8'">
+				if (<xsl:value-of select="$tblAgent"/> == <xsl:value-of select="/root/user/id"/>)
+				{
+					if (XML.evaluate)
+					{   
+				    var xPathRes = XML.evaluate ( "//TicketBoxList/Agent/TicketBox[@ViewID='<xsl:value-of select="@ViewID"/>']", XML, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+						var tBox = xPathRes.iterateNext ();
+				    while (tBox)
+				    {
+				    	nUnread = tBox.getAttribute ("unread_count");
+			        tBox = xPathRes.iterateNext ()
+			    	}
+			    }
+			    else
+			    {
+			    	nUnread = XML.selectSingleNode("/root/TicketBoxList/Agent/TicketBox[@ViewID='<xsl:value-of select="@ViewID"/>']/@unread_count").value;					
+			  	}
+								
+					if(nUnread == -1)
+						document.all.unreadCount<xsl:value-of select="@ViewID"/>.style.display = "none";
+					else
+						document.all.unreadCount<xsl:value-of select="@ViewID"/>.style.display = "inline";
+						
+					if (document.all.count<xsl:value-of select="@ViewID"/>.innerHTML != nCount )
+					{
+						document.all.count<xsl:value-of select="@ViewID"/>.innerHTML = nCount;					
+					}		
+					if (document.all.unreadCount<xsl:value-of select="@ViewID"/>.innerHTML != nUnread + "/" )
+					{
+						document.all.unreadCount<xsl:value-of select="@ViewID"/>.innerHTML = nUnread + "/";					
+					}
+				}
+				</xsl:if>	
+			</xsl:otherwise>
+			</xsl:choose>
+			
+			</xsl:if>				
+			</xsl:for-each>
+			</xsl:for-each>
+			
+			var isBold;
+			
+			//Alerts Bold
+			if (XML.evaluate)
+			{   
+		    var xPathRes = XML.evaluate ( "//Agent[@LoggedOnAgent='1']/TicketBox[@TypeID=8]", XML, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+				var tBox = xPathRes.iterateNext ();
+		    while (tBox)
+		    {
+		    	isBold = tBox.getAttribute ("Bold");
+	        tBox = xPathRes.iterateNext ()
+	    	}
+	    }
+	    else
+	    {
+	    	isBold = XML.selectSingleNode("/root/TicketBoxList/Agent[@LoggedOnAgent='1']/TicketBox[@TypeID=8]/@Bold").value;					
+	  	}	
+				
+			if(isBold == '0')
+			{
+				document.getElementById("nobrAlerts").style.fontWeight = "normal";
+			}
+			else
+			{
+				document.getElementById("nobrAlerts").style.fontWeight = "bold";
+			}	
+		}
+		catch(e){}	
+	}
+
+	function doStatusUpdate(XML) 
+	{
+		var nStatus;		
+		try
+		{
+			<xsl:for-each select="/root/TicketBoxList/Agent">
+			<xsl:variable name="tblAgent" select="@ID"/>
+			var nAgentID = <xsl:value-of select="@ID"/>;
+			var nStatusID;
+			var sStatusText;
+			var nLoggedIn=0;			
+			if (XML.evaluate)
+			{   
+		    var xPathRes = XML.evaluate ( "//Agent[@ID='<xsl:value-of select="@ID"/>']", XML, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+				var tBox = xPathRes.iterateNext ();
+		    while (tBox)
+		    {
+		    	nLoggedIn = tBox.getAttribute ("LoggedIn");
+		    	nStatusID = tBox.getAttribute ("StatusID");
+		    	if(nStatusID &lt; 1 || nStatusID &gt; 6)
+		    	{
+		    		nStatusID = 1;
+		    		sStatusText = "Online";
+		    	}
+		    	else
+		    	{
+		    		sStatusText = tBox.getAttribute ("StatusText");
+		    	}
+		    	if(nLoggedIn == 1)
+		    	{
+		    		sStatusText = "Logged In - " + sStatusText;
+		    	}
+		    	else
+		    	{
+		    		sStatusText = "Logged Out - " + sStatusText;
+		    	}
+		    	tBox = xPathRes.iterateNext ()
+	    	}
+	    }
+	    else
+	    {
+	    	nLoggedIn = XML.selectSingleNode("/root/TicketBoxList/Agent[@ID='<xsl:value-of select="@ID"/>']/@LoggedIn").value;
+	    	nStatusID = XML.selectSingleNode("/root/TicketBoxList/Agent[@ID='<xsl:value-of select="@ID"/>']/@StatusID").value;
+	    	if(nStatusID &lt; 1 || nStatusID &gt; 6)
+	    	{
+	    		nStatusID = 1;
+	    		sStatusText = "Online";
+	    	}
+	    	else
+	    	{
+	    		sStatusText = XML.selectSingleNode("/root/TicketBoxList/Agent[@ID='<xsl:value-of select="@ID"/>']/@StatusText").value;
+	    	}
+	    	if(nLoggedIn == 1)
+	    	{
+	    		sStatusText = "Logged In - " + sStatusText;
+	    	}
+	    	else
+	    	{
+	    		sStatusText = "Logged Out - " + sStatusText;
+	    	}
+	  	}
+			<xsl:choose>
+			<xsl:when test="@ID != /root/user/id">
+				updateStatusImage(nAgentID, nStatusID, sStatusText);
+			</xsl:when>
+			<xsl:otherwise>		
+				document.getElementById("StatusMenuImg").src="images/ico_as"+nStatusID+".gif";		
+				document.getElementById("StatusMenuHolder").title=sStatusText;			
+			</xsl:otherwise>
+			</xsl:choose>		
+			</xsl:for-each>
+		}
+		catch(e){}
+	}
+
+	function updateImage(ViewID, Status) 
+	{
+		thisIMG = document.getElementById("img_ticketbox_"+ViewID);
+		
+		switch (Status)
+		{
+			case 0:
+				if ( thisIMG.src != "images/ico_myshortcuts_public.gif" )
+					thisIMG.src = "images/ico_myshortcuts_public.gif";
+				break;
+			case 1:
+				if ( thisIMG.src != "images/ico_myshortcuts_public_access.gif" )
+					thisIMG.src = "images/ico_myshortcuts_public_access.gif";
+				break;
+			case 2:
+				if ( thisIMG.src != "images/ico_myshortcuts_public_low.gif" )
+					thisIMG.src = "images/ico_myshortcuts_public_low.gif";
+				break;
+			case 3:
+				if ( thisIMG.src != "images/ico_myshortcuts_public_high.gif" )
+					thisIMG.src = "images/ico_myshortcuts_public_high.gif";
+				break;
+		}
+	}
+
+	function updateStatusImage(AgentID, StatusID, StatusText) 
+	{
+		thisIMG = document.getElementById("statusimg"+AgentID);
+		try
+		{
+			switch (StatusID)
+			{
+				case "1":
+					if ( thisIMG.src != "images/ico_as1.gif" )
+						thisIMG.src = "images/ico_as1.gif";
+						thisIMG.title = StatusText;
+					break;
+				case "2":
+					if ( thisIMG.src != "images/ico_as2.gif" )
+						thisIMG.src = "images/ico_as2.gif";
+						thisIMG.title = StatusText;
+					break;
+				case "3":
+					if ( thisIMG.src != "images/ico_as3.gif" )
+						thisIMG.src = "images/ico_as3.gif";
+						thisIMG.title = StatusText;
+					break;
+				case "4":
+					if ( thisIMG.src != "images/ico_as4.gif" )
+						thisIMG.src = "images/ico_as4.gif";
+						thisIMG.title = StatusText;
+					break;
+				case "5":
+					if ( thisIMG.src != "images/ico_as5.gif" )
+						thisIMG.src = "images/ico_as5.gif";
+						thisIMG.title = StatusText;
+					break;
+				case "6":
+					if ( thisIMG.src != "images/ico_as6.gif" )
+						thisIMG.src = "images/ico_as6.gif";
+						thisIMG.title = StatusText;
+					break;
+			}
+		}
+		catch(e)
+		{}
+	}
+	
+	function BoldAlert() 
+	{
+		document.getElementById("nobrAlerts").style.fontWeight = "bold";
+	}
+
+	function unBoldAlert() 
+	{
+		document.getElementById("nobrAlerts").style.fontWeight = "normal";
+	}
+
+	function OpenGuide( sURL )
+	{
+		glo_launchNewWindow( sURL );
+	}
+	
+	function ExpandMyTicketChildWindow(e, imgID)
+	{
+		if(!e)var e = window.event;
+		e.cancelBubble = true;
+		if (e.stopPropagation) e.stopPropagation();
+
+		var divNum = parseInt(imgID);
+		var divID = divNum + "divMyTicketsChildren";
+		
+		if(document.getElementById(divID).style.display != "none")
+		{
+			document.getElementById(divID).style.display = "none";
+			document.getElementById(imgID).src = "./images/plus.gif"
+			setCookie(imgID, 0, "01/01/2099");
+		}
+		else
+		{
+			document.getElementById(divID).style.display = "block";
+			document.getElementById(imgID).src = "./images/minus.gif"
+			setCookie(imgID, 1, "01/01/2099");
+		}		
+	}
+	
+	function setMenuDefaults()
+	{
+		
+		var imgs = document.images;
+  	for (var i=0, iLen=imgs.length; i&lt;iLen; i++)
+  	{
+    	var imgID = imgs[i].id;
+    	if(imgID.indexOf("imgMyTickets") != -1)
+			{
+				var divNum = parseInt(imgID);				
+	    	if(getCookieNum(imgID, getCookieCount(imgID)))
+	    	{
+	    		var divID = divNum + "divMyTicketsChildren";
+					if(getCookieNum(imgID, getCookieCount(imgID)) == 0)
+					{
+						if(document.getElementById(divID).style.display != "none")
+						{
+							document.getElementById(divID).style.display = "none";
+							document.getElementById(imgID).src = "./images/plus.gif"
+						}
+					}
+					else
+					{
+						document.getElementById(divID).style.display = "block";
+						document.getElementById(imgID).src = "./images/minus.gif"
+					}
+	    	}
+	    }
+	    else if(imgID.indexOf("img") != -1)
+	    {
+	    	if(isNaN(parseInt(imgID.substring(3,imgID.length))) != true)
+	    	{
+	    		var divNum = parseInt(imgID.substring(3,imgID.length));
+	    		if(divNum == 999)
+	    		{
+	    			if(getCookieNum("999", getCookieCount("999")) == 1){toggleTree('999');}
+	    		}
+	    		else
+	    		{
+	    			if(getCookieNum(divNum, getCookieCount(divNum)) == 0){toggleTree(divNum);}
+	    		}	    		
+	    	}
+	    }
+  	}
+		<xsl:if test="not(/root/user/access/stdreports &lt; 2)">
+		if(getCookieNum("_srpt0", getCookieCount("_srpt0")) == 1){toggleTree('_srpt0');}
+		if(getCookieNum("_rpt1", getCookieCount("_rpt1")) == 0){toggleTree('_rpt1');}
+		if(getCookieNum("_rpt2", getCookieCount("_rpt2")) == 0){toggleTree('_rpt2');}
+		if(getCookieNum("_rpt3", getCookieCount("_rpt3")) == 0){toggleTree('_rpt3');}
+		if(getCookieNum("_rpt4", getCookieCount("_rpt4")) == 0){toggleTree('_rpt4');}
+		if(getCookieNum("_rpt5", getCookieCount("_rpt5")) == 0){toggleTree('_rpt5');}
+		if(getCookieNum("_rpt6", getCookieCount("_rpt6")) == 0){toggleTree('_rpt6');}
+		if(getCookieNum("_rpt7", getCookieCount("_rpt7")) == 0){toggleTree('_rpt7');}
+		if(getCookieNum("_rpt8", getCookieCount("_rpt8")) == 0){toggleTree('_rpt8');}
+		if(getCookieNum("_rpt9", getCookieCount("_rpt9")) == 0){toggleTree('_rpt9');}
+		if(getCookieNum("_rpt10", getCookieCount("_rpt10")) == 0){toggleTree('_rpt10');}
+		<xsl:if test="/root/user/access/agentaudit = '4'">
+			if(getCookieNum("_rpt11", getCookieCount("_rpt11")) == 0){toggleTree('_rpt11');}
+		</xsl:if>
+		if(getCookieNum("_rpt12", getCookieCount("_rpt12")) == 0){toggleTree('_rpt12');}
+		if(getCookieNum("_rpt13", getCookieCount("_rpt13")) == 0){toggleTree('_rpt13');}
+		if(getCookieNum("_rpt14", getCookieCount("_rpt14")) == 0){toggleTree('_rpt14');}
+		</xsl:if>
+		<xsl:if test="/root/user/isadmin = 1">
+			if(getCookieNum("_adm_gen", getCookieCount("_adm_gen")) == 1){toggleTree('_adm_gen');}
+			if(getCookieNum("_adm_mh", getCookieCount("_adm_mh")) == 1){toggleTree('_adm_mh');}
+			if(getCookieNum("_adm_al", getCookieCount("_adm_al")) == 1){toggleTree('_adm_al');}
+			if(getCookieNum("_adm_rep", getCookieCount("_adm_rep")) == 1){toggleTree('_adm_rep');}
+			if(getCookieNum("_adm_ss", getCookieCount("_adm_ss")) == 1){toggleTree('_adm_ss');}
+			if(getCookieNum("_adm_sec", getCookieCount("_adm_sec")) == 1){toggleTree('_adm_sec');}
+			if(getCookieNum("_adm_serv", getCookieCount("_adm_serv")) == 1){toggleTree('_adm_serv');}
+			if(getCookieNum("_adm_ag", getCookieCount("_adm_ag")) == 1){toggleTree('_adm_ag');}
+			if(getCookieNum("_adm_tb", getCookieCount("_adm_tb")) == 1){toggleTree('_adm_tb');}
+			if(getCookieNum("_adm_tik", getCookieCount("_adm_tik")) == 1){toggleTree('_adm_tik');}
+			if(getCookieNum("_adm_con", getCookieCount("_adm_con")) == 1){toggleTree('_adm_con');}
+			if(getCookieNum("_adm_db", getCookieCount("_adm_db")) == 1){toggleTree('_adm_db');}
+			if(getCookieNum("_adm_spell", getCookieCount("_adm_spell")) == 1){toggleTree('_adm_spell');}
+			if(getCookieNum("_adm_log", getCookieCount("_adm_log")) == 1){toggleTree('_adm_log');}
+			if(getCookieNum("_adm_help", getCookieCount("_adm_help")) == 1){toggleTree('_adm_help');}
+		</xsl:if>
+	}
+	
+	function toggleAll()
+	{
+		var contract = new Image();
+		contract.src = './images/minus.gif';
+		var expand = new Image();
+		expand.src = './images/plus.gif';
+		var x = document.images;
+		if(document.expandall.expand.value == '0') 
+		{
+			for (var i=0;i&lt;x.length;i++)
+			{
+				if(x[i].src == expand.src) 
+				{
+					var str=x[i].id;
+					if(str.indexOf("_adm_") != -1)
+					{
+						str=str.replace(/img_/,"_");
+						toggleTree(str);
+					}				
+				}
+			}							
+		}
+		if(document.expandall.expand.value == '1') 
+		{
+			for (var i=0;i&lt;x.length;i++)
+			{
+				if(x[i].src == contract.src) 
+				{
+					var str=x[i].id;
+					if(str.indexOf("_adm_") != -1)
+					{
+						str=str.replace(/img_/,"_");
+						toggleTree(str);
+					}				
+				}
+			}								
+		}
+		
+		if(document.expandall.expand.value == '0') 
+		{
+			document.expandall.expand.value = '1';
+		}
+		else
+		{
+			document.expandall.expand.value = '0';  
+		}			
+	}
+	
+	function toggleReports()
+	{
+		var contract = new Image();
+		contract.src = './images/minus.gif';
+		var expand = new Image();
+		expand.src = './images/plus.gif';
+		var x = document.images;
+		if(document.expandall.expand.value == '0') 
+		{
+			for (var i=0;i&lt;x.length;i++)
+			{
+				if(x[i].src == expand.src) 
+				{
+					var str=x[i].id;
+					if(str.indexOf("_rpt") != -1)
+					{
+						str=str.replace(/img_/,"_");
+						toggleTree(str);
+					}				
+				}
+			}							
+		}
+		if(document.expandall.expand.value == '1') 
+		{
+			for (var i=0;i&lt;x.length;i++)
+			{
+				if(x[i].src == contract.src) 
+				{
+					var str=x[i].id;
+					if(str.indexOf("_rpt") != -1)
+					{
+						str=str.replace(/img_/,"_");
+						toggleTree(str);
+					}				
+				}
+			}								
+		}
+		
+		if(document.expandall.expand.value == '0') 
+		{
+			document.expandall.expand.value = '1';
+		}
+		else
+		{
+			document.expandall.expand.value = '0';  
+		}			
+	}		
+	
+	function setRightPane(sUrl)
+	{	
+		parent.setRightPane(sUrl);
+	}	
+	
+	function setStatus(val)
+	{
+		var statustext="";
+		switch(val)
+		{
+		case "1":
+		  statustext='<xsl:value-of select="root/user/onlinetext"/>';
+		  break;
+		case "2":
+		  statustext='<xsl:value-of select="root/user/awaytext"/>';
+		  break;
+		case "3":
+		  statustext='<xsl:value-of select="root/user/notavailtext"/>';
+		  break;
+		case "4":
+		  statustext='<xsl:value-of select="root/user/dndtext"/>';
+		  break;
+		case "5":
+		  statustext='<xsl:value-of select="root/user/offlinetext"/>';
+		  break;
+		case "6":
+		  statustext='<xsl:value-of select="root/user/oootext"/>';
+		  break;		
+		}
+		
+		glo_launchModelessWindow('./modalframe.ems?file=setstatus.ems&amp;statusid='+val+'&amp;statustext='+statustext , 400, 180, 'yes', 'no', 'no');
+	}
+	
+	function logoutAgent(AgentID,AgentName,e)
+	{
+		glo_launchModelessWindow('./modalframe.ems?file=setstatus.ems&amp;agentid='+AgentID+'&amp;agentname='+AgentName , 400, 180, 'yes', 'no', 'no');
+		if (!e) e = window.event;
+    e.cancelBubble = true;
+    if (e.stopPropagation) e.stopPropagation();    
+	}
+	
+	</script>
+	</head>
+
+	<body callonload="SetTimer();setMenuDefaults();">
+	<xsl:attribute name="callBeforeOnLoad">xMenuBuild();</xsl:attribute>
+	<table id="docMasterTable" style="height:100%;width:100%;table-layout:fixed;" border="1" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%">
+				<div id="0rollUpBtn" style="cursor:hand;width:100%;border:1px outset;" onclick="docRollUpClick(0);" class="menuColor">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<script language="JavaScript" type="text/javascript">
+							var xMenu = new Array();
+							xMenu[0] = new Array();
+							xMenu[0][0] = new xMenuObject();
+							xMenu[0][1] = new xMenuItem('<img id="StatusMenuImg" src="images/ico_as{root/user/statusid}.gif" width="11" height="11" border="0" valign="bottom"/>', '', 1, null, null, 'StatusMenuHolder');
+							xMenu[1] = new Array();
+							xMenu[1][0] = new xMenuObject();
+							xMenu[1][1] = new xMenuItem('<img src="images/ico_as1.gif" width="11" height="11" border="0"/>&amp;nbsp;Online&amp;nbsp;', "setStatus('1');", 0);
+							xMenu[1][2] = new xMenuItem('<img src="images/ico_as2.gif" width="11" height="11" border="0"/>&amp;nbsp;Away&amp;nbsp;', "setStatus('2');", 0);
+							xMenu[1][3] = new xMenuItem('<img src="images/ico_as3.gif" width="11" height="11" border="0"/>&amp;nbsp;Not Available&amp;nbsp;', "setStatus('3');", 0);
+							xMenu[1][4] = new xMenuItem('<img src="images/ico_as5.gif" width="11" height="11" border="0"/>&amp;nbsp;Offline&amp;nbsp;', "setStatus('5');", 0);
+							xMenu[1][5] = new xMenuItem('<img src="images/ico_as6.gif" width="11" height="11" border="0"/>&amp;nbsp;Out of Office&amp;nbsp;', "setStatus('6');", 0);
+						</script>
+						<td id="StatusMenuHolder" title="{root/user/statustext}" style="padding-bottom:2px;width:11px;"></td>
+						<td style="padding:0px 0px 2px 2px;align:left;"><xsl:value-of select="/root/user/name"/></td>
+					</tr>
+				</table>
+				</div>
+				<xsl:if test="not(/root/user/access/stdreports &lt; 2)">
+				<div id="1rollUpBtn" style="cursor:hand;width:100%;border:1px outset;" onclick="docRollUpClick(1);" class="menuColor">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td style="padding:2px 0px 2px 5px;">
+				<img src="images/ico_admin_logging.gif" width="11" height="11" border="0"/>
+				<nobr><span style="margin-left:7px;">Reporting</span></nobr>
+				</td></tr></table>
+				</div>
+				</xsl:if>
+				<xsl:if test="/root/user/isadmin = 1">
+				<div id="2rollUpBtn" style="cursor:hand;width:100%;border:1px outset;" onclick="docRollUpClick(2);" class="menuColor">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td style="padding:2px 0px 2px 5px;">
+				<img src="images/ico_admin_settings.gif" width="11" height="11" border="0"/>
+				<nobr><span style="margin-left:7px;">Administration</span></nobr>
+				</td></tr></table>
+				</div>
+				</xsl:if>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:100%;height:100%;">
+			<div id="divMain" style="width:100%;height:100%;overflow:auto;">
+		<!--
+		# # OPEN CONTENT AREA FOR LOGGED IN AGENT OPTIONS
+		-->
+			<div id="0rollUpContent" ru_index="0" style="display:none;">
+			<table style="width:100%;padding:3px 0px 3px 5px;" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td style="width:100%;padding-left:5px;padding-top:3px;padding-bottom:3px;">
+						<div class="mainbranch">
+							<!-- # # LOOP iterate through each ticketbox for the logged on agent, indicated by select filter below -->
+							<xsl:for-each select="root/TicketBoxList/Agent[@LoggedOnAgent='1']/TicketBox">
+							
+							<xsl:variable name="showtb">
+							<xsl:choose>
+							<xsl:when test="@TypeID = '10' and /root/user/outboundapprover = '1'">1</xsl:when>
+							<xsl:when test="@TypeID = '10' and /root/user/outboundapprover = '0'">0</xsl:when>
+							<xsl:otherwise>1</xsl:otherwise>
+							</xsl:choose>
+							</xsl:variable>
+							
+							<xsl:if test="$showtb = '1'">
+							<div class="branch">	
+								<xsl:variable name="ticketname">
+									<xsl:choose>
+										<xsl:when test="@TypeID = 1">inbox</xsl:when>
+										<xsl:when test="@TypeID = 2">outbox</xsl:when>
+										<xsl:when test="@TypeID = 3">sentitems</xsl:when>
+										<xsl:when test="@TypeID = 4">drafts</xsl:when>
+										<xsl:when test="@TypeID = 8">alerts</xsl:when>
+										<xsl:when test="@TypeID = 10">approvals</xsl:when>
+										<xsl:when test="@TypeID = 11">notes</xsl:when>
+									</xsl:choose>
+								</xsl:variable>
+								<div>
+									<xsl:attribute name="onclick">
+										<xsl:choose>											
+											<xsl:when test="@TypeID = 1">setRightPane('mytickets.ems?TicketBoxView=<xsl:value-of select="@ViewID"/>')</xsl:when>
+											<xsl:when test="@TypeID = 2">setRightPane('outbox.ems?TicketBoxView=<xsl:value-of select="@ViewID"/>')</xsl:when>
+											<xsl:when test="@TypeID = 3">setRightPane('sentitems.ems?TicketBoxView=<xsl:value-of select="@ViewID"/>')</xsl:when>
+											<xsl:when test="@TypeID = 4">setRightPane('drafts.ems?TicketBoxView=<xsl:value-of select="@ViewID"/>')</xsl:when>
+											<xsl:when test="@TypeID = 8">setRightPane('alertlist.ems?TicketBoxView=<xsl:value-of select="@ViewID"/>')</xsl:when>
+											<xsl:when test="@TypeID = 10">setRightPane('approvals.ems?TicketBoxView=<xsl:value-of select="@ViewID"/>')</xsl:when>
+											<xsl:when test="@TypeID = 11">ViewNotes(<xsl:value-of select="@ViewID"/>);</xsl:when>
+										</xsl:choose>
+									</xsl:attribute>
+									<xsl:choose>
+										<xsl:when test="@TypeID = 1 and not(myfolders/folder) = true">
+											<img id="{@ViewID}imgMyTickets" src="./images/minus.gif" width="11" height="11"  border="0">
+											<xsl:attribute name="onclick">
+											<xsl:if test="@TypeID = 1 and not(myfolders/folder) = true">ExpandMyTicketChildWindow(event, id);</xsl:if>
+											</xsl:attribute>
+											</img>
+										</xsl:when>
+										<xsl:otherwise>
+											<img src="images/ico_myshortcuts_{$ticketname}.gif" width="11" height="11"  border="0"/>
+										</xsl:otherwise>
+									</xsl:choose>
+									<span class="adminbranch" style="margin:0px;">
+										<span class="leftmenuNoHiLight">
+											<xsl:attribute name="id">
+												<xsl:choose>
+													<xsl:when test="@TypeID = 1">nobrInbox</xsl:when>
+													<xsl:when test="@TypeID = 2">nobrOutbox</xsl:when>
+													<xsl:when test="@TypeID = 3">nobrSent</xsl:when>
+													<xsl:when test="@TypeID = 4">nobrDrafts</xsl:when>
+													<xsl:when test="@TypeID = 8">nobrAlerts</xsl:when>
+													<xsl:when test="@TypeID = 10">nobrApprovals</xsl:when>
+													<xsl:when test="@TypeID = 11">nobrNotes</xsl:when>
+												</xsl:choose>
+											</xsl:attribute>
+											<xsl:attribute name="onclick">
+												<xsl:choose>
+													<xsl:when test="@TypeID = 1">UpdateNonAdminLink('nobrInbox')</xsl:when>
+													<xsl:when test="@TypeID = 2">UpdateNonAdminLink('nobrOutbox')</xsl:when>
+													<xsl:when test="@TypeID = 3">UpdateNonAdminLink('nobrSent')</xsl:when>
+													<xsl:when test="@TypeID = 4">UpdateNonAdminLink('nobrDrafts')</xsl:when>
+													<xsl:when test="@TypeID = 8">UpdateNonAdminLink('nobrAlerts')</xsl:when>
+													<xsl:when test="@TypeID = 10">UpdateNonAdminLink('nobrApprovals')</xsl:when>
+													<xsl:when test="@TypeID = 11">UpdateNonAdminLink('nobrNotes')</xsl:when>
+												</xsl:choose>
+											</xsl:attribute>
+											<xsl:choose>
+												<xsl:when test="@Name = 'Alerts'">
+													<xsl:if test="@Bold = '1'">
+														<xsl:attribute name="style">font-weight:bold;</xsl:attribute>
+													</xsl:if>										
+													<xsl:value-of select="@Name"/>
+												</xsl:when>
+												<xsl:when test="@Name = 'Approvals'">Approval Queue</xsl:when>
+												<xsl:otherwise>
+													<xsl:value-of select="@Name"/>
+												</xsl:otherwise>
+											</xsl:choose>
+											<xsl:if test="@TypeID != 3">
+												<xsl:choose>
+													<xsl:when test="@TypeID = '1' and @unread_count != '-1'">
+														(<span id="unreadCount{@ViewID}"><xsl:value-of select="@unread_count"/>/</span><span id="count{@ViewID}" style="font-size:100%"><xsl:value-of select="@Count"/></span>)
+													</xsl:when>
+													<xsl:when test="@TypeID = '8' and @unread_count != '-1'">
+														(<span id="unreadCount{@ViewID}"><xsl:value-of select="@unread_count"/>/</span><span id="count{@ViewID}" style="font-size:100%"><xsl:value-of select="@Count"/></span>)
+													</xsl:when>
+													<xsl:otherwise>
+														(<span id="unreadCount{@ViewID}" style="display:none;"><xsl:value-of select="@unread_count"/>/</span><span id="count{@ViewID}" style="font-size:100%"><xsl:value-of select="@Count"/></span>)
+													</xsl:otherwise>
+												</xsl:choose>
+											</xsl:if>
+										</span>
+									</span>
+								</div>
+								<xsl:if test="@TypeID = 1">
+								<div id="{@ViewID}divMyTicketsChildren">
+									<xsl:for-each select="myfolders/folder">
+										<div class="childBranch">
+											<xsl:attribute name="onclick">setRightPane('mytickets.ems?CustomTicketBoxView=<xsl:value-of select="@id"/>')</xsl:attribute>
+											<img src="images/ico_myshortcuts_{$ticketname}.gif" width="11" height="11"  border="0"/>
+											<span class="adminbranch" style="margin:0px;">
+											<span id="spanMyFolder{@id}" class="leftmenuNoHiLight" onclick="UpdateNonAdminLink(id);"><xsl:value-of select="name"/>
+												<xsl:choose>
+												<xsl:when test="unreadticketcount != '-1'">
+												(<span id="childUnreadCount{@id}"><xsl:value-of select="unreadticketcount"/>/</span><span id="childCount{@id}" style="font-size:100%"><xsl:value-of select="ticketcount"/></span>)
+												</xsl:when>
+												<xsl:otherwise>
+												(<span id="childUnreadCount{@id}" style="display:none;"><xsl:value-of select="unreadticketcount"/>/</span><span id="childCount{@id}" style="font-size:100%"><xsl:value-of select="ticketcount"/></span>)
+												</xsl:otherwise>
+												</xsl:choose>
+											</span>
+											</span>
+										</div>
+									</xsl:for-each>
+								</div>
+								</xsl:if>
+							</div>
+							</xsl:if>
+							
+							</xsl:for-each>
+							<!-- #X# LOOP iterate through each ticketbox for the logged on agent, indicated by select filter below -->
+			
+							<xsl:if test="/root/TicketBoxList/TicketBox">
+							<div style="display:block;" id="div999{@ID}" class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree(999{@ID});" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img999{@ID}" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr>
+												<span style="font-weight:bold;">TicketBoxes</span>
+											</nobr>
+										</td>
+									</tr>
+								</table>
+			
+								<!-- # # LOOP iterate through custom ticketbox views -->
+								<xsl:for-each select="/root/TicketBoxList/TicketBox">
+								<div class="branch">	
+								<table style="margin-left:8px;margin-bottom:3px;" border="0" cellpadding="0" cellspacing="0">
+								
+								<xsl:attribute name="onclick">
+									<xsl:choose>
+										<xsl:when test="@Status = 1">
+											alert("You do not have sufficient access rights to view this TicketBox!");
+										</xsl:when>
+										<xsl:otherwise>
+											setRightPane('ticketlist.ems?TicketBoxView=<xsl:value-of select="@ViewID"/>')
+										</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>
+					
+									<tr>
+										<td width="11" valign="top">
+										<xsl:choose>
+											<xsl:when test="@TypeID = 8">
+											<img src="images/ico_admin_alertconfiguration.gif" width="11" height="11" border="0"/>
+											</xsl:when>
+											<xsl:otherwise>
+												<xsl:variable name="icopublicfinish">
+													<xsl:choose>
+														<xsl:when test="@Status = 0"></xsl:when>
+														<xsl:when test="@Status = 1">_access</xsl:when>
+														<xsl:when test="@Status = 2">_low</xsl:when>
+														<xsl:when test="@Status = 3">_high</xsl:when>
+													</xsl:choose>
+												</xsl:variable>
+												<img id="img_ticketbox_{@ViewID}" src="images/ico_myshortcuts_public{$icopublicfinish}.gif" width="11" height="11" border="0"/>
+											</xsl:otherwise>
+										</xsl:choose>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr class="leftmenuNoHiLight" id="nobrTicketsView{@ViewID}" onclick="UpdateNonAdminLink(id);" ><xsl:value-of select="@Name"/>
+											<xsl:choose>
+												<xsl:when test="@unread_count != '-1'">
+													(<span id="unreadCount{@ViewID}"><xsl:value-of select="@unread_count"/>/</span><span id="count{@ViewID}" style="font-size:100%"><xsl:value-of select="@Count"/></span>)
+												</xsl:when>
+												<xsl:otherwise>
+													(<span id="unreadCount{@ViewID}" style="display:none;"><xsl:value-of select="@unread_count"/>/</span><span id="count{@ViewID}" style="font-size:100%"><xsl:value-of select="@Count"/></span>)
+												</xsl:otherwise>
+											</xsl:choose>
+											</nobr>
+										</td>
+									</tr>
+								</table>
+								</div>
+								</xsl:for-each>								
+								<!-- #X# LOOP iterate through custom ticketbox views -->
+							</div>
+							</xsl:if>
+			
+			
+							<xsl:if test="root/TicketBoxList/Agent[@ID != /root/user/id]">
+							<div class="branch"> 
+								<table style="margin-bottom:3px;" onclick="toggleTree(1000000000);" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img1000000000" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Agent Views</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div1000000000" class="branch">					
+									<!-- iterate through agent views -->
+									<xsl:for-each select="root/TicketBoxList/Agent[@ID != /root/user/id]">
+									<xsl:if test="not(@Status = 1)">
+									<div id = "div{@ID}" class="branch" style="display: none;">
+										<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree({@ID});" border="0" cellpadding="0" cellspacing="0">
+											<tr>
+												<td width="11" valign="top">				
+													<img id="img{@ID}" src="./images/plus.gif" width="11" height="11" border="0"/>
+												</td>
+												<td class="adminbranch" valign="top">
+													<img id="statusimg{@ID}" src="images/ico_as{@StatusID}.gif" width="11" height="11" border="0">
+														<xsl:if test="@Status = 4 and /root/DOCUMENT/allowlogout = '1'">
+															<xsl:attribute name="onclick">logoutAgent(<xsl:value-of select="@ID"/>,'<xsl:value-of select="@Name"/>')</xsl:attribute>
+														</xsl:if>
+														<xsl:choose>
+															<xsl:when test="@LoggedIn = 1">
+																<xsl:attribute name="title">Logged In - <xsl:value-of select="@StatusText"/></xsl:attribute>
+															</xsl:when>
+															<xsl:otherwise>
+																<xsl:attribute name="title">Logged Out - <xsl:value-of select="@StatusText"/></xsl:attribute>
+															</xsl:otherwise>														
+														</xsl:choose>
+													</img>
+													<nobr><span style="margin-left:3px;"><xsl:value-of select="@Name"/></span></nobr>											
+												</td>
+											</tr>
+										</table>
+										<xsl:for-each select="TicketBox">
+										<div wrap="off" style="display: none;margin-left:16px;" class="branch">
+											<xsl:variable name="ticketname">
+												<xsl:choose>
+													<xsl:when test="@TypeID = 1">inbox</xsl:when>
+													<xsl:when test="@TypeID = 2">outbox</xsl:when>
+													<xsl:when test="@TypeID = 3">sentitems</xsl:when>
+													<xsl:when test="@TypeID = 4">drafts</xsl:when>
+													<xsl:when test="@TypeID = 8">alerts</xsl:when>
+													<xsl:when test="@TypeID = 10">approvals</xsl:when>
+													<xsl:when test="@TypeID = 11">notes</xsl:when>
+													<xsl:otherwise>public</xsl:otherwise>
+												</xsl:choose>
+											</xsl:variable>
+											<div>
+												<xsl:attribute name="onclick">
+												<xsl:choose>
+													<xsl:when test="@TypeID = 1">setRightPane('mytickets.ems?TicketBoxView=<xsl:value-of select="@ViewID"/>')</xsl:when>
+													<xsl:when test="@TypeID = 2">setRightPane('outbox.ems?TicketBoxView=<xsl:value-of select="@ViewID"/>')</xsl:when>
+													<xsl:when test="@TypeID = 3">setRightPane('sentitems.ems?TicketBoxView=<xsl:value-of select="@ViewID"/>')</xsl:when>
+													<xsl:when test="@TypeID = 4">setRightPane('drafts.ems?TicketBoxView=<xsl:value-of select="@ViewID"/>')</xsl:when>
+													<xsl:when test="@TypeID = 8">setRightPane('alertlist.ems?TicketBoxView=<xsl:value-of select="@ViewID"/>')</xsl:when>
+													<xsl:when test="@TypeID = 10">setRightPane('approvals.ems?TicketBoxView=<xsl:value-of select="@ViewID"/>')</xsl:when>
+													<xsl:when test="@TypeID = 11">ViewNotes(<xsl:value-of select="@ViewID"/>);</xsl:when>
+												</xsl:choose>
+												</xsl:attribute>
+												<xsl:choose>
+												<xsl:when test="@TypeID = 1 and not(myfolders/folder) = true">
+													<img id="{@ViewID}imgMyTickets" src="./images/plus.gif" width="11" height="11"  border="0">
+													<xsl:attribute name="onclick">
+													<xsl:if test="@TypeID = 1 and not(myfolders/folder) = true">ExpandMyTicketChildWindow(event, id);</xsl:if>
+													</xsl:attribute>
+													</img>
+												</xsl:when>
+												<xsl:otherwise>
+													<img src="images/ico_myshortcuts_{$ticketname}.gif" width="11" height="11"  border="0"/>
+												</xsl:otherwise>
+												</xsl:choose>
+												<span class="adminbranch" style="margin:0px;">
+													<span class="leftmenuNoHiLight" onclick="UpdateNonAdminLink(id);">
+													<xsl:attribute name="id">
+														<xsl:choose>
+														<xsl:when test="@TypeID = 1">nobrInbox<xsl:value-of select="@ViewID"/></xsl:when>
+														<xsl:when test="@TypeID = 2">nobrOutbox<xsl:value-of select="@ViewID"/></xsl:when>
+														<xsl:when test="@TypeID = 3">nobrSent<xsl:value-of select="@ViewID"/></xsl:when>
+														<xsl:when test="@TypeID = 4">nobrDrafts<xsl:value-of select="@ViewID"/></xsl:when>
+														<xsl:when test="@TypeID = 8">nobrAlerts<xsl:value-of select="@ViewID"/></xsl:when>
+														<xsl:when test="@TypeID = 10">nobrApprovals<xsl:value-of select="@ViewID"/></xsl:when>
+														<xsl:when test="@TypeID = 11">nobrNotes<xsl:value-of select="@ViewID"/></xsl:when>
+													</xsl:choose>
+													</xsl:attribute>
+													<xsl:value-of select="@Name"/>
+													<xsl:if test="@TypeID != 3">
+														<xsl:choose>
+															<xsl:when test="@TypeID = '1' and @unread_count != '-1'">
+																(<span id="unreadCount{@ViewID}"><xsl:value-of select="@unread_count"/>/</span><span id="count{@ViewID}" style="font-size:100%"><xsl:value-of select="@Count"/></span>)
+															</xsl:when>
+															<xsl:when test="@TypeID = '8' and @unread_count != '-1'">
+																(<span id="unreadCount{@ViewID}"><xsl:value-of select="@unread_count"/>/</span><span id="count{@ViewID}" style="font-size:100%"><xsl:value-of select="@Count"/></span>)
+															</xsl:when>
+															<xsl:otherwise>
+																(<span id="unreadCount{@ViewID}" style="display:none;"><xsl:value-of select="@unread_count"/>/</span><span id="count{@ViewID}" style="font-size:100%"><xsl:value-of select="@Count"/></span>)
+															</xsl:otherwise>
+														</xsl:choose>
+													</xsl:if>													
+													</span>
+												</span>
+											</div>
+											<xsl:if test="@TypeID = 1">
+											<div id="{@ViewID}divMyTicketsChildren" style="display:none;">
+												<xsl:for-each select="myfolders/folder">
+													<div class="childBranch">													
+														<xsl:attribute name="onclick">setRightPane('mytickets.ems?CustomTicketBoxView=<xsl:value-of select="@id"/>' + '&amp;AgentID=<xsl:value-of select="ownerid"/>')</xsl:attribute>
+														<img src="images/ico_myshortcuts_{$ticketname}.gif" width="11" height="11"  border="0"/>
+														<span class="adminbranch" style="margin:0px;">
+														<span id="spanMyFolder{@id}" class="leftmenuNoHiLight" onclick="UpdateNonAdminLink(id);"><xsl:value-of select="name"/>
+															<xsl:choose>
+															<xsl:when test="unreadticketcount != '-1'">
+																(<span id="childUnreadCount{@id}"><xsl:value-of select="unreadticketcount"/>/</span><span id="childCount{@id}" style="font-size:100%"><xsl:value-of select="ticketcount"/></span>)
+															</xsl:when>
+															<xsl:otherwise>
+																(<span id="childUnreadCount{@id}" style="display:none;"><xsl:value-of select="unreadticketcount"/>/</span><span id="childCount{@id}" style="font-size:100%"><xsl:value-of select="ticketcount"/></span>)
+															</xsl:otherwise>
+															</xsl:choose>
+														</span>
+														</span>
+													</div>
+												</xsl:for-each>
+											</div>
+											</xsl:if>
+											</div>														
+										</xsl:for-each>								
+									</div>
+									</xsl:if>									
+									</xsl:for-each>								
+								</div>
+							</div>
+							</xsl:if>
+						</div>
+						<xsl:if test="/root/user/access/pref = '4'">
+						<div class="mainbranch" style="cursor:hand;">
+							<nobr>
+								<a class="adminMenu" href="./apreferences.ems?selectid={root/user/id}" target="rightpane">
+								<img src="images/ico_myshortcuts_preferences.gif" width="11" height="11"  border="0"/>
+								<span class="leftmenuNoHiLight" id="spanPreferences" onclick="UpdateNonAdminLink(id);" style="padding-left:4px;">Preferences</span>
+								</a>
+							</nobr>
+						</div>
+						</xsl:if>
+						<div class="mainbranch" style="cursor:hand;">
+							<nobr>
+								<a class="adminMenu" href="#" onclick="glo_openSrWindow('ticketboxlist.ems');">
+								<img src="images/ico_myshortcuts_standardresponses.gif" width="11" height="11" border="0" />
+								<span class="leftmenuNoHiLight" id="spanStandardResp" onclick="UpdateNonAdminLink(id);" style="padding-left:4px;">Standard Responses</span>
+								</a>
+							</nobr>
+						</div>
+						<div class="mainbranch">
+							<nobr>
+								<a href="ticketsearch.ems" class="adminMenu" target="rightpane">
+								<img src="images/ico_myshortcuts_ticketsearch.gif" width="11" height="11" border="0"/>					
+								<span class="leftmenuNoHiLight" id="spanTicketSearch" onclick="UpdateNonAdminLink(id);" style="padding-left:4px;" target="rightpane">Ticket Search</span>
+								</a>
+							</nobr>
+						</div>
+						<div class="mainbranch">
+							<nobr>
+								<a href="ticketlinks.ems" class="adminMenu" target="rightpane">
+								<img src="images/ico_myshortcuts_links.gif" width="11" height="11" border="0"/>					
+								<span class="leftmenuNoHiLight" id="spanTicketLinks" onclick="UpdateNonAdminLink(id);" style="padding-left:4px;" target="rightpane">Ticket Links</span>
+								</a>
+							</nobr>
+						</div>
+						<div class="mainbranch" style="cursor:hand;">
+							<nobr>
+								<a href="contactframe.ems" class="adminMenu" target="rightpane">
+								<img src="images/ico_admin_contacts.gif" width="11" height="11" border="0"/>					
+								<span class="leftmenuNoHiLight" id="spanContacts" onclick="UpdateNonAdminLink(id);" style="padding-left:4px;">Contacts</span>
+								</a>
+							</nobr>
+						</div>
+						<xsl:if test="/root/user/access/contact &gt; 2 and not(/root/user/isadmin = 1)">
+						<div class="mainbranch" style="cursor:hand;">
+							<nobr>
+								<a href="contactgroups.ems" class="adminMenu" target="rightpane">
+								<img src="images/ico_admin_contactgroups.gif" width="11" height="11" border="0"/>					
+								<span class="leftmenuNoHiLight" id="spanAgentContactGroups" onclick="UpdateNonAdminLink(id);" style="padding-left:4px;">Contact Groups</span>
+								</a>
+							</nobr>
+						</div>
+						</xsl:if>
+						<div class="mainbranch">
+							<nobr>
+								<a class="adminMenu" href="#" onclick="openHelp('intro.htm');">
+								<img src="images/ico_11x_help.gif" width="11" height="11" border="0"/>
+								<span class="leftmenuNoHiLight" id="spanHelpTopics" onclick="UpdateNonAdminLink(id);" style="padding-left:4px;">Help Topics</span>
+								</a>
+							</nobr>
+						</div>
+						<div class="mainbranch">
+							<nobr>
+								<a href="javascript:OpenGuide('docs/UserG.pdf')" class="adminMenu">
+								<img src="images/ico_11x_helpguide.gif" width="11" height="11" border="0"/>					
+								<span class="leftmenuNoHiLight" id="spanUserGuide" onclick="UpdateNonAdminLink(id);" style="padding-left:4px;">Agent Guide</span>
+								</a>
+							</nobr>
+						</div>
+						<div class="mainbranch">
+							<nobr>
+								<a href="logout.ems" class="adminMenu" target="_top">
+								<img src="images/ico_myshortcuts_logout.gif" width="11" height="11" border="0"/>					
+								<span style="padding-left:4px;">Logout</span></a>
+							</nobr>
+						</div>
+					</td>
+				</tr>
+			</table>
+			</div>
+					<!--
+					#X# CLOSE CONTENT AREA FOR LOGGED IN AGENT OPTIONS
+					-->
+			<xsl:if test="not(/root/user/access/stdreports &lt; 2)">
+			<div id="1rollUpContent" ru_index="1" style="display:none;">
+			<table style="width:100%;padding:3px 0px 3px 5px;" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td style="width:100%;padding-left:5px;padding-top:3px;padding-bottom:3px;">
+					<!--
+					# # OPEN CONTENT AREA FOR REPORTING OPTIONS
+					-->
+					<div class="mainbranch">
+						<div class="branch">
+							<table style="margin-bottom:3px;" onclick="toggleTree('_srpt0');" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td width="11" valign="top">				
+										<img id="img_srpt0" src="./images/minus.gif" width="11" height="11" border="0"/>
+									</td>
+									<td class="adminbranch" valign="top">
+										<nobr><span style="font-weight:bold;">Standard Reports</span></nobr>
+									</td>
+								</tr>
+							</table>
+							<div id="div_srpt0" class="branch">	
+								<div id="div_rpt1">
+									<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rpt1');" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td width="11" valign="top">				
+												<img id="img_rpt1" src="./images/plus.gif" width="11" height="11" border="0"/>
+											</td>
+											<td class="adminbranch" valign="top">
+												<nobr><span style="font-weight:bold;">Inbound Messages</span></nobr>
+											</td>
+										</tr>
+									</table>
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportInboundMsgs.ems?type=0&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanIBTicketBox" onclick="UpdateNonAdminLink(id);">By TicketBox</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportInboundMsgs.ems?type=1&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanIBAgent" onclick="UpdateNonAdminLink(id);">By Agent</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportInboundMsgs.ems?type=5&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanIBGroup" onclick="UpdateNonAdminLink(id);">By Group</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportInboundMsgs.ems?type=4&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanIBTicketCategory" onclick="UpdateNonAdminLink(id);">By Ticket Category</span></a>
+									</div>
+									<xsl:if test="/root/user/isadmin = 1">
+										<div wrap="off" style="display:none; margin-left:23px" >
+											<a class="adminMenu" href="#" onclick="setRightPane('reportInboundMsgs.ems?type=2&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanIBRoutingRule" onclick="UpdateNonAdminLink(id);">By Routing Rule</span></a>
+										</div>
+										<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px" >
+											<a class="adminMenu" href="#" onclick="setRightPane('reportInboundMsgs.ems?type=3&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanIBMessageSource" onclick="UpdateNonAdminLink(id);">By Message Source</span></a>
+										</div>
+									</xsl:if>
+								</div>
+					
+								<div id="div_rpt2">
+									<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rpt2');" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td width="11" valign="top">				
+												<img id="img_rpt2" src="./images/plus.gif" width="11" height="11" border="0"/>
+											</td>
+											<td class="adminbranch" valign="top">
+												<nobr><span style="font-weight:bold;">Outbound Messages</span></nobr>
+											</td>
+										</tr>
+									</table>
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportOutboundMsgs.ems?type=ticketbox&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanOBTicketBox" onclick="UpdateNonAdminLink(id);">By TicketBox</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportOutboundMsgs.ems?type=owner&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanOBAgent" onclick="UpdateNonAdminLink(id);">By Agent</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportOutboundMsgs.ems?type=group&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanOBGroup" onclick="UpdateNonAdminLink(id);">By Group</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px; margin-bottom:3px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportOutboundMsgs.ems?type=ticketcategory&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanOBTicketCategory" onclick="UpdateNonAdminLink(id);">By Ticket Category</span></a>
+									</div>
+								</div>
+					
+								<div id="div_rpt3">
+									<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rpt3');" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td width="11" valign="top">				
+												<img id="img_rpt3" src="./images/plus.gif" width="11" height="11" border="0"/>
+											</td>
+											<td class="adminbranch" valign="top">
+												<nobr><span style="font-weight:bold;">Open Ticket Age</span></nobr>
+											</td>
+										</tr>
+									</table>
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportopenticketage.ems?type=ticketbox');"><span class="leftmenuNoHiLight" id="spanOTATicketBox" onclick="UpdateNonAdminLink(id);">By TicketBox</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportopenticketage.ems?type=owner');"><span class="leftmenuNoHiLight" id="spanOTAAgent" onclick="UpdateNonAdminLink(id);">By Agent</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportopenticketage.ems?type=group');"><span class="leftmenuNoHiLight" id="spanOTAGroup" onclick="UpdateNonAdminLink(id);">By Group</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px; margin-bottom:3px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportopenticketage.ems?type=ticketcategory');"><span class="leftmenuNoHiLight" id="spanOTATicketCategory" onclick="UpdateNonAdminLink(id);">By Ticket Category</span></a>
+									</div>
+								</div>
+					
+								<div id="div_rpt13">
+									<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rpt13');" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td width="11" valign="top">				
+												<img id="img_rpt13" src="./images/plus.gif" width="11" height="11" border="0"/>
+											</td>
+											<td class="adminbranch" valign="top">
+												<nobr><span style="font-weight:bold;">Open Tickets</span></nobr>
+											</td>
+										</tr>
+									</table>
+					
+									<div wrap="off" style="display:none; margin-left:23px" class="branch">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportticketsopen.ems?type=ticketbox');"><span class="leftmenuNoHiLight" id="spanOTTicketBox" onclick="UpdateNonAdminLink(id);">By TicketBox</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportticketsopen.ems?type=owner');"><span class="leftmenuNoHiLight" id="spanOTOwner" onclick="UpdateNonAdminLink(id);">By Owner</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportticketsopen.ems?type=group');"><span class="leftmenuNoHiLight" id="spanOTGroup" onclick="UpdateNonAdminLink(id);">By Group</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px; margin-bottom:3px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportticketsopen.ems?type=ticketcategory');"><span class="leftmenuNoHiLight" id="spanOTTicketCategory" onclick="UpdateNonAdminLink(id);">By Ticket Category</span></a>
+									</div>
+								</div>
+					
+								<div id="div_rpt4">
+									<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rpt4');" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td width="11" valign="top">				
+												<img id="img_rpt4" src="./images/plus.gif" width="11" height="11" border="0"/>
+											</td>
+											<td class="adminbranch" valign="top">
+												<nobr><span style="font-weight:bold;">Ticket Activity</span></nobr>
+											</td>
+										</tr>
+									</table>
+									<div wrap="off" style="display:none; margin-left:23px" class="branch">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportticketdisp.ems?type=ticketbox');"><span class="leftmenuNoHiLight" id="spanTDPTicketBox" onclick="UpdateNonAdminLink(id);">By TicketBox</span></a>
+									</div>									
+								</div>
+					
+								<div id="div_rpt12">
+									<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rpt12');" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td width="11" valign="top">				
+												<img id="img_rpt12" src="./images/plus.gif" width="11" height="11" border="0"/>
+											</td>
+											<td class="adminbranch" valign="top">
+												<nobr><span style="font-weight:bold;">Ticket Count Summary</span></nobr>
+											</td>
+										</tr>
+									</table>
+					
+									<div wrap="off" style="display:none; margin-left:23px" class="branch">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportticketcountsum.ems?type=ticketbox');"><span class="leftmenuNoHiLight" id="spanTCSTicketBox" onclick="UpdateNonAdminLink(id);">By TicketBox</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportticketcountsum.ems?type=owner');"><span class="leftmenuNoHiLight" id="spanTCSAgent" onclick="UpdateNonAdminLink(id);">By Owner</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px; margin-bottom:3px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportticketcountsum.ems?type=ticketcategory');"><span class="leftmenuNoHiLight" id="spanTCSTicketCategory" onclick="UpdateNonAdminLink(id);">By Ticket Category</span></a>
+									</div>
+								</div>
+					
+								<div id="div_rpt5">
+									<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rpt5');" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td width="11" valign="top">				
+												<img id="img_rpt5" src="./images/plus.gif" width="11" height="11" border="0"/>
+											</td>
+											<td class="adminbranch" valign="top">
+												<nobr><span style="font-weight:bold;">Ticket Distribution</span></nobr>
+											</td>
+										</tr>
+									</table>
+					
+									<div wrap="off" style="display:none; margin-left:23px" class="branch">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportticketdist.ems?type=ticketbox');"><span class="leftmenuNoHiLight" id="spanTDTicketBox" onclick="UpdateNonAdminLink(id);">By TicketBox</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportticketdist.ems?type=owner');"><span class="leftmenuNoHiLight" id="spanTDAgent" onclick="UpdateNonAdminLink(id);">By Owner</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px; margin-bottom:3px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportticketdist.ems?type=ticketcategory');"><span class="leftmenuNoHiLight" id="spanTDTicketCategory" onclick="UpdateNonAdminLink(id);">By Ticket Category</span></a>
+									</div>
+								</div>
+					
+								<div id="div_rpt14">
+									<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rpt14');" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td width="11" valign="top">				
+												<img id="img_rpt14" src="./images/plus.gif" width="11" height="11" border="0"/>
+											</td>
+											<td class="adminbranch" valign="top">
+												<nobr><span style="font-weight:bold;">TicketBox Details</span></nobr>
+											</td>
+										</tr>
+									</table>
+									<div wrap="off" style="display:none; margin-left:23px" class="branch">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportticketboxdetails.ems?type=ticketbox');"><span class="leftmenuNoHiLight" id="spanTBD" onclick="UpdateNonAdminLink(id);">By TicketBox</span></a>
+									</div>									
+								</div>
+					
+								<div id="div_rpt6">
+									<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rpt6');" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td width="11" valign="top">				
+												<img id="img_rpt6" src="./images/plus.gif" width="11" height="11" border="0"/>
+											</td>
+											<td class="adminbranch" valign="top">
+												<nobr><span style="font-weight:bold;">Standard Response</span></nobr>
+											</td>
+										</tr>
+									</table>
+									
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportstdusage.ems?graph_type=PIE');"><span class="leftmenuNoHiLight" id="spanSRUsage" onclick="UpdateNonAdminLink(id);">By Usage</span></a>
+									</div>	
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportstdresp.ems?type=category');"><span class="leftmenuNoHiLight" id="spanSRCategory" onclick="UpdateNonAdminLink(id);">By Category</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px; margin-bottom:3px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportstdresp.ems?type=author');"><span class="leftmenuNoHiLight" id="spanSRAuthor" onclick="UpdateNonAdminLink(id);">By Author</span></a>
+									</div>	
+								</div>
+					
+								<div id="div_rpt7">
+									<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rpt7');" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td width="11" valign="top">				
+												<img id="img_rpt7" src="./images/plus.gif" width="11" height="11" border="0"/>
+											</td>
+											<td class="adminbranch" valign="top">
+												<nobr><span style="font-weight:bold;">Avg Response Time</span></nobr>
+											</td>
+										</tr>
+									</table>
+					
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportresptime.ems?type=ticketbox&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanARTTicketBox" onclick="UpdateNonAdminLink(id);">By TicketBox</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportresptime.ems?type=agent&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanARTAgent" onclick="UpdateNonAdminLink(id);">By Agent</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px; margin-bottom:3px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportresptime.ems?type=ticketcategory&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanARTTicketCategory" onclick="UpdateNonAdminLink(id);">By Ticket Category</span></a>
+									</div>		
+								</div>
+					
+								<div id="div_rpt8">
+									<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rpt8');" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td width="11" valign="top">				
+												<img id="img_rpt8" src="./images/plus.gif" width="11" height="11" border="0"/>
+											</td>
+											<td class="adminbranch" valign="top">
+												<nobr><span style="font-weight:bold;">Avg Time to Resolve</span></nobr>
+											</td>
+										</tr>
+									</table>
+					
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportresolvetime.ems?type=ticketbox&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanATRTicketBox" onclick="UpdateNonAdminLink(id);">By TicketBox</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportresolvetime.ems?type=agent&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanATRAgent" onclick="UpdateNonAdminLink(id);">By Agent</span></a>
+									</div>	
+									<div wrap="off" style="display:none; margin-left:23px; margin-bottom:3px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportresolvetime.ems?type=ticketcategory&amp;graph_type=LINE');"><span class="leftmenuNoHiLight" id="spanATRTicketCategory" onclick="UpdateNonAdminLink(id);">By Ticket Category</span></a>
+									</div>
+								</div>
+					
+								<div id="div_rpt9">
+									<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rpt9');" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td width="11" valign="top">				
+												<img id="img_rpt9" src="./images/plus.gif" width="11" height="11" border="0"/>
+											</td>
+											<td class="adminbranch" valign="top">
+												<nobr><span style="font-weight:bold;">Busiest Time</span></nobr>
+											</td>
+										</tr>
+									</table>
+					
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportbusy.ems?type=hour');"><span class="leftmenuNoHiLight" id="spanBTHour" onclick="UpdateNonAdminLink(id);">Hour</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px; margin-bottom:3px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportbusy.ems?type=day');"><span class="leftmenuNoHiLight" id="spanBTDay" onclick="UpdateNonAdminLink(id);">Day of Week</span></a>
+									</div>	
+								</div>
+					
+								<div id="div_rpt10">
+									<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rpt10');" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td width="11" valign="top">				
+												<img id="img_rpt10" src="./images/plus.gif" width="11" height="11" border="0"/>
+											</td>
+											<td class="adminbranch" valign="top">
+												<nobr><span style="font-weight:bold;">History</span></nobr>
+											</td>
+										</tr>
+									</table>
+									
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportHistory.ems?type=0');"><span class="leftmenuNoHiLight" id="spanHistoryAgent" onclick="UpdateNonAdminLink(id);">By Agent</span></a>
+									</div>
+					
+									<div wrap="off" style="display:none; margin-left:23px">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportHistory.ems?type=1');"><span class="leftmenuNoHiLight" id="spanHistoryTicketBox" onclick="UpdateNonAdminLink(id);">By TicketBox</span></a>
+									</div>
+					
+									<div wrap="off" style="display:none; margin-left:23px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportHistory.ems?type=2');"><span class="leftmenuNoHiLight" id="spanHistoryContact" onclick="UpdateNonAdminLink(id);">By Contact</span></a>
+									</div>
+									<div wrap="off" style="display:none; margin-left:23px; margin-bottom:3px;">
+										<a class="adminMenu" href="#" onclick="setRightPane('reportHistory.ems?type=3');"><span class="leftmenuNoHiLight" id="spanHistoryTicketCategory" onclick="UpdateNonAdminLink(id);">By Ticket Category</span></a>
+									</div>
+								</div>
+								<xsl:if test="/root/user/access/agentaudit = '4'">
+									<div id="div_rpt11">
+										<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rpt11');" border="0" cellpadding="0" cellspacing="0">
+											<tr>
+												<td width="11" valign="top">				
+													<img id="img_rpt11" src="./images/plus.gif" width="11" height="11" border="0"/>
+												</td>
+												<td class="adminbranch" valign="top">
+													<nobr><span style="font-weight:bold;">Agent Audit</span></nobr>
+												</td>
+											</tr>
+										</table>									
+										<div wrap="off" style="display:none; margin-left:23px">
+											<a class="adminMenu" href="#" onclick="setRightPane('agentaudit.ems?type=0');"><span class="leftmenuNoHiLight" id="spanAgentAuditRpt" onclick="UpdateNonAdminLink(id);">By Agent</span></a>
+										</div>									
+									</div>
+								</xsl:if>
+							</div>
+							<xsl:if test="not(/root/user/access/schedreports &lt; 2)">
+							<div class="mainbranch" style="padding-top:3px;">
+							<nobr>
+								<a class="adminMenu" href="#" onclick="setRightPane('scheduledreports.ems');">
+								<img src="images/ico_11x_schedreport.gif" width="11" height="11"  border="0"/>
+								<span class="leftmenuNoHiLight" id="spanScheduledReports" onclick="UpdateNonAdminLink(id);" style="padding-left:4px;">Scheduled Reports</span>
+								</a>
+							</nobr>
+							</div>
+							</xsl:if>												
+						</div>
+					</div>
+					</td>
+				</tr>
+			</table>
+			</div>
+			</xsl:if>
+					
+					<!--
+					#X# CLOSE CONTENT AREA FOR REPORTING OPTIONS
+					-->
+			
+					<!--
+					# # OPEN CONTENT AREA FOR ADMINISTRATION OPTIONS
+					-->
+			<xsl:if test="/root/user/isadmin = 1">
+			<div id="2rollUpContent" ru_index="2" style="display:none;">
+			<table style="width:100%;padding:3px 0px 3px 5px;" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td style="width:100%;padding-left:5px;padding-top:3px;padding-bottom:3px;">
+						<div class="mainbranch">
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_ag');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_ag" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Agents &amp; Groups</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_ag" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('agents.ems');">
+												<img src="images/ico_admin_agents.gif" width="11" height="11" border="0"/>
+												<span class="leftmenuNoHiLight" id="spanAgents" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Agents</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('groups.ems');">
+												<img src="images/ico_admin_groups.gif" width="11" height="11" border="0"/>
+												<span class="leftmenuNoHiLight" id="spanGroups" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Groups</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('signatures.ems');">
+												<img src="images/ico_admin_signatures.gif" width="11" height="11" border="0"/>
+												<span class="leftmenuNoHiLight" id="spanSignatures" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Signatures</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('sessioninfo.ems');">
+												<img src="images/ico_admin_activesessions.gif" width="11" height="11" border="0"/>
+												<span class="leftmenuNoHiLight" id="spanActiveSessions" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Active Sessions</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('agentaudit.ems?type=0');">
+												<img src="images/ico_11x_audit.gif" width="11" height="11" border="0"/>
+												<span class="leftmenuNoHiLight" id="spanAudit" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Agent Audit</span>
+											</a>
+										</nobr>
+									</div>
+								</div>
+							</div>
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_al');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_al" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Alerting</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_al" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('alertconfiglist.ems');">
+											<img src="images/ico_admin_alertconfiguration.gif" width="11" height="11" border="0"/>					
+											<span class="leftmenuNoHiLight" id="spanAlerts" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Integrated Alerts</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('agealerts.ems');">
+											<img src="images/ico_11x_agealert.gif" width="11" height="12" border="0"/>					
+											<span class="leftmenuNoHiLight" id="spanAgeAlerts" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Age Alerts</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('wmalerts.ems');">
+											<img src="images/ico_11x_wmalert.gif" width="11" height="12" border="0"/>					
+											<span class="leftmenuNoHiLight" id="spanWmAlerts" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Watermark Alerts</span>
+											</a>
+										</nobr>
+									</div>
+								</div>
+							</div>
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_con');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_con" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Contacts</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_con" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('personaldatatypes.ems');">
+												<img src="images/ico_contactproperties_11x.gif" width="11" height="11" border="0" />					
+												<span class="leftmenuNoHiLight" id="spanContactProperties" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Contact Properties</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('contactgroups.ems?AgentID=0');">
+												<img src="images/ico_admin_contactgroups.gif" width="11" height="11" border="0" />
+												<span class="leftmenuNoHiLight" id="spanContactGroups" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Contact Groups</span>
+											</a>
+										</nobr>
+									</div>									
+								</div>
+							</div>
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_db');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_db" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">DataBase Maintenance</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_db" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('dbmaintenance.ems');">
+												<img src="images/ico_admin_settings.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanDBMaint" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Maintenance Settings</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="showMaint();">
+												<img src="images/ico_admin_logging.gif" width="11" height="11" border="0"/>
+												<span class="leftmenuNoHiLight" id="spanMaintStatus" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Maintenance Status</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('dbarchives.ems');">
+												<img src="images/ico_admin_databasemaintenance.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanArchives" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Archives</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('dbbackups.ems');">
+												<img src="images/ico_admin_databasemaintenance.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanBackups" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Backups</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('deleteditems.ems');">
+												<img src="images/ico_admin_trashcan.gif" width="11" height="11" border="0"/>
+												<span class="leftmenuNoHiLight" id="spanDeletedItems" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Deleted Items</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('sqlquery.ems');">
+												<img src="images/ico_11x_notes.gif" width="11" height="11" border="0"/>
+												<span class="leftmenuNoHiLight" id="spanSqlQuery" onclick="UpdateAdminLink(id);" style="padding-left:4px;">SQL Query</span>
+											</a>
+										</nobr>
+									</div>
+								</div>
+							</div>
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_gen');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_gen" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">General Configuration</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_gen" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('adminportal.ems');">
+												<img src="images/ico_admin_settings.gif" width="11" height="11" border="0"/>
+												<span class="leftmenuNoHiLight" id="spanCustomSettings" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Admin Portal</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('customsettings.ems');">
+												<img src="images/ico_admin_settings.gif" width="11" height="11" border="0"/>	
+												<span class="leftmenuNoHiLight" id="spanCustomSettings" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Settings</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('bulksettings.ems');">
+												<img src="images/ico_admin_settings.gif" width="11" height="11" border="0"/>
+												<span class="leftmenuNoHiLight" id="spanBulkSettings" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Bulk Settings</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('systememailaddress.ems');">
+											<img src="images/ico_admin_mailserver.gif" width="11" height="11" border="0"/>					
+											<span class="leftmenuNoHiLight" id="spanSystemEmailAddress" onclick="UpdateAdminLink(id);" style="padding-left:4px;">System Email Address</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('registration.ems');">
+												<img src="images/ico_admin_productregistration.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanMailFlow" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Registration</span>
+											</a>
+										</nobr>
+									</div>
+									
+								</div>
+							</div>
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_help');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_help" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Help</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_help" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="openHelp('intro.htm');">
+											<img src="images/ico_11x_help.gif" width="11" height="11" border="0"/>
+											<span class="leftmenuNoHiLight" id="spanAdminHelpTopics" onclick="UpdateNonAdminLink(id);" style="padding-left:4px;">Help Topics</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a href="javascript:OpenGuide('docs/AdminG.pdf')" class="adminMenu" >
+												<img src="images/ico_11x_helpguide.gif" width="11" height="11" border="0"/>
+												<span class="leftmenuNoHiLight" id="spanAdminGuide" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Admin Guide</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a href="http://www.visnetic.com/support" class="adminMenu" target="_blank">
+											<img src="images/ico_link.gif" width="11" height="11" border="0"/>					
+											<span class="leftmenuNoHiLight" id="spanAdminSupport" onclick="UpdateNonAdminLink(id);" style="padding-left:4px;">Support Website</span>
+											</a>
+										</nobr>
+									</div>
+									
+								</div>
+							</div>
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_log');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_log" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Logging</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_log" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('showlogs.ems');">
+											<img src="images/ico_admin_logging.gif" width="11" height="11" border="0"/>
+											<span class="leftmenuNoHiLight" id="spanFSLogs" onclick="UpdateAdminLink(id);" style="padding-left:4px;">File System Logs</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('showdblogs.ems');">
+											<img src="images/ico_admin_logging.gif" width="11" height="11" border="0"/>
+											<span class="leftmenuNoHiLight" id="spanDBLogs" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Database Logs</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('showdebuglogs.ems');">
+											<img src="images/ico_admin_logging.gif" width="11" height="11" border="0"/>
+											<span class="leftmenuNoHiLight" id="spanDebugLogs" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Debug Logs</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('logconfig.ems');">
+											<img src="images/ico_admin_logconfiguration.gif" width="11" height="11" border="0"/>					
+											<span class="leftmenuNoHiLight" id="spanLoggingOptions" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Logging Options</span>
+											</a>
+										</nobr>
+									</div>									
+								</div>
+							</div>
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_serv');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_serv" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">MailFlow Servers</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_serv" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('servers.ems');">
+											<img src="images/ico_admin_messagesources.gif" width="11" height="11" border="0"/>					
+											<span class="leftmenuNoHiLight" id="spanServerSettings" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Servers</span>
+											</a>
+										</nobr>
+									</div>																		
+								</div>
+							</div>
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_mh');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_mh" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Message Handling</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_mh" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('messagesources.ems');">
+											<img src="images/ico_admin_messagesources.gif" width="11" height="11" border="0"/>					
+											<span class="leftmenuNoHiLight" id="spanMessageSources" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Message Sources</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('messagedestinations.ems');">
+											<img src="images/ico_admin_messagedestinations.gif" width="11" height="11" border="0"/>					
+											<span class="leftmenuNoHiLight" id="spanMessageDestinations" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Message Destinations</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('rroptions.ems');">
+											<img src="images/ico_admin_routingrules.gif" width="11" height="11" border="0"/>					
+											<span class="leftmenuNoHiLight" id="spanDefaultRoutingRules" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Default Routing Rule</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('routingrules.ems');">
+											<img src="images/ico_routingrules_11x_gold.gif" width="11" height="11" border="0" />					
+											<span class="leftmenuNoHiLight" id="spanCustomRoutingRules" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Custom Routing Rules</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('processingrules.ems');">
+											<img src="images/ico_processingrules_11x.gif" width="11" height="11" border="0" />					
+											<span class="leftmenuNoHiLight" id="spanProcessingRules" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Processing Rules</span>
+											</a>
+										</nobr>
+									</div>
+									<xsl:if test="root/DOCUMENT/HOSTED_VERSION">	
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('datefilters.ems');">
+											<img src="images/ico_filtertickets.gif" width="11" height="11" border="0" />					
+											<span class="leftmenuNoHiLight" id="spanDateFilters" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Date Filters</span>
+											</a>
+										</nobr>
+									</div>
+									</xsl:if>	
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('inboundqueue.ems?Queue=2');">
+											<img src="images/ico_15x_inboundmessage.gif" width="11" height="11" border="0" />					
+											<span class="leftmenuNoHiLight" id="spanInboundOrphans" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Inbound Orphans</span>
+											</a>
+										</nobr>
+									</div>	
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('inboundqueue.ems?Queue=1');">
+											<img src="images/ico_15x_inboundmessage.gif" width="11" height="11" border="0" />					
+											<span class="leftmenuNoHiLight" id="spanInboundQueue" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Inbound Queue</span>
+											</a>
+										</nobr>
+									</div>	
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('outboundqueue.ems?Queue=0');">
+											<img src="images/ico_15x_outboundmessage.gif" width="11" height="11" border="0" />					
+											<span class="leftmenuNoHiLight" id="spanOutboundQueue" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Outbound Queue</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('outboundqueue.ems?Queue=3');">
+											<img src="images/ico_15x_outboundmessage.gif" width="11" height="11" border="0" />					
+											<span class="leftmenuNoHiLight" id="spanOutboundOrphans" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Outbound Orphans</span>
+											</a>										
+										</nobr>
+									</div>	
+								</div>
+							</div>
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_rep');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_rep" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Reporting</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_rep" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('reportsysconfig.ems');">
+												<img src="images/ico_reporting_sysconfig.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanConfigurationReport" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Configuration Report</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('scheduledadminreports.ems');">
+												<img src="images/ico_11x_schedreport.gif" width="12" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanReports" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Scheduled Reports</span>
+											</a>
+										</nobr>
+									</div>
+								</div>
+							</div>
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_ss');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_ss" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Scheduled Tasks</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_ss" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('automessages.ems');">
+												<img src="images/ico_automessages_11x.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanautomessages" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Auto Messages</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('autoresponses.ems');">
+												<img src="images/ico_11x_reply.gif" width="12" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanAutoResponses" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Auto Responses</span>
+											</a>
+										</nobr>
+									</div>									
+								</div>
+							</div>
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_sec');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_sec" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Security</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_sec" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('default_accesscontrol.ems');">
+											<img src="images/ico_admin_accesscontrol.gif" width="11" height="11" border="0"/>					
+											<span class="leftmenuNoHiLight" id="spanDefaultAccessControl" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Default Access Control</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('accesscontrol.ems');">
+												<img src="images/ico_admin_accesscontrol.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanCustomAccessControl" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Custom Access Control</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('ipaccess.ems');">
+												<img src="images/ico_admin_ipaccess.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanIPRestrictions" onclick="UpdateAdminLink(id);" style="padding-left:4px;">IP Restrictions</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('securitysettings.ems');">
+												<img src="images/ico_admin_settings.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanOtherRestrictions" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Other Restrictions</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('effectiverights.ems');">
+											<img src="images/ico_11x_effective.gif" width="11" height="11" border="0"/>					
+											<span class="leftmenuNoHiLight" id="spanEffectiveRights" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Effective Rights</span>
+											</a>
+										</nobr>
+									</div>									
+								</div>
+							</div>
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_spell');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_spell" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Spell Checking</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_spell" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('customdictionary.ems?agentid=0');">
+												<img src="images/ico_globaldictionary_11x.gif" width="11" height="11" border="0" />
+												<span class="leftmenuNoHiLight" id="spanGlobalDictionary" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Global Dictionary</span>
+											</a>
+										</nobr>
+									</div>
+								</div>
+							</div>
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_tb');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_tb" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">TicketBoxes</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_tb" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('ticketboxes.ems?msg=5');">
+												<img src="images/ico_myshortcuts_public.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanTicketBoxes" onclick="UpdateAdminLink(id);" style="padding-left:4px;">TicketBoxes</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('ticketboxheaders.ems');">
+												<img src="images/ico_admin_ticketboxheaders.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanTicketBoxHeaders" onclick="UpdateAdminLink(id);" style="padding-left:4px;">TicketBox Headers</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('ticketboxfooters.ems');">
+												<img src="images/ico_admin_ticketboxfooters.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanTicketBoxFooters" onclick="UpdateAdminLink(id);" style="padding-left:4px;">TicketBox Footers</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('ticketboxowners.ems');">
+												<img src="images/ico_admin_agents.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanTicketBoxOwners" onclick="UpdateAdminLink(id);" style="padding-left:4px;">TicketBox Owners</span>
+											</a>
+										</nobr>
+									</div>
+								</div>
+							</div>
+							<div class="branch">
+								<table style="margin-bottom:3px;" onclick="toggleTree('_adm_tik');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_adm_tik" src="./images/minus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Tickets</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div id="div_adm_tik" class="branch">
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('ticketfields.ems');">
+												<img src="images/ico_myshortcuts_public.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanTicketFields" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Custom Ticket Fields</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('ticketcategories.ems');">
+												<img src="images/ico_myshortcuts_public.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanTicketCategories" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Ticket Categories</span>
+											</a>
+										</nobr>
+									</div>
+									<div class="mainbranch" wrap="off" style="margin-left:16px;margin-bottom:3px;">
+										<nobr>
+											<a class="adminMenu" href="#" onclick="setRightPane('ticketsearchresults.ems?Action=search&amp;hideleft=0&amp;ticketlockstateid=0');">
+												<img src="images/ico_myshortcuts_public.gif" width="11" height="11" border="0"/>					
+												<span class="leftmenuNoHiLight" id="spanLockedTickets" onclick="UpdateAdminLink(id);" style="padding-left:4px;">Locked Tickets</span>
+											</a>
+										</nobr>
+									</div>
+								</div>
+							</div>												
+						</div>
+					</td>
+				</tr>
+			</table>
+			</div>			
+			</xsl:if>		
+			
+					<!--
+					#X# CLOSE CONTENT AREA FOR ADMINISTRATION OPTIONS
+					-->
+			</div>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:100%">
+				<div id="0rollUpBtnX" style="cursor:hand;width:100%;border:1px outset;" onclick="docRollUpClick(0);" class="menuColor">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<script language="JavaScript" type="text/javascript">
+							var xMenuX = new Array();
+								xMenuX[0] = new Array();
+								xMenuX[0][0] = new xMenuObject();
+								xMenuX[0][1] = new xMenuItem('<img src="images/ico_as1.gif" width="11" height="11" border="0" valign="bottom"/>', '', 1, null, null, 'StatusMenuHolderX');
+								xMenuX[1] = new Array();
+								xMenuX[1][0] = new xMenuObject();
+								xMenuX[1][1] = new xMenuItem('<img src="images/ico_as1.gif" width="11" height="11" border="0"/>&amp;nbsp;Online&amp;nbsp;', "setStatus('1');", 0);
+								xMenuX[1][2] = new xMenuItem('<img src="images/ico_as2.gif" width="11" height="11" border="0"/>&amp;nbsp;Away&amp;nbsp;', "setStatus('2');", 0);
+								xMenuX[1][3] = new xMenuItem('<img src="images/ico_as3.gif" width="11" height="11" border="0"/>&amp;nbsp;Not Available&amp;nbsp;', "setStatus('3');", 0);
+								xMenuX[1][4] = new xMenuItem('<img src="images/ico_as5.gif" width="11" height="11" border="0"/>&amp;nbsp;Offline&amp;nbsp;', "setStatus('5');", 0);
+								xMenuX[1][5] = new xMenuItem('<img src="images/ico_as6.gif" width="11" height="11" border="0"/>&amp;nbsp;Out of Office&amp;nbsp;', "setStatus('6');", 0);
+						</script>
+						<td id="StatusMenuHolderX" title="Online - Click to set status" style="padding-bottom:2px;width:11px;"></td>
+						<td style="padding:0px 0px 2px 2px;align:left;"><xsl:value-of select="/root/user/name"/></td>
+					</tr>
+				</table>
+				</div>
+			<xsl:if test="not(/root/user/access/stdreports &lt; 2)">	
+				<div id="1rollUpBtnX" style="cursor:hand;width:100%;border:1px outset;" onclick="docRollUpClick(1);" class="menuColor">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td style="padding:2px 0px 2px 5px;">
+				<img src="images/ico_admin_logging.gif" width="11" height="11" border="0"/>
+				<nobr><span style="margin-left:7px;">Reporting</span></nobr>
+				</td></tr></table>
+				</div>
+			</xsl:if>	
+			<xsl:if test="/root/user/isadmin = 1">
+				<div id="2rollUpBtnX" style="cursor:hand;width:100%;border:1px outset;" onclick="docRollUpClick(2);" class="menuColor">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td style="padding:2px 0px 2px 5px;">
+				<img src="images/ico_admin_settings.gif" width="11" height="11" border="0"/>
+				<nobr><span style="margin-left:7px;">Administration</span></nobr>
+				</td></tr></table>
+				</div>
+			</xsl:if>
+			</td>
+		</tr>
+	</table>
+	<form name="expandall" action="">
+		<input type="hidden" value="1" id="expand"/>
+	</form>
+	</body>
+	<script type="text/javascript">
+		if (document.getElementById("0rollUpBtn"))
+		{
+			var iLastb = null;
+			var icount = 0;
+			
+			<xsl:choose>
+			<xsl:when test="/root/user/isadmin = 1">
+			icount = 3;
+			</xsl:when>
+			<xsl:when test="/root/user/access/stdreports &lt; 2">
+			icount = 1;
+			</xsl:when>
+			<xsl:otherwise>
+			icount = 2;
+			</xsl:otherwise>
+			</xsl:choose>
+			
+			var bin = null;
+			
+			if(document.cookie &amp;&amp; getCookieCount("leftmenuBtn") != 0)
+			{
+				iLastb = getCookieNum("leftmenuBtn", getCookieCount("leftmenuBtn"));
+			}
+			
+			if(iLastb == null)
+			{
+				iLastb = 0;
+			}
+			
+			if(isNaN(iLastb) == false)
+			{
+				for (var x = 0; x &lt; icount; x++)
+				{
+					var idName = x + "rollUpBtn";
+					var idNameX = x + "rollUpBtnX";
+					var idContent = x + "rollUpContent";
+					var irb = document.getElementById(idName);
+					var xrb = document.getElementById(idNameX);
+					var ruc = document.getElementById(idContent);
+					
+					if(x &lt; iLastb)
+					{
+						irb.style.display = "block";
+						xrb.style.display = "none";
+					}
+					if(x == iLastb)
+					{
+						irb.style.display = "block";
+						xrb.style.display = "none";
+						ruc.style.display = "block";
+					}
+					if(x &gt; iLastb)
+					{
+						irb.style.display = "none";
+						xrb.style.display = "block";
+					}
+				}				
+				rcOpenDim = iLastb;
+			}
+			
+		}
+	</script>
+	</html>
+</xsl:template>
+</xsl:stylesheet>

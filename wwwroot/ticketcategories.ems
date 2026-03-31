@@ -1,0 +1,188 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+	<html>
+	<head>
+	
+
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontroller.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontrollerrows.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/resize_handle.jmf"></script>
+	<script type="text/javascript" language="javascript">
+		function docAction( dAction ) {
+			switch ( dAction )
+			{
+				case "NEW" :
+				{
+					glo_launchModalWindow('./modalframe.ems?file=editticketcategory.ems?id=0',375,150);
+					break;
+				}
+				case "EDIT" :
+				{
+					glo_launchModalWindow('./modalframe.ems?file=editticketcategory.ems?id='+document.tabularForm.selectId.value,375,150);
+					break;
+				}
+				case "DELETE" :
+				{
+					var uAns = confirm("Are you sure you want to delete this Ticket Category?");
+					if (uAns)
+					{
+						var postResults = glo_buildFormPost('tabularForm');
+						var proceed = postResults[0];
+						if (proceed)
+						{
+							document.location.reload();
+						}
+					}
+					break;
+				}
+				default:
+				{
+				}
+			}
+		}
+		function docModAccessControl() {
+			glo_launchModalWindow("modalframe.ems?file=accessrights.ems&amp;ObjectTypeID=6&amp;docshowtitle=1&amp;ID="+tabularForm.selectId.value,575,400);
+		}
+</script>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	</head>
+
+	<body callBeforeOnLoad="" callOnLoad="">
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="Action" value="update" />
+	<input type="hidden" name="selectId" value="" />
+
+
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="true"
+										 title="New Ticket Category" onclick="docAction('NEW');">
+										<nobr>
+										<img src="images/ico_new.gif" width="24" height="22" border="0" valign="bottom"/>
+										New
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(gloListControl.ActiveRows.length!=0)"
+										 title="Edit Ticket Category" onclick="docAction('EDIT');">
+										<nobr>
+										<img src="images/ico_edit.gif" width="24" height="22" border="0" valign="bottom"/>
+										Edit
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(gloListControl.ActiveRows.length!=0)"
+										 title="Delete Ticket Category" onclick="docAction('DELETE');">
+										<nobr>
+										<img src="images/ico_delete.gif" width="24" height="22" border="0" valign="bottom"/>
+										Delete
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(gloListControl.ActiveRows.length!=0)"
+										 title="Edit Access Rights" onclick="docModAccessControl()">
+										<nobr>
+										<img src="images/ico_edit.gif" width="24" height="22" border="0" valign="bottom"/>
+										Access Rights
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="true"
+										 title="Show Help" onclick="openHelp('administration/tickets/ticket_categories.htm');">
+										<nobr>
+										<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom"/>
+										Help
+										</nobr>
+				  						</div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:hidden;">
+
+				<div id="ListHolder" style="overflow:hidden;height:100%;width:100%;position:relative;">
+				<!-- table-layout:fixed - very important, without, table will extend off page -->
+				<table border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed;height:100%;width:100%;">
+					<tr>
+						<!-- no properties here, height will depend on contents -->
+						<td style="width:100%;">
+							<!-- position:relative - very important, without, table won't scroll -->
+							<table id="ListTableTop" border="0" cellspacing="0" cellpadding="0" style="width:100%;position:relative;user-select:none;">
+							<tr id="ListHeaderRow">
+								<td class="listHeaderCell" style="width:100%;">
+								<NOBR>Description<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>
+								<xsl:call-template name="list_resizeHandle"/>
+								</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<!-- set the height of this cell to 100%! -->
+						<td style="height:100%;overflow:hidden;vertical-align:top;">
+							<div id="ListDivider" style="width:100%;height:100%;overflow:auto;" class="listBack" onscroll="OnListDividerScroll(id);">
+							<table id="ListTableBot" style="width:100%;user-select:none;" border="0" cellspacing="0" cellpadding="0" allowMultiple="true">
+							<xsl:for-each select="/root/TicketCategoryNames/TicketCategory">
+								<tr id="listRow" class="rowOff" glc_form_tabularForm_selectId="{@ID}" onClick="gloListControl.listRowClick()" onDblClick="gloListControl.keepActiveRow();docAction('EDIT');" onMouseOver="tabRowOn()" onMouseOut="tabRowOff()">
+									<td id="listCell" style="width:100%;" class="cellOff" title="{@Description}">
+										<NOBR>
+										<xsl:value-of select="@Description"/>
+										</NOBR>
+									</td>
+								</tr>
+							</xsl:for-each>
+							<xsl:if test="not(/root/TicketCategoryNames/TicketCategory)">
+								<tr style="display:none;">
+									<td><br/></td>
+								</tr>
+								<tr><td class="listBack"><i>No Ticket Categories available</i></td></tr>
+							</xsl:if>
+							</table><!--listTableBot-->
+							</div><!--listDivider-->
+						</td>
+					</tr>
+				</table>
+				</div><!--listHolder-->
+
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+</xsl:template>
+</xsl:stylesheet>

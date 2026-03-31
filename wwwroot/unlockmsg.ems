@@ -1,0 +1,25 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script> 
+	</head>
+		
+	<body class="menuColor" callonload="glo_doClose()">
+
+		<xsl:if test="not(root/Error)">
+		<div align="center">
+			<span id="messagetext">Unlocking ticket, please wait...</span>
+			<p/>
+			<div id="slidecontainer"/>
+		</div>
+		</xsl:if>
+			
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

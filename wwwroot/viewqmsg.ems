@@ -1,0 +1,442 @@
+﻿<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<xsl:variable name="agentID" select="root/user/id" />
+	<html>
+	<head>
+	<title>
+		<xsl:value-of select="root/Message/Subject" disable-output-escaping="yes" />
+	</title>
+	<link rel="stylesheet" type="text/css" href="{root/user/stylesheetname}"></link>
+	<style type="text/css">
+		.isResizable {
+			overflow: hidden;
+			resize: vertical;
+			width: 100%;
+			width: 100%;
+			height: 70px;
+			min-height: 70px;			
+			max-height: 300px;
+		}
+   </style>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/xmenucontroller.jmf"></script>
+<xsl:if test="not(root/Error)">
+	<script language="javascript">
+		var inNewWindow = 0;
+		contract = new Image();
+		contract.src = './images/minus.gif';
+		expand = new Image();
+		expand.src = './images/plus.gif';
+		
+		// was this opened from a modal?
+		if (parent.window.opener) {
+			inNewWindow = 1;
+		}
+		
+		gServerName = '<xsl:value-of select="/root/DOCUMENT/servername"/>';
+		gUseHttps = <xsl:value-of select="/root/DOCUMENT/usehttps"/>;
+		var ticketboxid = '<xsl:value-of select="root/Ticket/@TicketBoxID"/>';
+		var ticketboxview = '<xsl:value-of select="root/DOCUMENT/URLPARAMETERS/TICKETBOXVIEW"/>';
+		var messageid = '<xsl:value-of select="root/Message/@ID" />';
+		var messagetype = '<xsl:value-of select="root/Message/@Type"/>';
+		var ticketid = '<xsl:value-of select="root/Ticket/@ID"/>';
+		var secondsToMarkAsRead = <xsl:value-of select="root/user/markasreadseconds"/>;
+		var timer = 0;		
+
+		function viewMsgHeaders() {
+			glo_launchModalWindow('./modalframe.ems?file=viewheaders.ems', 550, 400, 'yes', 'no', 'no');
+		}
+		function viewMsgSource() {
+			glo_launchModalWindow('./modalframe.ems?file=viewsource.ems', 550, 400, 'yes', 'no', 'no');
+		}
+		function funcPrintMsg() {
+			glo_launchNewWindow("./printinboundmsg.ems?msg=<xsl:value-of select="root/Message/@ID" />&amp;type=<xsl:value-of select="root/Message/@Type" />&amp;archiveId=<xsl:value-of select="root/Message/@ArchiveID" />",1024,768);
+		}
+		function linkRedir() {
+			try
+			{
+				if (document.links.length) {
+					var ldim = 0;
+					while(ldim &lt;= (document.links.length - 1)) {
+						if (document.links[ldim].href.indexOf('viewqmsg.ems') == -1) {
+							document.links[ldim].target = '_new'; 
+						}
+						ldim ++;
+					}
+				}
+			}catch(e){}
+		}
+		function deleteMsg() {
+			if (confirm("Are you sure you want to delete this message?")){
+				document.viewInboundMessage.Action.value = "delete";
+				document.viewInboundMessage.submit();
+			} 
+		}
+		
+		function openAttach(ID) {
+			var attachLoc = "download.ems?ID="+ ID +"&amp;type="+messagetype;
+			
+			<xsl:if test="/root/Message/@ArchiveID">
+			attachLoc += '&amp;archiveid=<xsl:value-of select="/root/Message/@ArchiveID"/>';
+			</xsl:if>
+			
+			attachLoc = CreateServerLocation(attachLoc);
+			
+			document.getElementById("dlframe").src = attachLoc;
+		}
+		
+		function reloadMe() {
+			if(inNewWindow == 1) {
+				parent.close();
+				parent.window.opener.location.reload();
+				
+			} else {
+				parent.rightpane.location = parent.rightpane.location.href;
+			}
+		}
+
+		function docSwitchMsgProps() {
+			if (itemRowOff.style.display=="none") {
+				itemRowOff.style.display = "block";
+				itemRow.style.display = "none";
+			} else {
+				itemRow.style.display = "block";
+				itemRowOff.style.display = "none";
+			}
+		}
+		function docSizeMsgProps() {
+			if (itemRow.offsetHeight &gt; 100)
+				itemRow.style.height = "100px";
+		}		
+	</script>
+</xsl:if>
+	</head>
+
+	<body callOnLoad="linkRedir();xMenuBuild();docSizeMsgProps();">
+		<xsl:if test="root/Refresh/@Required = '1'">
+		<xsl:attribute name="callBeforeOnLoad">reloadMe()</xsl:attribute>
+		</xsl:if>
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+						<xsl:value-of select="root/Message/Subject" />
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true" >
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+			
+						
+						<xsl:if test="root/Message/@Type = 'inbound'">
+						<script LANGUAGE="JavaScript">
+						var xMenu = new Array();
+							xMenu[0] = new Array();
+							xMenu[0][0] = new xMenuObject();
+						
+							xMenu[0][1] = new xMenuItem('<img src="images/ico_viewheaders.gif" width="24" height="22" border="0" align="bottom"/>View<img src="images/ico_arrow6x.gif" width="6" height="6" border="0"/>', '', 1,null,null,'ViewMenuHolder');
+						
+							xMenu[1] = new Array();
+							xMenu[1][0] = new xMenuObject();							
+							xMenu[1][1] = new xMenuItem('Message Headers', "viewMsgHeaders()", 0);
+							xMenu[1][2] = new xMenuItem('Message Source', "viewMsgSource()", 0);
+						
+						</script>
+							<td id="ViewMenuHolder" title="Message Options" class="ButtonText"></td>
+							<td height="100%">										
+								<div class="toolBar" id="toolButton" name="toolButton"  title="Delete this message" onclick="deleteMsg();">
+									<nobr>
+										<img src="images/ico_delete.gif" width="24" height="22" border="0" valign="bottom" alt="Delete this message"/>Delete<xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;
+									</nobr>
+								</div>											
+							</td>
+						</xsl:if>									
+							
+					<td height="100%">										
+						<div class="toolBar" id="toolButton" name="toolButton"  title="Print this message" onclick="funcPrintMsg();">
+							<nobr>
+								<img src="images/ico_print.gif" width="24" height="22" border="0" valign="bottom" alt="Print this message"/>Print<xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;
+							</nobr>
+						</div>											
+					</td>
+			
+					<td height="100%">										
+						<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('Overview/Messages.htm', 3);">
+							<nobr>
+								<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom" alt="Show Help"/>Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;
+							</nobr>
+						</div>											
+					</td>
+				
+						<xsl:if test="root/Message/Attachment">
+						<script LANGUAGE="JavaScript">
+						if (window.xMenu)
+						{
+							var thisMenuDim = 2;
+						}
+						else
+						{
+							var xMenu = new Array();
+							xMenu[0] = new Array();
+							xMenu[0][0] = new xMenuObject();
+							var thisMenuDim = 1;							
+						}
+
+							xMenu[0][thisMenuDim] = new xMenuItem('<img src="images/ico_attach_32.gif" width="24" height="22" border="0" align="bottom"/>', '', thisMenuDim,null,null,'AttachMenuHolder');
+						
+							xMenu[thisMenuDim] = new Array();
+							xMenu[thisMenuDim][0] = new xMenuObject();
+					    <xsl:for-each select="root/Message/Attachment">
+							var attachOnClk = null;
+								<xsl:choose>
+									<xsl:when test="@VirusScanStateID = '3'"></xsl:when>
+									<xsl:when test="@VirusScanStateID = '4'"></xsl:when>
+									<xsl:otherwise>
+										attachOnClk = 'openAttach(<xsl:value-of select="@ID"/>)';
+									</xsl:otherwise>
+								</xsl:choose>
+							var strExt = null;
+								<xsl:choose>
+									
+									<xsl:when test="@FileExists = '0'">
+										strExt = '<font color="blue"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;[<xsl:value-of select="State"/>]</font>';
+									</xsl:when>
+
+									<xsl:when test="@VirusScanStateID = '0'">
+										strExt = '<font color="red"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;[<xsl:value-of select="State"/>]</font>';
+									</xsl:when>
+									<xsl:when test="@VirusScanStateID = '1'">
+										strExt = '<font color="blue"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;[<xsl:value-of select="State"/>]</font>';
+									</xsl:when>
+									<xsl:when test="@VirusScanStateID = '2'">
+										strExt = '<font color="green"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;[<xsl:value-of select="State"/>]</font>';
+									</xsl:when>
+									<xsl:when test="@VirusScanStateID > '2'">
+										strExt = '<font color="red"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;[<xsl:value-of select="State"/>]</font>';
+									</xsl:when>
+								</xsl:choose>
+							
+							var clicker = (attachOnClk!=null)? attachOnClk : '';
+							var str = '<img src="images/ico_attach_16.gif"  border="0" align="bottom"/>';
+								str +="<xsl:value-of select="FileName"/>";
+								str +="<xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;(<xsl:value-of select="FileSize"/>)";
+								str += (strExt!=null)? strExt : '';
+								
+							xMenu[thisMenuDim][xMenu[thisMenuDim].length] = new xMenuItem(str, clicker, 0);
+						</xsl:for-each>
+						</script>
+									<td id="AttachMenuHolder" title="Message Attachments"></td>
+									
+				</xsl:if>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			<!-- menusection did end here! -->
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td class="menubarx" style="padding-left:0px!important;" nowrap="true">
+			
+						<div id="itemRow" style="overflow-y:auto;">
+						<table cellpadding="0" cellspacing="0" border="0" width="100%">
+							<tr id="MessagePropsOff" style="display:none;">
+								<td height="100%">
+									<table height="100%" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td height="100%" id="menuButton" title="Click to display Message Properties" onclick="docShowMessageProps();">
+											<nobr>
+											<img src="images/ico_transparent.gif" width="6" height="6" border="0" alt="Click to display Message Properties"/>
+											<img src="images/ico_arrow6x.gif" width="6" height="6" border="0" alt="Click to display Message Properties"/>
+											<img src="images/ico_arrow6x.gif" width="6" height="6" border="0" alt="Click to display Message Properties"/>
+											<img src="images/ico_transparent.gif" width="6" height="6" border="0" alt="Click to display Message Properties"/>						
+											</nobr>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							<tr id="MessagePropsOn">
+								<td height="100%">
+									<table cellpadding="0" cellspacing="0" border="0" width="100%">
+										<tr style="padding-top:3px;" class="LabelText">
+											<td style="padding-left:10px;" width="30" valign="top">To :</td>
+											<td width="8%"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;</td>
+											<td style="padding-left:10px;cursor:text;" allowSelect="true">
+												<span>
+													<xsl:if test="root/Message/@Type = 'outbound'">
+														<xsl:attribute name="style">cursor:hand;text-decoration:underline;</xsl:attribute>
+														<xsl:attribute name="onClick">displayContactInfo()</xsl:attribute>
+													</xsl:if>
+													<xsl:value-of select="root/Message/To" />
+												</span>
+											</td>
+											<td style="padding-left:10px;" valign="top">Date :</td>
+											<td width="8%"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;</td>
+											<td style="padding-left:10px;padding-right:10px;cursor:text;" valign="top" allowSelect="true">	
+												<xsl:choose>
+													<xsl:when test="root/Message/@Type = 'inbound'">
+														<xsl:choose>
+															<xsl:when test="/root/DOCUMENT/usedatetime='1'">
+																<nobr><xsl:value-of select="root/Message/@EmailDateTime"/></nobr>
+															</xsl:when>
+															<xsl:otherwise>
+																<nobr><xsl:value-of select="root/Message/@DateReceived"/></nobr>
+															</xsl:otherwise>
+														</xsl:choose>
+													</xsl:when>
+													<xsl:otherwise>
+														<nobr><xsl:value-of select="root/Message/@EmailDateTime"/></nobr>
+													</xsl:otherwise>
+												</xsl:choose>
+											</td>
+											<td align="right"></td>
+										</tr>
+										<tr><td colspan="7"><br/></td></tr>
+										<tr class="LabelText">
+											<xsl:if test="not(root/Message/Bcc) or root/Message/Bcc = ''">
+											<xsl:attribute name="style">padding-bottom:3px;</xsl:attribute>
+											</xsl:if>
+											
+											<td style="padding-left:10px;" valign="top">
+												From :
+											</td>
+											<td width="8%"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;</td>
+											<td style="padding-left:10px;cursor:text;" allowSelect="true">
+												<span>
+													<xsl:if test="root/Message/@Type = 'inbound'">
+														<xsl:attribute name="style">cursor:hand;text-decoration:underline;</xsl:attribute>
+														<xsl:attribute name="onClick">displayContactInfo()</xsl:attribute>
+													</xsl:if>
+													<xsl:value-of select="root/Message/From" />
+												</span>
+											</td>
+											<td style="padding-left:10px;">
+												<xsl:if test="root/Message/cc != ''">
+												CC :
+												</xsl:if>
+											</td>
+											<td width="8%"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;</td>
+											<td style="padding-left:10px;cursor:text;" allowSelect="true">
+												<xsl:value-of select="root/Message/cc" />
+											</td>
+										</tr>
+									<xsl:if test="/root/Message/@Type = 'outbound' and root/Message/Bcc != ''">
+										<tr style="padding-bottom:3px;" class="LabelText">
+											<td style="padding-left:10px;">
+												BCC :
+											</td>
+											<td width="8%"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;</td>
+											<td style="padding-left:10px;padding-right:10px;cursor:text;" allowSelect="true">
+												<xsl:value-of select="root/Message/Bcc" />
+											</td>
+											<td colspan="4"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;</td>
+										</tr>
+									</xsl:if>
+									</table>
+								</td>
+							</tr>							
+						</table>
+						</div>
+					</td>
+				</tr>
+			</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto;">
+				<div class="listBack" style="height:100%;width:100%;overflow:auto;">
+				<div id="messagepartition" style="padding-left:4px;cursor:text;height:100%;" allowSelect="true">
+					<xsl:choose>
+						<xsl:when test="root/Message/@IsDeleted = '0'">
+							<xsl:value-of select="root/Message/messagebody" disable-output-escaping="yes" />
+						</xsl:when>
+						<xsl:otherwise>
+							<center><h4>Message Is Deleted</h4></center>
+							<xsl:if test="root/Message/@tsresult = '0'">
+							<script>
+							if (parent.frames.rightpane)
+							{
+								parent.frames.menu.updateTicketCount();
+								parent.frames.rightpane.document.location.reload();
+							} else {
+								if (parent.window.opener)
+								{
+									//	It is!!!  Now let's update the left pane counts if we can...
+									if (parent.window.opener.parent.frames.rightpane)
+									{
+										parent.window.opener.parent.frames.menu.updateTicketCount();
+										parent.window.opener.parent.frames.rightpane.document.location.reload();
+									}
+									else if (parent.window.opener.parent.window.opener)
+									{
+										if (parent.window.opener.parent.window.opener.parent.frames.rightpane)
+										{
+											parent.window.opener.parent.window.opener.parent.frames.menu.updateTicketCount();
+											parent.window.opener.parent.window.opener.parent.frames.rightpane.document.location.reload();
+										}
+									}
+								}
+								top.close();
+							}
+							</script>
+							</xsl:if>
+						</xsl:otherwise>
+					</xsl:choose>
+				</div>
+				</div>
+			</div>
+			</td>
+		</tr>
+		<tr class="ListHeaderRow" style="font-size: 10px;">
+			<td class="listHeaderCell" style="font-size:5px;width:100%;height:5px;">
+				<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+			</td>		
+		</tr>		
+		<xsl:if test="root/Message/Attachment">
+		<tr>
+			<td class="isResizable">
+				<iframe name="attframe" src="attachments.ems?message={root/Message/@ID}&amp;isinbound={root/Message/@IsInbound}" width="100%" height="100%" border="0" scrolling="yes"/>
+			</td>
+		</tr>
+		<tr class="ListHeaderRow" style="font-size: 10px;">
+			<td class="listHeaderCell" style="font-size: 5px;width:100%;height:5px;border-width:0px;padding-top:0px;padding-bottom:0px;border-style:none;">
+				<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+			</td>		
+		</tr>	
+		</xsl:if>
+	</table>
+
+		<form name="viewInboundMessage" method="post" action="">
+		<input type="hidden" name="Action" value="update" /> 
+		<input type="hidden" name="id" value="{root/Message/@ID}" />
+		<textarea name="hBody" style="display:none;visibility:hidden;">
+			<xsl:choose>
+				<xsl:when test="root/Message/@IsDeleted = '0'">
+					<xsl:value-of select="root/Message/messagebody" disable-output-escaping="yes" />
+				</xsl:when>
+				<xsl:otherwise>
+					<center><h4>Message Is Deleted</h4></center>
+				</xsl:otherwise>
+			</xsl:choose>
+		</textarea>		
+		</form>
+
+		<div id="headersText" style="display: none;">
+			<xsl:value-of select="root/Message/POPHeaders" disable-output-escaping="yes"/>
+		</div>
+		<div id="dldiv" style="display:none;">
+			<iframe id="dlframe" name="dlframe" src="download_blank.htm" style="width:0px; height:0px; border:0px;"/>
+		</div>
+	</body>	
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

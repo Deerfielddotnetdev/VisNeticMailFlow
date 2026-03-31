@@ -1,0 +1,105 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.01 Frameset//EN"  />
+<xsl:template match="/"> 
+
+<html>
+	<head>
+		<title>Standard Response Library</title>
+		<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+		<script type="text/javascript">
+			var showInsert=0;
+			var callerWindowObj = null;
+ 			if (window.dialogArguments != null)
+ 			{
+				callerWindowObj = window.dialogArguments;
+			}
+			else if(window.opener)
+			{
+				if(window.opener.dialogArguments)
+				{
+					callerWindowObj = window.opener.dialogArguments;
+				}
+				else
+				{
+					callerWindowObj = window.opener;
+				}
+			}
+			if (callerWindowObj)
+			{
+				pageFrom = callerWindowObj.pageFrom;
+				windowFrom = callerWindowObj.windowObj;
+				if (pageFrom == "routingrule.ems")
+ 					showInsert = 1;
+ 				else if (pageFrom == "newmessage.ems")
+ 					showInsert = 1;
+ 				else if (pageFrom == "newticketbox.ems")
+ 					showInsert = 1;
+ 				else if (pageFrom == "editticketbox.ems")
+ 					showInsert = 1;
+ 				else if (pageFrom == "editautomessage.ems")
+ 					showInsert = 1;
+ 				else if (pageFrom == "editautoresponse.ems")
+ 					showInsert = 1;
+ 			}
+ 			
+ 			function insertSR(returnID, returnName)
+ 			{
+	 			if (pageFrom=="routingrule.ems")
+	 			{
+	 				windowFrom.tabularForm.AutoReplyStandardResponseId.value = returnID;
+	 				windowFrom.tabularForm.AutoReplyStdResponseName.value = returnName;
+	 				glo_doClose();
+	 				
+	 			}
+	 			else if (pageFrom=="newticketbox.ems")
+	 			{
+	 				windowFrom.newTicketBox.AutoReplyWithStdResponse.value = returnID;
+	 				windowFrom.newTicketBox.srName.value = returnName;
+	 				glo_doClose();
+	 				
+	 			}
+				else if (pageFrom=="editticketbox.ems")
+	 			{
+	 				windowFrom.editTicketBox.AutoReplyWithStdResponse.value = returnID;
+	 				windowFrom.editTicketBox.srName.value = returnName;
+					glo_doClose();
+	 				
+	 			}
+	 			else if (pageFrom=="newmessage.ems")
+	 			{
+	 				windowFrom.labelSr(returnID);
+	 
+	 				windowFrom.docInsertResponseFromMenu(returnID);
+					//windowFrom.htmledit.pasteContent(srbottom.document.all.srbody.innerText);
+	 				glo_doClose();
+				}
+				else if (pageFrom=="editautomessage.ems")
+	 			{
+	 				windowFrom.tabularForm.SrToSendID.value = returnID;
+	 				windowFrom.tabularForm.SrToSend.value = returnName;
+	 				glo_doClose();
+				}
+				else if (pageFrom=="editautoresponse.ems")
+	 			{
+	 				windowFrom.tabularForm.SrToSendID.value = returnID;
+	 				windowFrom.tabularForm.SrToSend.value = returnName;
+	 				glo_doClose();
+				}    
+	 		}
+		</script>
+	</head>
+	
+	<frameset rows="31px,*">
+		<frame name="menu" src="standardresponse_menu.ems" frameborder="0" marginheight="0" marginwidth="0" scrolling="no" noresize="noresize"/>
+		<frameset cols="20%,80%" style="border:none;margin:0px;">
+			<frame name="frameLeft" src="liststdrespcategories.ems" frameborder="0" marginheight="0" marginwidth="0"/>
+			<frameset rows="30%,70%" style="margin:0px; border-left-style: ridge; border-left-width: 2px;">
+				<frame name="frameRightTop" src="stdresponselist.ems?id=-2" frameborder="1" marginheight="0" marginwidth="0"/>
+				<frame name="frameRightBottom" src="stdresponse.ems?id=0&amp;categoryid=-2" frameborder="0" marginheight="0" marginwidth="0"/>
+			</frameset>
+		</frameset>
+	</frameset>
+</html>
+
+</xsl:template>
+</xsl:stylesheet>

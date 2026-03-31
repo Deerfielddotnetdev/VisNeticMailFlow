@@ -1,0 +1,87 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+	<xsl:template match="/">
+
+	<head>
+	<title>Login Test</title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script> 
+	<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+	function getResults()
+	{
+		// Create the Object
+		var xmlhttp = glo_createXMLhttpObject();
+
+		//Do this once a second:
+		xmlhttp.open('GET', '<xsl:value-of select="root/Test/@URL"/>', false);
+		if(xmlhttp.overrideMimeType){ xmlhttp.overrideMimeType('text/xml'); }
+		xmlhttp.send();
+	
+		if (xmlhttp.responseXML)
+		{
+			statusDesc = xmlhttp.responseXML.selectSingleNode('/root/LoginTestResults/@Description').value;
+			statusCode = xmlhttp.responseXML.selectSingleNode('/root/LoginTestResults/@Code').value;
+		}
+		else {
+			statusCode = 0;
+			statusDesc = "";
+		}
+
+		if (statusCode==0)
+		{
+			clearInterval(timerID);
+			alert('There was an error trying to test your login information!');
+		}
+		else if (statusCode==1)
+		{
+			numdots = dots.innerHTML.length;
+			if (numdots==0)
+			{	dots.innerHTML= '.';	}
+			if (numdots==1)
+			{	dots.innerHTML= '..';	}
+			else if (numdots==2)
+			{	dots.innerHTML= '...';	}
+			else if (numdots==3)
+			{	dots.innerHTML= '';	}
+		}
+		else if (statusCode &gt; 1)
+		{
+			clearInterval(timerID);
+			if (statusCode == 2)
+			{	statusContainer.style.color = '000000';	}
+			else{statusContainer.style.color = 'red';}
+			statusContainer.innerHTML = statusDesc;
+			OK.style.display = "block";
+		}
+	}
+	// set timer for processing interval
+	timerID = setInterval('getResults()', 1000)
+	</SCRIPT>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	</head>
+
+	<body callOnLoad="">
+<!--
+	<div id="menusection">
+	<TABLE CLASS="header" WIDTH="30%" BORDER="0" CELLSPACING="0" CELLPADDING="0" ALIGN="center">
+		<TR>
+			<TD WIDTH="70%" align="right" class="headerGradient">
+			<A HREF="#" onClick="glo_launchModalWindow('about.ems', 450, 500);">
+			<img src="./images/mailflowwhite.gif" width="199" height="25"  border="0"/></A>
+			</TD>
+		</TR>
+	</TABLE>
+	</div>
+-->
+	<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td height="200" width="100%" valign="middle" id="statusContainer" style="padding-left:10px;font-size:16px;font-weight:bold;">
+			Testing in Progress <span id="dots"></span><br/>
+			</td>
+		</tr>
+		<tr id="OK" style="display:none;">
+			<td valign="top" align="center"><input style="height:30px;width:34px;" type="button" class="childControlBtn" value="OK" onclick="glo_doClose();"/></td>
+		</tr>
+	</table> 
+	</body>
+	</xsl:template>
+</xsl:stylesheet>

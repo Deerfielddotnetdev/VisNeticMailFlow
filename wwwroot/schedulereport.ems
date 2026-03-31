@@ -1,0 +1,959 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"/>
+	<script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"></script>
+	<script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/schedulereport.jmf"></script>
+	</head>
+	
+	<body>
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="Action">
+	<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="value">update</xsl:attribute></xsl:if>
+	<xsl:if test="root/Report/@ID = '0'"><xsl:attribute name="value">insert</xsl:attribute></xsl:if>
+	</input>
+	<input type="hidden" name="Flag1" value="0"/>
+	<input type="hidden" name="Flag2" value="0"/>
+	<input type="hidden" name="TbTargetID" value="0"/>
+	<input type="hidden" name="AgentsTargetID" value="0"/>
+	<input type="hidden" name="TcTargetID" value="0"/>
+	<input type="hidden" name="SrTargetID" value="0"/>
+	<input type="hidden" name="RrTargetID" value="0"/>
+	<input type="hidden" name="MsTargetID" value="0"/>
+	<input type="hidden" name="TsTargetID" value="0"/>
+	<input type="hidden" name="SaveResultTofile" value="0"/>
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td style="width:100%">
+	<xsl:call-template name="default_titlebar">
+		<xsl:with-param name="title_text">
+		<xsl:value-of select="root/DOCUMENT/TITLE"/>
+		</xsl:with-param>
+	</xsl:call-template>
+	<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+	<td style="height:32px;" class="menubarx" nowrap="true">
+	<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td height="100%">
+				<div class="toolBar" id="toolButton" name="toolButton" 
+				 xrequire="true"  
+				 title="Save Report" onclick="adjustForm()"
+				  >
+					<nobr>
+						<img src="images/ico_save.gif" width="24" height="22" border="0"/>
+						Save
+					</nobr>
+				  </div>
+			</td>
+			<td height="100%">					
+				<div class="toolBar" id="toolButton" name="toolButton" 
+				 xrequire="true"  
+				 title="Cancel" onclick="glo_doClose();"
+				  >
+					<nobr>
+						<img src="images/ico_cancel.gif" width="24" height="22" border="0"/>
+						Cancel
+					</nobr>
+				  </div>
+			</td>
+			<td height="100%">					
+				<div class="toolBar" id="toolButton" name="toolButton" 
+				 xrequire="true"  
+				 title="Show Help" 
+				 onclick="openHelp('Administration/Hidden/Reports/Create_Edit_a_Scheduled_Report.htm')"
+				  >
+					<nobr>
+						<img src="images/ico_help.gif" width="24" height="22" border="0"/>
+						Help
+					</nobr>
+				  </div>
+			</td>
+		</tr>
+	</table>
+	</td>
+	</tr>
+	</table>
+	</td>
+	</tr>
+	<tr>
+	<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+	<div style="width:100%;height:100%;overflow:auto">
+	<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+	<td>
+	<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+	
+	<tr>
+	<td style="padding-left:10px;padding-right:10px;">
+	<table width="100%" cellspacing="0">
+	<tr><td height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+	<tr>
+		<td width="100%" class="subSectionHeader" align="left">
+			General Information
+		</td>
+	</tr>
+	<tr>
+		<td width="100%" class="subSectionWrapper" align="left">
+			<table width="100%" cellpadding="0" cellspacing="0">
+				<tr>
+					<td width="20%" style="padding-left:10px;">Description:</td>
+					<td width="80%" align="left">
+						<input style="width:100%" maxlength="125" type="text" name="Description" value="{root/Report/@Description}"/>
+						<script language="javascript">
+							document.tabularForm.Description.focus();
+						</script>
+					</td>
+				</tr>
+				<tr>
+					<td width="20%" style="padding-left:10px;padding-top:5px;">Enabled:</td>
+					<td width="80%" align="left" style="padding-top:5px;">
+						Yes<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+						<input type="Radio" name="IsEnabled" value="1">
+						<xsl:if test="root/Report/@IsEnabled = '1'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						No<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+						<input type="Radio" name="IsEnabled" value="0">
+						<xsl:if test="root/Report/@IsEnabled = '0'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+					</td>
+				</tr>
+				<tr>
+					<td width="20%" style="padding-left:10px;padding-top:5px;">Owner:</td>
+					<td width="80%" align="left" style="padding-top:5px;">
+						<xsl:variable name="nOwnedBy" select="root/Report/@OwnerID" />
+						<select name="OwnerID">
+							<xsl:if test="not(/root/Report/@IsAdminView = '1')">
+								<xsl:attribute name="disabled">true</xsl:attribute>
+							</xsl:if>
+							<xsl:for-each select="root/AgentNames/Agent">
+							<xsl:choose>
+								<xsl:when test="@ID = $nOwnedBy">
+								<option>
+									<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+									<xsl:attribute name="selected">true</xsl:attribute>
+									<xsl:value-of select="@Name"/>
+								</option>
+								</xsl:when>
+								<xsl:otherwise>
+								<option>
+									<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+									<xsl:value-of select="@Name"/>
+								</option>
+								</xsl:otherwise>
+							</xsl:choose>
+							</xsl:for-each>
+						</select>																	
+					</td>
+				</tr>
+				<xsl:if test="not(root/Report/@ID = '0')">
+				<tr>
+					<td width="20%" style="padding-left:10px;padding-top:5px;">Created By:</td>
+					<td width="80%" align="left" style="padding-top:5px;">
+						<xsl:variable name="nCreatedBy" select="root/Report/@CreatedByID" />
+						<xsl:choose>
+							<xsl:when test="/root/AgentNames/Agent/@ID = $nCreatedBy">
+								<xsl:for-each select="/root/AgentNames/Agent">
+									<xsl:if test="@ID = $nCreatedBy">
+										<xsl:value-of select="@Name"/>
+									</xsl:if>
+								</xsl:for-each>
+							</xsl:when>
+							<xsl:otherwise>
+								Unknown
+							</xsl:otherwise>										
+						</xsl:choose>
+						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/Report/@DateCreated"/>
+					</td>
+				</tr>
+				<tr>
+					<td width="20%" style="padding-left:10px;padding-top:5px;">Edited By:</td>
+					<td width="80%" align="left" style="padding-top:5px;">
+						<xsl:variable name="nEditedBy" select="root/Report/@EditedByID" />
+						<xsl:choose>
+						<xsl:when test="root/AgentNames/Agent/@ID = $nEditedBy">
+							<xsl:for-each select="/root/AgentNames/Agent">
+								<xsl:if test="@ID = $nEditedBy">
+									<xsl:value-of select="@Name"/>
+								</xsl:if>
+							</xsl:for-each>
+						</xsl:when>
+						<xsl:otherwise>
+							Unknown
+						</xsl:otherwise>										
+					</xsl:choose>
+					<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/Report/@DateEdited"/>
+					</td>
+				</tr>
+				</xsl:if>
+			</table>
+		</td>
+	</tr>
+	<tr><td height="10"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+	<tr>
+		<td width="100%" class="subSectionHeader" align="left">
+			What to Run
+		</td>
+	</tr>
+	<tr>
+	<td width="100%" class="subSectionWrapper" align="left">
+	<table width="100%" cellpadding="0" cellspacing="0">
+	<tr>
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Report:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<select name="ReportID" onchange="setReportDiv(this.value)">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:for-each select="root/StandardReports/Report">
+			<xsl:choose>
+				<xsl:when test="@ID = /root/Report/@ReportID">
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:attribute name="selected">true</xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:when>
+				<xsl:otherwise>
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:otherwise>
+			</xsl:choose>
+			</xsl:for-each>
+		</select>
+	</td>
+	</tr>
+	<tr id="divtb" style="display:none;">
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">TicketBox:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<select name="TbTargetID">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:for-each select="root/TicketBoxes/TicketBox">
+			<xsl:choose>
+				<xsl:when test="@ID = /root/Report/@TargetID">
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:attribute name="selected">true</xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:when>
+				<xsl:otherwise>
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:otherwise>
+			</xsl:choose>
+			</xsl:for-each>
+		</select>				
+	</td>
+	</tr>
+	<tr id="divagents" style="display:none;">
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Agent:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<select name="AgentsTargetID">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:for-each select="root/Agents/Agent">
+			<xsl:choose>
+				<xsl:when test="@ID = /root/Report/@TargetID">
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:attribute name="selected">true</xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:when>
+				<xsl:otherwise>
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:otherwise>
+			</xsl:choose>
+			</xsl:for-each>
+		</select>				
+	</td>
+	</tr>
+	<tr id="divtc" style="display:none;">
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Ticket Category:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<select name="TcTargetID">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:for-each select="root/TicketCategories/TicketCategory">
+			<xsl:choose>
+				<xsl:when test="@ID = /root/Report/@TargetID">
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:attribute name="selected">true</xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:when>
+				<xsl:otherwise>
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:otherwise>
+			</xsl:choose>
+			</xsl:for-each>
+		</select>				
+	</td>
+	</tr>
+	<tr id="divsr" style="display:none;">
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">SR Category:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<select name="SrTargetID">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:for-each select="root/ResponseCategories/Category">
+			<xsl:choose>
+				<xsl:when test="@ID = /root/Report/@TargetID">
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:attribute name="selected">true</xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:when>
+				<xsl:otherwise>
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:otherwise>
+			</xsl:choose>
+			</xsl:for-each>
+		</select>				
+	</td>
+	</tr>
+	<tr id="divrr" style="display:none;">
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Routing Rule:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<select name="RrTargetID">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:for-each select="root/RoutingRules/RoutingRule">
+			<xsl:choose>
+				<xsl:when test="@ID = /root/Report/@TargetID">
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:attribute name="selected">true</xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:when>
+				<xsl:otherwise>
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:otherwise>
+			</xsl:choose>
+			</xsl:for-each>
+		</select>				
+	</td>
+	</tr>
+	<tr id="divms" style="display:none;">
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Message Source:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<select name="MsTargetID">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:for-each select="root/MessageSources/MessageSource">
+			<xsl:choose>
+				<xsl:when test="@ID = /root/Report/@TargetID">
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:attribute name="selected">true</xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:when>
+				<xsl:otherwise>
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:otherwise>
+			</xsl:choose>
+			</xsl:for-each>
+		</select>				
+	</td>
+	</tr>
+	<tr id="divts" style="display:none;">
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Ticket State:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<select name="TsTargetID">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:for-each select="root/TicketStates/TicketState">
+			<xsl:choose>
+				<xsl:when test="@ID = /root/Report/@TargetID">
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:attribute name="selected">true</xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:when>
+				<xsl:otherwise>
+				<option>
+					<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+					<xsl:value-of select="@Description"/>
+				</option>
+				</xsl:otherwise>
+			</xsl:choose>
+			</xsl:for-each>
+		</select>				
+	</td>
+	</tr>		
+	<tr id="divom" style="display:none;">
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Options:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<input type="checkbox" name="Flag1divom">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:if test="root/Report/@Flag1 = '1'">
+				<xsl:attribute name="CHECKED">true</xsl:attribute>
+			</xsl:if>
+		</input>
+		Include Auto Responses		
+	</td>
+	</tr>
+	<tr id="divtdtb" style="display:none;">
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Options:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<input type="checkbox" name="Flag1divtdtb">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:if test="root/Report/@Flag1 = '1'">
+				<xsl:attribute name="CHECKED">true</xsl:attribute>
+			</xsl:if>
+		</input>
+		Include Ticket Boxes with 0 Tickets		
+	</td>
+	</tr>
+	<tr id="divtdown" style="display:none;">
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Options:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<input type="checkbox" name="Flag1divtdown">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:if test="root/Report/@Flag1 = '1'">
+				<xsl:attribute name="CHECKED">true</xsl:attribute>
+			</xsl:if>
+		</input>
+		Include Agents with 0 Tickets
+		<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+		<input type="checkbox" name="Flag2divtdown">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:if test="root/Report/@Flag2 = '1'">
+				<xsl:attribute name="CHECKED">true</xsl:attribute>
+			</xsl:if>
+		</input>
+		Include Tickets that are not owned			
+	</td>
+	</tr>
+	<tr id="divtdtc" style="display:none;">
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Options:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<input type="checkbox" name="Flag1divtdtc">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:if test="root/Report/@Flag1 = '1'">
+				<xsl:attribute name="CHECKED">true</xsl:attribute>
+			</xsl:if>
+		</input>
+		Include Ticket Categories with 0 Tickets
+		<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+		<input type="checkbox" name="Flag2divtdtc">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:if test="root/Report/@Flag2 = '1'">
+				<xsl:attribute name="CHECKED">true</xsl:attribute>
+			</xsl:if>
+		</input>
+		Include the Unassigned Ticket Category			
+	</td>
+	</tr>				
+	<tr id="divsruse" style="display:none;">
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Options:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<input type="checkbox" name="Flag1divsruse">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:if test="root/Report/@Flag1 = '1'">
+				<xsl:attribute name="CHECKED">true</xsl:attribute>
+			</xsl:if>
+		</input>
+		Include Unused Responses
+		<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+		<input type="checkbox" name="Flag2divsruse">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:if test="root/Report/@Flag2 = '1'">
+				<xsl:attribute name="CHECKED">true</xsl:attribute>
+			</xsl:if>
+		</input>
+		Include Auto Replies		
+	</td>
+	</tr>	
+	<tr id="divsrcat" style="display:none;">
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Options:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<input type="checkbox" name="Flag1divsrcat">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:if test="root/Report/@Flag1 = '1'">
+				<xsl:attribute name="CHECKED">true</xsl:attribute>
+			</xsl:if>
+		</input>
+		Include Uncategorized Responses
+		<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+		<input type="checkbox" name="Flag2divsrcat">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:if test="root/Report/@Flag2 = '1'">
+				<xsl:attribute name="CHECKED">true</xsl:attribute>
+			</xsl:if>
+		</input>
+		Include Categories with 0 Responses		
+	</td>
+	</tr>	
+	<tr id="divsrauth" style="display:none;">
+	<td width="20%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Options:</td>
+	<td width="80%" align="left" style="padding-right:10px;">
+		<input type="checkbox" name="Flag1divsrauth">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:if test="root/Report/@Flag1 = '1'">
+				<xsl:attribute name="CHECKED">true</xsl:attribute>
+			</xsl:if>
+		</input>
+		Include Responses from Unknown Author
+		<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+		<input type="checkbox" name="Flag2divsrauth">
+			<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+			<xsl:if test="root/Report/@Flag2 = '1'">
+				<xsl:attribute name="CHECKED">true</xsl:attribute>
+			</xsl:if>
+		</input>
+		Include Authors with 0 Responses		
+	</td>
+	</tr>																			
+	</table>
+	</td>
+	</tr>
+	<tr><td height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+	<tr>
+		<td width="100%" class="subSectionHeader" align="left">
+			When to Run
+		</td>
+	</tr>
+	<tr>
+		<td width="100%" class="subSectionWrapper" align="left">
+			<table width="100%" cellpadding="0" cellspacing="0">
+				<tr>
+					<td width="20%" style="padding-left:10px;padding-top:3px;">Frequency:</td>
+					<td width="80%" align="left" style="padding-right:10px;">
+						<input type="Radio" name="RunFreq" value="0" onClick="setFreqDiv()">
+						<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+						<xsl:if test="root/Report/@RunFreq = '0'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Daily
+						<input type="Radio" name="RunFreq" value="1" onClick="setFreqDiv()">
+						<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+						<xsl:if test="root/Report/@RunFreq = '1'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Weekly
+						<input type="Radio" name="RunFreq" value="2" onClick="setFreqDiv()">
+						<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+						<xsl:if test="root/Report/@RunFreq = '2'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Monthly
+						<input type="Radio" name="RunFreq" value="3" onClick="setFreqDiv()">
+						<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+						<xsl:if test="root/Report/@RunFreq = '3'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Annualy
+					</td>
+				</tr>
+				<tr id="divdaily" style="display:none;">
+					<td width="20%" style="padding-left:10px;padding-top:5px;">Run On:</td>
+					<td width="80%" align="left" style="padding-right:10px;padding-top:5px;">													
+						<input type="checkbox" name="runsun">
+						<xsl:if test="root/Report/@RunSun = '1'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Sunday
+						<input type="checkbox" name="runmon">
+						<xsl:if test="root/Report/@RunMon = '1'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Monday
+						<input type="checkbox" name="runtue">
+						<xsl:if test="root/Report/@RunTue = '1'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Tuesday
+						<input type="checkbox" name="runwed">
+						<xsl:if test="root/Report/@RunWed = '1'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Wednesday
+						<input type="checkbox" name="runthur">
+						<xsl:if test="root/Report/@RunThur = '1'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Thursday
+						<input type="checkbox" name="runfri">
+						<xsl:if test="root/Report/@RunFri = '1'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Friday
+						<input type="checkbox" name="runsat">
+						<xsl:if test="root/Report/@RunSat = '1'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Saturday
+					</td>
+				</tr>
+				<tr id="divweekly" style="display:none;">
+					<td width="20%" style="padding-left:10px;padding-top:5px;">Run On:</td>
+					<td width="80%" align="left" style="padding-right:10px;padding-top:5px;">													
+						<input type="Radio" name="RunOn" value="0">
+						<xsl:if test="root/Report/@RunOn = '0'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Sunday
+						<input type="Radio" name="RunOn" value="1">
+						<xsl:if test="root/Report/@RunOn = '1'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Monday
+						<input type="Radio" name="RunOn" value="2">
+						<xsl:if test="root/Report/@RunOn = '2'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Tuesday
+						<input type="Radio" name="RunOn" value="3">
+						<xsl:if test="root/Report/@RunOn = '3'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Wednesday
+						<input type="Radio" name="RunOn" value="4">
+						<xsl:if test="root/Report/@RunOn = '4'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Thursday
+						<input type="Radio" name="RunOn" value="5">
+						<xsl:if test="root/Report/@RunOn = '5'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Friday
+						<input type="Radio" name="RunOn" value="6">
+						<xsl:if test="root/Report/@RunOn = '6'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						Saturday
+					</td>
+				</tr>
+				<tr id="divmonthly" style="display:none;">
+					<td width="20%" style="padding-left:10px;padding-top:5px;">Run On:</td>
+					<td width="80%" align="left" style="padding-right:10px;padding-top:5px;">													
+						<input type="Radio" name="RunMonth" value="0">
+						<xsl:if test="root/Report/@RunOn = '0'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						First Day of Month
+					</td>
+				</tr>
+				<tr id="divannualy" style="display:none;">
+					<td width="20%" style="padding-left:10px;padding-top:5px;">Run On:</td>
+					<td width="80%" align="left" style="padding-right:10px;padding-top:5px;">													
+						<input type="Radio" name="RunYear" value="0">
+						<xsl:if test="root/Report/@RunOn = '0'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						</input>
+						First Day of Year
+					</td>
+				</tr>
+				<tr >
+					<td width="20%" style="padding-left:10px;padding-top:5px;">Run At:</td>
+					<td width="80%" align="left" style="padding-right:10px;padding-top:5px;">													
+						<select name="RunAtHour">
+							<option>
+								<xsl:attribute name="value">1</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtHour = '1'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								01
+							</option>
+							<option>
+								<xsl:attribute name="value">2</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtHour = '2'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								02
+							</option>
+							<option>
+								<xsl:attribute name="value">3</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtHour = '3'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								03
+							</option>
+							<option>
+								<xsl:attribute name="value">4</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtHour = '4'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								04
+							</option>
+							<option>
+								<xsl:attribute name="value">5</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtHour = '5'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								05
+							</option>
+							<option>
+								<xsl:attribute name="value">6</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtHour = '6'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								06
+							</option>
+							<option>
+								<xsl:attribute name="value">7</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtHour = '7'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								07
+							</option>
+							<option>
+								<xsl:attribute name="value">8</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtHour = '8'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								08
+							</option>
+							<option>
+								<xsl:attribute name="value">9</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtHour = '9'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								09
+							</option>
+							<option>
+								<xsl:attribute name="value">10</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtHour = '10'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								10
+							</option>
+							<option>
+								<xsl:attribute name="value">11</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtHour = '11'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								11
+							</option>
+							<option>
+								<xsl:attribute name="value">12</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtHour = '12'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								12
+							</option>
+						</select>
+						<b>:</b> 
+						<select name="RunAtMin">
+							<option>
+								<xsl:attribute name="value">0</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtMin = '0'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								00
+							</option>
+							<option>
+								<xsl:attribute name="value">15</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtMin = '15'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								15
+							</option>
+							<option>
+								<xsl:attribute name="value">30</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtMin = '30'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								30
+							</option>
+							<option>
+								<xsl:attribute name="value">45</xsl:attribute>
+								<xsl:if test="root/Report/@RunAtMin = '45'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								45
+							</option>							
+						</select>
+						<input type="radio" name="RunAtAmPm" value="AM">
+							<xsl:if test="root/Report/@RunAtAmPm = 'AM'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						AM
+						</input>
+						<input type="radio" name="RunAtAmPm" value="PM">
+							<xsl:if test="root/Report/@RunAtAmPm = 'PM'">
+							<xsl:attribute name="CHECKED">true</xsl:attribute>
+						</xsl:if>
+						PM
+						</input>  
+					</td>
+				</tr>											
+			</table>
+		</td>
+	</tr>
+	<tr><td height="10"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+	<tr>
+		<td width="100%" class="subSectionHeader" align="left">
+			Results
+		</td>
+	</tr>
+	<tr>
+		<td width="100%" class="subSectionWrapper" align="left">
+			<table width="100%" cellpadding="0" cellspacing="0">
+				<tr>
+					<td width="20%" style="padding-left:10px;padding-top:3px;">Summary Period:</td>
+					<td width="80%" align="left" style="padding-right:10px;">
+						<select name="SumPeriod">
+						<xsl:if test="root/Report/@ID &gt; '0'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+							<option>
+								<xsl:attribute name="value">0</xsl:attribute>
+								<xsl:if test="root/Report/@SumPeriod = '0'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								Hour
+							</option>
+							<option>
+								<xsl:attribute name="value">1</xsl:attribute>
+								<xsl:if test="root/Report/@SumPeriod = '1'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								Day
+							</option>
+							<option>
+								<xsl:attribute name="value">2</xsl:attribute>
+								<xsl:if test="root/Report/@SumPeriod = '2'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								Week
+							</option>
+							<option>
+								<xsl:attribute name="value">3</xsl:attribute>
+								<xsl:if test="root/Report/@SumPeriod = '3'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								Month
+							</option>
+							<option>
+								<xsl:attribute name="value">4</xsl:attribute>
+								<xsl:if test="root/Report/@SumPeriod = '4'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								Year
+							</option>							
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td width="20%" style="padding-left:10px;padding-top:3px;">Max Lines:</td>
+					<td width="80%" align="left" style="padding-right:10px;">
+						<input style="width:30px" maxlength="3" type="text" name="MaxResults" value="{root/Report/@MaxResults}"/>		
+					</td>
+				</tr>
+				<tr>
+					<td width="20%" style="padding-left:10px;padding-top:3px;">Alert to Owner:</td>
+					<td width="80%" align="left" style="padding-right:10px;">
+						<input type="checkbox" name="SendAlertToOwner">
+							<xsl:if test="root/Report/@SendAlertToOwner = '1'">
+								<xsl:attribute name="CHECKED">true</xsl:attribute>
+							</xsl:if>
+						</input>		
+					</td>
+				</tr>
+				<tr>
+					<td width="20%" style="padding-left:10px;padding-top:3px;">Alert to Email:</td>
+					<td width="80%" align="left" style="padding-right:10px;">
+						<input type="checkbox" name="SendResultToEmail" onClick="adjDisable(this)">
+							<xsl:if test="root/Report/@SendResultToEmail = '1'">
+								<xsl:attribute name="CHECKED">true</xsl:attribute>
+							</xsl:if>
+						</input>
+						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+						<input style="width:80%" maxlength="125" type="text" name="ResultEmailTo" value="{root/Report/@ResultEmailTo}"/>		
+					</td>					
+				</tr>
+				<tr>
+					<td width="20%" style="padding-left:10px;padding-top:3px;">Include Result in Email:</td>
+					<td width="80%" align="left" style="padding-right:10px;">
+						<input type="checkbox" name="IncludeResultFile">
+							<xsl:if test="root/Report/@IncludeResultFile = '1'">
+								<xsl:attribute name="CHECKED">true</xsl:attribute>
+							</xsl:if>
+						</input>
+								
+					</td>
+				</tr>																	
+			</table>
+		</td>
+	</tr>
+	</table>
+	</td>
+	</tr>	
+	</table>
+	</td>
+	</tr>
+	</table>
+	</div>
+	</td>
+	</tr>
+	</table>
+	
+	<xsl:for-each select="root/StandardReports/Report">
+	<input type="hidden" name="rid" disabled="true"><xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute></input>
+	</xsl:for-each>
+	<xsl:for-each select="root/StandardReports/Report">
+	<input type="hidden" name="roid" disabled="true"><xsl:attribute name="value"><xsl:value-of select="@ReportObjectID"/></xsl:attribute></input>
+	</xsl:for-each>
+	<xsl:for-each select="root/StandardReports/Report">
+	<input type="hidden" name="rtid" disabled="true"><xsl:attribute name="value"><xsl:value-of select="@ReportTypeID"/></xsl:attribute></input>
+	</xsl:for-each>
+	</form>
+	<script type="text/javascript">
+		setFreqDiv();
+		var sv = document.getElementById('ReportID').options[document.getElementById('ReportID').selectedIndex].value;
+		setReportDiv(sv);
+		docInitDisableForms()
+	</script>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

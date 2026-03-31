@@ -1,0 +1,102 @@
+﻿<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:template match="/">
+
+	<head>
+	<meta name="keywords" content="email tracking, software, e-mail, management, response, eCRM, customer, relationship, mail"/>
+	<meta name="description" content="VisNetic MailFlow - Email management software"/>
+	<title>VisNetic MailFlow - Email Management Software</title>
+	<script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"></script>
+	<link rel="STYLESHEET" type="text/css" href="./stylesheets/standard.css"/>
+	<style>
+	a:visited{color:black;}
+	a{color:black;}
+	</style>
+	</head>
+
+	<body onload="document.body.focus()" style="border:2px inset!important;background-color:#E0E0E0!important;">
+	<table height="100%" width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td height="90%" width="100%" valign="middle" align="center">
+
+				<table width="387" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td width="387" style="border:2px solid black;background-color:#FFFFFF;">
+							<table height="147" width="387" border="0" background="images/version.jpg" cellspacing="0" cellpadding="0">
+								<tr>
+									<td height="147" width="387" align="left" valign="top" style="font-size:9px;padding-left:10px;">
+									
+									</td>
+									
+								</tr>
+							</table>
+							<table width="387" border="0" cellspacing="0" cellpadding="0">
+								<tr>
+									<td valign="top" style="padding-left:35px;">
+										<xsl:value-of select="root/License"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;<xsl:value-of select="root/Version/@Number"/>
+									</td>
+								</tr>
+								<tr>
+									<td style="padding-top:5px;padding-bottom:10px;">
+										<div style="padding-left:35px;font-size:10px;font-weight:bold;">
+											<xsl:value-of select="root/Update/."/><br/>
+											<a href="{root/UpdateLink/.}" target="_blank" style="padding-left:9px;text-decoration:none;color:black;">
+											<xsl:value-of select="root/UpdateLink/."/>
+											</a>
+										</div>
+										<div style="padding-top:5px;padding-left:35px;font-size:10px;font-weight:bold;">
+											<xsl:value-of select="root/Support/."/><br/>
+											<a href="{root/SupportLink/.}" target="_blank" style="padding-left:9px;text-decoration:none;color:black;">
+											<xsl:value-of select="root/SupportLink/."/>
+											</a>
+										</div>
+										<div style="padding-top:5px;padding-left:35px;font-size:10px;font-weight:bold;">
+											<xsl:value-of select="root/Website/."/><br/>
+											<a href="{root/WebsiteLink/.}" target="_blank" style="padding-left:9px;text-decoration:none;color:black;">
+											<xsl:value-of select="root/WebsiteLink/."/>
+											</a>
+										</div>
+										<div style="padding-top:10px;padding-left:35px;font-size:10px;">
+										Contact:<br/>
+										<div style="padding-left:9px;">
+										<xsl:value-of select="root/Address/Name/."/><br/>
+										<xsl:value-of select="root/Address/Street1/."/><br/>
+										<xsl:if test="root/Address/Street2/. != ''">
+										<xsl:value-of select="root/Address/Street2/."/><br/>
+										</xsl:if>
+										<xsl:value-of select="root/Address/City/."/><br/>
+										<div style="padding-top:4px;">
+										<xsl:value-of select="root/Phone/."/><br/>
+										<xsl:value-of select="root/Fax/."/><br/>
+										</div>
+										<xsl:value-of select="root/Email/."/>
+										<a href="mailto:{root/EmailLink/.}">
+										<xsl:value-of select="root/EmailLink/."/></a>
+										</div>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td valign="top" height="10" width="387">
+									<img src="images/about_logo_line.jpg" width="387" height="10" border="0" />
+									</td>
+								</tr>
+							</table>
+							<table height="38" align="center" border="0" cellspacing="0" cellpadding="0">
+								<tr>
+									<td height="38" align="center" style="font-size:10px;">
+									<a href="http://www.visnetic.com/" target="_blank">VisNetic MailFlow</a><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#174; is a Trademark of <a href="http://www.deerfield.net/" target="_blank">Deerfield Communications Inc.</a><br/>
+									Copyright<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#169; 2002-<script>document.write(new Date().getFullYear())</script> All rights reserved.
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	</body>
+
+</xsl:template>
+</xsl:stylesheet>

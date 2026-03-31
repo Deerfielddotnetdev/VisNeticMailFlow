@@ -1,0 +1,174 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN" indent="yes" />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+<HTML>
+<HEAD>
+<TITLE>Manage Mailing Group Subscriptions</TITLE>
+<LINK rel="STYLESHEET" type="text/css" href="./stylesheets/standard.css"/>
+<script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"></script>
+<SCRIPT type="text/javascript" language="javascript">
+	function handleException()
+	{
+		var XMLObject = document.getElementById("docXML").XMLDocument;
+		if ( XMLObject )
+		{
+			if (document.implementation.hasFeature("XPath", "3.0"))
+			{
+				var Node = glo_getXML('//root/error');
+				if ( Node )
+						alert( Node.textContent);
+			}
+			else
+			{
+				var Node = XMLObject.selectSingleNode("/root/Error/.");
+				if ( Node )
+					alert( Node.text );
+			}
+		}
+	}
+	function unsub (val)
+	{
+		if ( document.tabularForm.Code.value == "" )
+		{
+			alert("Please specify a Confirmation Code");
+			document.tabularForm.Code.focus();
+			return false;
+		}
+		submitForm(val);
+	}
+	function getUrl()
+	{
+		var submitform = true;
+		var code;		
+		var query = window.location.search.substring(1);
+		var vars = query.split("&#38;");
+		for (var i=0;i&#60;vars.length;i++)
+		{
+			var pair = vars[i].split("=");
+			if (pair[0] == "code")
+			{
+				code=pair[1];
+				document.tabularForm.Code.value = code;
+			}
+		}
+		document.tabularForm.Code.value = document.tabularForm.Code.value.replace(/\s+/g,"");
+		if(document.tabularForm.Code.value.length == 50)
+		{
+			if(document.tabularForm.Code.value.toUpperCase() != document.tabularForm.Code.value)
+			{
+				alert("You must specify a valid confirmation code!");
+				document.tabularForm.Code.value = "";
+				document.tabularForm.Code.focus();
+				submitform = false;
+			}
+		}
+		else
+		{
+			submitform = false;
+			document.tabularForm.Code.focus();
+		}
+		if(submitform)
+		{
+			submitForm(5);
+		}
+	}
+	
+	function submitForm(val)
+	{
+		var submitform = true;
+		if(val==5)
+		{
+			document.tabularForm.Code.value = document.tabularForm.Code.value.replace(/\s+/g,"");
+			if(document.tabularForm.Code.value.length == 50)
+			{
+				if(document.tabularForm.Code.value.toUpperCase() != document.tabularForm.Code.value)
+				{
+					alert("You must specify a valid confirmation code!");
+					document.tabularForm.Code.value = "";
+					document.tabularForm.Code.focus();
+					submitform = false;
+				}
+			}
+			else
+			{
+				submitform = false;
+				document.tabularForm.Code.focus();
+			}
+			if(submitform)
+			{
+				document.tabularForm.Action.value="confirm";
+				document.tabularForm.submit();
+			}
+			else
+			{
+				alert("You must specify a valid confirmation code!");
+				document.tabularForm.Code.value = "";
+				document.tabularForm.Code.focus();				
+			}
+		}
+	}
+</SCRIPT>
+</HEAD>
+<BODY OnLoad="handleException();getUrl();" style="background-color:#FFFFFF !important">
+<FORM NAME="tabularForm" method="post" action="unsub3.ems">
+<INPUT TYPE="hidden" NAME="Action" VALUE="confirm"/>
+<TABLE WIDTH="100%" HEIGHT="90%" BORDER="0" CELLSPACING="0" CELLPADDING="0"  BACKGROUND="">
+<TR>
+<TD VALIGN="middle">
+<DIV ALIGN="center">
+<TABLE CELLPADDING="20" CELLSPACING="0" BORDER="0" BACKGROUND="" HEIGHT="">
+    <TR><TD><IMG src="./images/logo.gif"/></TD></TR>
+</TABLE>
+<TABLE CELLPADDING="10" CELLSPACING="0" BORDER="0">
+<xsl:choose>
+<xsl:when test="root/Confirmed/Groups/Group">
+<TR>
+  <TD colspan="2" style="text-align:center;align:center;padding-bottom:10px;">
+  	Your subscription of the email address <b><xsl:value-of select="root/Unsub/@Email"/></b><br/>
+  	 to the Mailing Group listed below has been confirmed.
+  </TD>
+</TR>
+<xsl:for-each select="root/Confirmed/Groups/Group">
+	<TR>
+	<TD colspan="2" style="text-align:center;align:center;padding-bottom:10px;">
+	<font color="red"><b><xsl:value-of select="@Name"/></b></font>
+	</TD>
+	</TR>
+</xsl:for-each>
+<TR>
+  <TD colspan="2" style="text-align:center;align:center;padding-bottom:10px;">
+  	<a href="unsub.ems?email={root/Unsub/@Email}">Manage your Mailing Group Subscriptions</a>
+  </TD>
+</TR>
+</xsl:when>
+<xsl:otherwise>
+<TR>
+  <TD colspan="2" style="text-align:center;align:center;">
+  	<b>Manage Mailing Group Subscriptions</b>
+  </TD>
+</TR>
+<TR>
+  <TD ALIGN="right" VALIGN="middle">Confirmation Code :</TD>
+	<TD ALIGN="left" VALIGN="middle" >
+		<INPUT style="width:20em" maxlength="50" TYPE="text" NAME="Code" value="{root/Email/.}" SIZE="15"/>
+	</TD>
+</TR>
+<TR><TD colspan="2" style="text-align:right;align:right;"><INPUT TYPE="button" onclick="unsub(5);" VALUE="Next ->"/></TD></TR>
+</xsl:otherwise>
+</xsl:choose>
+</TABLE>
+<br/><br/>
+<SPAN style="font-size:10pt;">
+    <a href="http://www.visnetic.com" target="_blank">VisNetic<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#174; MailFlow</a>
+		is a Registered Trademark of<a href="http://www.deerfield.net/" target="_blank"> Deerfield Communications Inc. </a><br/>
+		Copyright<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#169; 2002-2017 All rights reserved.</SPAN>
+</DIV>
+</TD>
+</TR>
+</TABLE>
+</FORM>
+</BODY>
+</HTML>
+</xsl:template>
+</xsl:stylesheet>

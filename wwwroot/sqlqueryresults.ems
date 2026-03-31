@@ -1,0 +1,217 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+<html>
+<head>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"/>
+	<link type="text/css" rel="StyleSheet" href="./stylesheets/datepicker.css" />
+	<style type="text/css">
+		 .bclass{
+    display:inline-block;
+    width: 100%;
+    height: 100%;
+		}
+	</style>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script> 
+	<script LANGUAGE="javascript">
+		function selectElementContents(el)
+		{
+	    var body = document.body, range, sel;
+	    if (document.createRange &amp;&amp; window.getSelection)
+	    {
+	      range = document.createRange();
+	      sel = window.getSelection();
+	      sel.removeAllRanges();
+	      try
+	      {
+	        range.selectNodeContents(el);
+	        sel.addRange(range);
+	      }
+	      catch (e)
+	      {
+	        range.selectNode(el);
+	        sel.addRange(range);
+	      }
+	    }
+	    else if (body.createTextRange)
+	    {
+	      range = body.createTextRange();
+	      range.moveToElementText(el);
+	      range.select();
+	    }
+    }
+    
+    function DownloadCSV()
+		{
+			document.tabularForm.target = "DLFrame";
+			document.tabularForm.Action.value = "outputfile";
+			
+			document.tabularForm.submit();
+		
+			document.tabularForm.target = "";
+			document.tabularForm.Action.value = "";
+		}
+	</script>
+	<title><xsl:value-of select="/root/Title"/></title>
+</head>
+<body>
+	<form name="tabularForm" id="tabularForm" method="post" action="">
+		<input type="hidden" name="server" value="{root/SqlQuery/@Server}" />
+		<input type="hidden" name="database" value="{root/SqlQuery/@Database}" />
+		<input type="hidden" name="user" value="{root/SqlQuery/@User}" />
+		<input type="hidden" name="password" value="{root/SqlQuery/@Password}" />
+		<input type="hidden" name="querytext" value="{root/SqlQuery/@QueryText}" />
+		<input type="hidden" name="Action" value="" />
+	</form>	
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr> 
+			<td style="width:100%;vertical-align:top;height:32px;">
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px" class="menubarx" nowrap="true">
+							<table style="height:100%" align="left" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Select Results" onclick="selectElementContents(document.getElementById('results'));" style="padding-right:5px;"
+										  >
+										  <xsl:attribute name="xrequire">
+												<xsl:choose>
+													<xsl:when test="/root/Rows/Row">true</xsl:when>
+													<xsl:otherwise>false</xsl:otherwise>
+												</xsl:choose>
+											</xsl:attribute>
+											<nobr>
+												<img src="images/ico_viewheaders.gif" width="24" height="22" border="0" align="bottom"/>
+												Select Results
+											</nobr>
+										  </div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Save Results as CSV" onclick="DownloadCSV()" style="padding-right:5px;"
+										  >
+										  <xsl:attribute name="xrequire">
+												<xsl:choose>
+													<xsl:when test="/root/Rows/Row">true</xsl:when>
+													<xsl:otherwise>false</xsl:otherwise>
+												</xsl:choose>
+											</xsl:attribute>
+											<nobr>
+												<img src="images/ico_save.gif" width="24" height="22" border="0" align="bottom"/>
+												Save Results
+											</nobr>
+										  </div>
+									</td>
+									<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Number of Result Rows" onclick="" style="padding-right:5px;"
+										  >
+											<xsl:attribute name="xrequire">
+												<xsl:choose>
+													<xsl:when test="/root/Columns">true</xsl:when>
+													<xsl:otherwise>false</xsl:otherwise>
+												</xsl:choose>
+											</xsl:attribute>
+											<nobr>
+												<img src="images/trans.gif" width="1" height="22" border="0" align="bottom"/>
+												Result Rows: <b><xsl:value-of select="/root/SqlQuery/@NumRows"/></b>
+											</nobr>
+										  </div>
+									</td>
+									<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										title="Show Help" onclick="openHelp('administration/database_maintenance/SqlQuery.htm')" style="padding-right:5px;"
+										 >
+											<nobr>
+												<img src="images/ico_help.gif" width="24" height="22" border="0" align="bottom"/>
+												Help
+											</nobr>
+										</div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<xsl:choose>
+			<xsl:when test="/root/SQLError">
+				<tr>
+					<td style="width:100%;vertical-align:top;padding-left:10px;padding-top:10px;">
+						One or more errors occured while processing the SQL Query:<br/><br/>
+						<xsl:for-each select="root/SQLError/Error">
+							<span style="color:red"><xsl:value-of select="@Message"/></span><br/>
+						</xsl:for-each>
+					</td>
+				</tr>
+			</xsl:when>
+			<xsl:when test="/root/Columns">
+			<div id="title_div"></div>
+				<tr>
+					<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+						<div id="results" style="overflow:scroll;height:100%;width:100%;position:relative;">
+							<table id="results_table" border="1" style="border-collapse:collapse;border-style:outset" width="90%" bordercolor="#000000" cellpadding="4" cellspacing="0" >
+								<thead>
+								<tr bgcolor="#D1D1D1">
+									<xsl:for-each select="root/Columns/Column">
+									<td style="border-bottom:1px solid black;padding-bottom:2px;">
+										<NOBR>
+											<xsl:value-of select="@Description"/>
+										</NOBR>
+									</td>
+									</xsl:for-each>
+								</tr>
+								</thead>
+								<tbody>
+								<xsl:for-each select="root/Rows/Row">
+								<tr>
+									<xsl:choose>
+									<xsl:when test="position() mod 2 = 0">
+										<xsl:attribute name="STYLE">background-color:#FFFFDD;</xsl:attribute>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:attribute name="STYLE">background-color:#FFFFFF;</xsl:attribute>
+									</xsl:otherwise>
+								</xsl:choose>
+								<xsl:for-each select="Cell">
+									<td style="border-bottom:1px solid black;padding-bottom:2px;" title="{.}">
+										<NOBR>
+										<xsl:value-of select="."/>
+										</NOBR>
+									</td>
+									</xsl:for-each>
+								</tr>
+								</xsl:for-each>
+								</tbody>
+							</table>
+						</div>
+					</td>
+				</tr>
+			</xsl:when>
+			<xsl:otherwise>
+				<tr>
+					<td style="width:100%;vertical-align:top;padding-left:10px;">
+						<xsl:choose>
+							<xsl:when test="/root/SqlQuery/@NumRowsAffected &gt; '0'">
+								<br/> (<xsl:value-of select="/root/SqlQuery/@NumRowsAffected"/> row(s) affected)
+							</xsl:when>
+							<xsl:otherwise>
+								<br/> <i>Set login credentials, specify query then execute.</i>
+							</xsl:otherwise>
+						</xsl:choose>
+					</td>
+				</tr>
+			</xsl:otherwise>
+		</xsl:choose>
+	</table>
+	<div id="statusbar" style="display:none"></div>
+	<iframe src="download_blank.htm" name="DLFrame" style="display:none"/>
+</body>
+</html>
+</xsl:template>
+</xsl:stylesheet>

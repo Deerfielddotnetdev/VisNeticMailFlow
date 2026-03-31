@@ -1,0 +1,110 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+	<html>
+	<head>
+	<title><xsl:value-of select="/root/DOCUMENT/TITLE"/></title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript">
+	function docPasteDataFromParent() {
+		var args;
+		try
+		{
+			if (window.dialogArguments)
+			{
+				args = window.dialogArguments;
+			}
+			else if (parent.window.dialogArguments)
+			{
+				args = parent.window.dialogArguments;
+			}
+			else if (parent.parent.window.dialogArguments)
+			{
+				args = parent.parent.window.dialogArguments;
+			}
+			else if(window.opener)
+			{
+				args = window.opener.xdata;
+			}
+			else if(parent.window.opener)
+			{
+				args = parent.window.opener.xdata;
+			}
+			else
+			{
+				alert("Unable to view log entry!");
+				glo_doClose();
+			}
+		}
+		catch(e)
+		{
+			alert("Unable to view log entry!");
+			glo_doClose();
+		}
+		
+		if(args)
+		{
+			default_titlebar_text.children[0].innerText = args.date;
+			logEntrySeverity.src = args.severitysrc;
+			logEntryComponent.src = args.componentsrc;
+			logEntrySeverity.alt = args.severitydesc;
+			logEntrySeverityDesc.innerText = args.severitydesc;
+			logEntryTypeDesc.innerText = args.logentrytype;
+			logEntryComponentDesc.innerText = args.componentdesc;
+			logEntryDisplay.value = args.description;
+		}
+	}
+	</script>
+	</head>
+
+	<body callbeforeonload="docPasteDataFromParent();">
+
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td style="width:100%">
+	
+		<xsl:call-template name="default_titlebar">
+			<xsl:with-param name="title_text">
+			<xsl:value-of select="root/DOCUMENT/TITLE"/>
+			</xsl:with-param>
+		</xsl:call-template>
+		
+	</td>
+	</tr>
+
+	<tr>
+	<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+	<div style="width:100%;height:100%;overflow:auto">
+	
+	<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td valign="middle">Severity:</td>
+			<td><span style="vertical-align:middle" id="logEntrySeverityDesc"></span><img id="logEntrySeverity" height="16" width="16"/></td>
+		</tr>
+		<tr>
+			<td valign="middle">Component:</td>
+			<td><span style="vertical-align:middle" id="logEntryComponentDesc"></span><img id="logEntryComponent" height="16" width="16"/></td>
+		</tr>
+		<tr>
+			<td valign="middle">Category:</td>
+			<td><span style="vertical-align:middle" id="logEntryTypeDesc"></span></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+			<textarea contenteditable="false" id="logEntryDisplay" name="logEntryDisplay" style="width:100%;height:100px;"></textarea>
+			</td>
+		</tr>
+	</table>
+	</div>
+	</td>
+	</tr>
+	</table>
+
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

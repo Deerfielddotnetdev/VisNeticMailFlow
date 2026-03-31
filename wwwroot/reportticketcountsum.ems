@@ -1,0 +1,615 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+<html>
+<head>
+
+
+
+<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"/>
+<link type="text/css" rel="StyleSheet" href="./stylesheets/datepicker.css" />
+<style>
+	a:visited{color:black;}
+	a{color:black;}
+</style>
+
+<script language="javascript" src="./javascript/global.jmf"></script>
+<xsl:choose>
+<xsl:when test="root/DOCUMENT/dateformat = '0'">
+<script language="javascript" src="./javascript/datepicker.jmf"></script>
+</xsl:when>
+<xsl:otherwise>
+<script language="javascript" src="./javascript/datepicker1.jmf"></script>
+</xsl:otherwise>
+</xsl:choose>
+<script LANGUAGE="javascript">
+
+var SVGObj = null;
+
+/*---------------------------------------------------------------------------\                     
+||  Comments:	Enable / Disabled controls based upon ticketbox selections
+\*--------------------------------------------------------------------------*/
+function Enable()
+{
+	var bEnable = (document.tabularForm.CUSTOM_DATE[0].checked == true);
+
+	var fields = new Array();
+	fields[fields.length] = document.tabularForm.DATE_RANGE_SEL;
+	glo_disableForm(bEnable,fields);
+
+	fields = new Array();
+	fields[fields.length] = objStartDate._input;
+	fields[fields.length] = objStartDate._button;
+	fields[fields.length] = objEndDate._input;
+	fields[fields.length] = objEndDate._button;
+	glo_disableForm(!bEnable,fields);
+
+	UpdateDateRange();	
+}
+
+/*---------------------------------------------------------------------------\                     
+||  Comments:	Updates the date ranges when the date range interval 
+||				is changed
+\*--------------------------------------------------------------------------*/
+function UpdateDateRange()
+{
+	if (document.tabularForm.CUSTOM_DATE[0].checked == true)
+		SetDateRange(document.tabularForm.DATE_RANGE_SEL.value, objStartDate, objEndDate);
+}
+
+/*---------------------------------------------------------------------------\                     
+||  Comments:	Submit the form
+\*--------------------------------------------------------------------------*/
+function Submit()
+{
+	// validate start date
+	if (!objStartDate.Update(true))
+		return;
+
+	// validate end date
+	if (!objEndDate.Update(true))
+		return;
+	
+	id = document.tabularForm.selID;
+	IDColl = "";
+	for (i = 0; i &lt; id.length; i++)
+	{
+		if (id.options[i].selected)
+		{
+			if (IDColl=="")
+			{
+				IDColl = id.options[i].value;
+			}
+			else
+			{
+				IDColl = IDColl + ', ' + id.options[i].value;
+			}
+		}
+	}
+	document.tabularForm.IDCollection.value = IDColl;
+	if (IDColl == '')
+	{
+		alert("You must select at least one object to report on!");
+		return;	
+	}
+	
+	SetCookie();
+
+	// submit the form
+	document.tabularForm.submit();
+}
+
+/*---------------------------------------------------------------------------\                     
+||  Comments:	Download the report as a CSV file
+\*--------------------------------------------------------------------------*/
+function DownloadCSV()
+{
+	document.tabularForm.target = "DLFrame";
+	document.tabularForm.Action.value = "download";
+	
+	Submit();
+
+	document.tabularForm.target = "";
+	document.tabularForm.Action.value = "";
+}
+
+/*---------------------------------------------------------------------------\                     
+||  Comments:	Print the report
+\*--------------------------------------------------------------------------*/
+function Print()
+{
+<xsl:if test="/root/Results">
+	var height = 550;
+	var width = 750;
+
+	glo_launchNewWindow("printreport.ems", width, height);
+</xsl:if>
+}
+
+/*---------------------------------------------------------------------------\                     
+||  Comments:	Audit Properties
+\*--------------------------------------------------------------------------*/
+function Properties()
+{
+	var url = 'customsettings.ems';
+	glo_launchModalWindow('modalframe.ems?file=' + url, 640, 480, 'yes', 'no', 'no');
+}
+
+/*---------------------------------------------------------------------------\                     
+||  Comments:	View a message in a pop-up window
+\*--------------------------------------------------------------------------*/
+function ViewMsg(msgid,type) 
+{
+	var msgType = (type == "1") ? "inbound" : "outbound";
+	var qString= "nomove=1&amp;msg=" + msgid + "&amp;type=" + msgType;
+
+	glo_launchViewMessage(qString);
+}
+
+/*---------------------------------------------------------------------------\                     
+||  Comments:	View the ticket history
+\*--------------------------------------------------------------------------*/
+function ViewTicketHistory(nTicketID)
+{
+	glo_launchNewWindow("mailflow.ems?rightpane=ticketsearchresults.ems$nocancel=1$Action=search$hideleft=1$ticketid=" + nTicketID );
+}
+
+/*---------------------------------------------------------------------------\                     
+||  Comments:	Defaults the report parameters to the values stored 
+||				in the cookie.
+||
+||				Cookie Format: CUSTOM_DATE.DATE_RANGE_SEL.START_DATE.END_DATE	              
+\*--------------------------------------------------------------------------*/
+function GetCookie()
+{
+	if (document.cookie &amp;&amp; getCookieCount("report_max") > 0)
+		document.tabularForm.MAX_LINES.value = getCookieNum("report_max", 1);
+	
+	if (document.cookie &amp;&amp; getCookieCount("tb_sel") > 0)
+	{
+		var Values = getCookieNum("tb_sel", 1).split(".");
+		
+		for (var y=0; y &lt; Values.length; y++)
+		{
+			for (var i=0; i &lt; document.tabularForm.selID.length; i++)
+		  	{
+		  		if (Values[y] == i)
+		   	{
+		   		document.tabularForm.selID[i].selected = true;	
+		   	}
+		  	}
+		}		
+	}
+		
+	if (document.cookie &amp;&amp; getCookieCount("report_date") > 0)
+	{
+		var Values = getCookieNum("report_date", 1).split(".");
+		
+		document.tabularForm.DATE_RANGE_SEL.value = Values[1];
+
+		if ( Values[0] == "false" )
+		{
+			document.tabularForm.CUSTOM_DATE[1].checked = true;
+
+			var theDate = new Date;
+			var dateArray = Values[2].split(",");
+
+			theDate.setMonth(dateArray[0] - 1);
+			theDate.setDate(dateArray[1]);
+			theDate.setFullYear(dateArray[2]);
+			objStartDate._input.value = FormatToDefaultDate(theDate.getFullYear(), 
+								        theDate.getMonth(), 
+									theDate.getDate() );
+	
+			dateArray = Values[3].split(",");
+
+			theDate.setMonth(dateArray[0] - 1);
+			theDate.setDate(dateArray[1]);
+			theDate.setFullYear(dateArray[2]);
+
+			objEndDate._input.value = FormatToDefaultDate(theDate.getFullYear(), 
+								      theDate.getMonth(), 
+		    						      theDate.getDate() );
+		}
+	}
+}
+
+/*---------------------------------------------------------------------------\                     
+||  Comments:	Store report parameters in a cookie
+\*--------------------------------------------------------------------------*/
+function SetCookie()
+{
+	var valString = new String();
+	valString = document.tabularForm.CUSTOM_DATE[0].checked + ".";
+	valString += document.tabularForm.DATE_RANGE_SEL.value + ".";
+	valString += objStartDate._value.value + ".";
+	valString += objEndDate._value.value;
+	setCookie("report_date", valString, "01/01/2099");
+
+	valString = document.tabularForm.MAX_LINES.value;
+	setCookie("report_max", valString, "01/01/2099");
+	
+	var tbSel='';
+	for (var i=0; i &lt; document.tabularForm.selID.length; i++)
+  	{
+  		if (document.tabularForm.selID[i].selected)
+   	{
+   		if(tbSel.length==0)
+   		{
+   			tbSel = i;
+   		}
+   		else
+   		{
+   			tbSel += "." + i;
+   		}     			
+   	}
+  	}
+  	setCookie("tb_sel", tbSel, "01/01/2099");
+}
+
+/*---------------------------------------------------------------------------\                     
+||  Comments:	Called after unload completes
+\*--------------------------------------------------------------------------*/
+function Initialize()
+{
+	GetCookie();
+	Enable();
+}
+
+</script>
+
+<title><xsl:value-of select="/root/Title"/></title>
+
+</head>
+
+<body callBeforeOnLoad="Initialize()" >
+
+<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+<tr> 
+<td style="width:100%;"> 
+
+	<xsl:call-template name="default_titlebar">
+		<xsl:with-param name="title_text">
+		<xsl:value-of select="root/DOCUMENT/TITLE"/>
+		</xsl:with-param>
+	</xsl:call-template>
+	<form name="tabularForm" method="get" action="">
+		<input type="hidden" name="type" value="{/root/DOCUMENT/URLPARAMETERS/TYPE}" />
+		<input type="hidden" name="Action"/>
+		<input type="hidden" name="IDCollection" value="" />		
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+		<td style="height:32px" class="menubarx" nowrap="true">
+			<table style="height:100%" align="left" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td height="100%">					
+					<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+					 title="View Report" onclick="Submit()"
+					  >
+						<nobr>
+							<img src="images/ico_magnify.gif" width="24" height="22" border="0" align="bottom"/>
+							View
+						</nobr>
+					  </div>
+				</td>
+
+				<td height="100%">					
+					<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+					 title="Download Report as File" onclick="DownloadCSV()"
+					  >
+						<nobr>
+							<img src="images/ico_download.gif" width="24" height="22" border="0" align="bottom"/>
+							Download
+						</nobr>
+					  </div>
+				</td>
+
+				<td height="100%">					
+					<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+					title="Print Report" onclick="Print()"
+					 >
+
+						<xsl:attribute name="xrequire">
+							<xsl:choose>
+								<xsl:when test="/root/Results">true</xsl:when>
+								<xsl:otherwise>false</xsl:otherwise>
+							</xsl:choose>
+						</xsl:attribute>
+
+						<nobr>
+							<img src="images/ico_print.gif" width="24" height="22" border="0" align="bottom"/>
+							Print
+						</nobr>
+					</div>
+				</td>
+
+				<td height="100%">					
+					<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+					title="Show Help" onclick="openHelp('Reporting/Ticket_Count_Summary.htm')"
+					 >
+						<nobr>
+							<img src="images/ico_help.gif" width="24" height="22" border="0" align="bottom"/>
+							Help
+						</nobr>
+					</div>
+				</td>					
+			</tr>
+			</table>
+		</td>
+		</tr>
+		<tr>
+			<td class="menubarx" style="padding:5" nowrap="true">
+			<table>
+			
+				<xsl:for-each select="root/REPORT_OPTIONS/ROW">			
+				<tr>
+					<xsl:if test="@HEIGHT"><xsl:attribute name="style">height:<xsl:value-of select="@HEIGHT"/></xsl:attribute></xsl:if>
+					<xsl:for-each select="FORM_FIELD">
+
+					<xsl:if test="@TYPE = 'NONE'">
+						<td><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+					</xsl:if>
+
+					<xsl:if test="@TYPE = 'SELECT'">
+						<td nowrap="true" valign="top">
+							<xsl:if test="@COLSPAN"><xsl:attribute name="colspan"><xsl:value-of select="@COLSPAN"/></xsl:attribute></xsl:if>
+							<xsl:if test="@ROWSPAN"><xsl:attribute name="rowspan"><xsl:value-of select="@ROWSPAN"/></xsl:attribute></xsl:if>
+							<xsl:choose>
+								<xsl:when test="@NAME = 'AGENT'">
+									Owner:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:value-of select="LABLE"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+								</xsl:otherwise>
+							</xsl:choose>	
+							
+						</td>
+						<td>
+							<select name="selID">
+								<xsl:for-each select="EVENT">
+									<xsl:attribute name="{@TYPE}"><xsl:value-of select="."/></xsl:attribute>
+								</xsl:for-each>
+								
+								<xsl:attribute name="multiple">true</xsl:attribute>
+								<xsl:attribute name="size">3</xsl:attribute>						
+								
+								<xsl:for-each select="OPTION">
+									<option value="{@VALUE}">										
+										<xsl:value-of select="."/>
+									</option>
+								</xsl:for-each>
+							</select><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+						</td>
+					</xsl:if>
+
+				<xsl:if test="@TYPE = 'CHECK'">
+					<td nowrap="true">
+						<xsl:if test="@COLSPAN"><xsl:attribute name="colspan"><xsl:value-of select="@COLSPAN"/></xsl:attribute></xsl:if>
+						<xsl:if test="@ROWSPAN"><xsl:attribute name="rowspan"><xsl:value-of select="@ROWSPAN"/></xsl:attribute></xsl:if>
+						
+						<input type="checkbox" name="{@NAME}">
+							<xsl:if test="@CHECKED = 1">
+								<xsl:attribute name="checked">true</xsl:attribute>
+							</xsl:if>
+							<xsl:for-each select="EVENT">
+								<xsl:attribute name="{@TYPE}"><xsl:value-of select="."/></xsl:attribute>
+							</xsl:for-each>
+							<xsl:value-of select="LABLE"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+						</input>
+					</td>
+				</xsl:if>
+
+				<xsl:if test="@TYPE = 'INPUT'">
+
+					<td nowrap="true">
+						<xsl:if test="@COLSPAN"><xsl:attribute name="colspan"><xsl:value-of select="@COLSPAN"/></xsl:attribute></xsl:if>
+						<xsl:if test="@ROWSPAN"><xsl:attribute name="rowspan"><xsl:value-of select="@ROWSPAN"/></xsl:attribute></xsl:if>
+						<xsl:value-of select="LABLE"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+					</td>
+
+					<td nowrap="true">
+						<input type="text" name="{@NAME}">
+							<xsl:attribute name="SIZE"><xsl:value-of select="@SIZE"/></xsl:attribute>
+							<xsl:attribute name="MAXLENGTH"><xsl:value-of select="@MAXLENGTH"/></xsl:attribute>
+							<xsl:attribute name="VALUE"><xsl:value-of select="VALUE"/></xsl:attribute>
+							<xsl:for-each select="EVENT">
+								<xsl:attribute name="{@TYPE}"><xsl:value-of select="."/></xsl:attribute>
+							</xsl:for-each>
+						</input>
+					</td>
+				</xsl:if>
+
+				<xsl:if test="@TYPE = 'BUTTON'">
+					<td nowrap="true">
+						<input type="button" class="childControlBtn" name="{@NAME}" value="{LABLE}">
+							<xsl:for-each select="EVENT">
+								<xsl:attribute name="{@TYPE}"><xsl:value-of select="."/></xsl:attribute>
+							</xsl:for-each>
+						</input>
+					</td>
+				</xsl:if>
+			
+				<xsl:if test="@TYPE='DATE_RANGE'">
+					<td nowrap="true" style="padding-right:10;vertical-align:top;" >
+						<xsl:if test="@COLSPAN"><xsl:attribute name="colspan"><xsl:value-of select="@COLSPAN"/></xsl:attribute></xsl:if>
+						<xsl:if test="@ROWSPAN"><xsl:attribute name="rowspan"><xsl:value-of select="@ROWSPAN"/></xsl:attribute></xsl:if>
+						
+						<fieldset style="width:0;border-color:000000;border-width:1">
+						<legend style="color:000000"><xsl:value-of select="LABLE"/></legend>
+						<table>
+							<tr>
+								<td><input type="radio" name="CUSTOM_DATE" value="0" onclick="javascript:UpdateDateRange();javascript:Enable();">
+									<xsl:if test="not(/root/DOCUMENT/URLPARAMETERS/CUSTOM_DATE) or /root/DOCUMENT/URLPARAMETERS/CUSTOM_DATE = 0"> 
+										<xsl:attribute name="checked">true</xsl:attribute>
+									</xsl:if>
+									</input>
+								</td>
+								<td colspan="2">
+									<select name="DATE_RANGE_SEL" OnChange="SetDateRange(DATE_RANGE_SEL.value, objStartDate, objEndDate)">
+										<xsl:for-each select="OPTION">
+											<option value="{@VALUE}">
+												<xsl:if test="@SELECTED = 1">
+													<xsl:attribute name="selected">true</xsl:attribute>
+												</xsl:if>
+												<xsl:value-of select="."/>
+											</option>
+										</xsl:for-each>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<input type="radio" name="CUSTOM_DATE" value="1" onclick="Enable()">
+										<xsl:if test="/root/DOCUMENT/URLPARAMETERS/CUSTOM_DATE = 1"> 
+											<xsl:attribute name="checked">true</xsl:attribute>
+										</xsl:if>
+									</input>
+								</td>
+								<td>From:</td>
+								<td id="start_date_cell">
+									<script type="text/javascript">
+										var objStartDate = new DatePicker("<xsl:value-of select='/root/DOCUMENT/URLPARAMETERS/START_DATE'/>");
+										document.getElementById("start_date_cell").appendChild(objStartDate.create("START_DATE"));
+									</script>
+								</td>
+							</tr>
+							<tr>
+								<td><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+								<td>To:</td>
+								<td id="end_date_cell">
+									<script type="text/javascript">
+										var objEndDate = new DatePicker("<xsl:value-of select='/root/DOCUMENT/URLPARAMETERS/END_DATE'/>");
+										document.getElementById("end_date_cell").appendChild(objEndDate.create("END_DATE"));
+									</script>
+								</td>
+							</tr>
+						</table>
+						</fieldset>
+					</td>
+				</xsl:if>
+				</xsl:for-each>				
+				</tr>
+				</xsl:for-each>
+			</table>
+			</td>
+		</tr>		
+	</table>
+	</form>
+</td>
+</tr>
+
+<tr> 
+
+<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;"> 
+<div align="center" style="width:100%;height:100%;overflow:auto"> 
+<table style="width:100%" border="0" cellpadding="0" cellspacing="0">
+<tr> 
+<td align="center"> 
+
+	<br/>
+	<xsl:choose>
+		<xsl:when test="/root/Results">
+			<div id="title_div">
+				<span style="font-size: 2em"><xsl:value-of select="/root/Title"/><br/></span>
+				<span style="font-size: 1.25em"><xsl:value-of select="/root/SubTitle"/><br/></span>
+			</div>
+
+			<br/><br/>
+
+			<div id="results" >
+				<table id="results_table" border="1" style="border-collapse:collapse;width:98%" bordercolor="#000000" cellpadding="4" cellspacing="0" >
+					<tr bgcolor="#D1D1D1">
+						<td>
+							<b>
+								<xsl:choose>
+									<xsl:when test="/root/DOCUMENT/URLPARAMETERS/TYPE = 'ticketbox'">
+										TicketBox
+									</xsl:when>
+									<xsl:when test="/root/DOCUMENT/URLPARAMETERS/TYPE = 'ticketcategory'">
+										Ticket Category
+									</xsl:when>
+									<xsl:otherwise>
+										Owner
+									</xsl:otherwise>
+								</xsl:choose>								
+							</b>						
+						</td>
+						<td><b>Open</b></td>
+						<td><b>Closed</b></td>
+						<td><b>Total</b></td>
+						<td><b>Percent Closed</b></td>												
+					</tr>
+
+					<xsl:for-each select="root/Row">
+										
+						<tr>
+							<xsl:choose>
+								<xsl:when test="position() mod 2 = 0">
+									<xsl:attribute name="STYLE">background-color:#FFFFDD;</xsl:attribute>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:attribute name="STYLE">background-color:#FFFFFF;</xsl:attribute>
+								</xsl:otherwise>
+							</xsl:choose>
+							<xsl:choose>
+								<xsl:when test="IsTBTotal = 2">
+									<xsl:attribute name="STYLE">font-style:italic;font-weight:bold;</xsl:attribute>									
+								</xsl:when>								
+							</xsl:choose>
+														
+							<td>
+								<nobr><xsl:value-of select="Name"/></nobr>								
+							</td>
+								
+							<td><nobr><xsl:value-of select="Open"/></nobr></td>
+							<td><nobr><xsl:value-of select="Closed"/></nobr></td>
+							<td><nobr><xsl:value-of select="Total"/></nobr></td>
+							<td><nobr><xsl:value-of select="PctClosed"/></nobr></td>							
+						</tr>
+					</xsl:for-each>
+
+					<xsl:if test="not(root/Row)">
+						<tr style="background-color:#FFFFFF">
+							<td colspan="6">
+								<b>No records were returned</b>		
+							</td>
+						</tr>
+					</xsl:if>
+
+					<xsl:for-each select="root/Information">
+						<tr style="background-color:#FFFFFF">
+							<td colspan="6">
+								<b><xsl:value-of select="."/></b>		
+							</td>
+						</tr>
+					</xsl:for-each>
+				</table>
+
+			</div>
+			<br/><br/>
+
+		</xsl:when>
+		<xsl:otherwise>
+			<br/>Select report options above and click the View button to generate report.
+		</xsl:otherwise>
+	</xsl:choose>
+
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+</table>
+	
+<div id="statusbar" style="display:none"></div>
+
+<iframe src="download_blank.htm" name="DLFrame" style="display:none"/>
+
+</body>
+</html>
+
+</xsl:template>
+</xsl:stylesheet>

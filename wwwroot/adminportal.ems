@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsl:stylesheet version="1.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+	<xsl:output method="html" encoding="utf-8"
+				doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"/>
+
+	<!-- Keep your shared chrome/templates -->
+	<xsl:include href="interface_templates.ems"/>
+
+	<xsl:template match="/">
+
+		<html>
+			<head>
+				<title>
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+				</title>
+				<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"/>
+				<script type="text/javascript" src="./javascript/global.jmf"></script>
+
+				<style type="text/css">
+					.ap-wrap { width:100%; height:100%; overflow:auto; }
+					.ap-section { background:#fff; border:1px solid #cdd3e0; border-radius:8px; padding:10px 12px; margin:10px 0; }
+					.ap-section h3 { margin:0 0 8px 0; font-size:14px; }
+					.ap-rows { width:100%; }
+					.ap-rows td { padding:6px 8px; vertical-align:middle; }
+					.ap-hint { color:#566; font-size:11px; }
+					.ap-actions { margin-top:8px; }
+					.ap-actions .toolBar { display:inline-block; margin-right:8px; }
+					.ap-input { width:360px; }
+					.ap-area { width:460px; height:60px; }
+					.ap-badge { background:#eef2fb; border:1px solid #cfd6ea; padding:2px 6px; border-radius:6px; font-size:11px; color:#334; }
+				</style>
+
+				<script type="text/javascript">
+					// Basic UI helpers (match your existing patterns)
+					var g_bIsDirty = false;
+
+					function ap_setDirty(el) {
+					if (!g_bIsDirty && el && el.readOnly != true) {
+					g_bIsDirty = true;
+					if (typeof glo_initMenuButtons === "function") { glo_initMenuButtons(); }
+					}
+					}
+
+					function ap_confirmRun(msg) {
+					return confirm(msg || "Proceed with this operation?");
+					}
+
+					function ap_post(formName) {
+					var frm = document.forms[formName];
+					if (!frm) return;
+					// Direct POST to adminjobs.ems (server will INSERT job & redirect)
+					frm.submit();
+					}
+
+					function ap_toggleDryRun(sourceId, targetId) {
+					var sel = document.getElementById(sourceId);
+					var t = document.getElementById(targetId);
+					if (!sel || !t) return;
+					var v = sel.value;
+					t.innerHTML = (v === "1") ? "Dry Run: report only" : "Execute: will perform changes";
+					}
+				</script>
+			</head>
+
+			<body>
+				<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td style="width:100%;">
+							<xsl:call-template name="default_titlebar">
+								<xsl:with-param name="title_text">
+									<xsl:value-of select="root/DOCUMENT/TITLE"/>
+								</xsl:with-param>
+							</xsl:call-template>
+
+							<!-- Menubar -->
+							<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+								<tr>
+									<td style="height:32px;" class="menubarx" nowrap="true">
+										<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+											<tr>
+												<td height="100%">
+													<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"
+														 title="Help"
+														 onclick="openHelp('administration/admin_portal/Admin_Portal.htm')">
+														<nobr>
+															<img src="images/ico_help.gif" width="24" height="22" border="0"/>
+															Help
+														</nobr>
+													</div>
+												</td>
+												<!-- Add other global toolbar buttons here as needed -->
+											</tr>
+										</table>
+									</td>
+								</tr>
+							</table>
+
+						</td>
+					</tr>
+
+					<tr>
+						<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+							<div class="ap-wrap">
+								<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0">
+									<tr>
+										<td>
+
+											<!-- Intro -->
+											<div class="ap-section">
+												<h3>
+													Admin Portal <span class="ap-badge">Super Utility</span>
+												</h3>
+												<div class="ap-hint">
+													Use these tools to run maintenance operations as background jobs.
+													Submissions post to <b>adminjobs.ems</b> which enqueues the work for the worker service.
+												</div>
+											</div>
+
+											<!-- PURGE -->
+											<form name="apPurge" method="post" action="adminjobs.ems" class="ap-section">
+												<h3>Purge</h3>
+												<input type="hidden" name="Action" value="createJob"/>
+												<input type="hidden" name="JobType" value="Purge"/>
+
+												<table class="ap-rows" border="0" cellspacing="0" cellpadding="0">
+													<tr>
+														<td style="width:220px;">Cutoff (days):</td>
+														<td>
+															<input class="ap-input" type="text" name="CutoffDays" value="30"
+																   onkeydown="ap_setDirty(this)" oncut="ap_setDirty(this)" onpaste="ap_setDirty(this)"/>
+															<div class="ap-hint">Items older than this threshold are eligible.</div>
+														</td>
+													</tr>
+													<tr>
+														<td>What to purge:</td>
+														<td>
+															<label>
+																<input type="checkbox" name="PurgeTickets" value="1" checked="checked"/> Tickets (idle by cutoff)
+															</label>&#160;&#160;
+															<label>
+																<input type="checkbox" name="PurgeTrash" value="1"/> Trash (IsDeleted=1)
+															</label>&#160;&#160;
+															<label>
+																<input type="checkbox" name="PurgeStdRspUsage" value="1"/> Std. Response Usage
+															</label>&#160;&#160;
+															<label>
+																<input type="checkbox" name="PurgeAlerts" value="1"/> Alerts
+															</label>&#160;&#160;
+															<label>
+																<input type="checkbox" name="PurgeContacts" value="1"/> Orphan Contacts
+															</label>
+														</td>
+													</tr>
+													<tr>
+														<td>Dry Run:</td>
+														<td>
+															<select id="PurgeDryRun" name="DryRun" onchange="ap_toggleDryRun('PurgeDryRun','PurgeDryRunMsg')">
+																<option value="1" selected="selected">Yes (report only)</option>
+																<option value="0">No (perform deletes)</option>
+															</select>
+															&#160;<span id="PurgeDryRunMsg" class="ap-hint">Dry Run: report only</span>
+														</td>
+													</tr>
+													<tr>
+														<td></td>
+														<td class="ap-actions">
+															<div class="toolBar" title="Run Purge"
+																 onclick="if(ap_confirmRun('Run purge now?')) ap_post('apPurge')">
+																<nobr>
+																	<img src="images/ico_performmaintenancenow.gif" width="24" height="22" border="0"/>Run Purge
+																</nobr>
+															</div>
+															<div class="toolBar" title="Reset" onclick="document.forms['apPurge'].reset(); ap_toggleDryRun('PurgeDryRun','PurgeDryRunMsg');">
+																<nobr>
+																	<img src="images/ico_refresh.gif" width="24" height="22" border="0"/>Reset
+																</nobr>
+															</div>
+														</td>
+													</tr>
+												</table>
+											</form>
+
+											<!-- EXPORT EML -->
+											<form name="apExport" method="post" action="adminjobs.ems" class="ap-section">
+												<h3>Export Tickets to EML</h3>
+												<input type="hidden" name="Action" value="createJob"/>
+												<input type="hidden" name="JobType" value="ExportEML"/>
+
+												<table class="ap-rows" border="0" cellspacing="0" cellpadding="0">
+													<tr>
+														<td style="width:220px;">Start date/time (optional):</td>
+														<td>
+															<input class="ap-input" type="text" name="StartDate" placeholder="YYYY-MM-DD HH:MM"
+																   onkeydown="ap_setDirty(this)" oncut="ap_setDirty(this)" onpaste="ap_setDirty(this)"/>
+														</td>
+													</tr>
+													<tr>
+														<td>End date/time (optional):</td>
+														<td>
+															<input class="ap-input" type="text" name="EndDate" placeholder="YYYY-MM-DD HH:MM"
+																   onkeydown="ap_setDirty(this)" oncut="ap_setDirty(this)" onpaste="ap_setDirty(this)"/>
+														</td>
+													</tr>
+													<tr>
+														<td>Ticket IDs (optional):</td>
+														<td>
+															<textarea class="ap-area" name="TicketIDs" placeholder="e.g. 101,102,103"
+																	  onkeydown="ap_setDirty(this)" oncut="ap_setDirty(this)" onpaste="ap_setDirty(this)"></textarea>
+														</td>
+													</tr>
+													<tr>
+														<td>Destination folder (server):</td>
+														<td>
+															<input class="ap-input" type="text" name="DestinationPath" placeholder="D:\MailFlow\Exports\eml"
+																   onkeydown="ap_setDirty(this)" oncut="ap_setDirty(this)" onpaste="ap_setDirty(this)"/>
+														</td>
+													</tr>
+													<tr>
+														<td></td>
+														<td class="ap-actions">
+															<div class="toolBar" title="Export"
+																 onclick="if(ap_confirmRun('Start EML export?')) ap_post('apExport')">
+																<nobr>
+																	<img src="images/ico_export.gif" width="24" height="22" border="0"/>Export
+																</nobr>
+															</div>
+															<div class="toolBar" title="Reset" onclick="document.forms['apExport'].reset();">
+																<nobr>
+																	<img src="images/ico_refresh.gif" width="24" height="22" border="0"/>Reset
+																</nobr>
+															</div>
+														</td>
+													</tr>
+												</table>
+											</form>
+
+											<!-- DELETE TICKETS -->
+											<form name="apDelete" method="post" action="adminjobs.ems" class="ap-section">
+												<h3>Delete Tickets</h3>
+												<input type="hidden" name="Action" value="createJob"/>
+												<input type="hidden" name="JobType" value="DeleteTickets"/>
+
+												<table class="ap-rows" border="0" cellspacing="0" cellpadding="0">
+													<tr>
+														<td style="width:220px;">Mode:</td>
+														<td>
+															<select name="DeleteMode" onchange="ap_setDirty(this)">
+																<option value="Soft" selected="selected">Soft Delete (IsDeleted=1)</option>
+																<option value="Hard">Hard Delete (remove rows)</option>
+															</select>
+														</td>
+													</tr>
+													<tr>
+														<td>Ticket IDs:</td>
+														<td>
+															<textarea class="ap-area" name="TicketIDs" placeholder="e.g. 2001,2002,2003"
+																	  onkeydown="ap_setDirty(this)" oncut="ap_setDirty(this)" onpaste="ap_setDirty(this)"></textarea>
+														</td>
+													</tr>
+													<tr>
+														<td>Reason (audit):</td>
+														<td>
+															<input class="ap-input" type="text" name="Reason" maxlength="200"
+																   onkeydown="ap_setDirty(this)" oncut="ap_setDirty(this)" onpaste="ap_setDirty(this)"/>
+														</td>
+													</tr>
+													<tr>
+														<td>Dry Run:</td>
+														<td>
+															<select id="DeleteDryRun" name="DryRun" onchange="ap_toggleDryRun('DeleteDryRun','DeleteDryRunMsg')">
+																<option value="1" selected="selected">Yes (report only)</option>
+																<option value="0">No (perform deletes)</option>
+															</select>
+															&#160;<span id="DeleteDryRunMsg" class="ap-hint">Dry Run: report only</span>
+														</td>
+													</tr>
+													<tr>
+														<td></td>
+														<td class="ap-actions">
+															<div class="toolBar" title="Delete"
+																 onclick="if(ap_confirmRun('Delete selected tickets?')) ap_post('apDelete')">
+																<nobr>
+																	<img src="images/ico_delete.gif" width="24" height="22" border="0"/>Delete
+																</nobr>
+															</div>
+															<div class="toolBar" title="Reset" onclick="document.forms['apDelete'].reset(); ap_toggleDryRun('DeleteDryRun','DeleteDryRunMsg');">
+																<nobr>
+																	<img src="images/ico_refresh.gif" width="24" height="22" border="0"/>Reset
+																</nobr>
+															</div>
+														</td>
+													</tr>
+												</table>
+											</form>
+
+											<!-- TOTALS / HEALTH -->
+											<form name="apTotals" method="post" action="adminjobs.ems" class="ap-section">
+												<h3>Totals / Health Check</h3>
+												<input type="hidden" name="Action" value="createJob"/>
+												<input type="hidden" name="JobType" value="Totals"/>
+
+												<table class="ap-rows" border="0" cellspacing="0" cellpadding="0">
+													<tr>
+														<td style="width:220px;">From (optional):</td>
+														<td>
+															<input class="ap-input" type="text" name="FromDate" placeholder="YYYY-MM-DD HH:MM"
+																   onkeydown="ap_setDirty(this)" oncut="ap_setDirty(this)" onpaste="ap_setDirty(this)"/>
+														</td>
+													</tr>
+													<tr>
+														<td>To (optional):</td>
+														<td>
+															<input class="ap-input" type="text" name="ToDate" placeholder="YYYY-MM-DD HH:MM"
+																   onkeydown="ap_setDirty(this)" oncut="ap_setDirty(this)" onpaste="ap_setDirty(this)"/>
+														</td>
+													</tr>
+													<tr>
+														<td></td>
+														<td class="ap-actions">
+															<div class="toolBar" title="Run Totals"
+																 onclick="ap_post('apTotals')">
+																<nobr>
+																	<img src="images/ico_refresh.gif" width="24" height="22" border="0"/>Run Totals
+																</nobr>
+															</div>
+															<div class="toolBar" title="Reset" onclick="document.forms['apTotals'].reset();">
+																<nobr>
+																	<img src="images/ico_refresh.gif" width="24" height="22" border="0"/>Reset
+																</nobr>
+															</div>
+														</td>
+													</tr>
+												</table>
+											</form>
+
+											<!-- JOB STATUS / HISTORY -->
+											<form name="apJobs" method="get" action="adminjobs.ems" class="ap-section">
+												<h3>Job Status / History</h3>
+												<table class="ap-rows" border="0" cellspacing="0" cellpadding="0">
+													<tr>
+														<td style="width:220px;">Job ID (optional):</td>
+														<td>
+															<input class="ap-input" type="text" name="job" placeholder="e.g. 123"/>
+														</td>
+													</tr>
+													<tr>
+														<td>Status filter:</td>
+														<td>
+															<select name="status">
+																<option value="">(any)</option>
+																<option value="Queued">Queued</option>
+																<option value="Running">Running</option>
+																<option value="Succeeded">Succeeded</option>
+																<option value="Failed">Failed</option>
+																<option value="Canceled">Canceled</option>
+															</select>
+														</td>
+													</tr>
+													<tr>
+														<td></td>
+														<td class="ap-actions">
+															<div class="toolBar" title="Open"
+																 onclick="document.forms['apJobs'].submit();">
+																<nobr>
+																	<img src="images/ico_view.gif" width="24" height="22" border="0"/>Open
+																</nobr>
+															</div>
+															<a class="toolBar" href="adminjobs.ems" title="All Jobs" style="text-decoration:none;">
+																<nobr>
+																	<img src="images/ico_view.gif" width="24" height="22" border="0"/>All Jobs
+																</nobr>
+															</a>
+														</td>
+													</tr>
+												</table>
+											</form>
+
+										</td>
+									</tr>
+								</table>
+							</div>
+						</td>
+					</tr>
+				</table>
+
+				<script type="text/javascript">
+					// Initialize hint toggles
+					ap_toggleDryRun('PurgeDryRun','PurgeDryRunMsg');
+					ap_toggleDryRun('DeleteDryRun','DeleteDryRunMsg');
+				</script>
+			</body>
+
+		</html>
+	</xsl:template>
+</xsl:stylesheet>

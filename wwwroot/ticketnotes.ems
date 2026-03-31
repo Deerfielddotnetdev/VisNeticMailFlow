@@ -1,0 +1,1112 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+	<html>
+	<head>
+	
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<link rel="stylesheet" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/tabs.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontrollerrows.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontroller.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/resize_handle.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/xmenucontroller.jmf"></script>	
+	<script type="text/javascript" language="javascript" src="./javascript/timer.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/datetimepicker.jmf"></script>	
+	<script language="javascript">
+		var noPrompt=0;
+				
+		function chkSpell(isSend)
+		{
+			if(!glo_isMobile())
+			{
+			<xsl:choose>
+			<xsl:when test="root/Spell/Check/@DcEnabled &gt; '1'">
+			var nDictionaryID = document.tabularForm.DictionaryID.options[document.tabularForm.DictionaryID.selectedIndex].value;
+			<xsl:if test="root/Spell/Check/@DictionaryPrompt = '1'">
+				var sDictionary = document.tabularForm.DictionaryID.options[document.tabularForm.DictionaryID.selectedIndex].text;
+				var msg = 	'You have selected the '+sDictionary+' spell check dictionary.\n\n' + 
+								'Do you want to select an alternate dictionary?';
+								
+				if (confirm(msg))
+				{
+					return;
+				}
+				
+			</xsl:if>
+			var result = glo_launchModalWindow('./modalframe.ems?file=spelltemp.ems&amp;isnote=1&amp;did='+nDictionaryID, 400, 250, 'yes', 'no', 'no');			
+			</xsl:when>
+			<xsl:otherwise>
+			var result = glo_launchModalWindow('./modalframe.ems?file=spelltemp.ems&amp;isnote=1', 400, 250, 'yes', 'no', 'no');
+			</xsl:otherwise>
+			</xsl:choose>
+				
+				return result;
+			}
+			else
+			{
+				alert("Spell checking is disabled in mobile browsers!");
+			}
+		}
+		
+		var secondsToMarkAsRead = <xsl:value-of select="root/user/markasreadseconds"/>;
+		var timer = 0;
+		
+		function SetOnRead()
+		{
+			if(document.tabularForm.beenread)
+			{
+				document.tabularForm.beenread.value = "1";
+				document.tabularForm.Action.value = "updateread";
+				
+				if(glo_buildFormPost("tabularForm"))
+				{
+					var buttons = document.all.toolButton;					
+					xShowMenuButtonByTitle(buttons, "Mark as Unread");
+					xHideMenuButtonByTitle(buttons, "Mark as Read");
+					
+					var nTicketNoteID = '<xsl:value-of select="/root/TicketNote/@TicketNoteID"/>';
+					var nTicketID = '<xsl:value-of select="/root/Ticket/@ID"/>';
+					
+					if (parent.frames.rightpane)
+					{
+						parent.frames.rightpane.UpdateReadNote(nTicketID, nTicketNoteID);
+					}
+					else
+					{
+						if (parent.window.opener)
+						{
+							//	It is!!!  Now let's update the left pane counts if we can...
+							if (parent.window.opener.parent.frames.rightpane)
+							{
+								parent.window.opener.parent.frames.rightpane.UpdateReadNote(nTicketID, nTicketNoteID);										
+							}
+							else if (parent.window.opener.parent.window.opener)
+							{
+								if (parent.window.opener.parent.window.opener.parent.frames.rightpane)
+								{
+									parent.window.opener.parent.window.opener.parent.frames.rightpane.UpdateReadNote(nTicketID, nTicketNoteID);											
+								}
+							}
+						}								
+					}
+				}
+			}
+		}
+		function onUnRead()
+		{
+			document.tabularForm.beenread.value = "0";
+			document.tabularForm.Action.value = "updateread";
+			
+			if(glo_buildFormPost("tabularForm"))
+			{
+				var buttons = document.all.toolButton;
+				xShowMenuButtonByTitle(buttons, "Mark as Read");
+				xHideMenuButtonByTitle(buttons, "Mark as Unread");
+				
+				var nTicketNoteID = '<xsl:value-of select="/root/TicketNote/@TicketNoteID"/>';
+				var nTicketID = '<xsl:value-of select="/root/Ticket/@ID"/>';
+				if (parent.frames.rightpane)
+				{
+					parent.frames.rightpane.UpdateUnReadNote(nTicketID, nTicketNoteID);
+				}
+				else
+				{
+					if (parent.window.opener)
+					{
+						//	It is!!!  Now let's update the left pane counts if we can...
+						if (parent.window.opener.parent.frames.rightpane)
+						{
+							parent.window.opener.parent.frames.rightpane.UpdateUnReadNote(nTicketID, nTicketNoteID);									
+						}
+						else if (parent.window.opener.parent.window.opener)
+						{
+							if (parent.window.opener.parent.window.opener.parent.frames.rightpane)
+							{
+								parent.window.opener.parent.window.opener.parent.frames.rightpane.UpdateUnReadNote(nTicketID, nTicketNoteID);										
+							}
+						}
+					}								
+				}
+			}
+		}
+		function onRead()
+		{
+			document.tabularForm.beenread.value = "1";
+			document.tabularForm.Action.value = "updateread";
+			
+			if(glo_buildFormPost("tabularForm"))
+			{
+				clearTimeout(timer);
+				
+				var buttons = document.all.toolButton;
+				
+				xShowMenuButtonByTitle(buttons, "Mark as Unread");
+				xHideMenuButtonByTitle(buttons, "Mark as Read");
+				
+				var nTicketNoteID = '<xsl:value-of select="/root/TicketNote/@TicketNoteID"/>';
+				var nTicketID = '<xsl:value-of select="/root/Ticket/@ID"/>';
+				if (parent.frames.rightpane)
+				{
+					parent.frames.rightpane.UpdateReadNote(nTicketID, nTicketNoteID);
+				}
+				else
+				{
+					if (parent.window.opener)
+					{
+						//	It is!!!  Now let's update the left pane counts if we can...
+						if (parent.window.opener.parent.frames.rightpane)
+						{
+							parent.window.opener.parent.frames.rightpane.UpdateReadNote(nTicketID, nTicketNoteID);										
+						}
+						else if (parent.window.opener.parent.window.opener)
+						{
+							if (parent.window.opener.parent.window.opener.parent.frames.rightpane)
+							{
+								parent.window.opener.parent.window.opener.parent.frames.rightpane.UpdateReadNote(nTicketID, nTicketNoteID);											
+							}
+						}
+					}								
+				}
+			}
+		}		
+		function docViewNote()
+		{
+			document.location = "ticketnotes.ems?selectId="+document.tabularForm.selectId.value;			
+		}		
+		function docAddNote()
+		{
+			window.location = "ticketnotes.ems?selectId=0&amp;ticketId="+document.tabularForm.ticketId.value;
+		}
+		function docAddPhoneNote(ContactID)
+		{
+			if(typeof ContactID == "undefined")
+			{
+				<xsl:choose>
+				<xsl:when test="root/Contacts/@Count = 1">
+					<xsl:for-each select="root/Contact">
+						ContactID = <xsl:value-of select="@ID"/>;
+					</xsl:for-each>					
+				</xsl:when>
+				<xsl:otherwise>
+					ContactID = 0;
+				</xsl:otherwise>
+				</xsl:choose>				
+			}
+			window.location = "ticketnotes.ems?type=phone&amp;selectId=0&amp;ContactID="+ContactID+"&amp;ticketId="+document.tabularForm.ticketId.value;
+		}
+		function docEditNote()
+		{
+			window.location = "ticketnotes.ems?edit=1&amp;selectId="+tabularForm.selectId.value;
+		}
+		function docDeleteNote()
+		{
+			var selectId = tabularForm.selectId.value;
+			if (tabularForm.selectId.value.indexOf(",")!=-1)
+				var cont = confirm("Are you sure you want to delete these ticket notes?");
+			else
+				var cont = confirm("Are you sure you want to delete this ticket note?");
+			if (!cont)
+				return false;
+			
+			document.tabularForm.Action.value = "delete";
+			var postResults = glo_buildFormPost('tabularForm');
+			if (postResults[0]==true)
+			{
+				window.location = "ticketnotes.ems?ticketId="+document.tabularForm.ticketId.value;
+			}
+		}
+		function docClose()
+		{
+			noPrompt=1;
+			glo_doClose();
+		}
+		function updateElapsed()
+		{
+			var timestart = new Date(document.tabularForm.timestart.value);
+			var timeend = new Date(document.tabularForm.timestop.value);
+			var timediff = new Date();
+		   timediff.setTime(Math.abs(timeend.getTime() - timestart.getTime()));
+		   diff = timediff.getTime();
+		   if(diff &gt; 0)
+			{
+				hours_passed = Math.floor(diff / (1000 * 60 * 60)); 
+				diff -= hours_passed * (1000 * 60 * 60);
+				if(hours_passed &lt; 10){
+				        hours_passed = "0" + hours_passed;
+				    }
+				minutes_passed = Math.floor(diff / (1000 * 60)); 
+				diff -= minutes_passed * (1000 * 60);
+				if(minutes_passed &lt; 10){
+			           minutes_passed = "0" + minutes_passed;
+			       }
+			       
+				seconds_passed = Math.floor(diff / 1000); 
+				diff -= seconds_passed * 1000;
+			   if(seconds_passed &lt; 10){
+			           seconds_passed = "0" + seconds_passed;
+			       }
+			          
+			   document.tabularForm.timetextarea.value = hours_passed + ":" + minutes_passed + ":" + seconds_passed;
+			 }
+			 else
+			 {
+			 	document.tabularForm.timetextarea.value = "00:00:00";
+			 }
+		}
+		function docSaveNote()
+		{
+			if(glo_isMobile())
+			{
+				docSaveCloseNote();
+			}
+			else
+			{
+				<xsl:if test="root/TicketNote/@IsVoip='1'">
+					if(document.tabularForm.timetextarea.value!="00:00:00")
+					{
+						if(document.tabularForm.timestart.value!="")
+						{
+							if(document.tabularForm.timestop.value=="")
+							{
+								StopTimer('<xsl:value-of select="root/DOCUMENT/dateformat"/>');
+							}
+						}
+					}
+					
+					var timenow = new Date();
+					<xsl:choose>
+					<xsl:when test="root/DOCUMENT/dateformat = '0'">
+						var timestart = new Date(document.tabularForm.timestart.value);
+						var timeend = new Date(document.tabularForm.timestop.value);
+					</xsl:when>
+					<xsl:otherwise>
+						var ts = document.tabularForm.timestart.value.split('/');
+						var te = document.tabularForm.timestop.value.split('/');
+						var timestart = new Date(ts[1]+"/"+ts[0]+"/"+ts[2]);
+						var timeend = new Date(te[1]+"/"+te[0]+"/"+te[2]);
+					</xsl:otherwise>
+					</xsl:choose>
+					var timediff = timeend - timestart;
+					if (timediff &lt; 0 )
+					{
+						alert("The Stop Time must be later than the Start Time!");
+						document.tabularForm.timestart.focus;
+						return;
+					}
+													
+					timediff = timenow - timestart;
+					if (timediff &lt; 0 )
+					{
+						alert("The Start Time cannot be in the future!");
+						document.tabularForm.timestart.focus;
+						return;
+					}
+					timediff = timenow - timeend;
+					if (timediff &lt; 0 )
+					{
+						alert("The Stop Time cannot be in the future!");
+						document.tabularForm.timestop.focus;
+						return;
+					}
+					
+				</xsl:if>
+				
+				document.tabularForm.Action.value = (document.tabularForm.selectId.value=="0")?"insert":"update";
+				var postResults = glo_buildFormPost('tabularForm');
+				if (postResults[0]==true)
+				{
+					noPrompt=1;
+					if (self.name=="splitpane")
+						window.location = "ticketnotes.ems?selectId="+document.tabularForm.selectId.value;
+					else
+						window.location = "ticketnotes.ems?ticketId="+document.tabularForm.ticketId.value;
+				}
+			}			
+		}
+		
+		function docSaveCloseNote()
+		{
+			<xsl:if test="root/TicketNote/@IsVoip='1'">
+				if(document.tabularForm.timetextarea.value!="00:00:00")
+				{
+					if(document.tabularForm.timestart.value!="")
+					{
+						if(document.tabularForm.timestop.value=="")
+						{
+							StopTimer('<xsl:value-of select="root/DOCUMENT/dateformat"/>');
+						}
+					}
+				}
+				
+				var timenow = new Date();
+				<xsl:choose>
+				<xsl:when test="root/DOCUMENT/dateformat = '0'">
+					var timestart = new Date(document.tabularForm.timestart.value);
+					var timeend = new Date(document.tabularForm.timestop.value);
+				</xsl:when>
+				<xsl:otherwise>
+					var ts = document.tabularForm.timestart.value.split('/');
+					var te = document.tabularForm.timestop.value.split('/');
+					var timestart = new Date(ts[1]+"/"+ts[0]+"/"+ts[2]);
+					var timeend = new Date(te[1]+"/"+te[0]+"/"+te[2]);
+				</xsl:otherwise>
+				</xsl:choose>
+				var timediff = timeend - timestart;
+				if (timediff &lt; 0 )
+				{
+					alert("The Stop Time must be later than the Start Time!");
+					document.tabularForm.timestart.focus;
+					return;
+				}
+												
+				timediff = timenow - timestart;
+				if (timediff &lt; 0 )
+				{
+					alert("The Start Time cannot be in the future!");
+					document.tabularForm.timestart.focus;
+					return;
+				}
+				timediff = timenow - timeend;
+				if (timediff &lt; 0 )
+				{
+					alert("The Stop Time cannot be in the future!");
+					document.tabularForm.timestop.focus;
+					return;
+				}
+				
+			</xsl:if>			
+			
+			document.tabularForm.Action.value = (document.tabularForm.selectId.value=="0")?"insert":"update";
+			var postResults = glo_buildFormPost('tabularForm');
+			if (postResults[0]==true)
+			{
+				noPrompt=1;
+				glo_doClose();
+			}
+		}
+		
+		function doFocus() {
+			if(document.tabularForm.note) {
+				document.tabularForm.note.focus();
+			}
+		}
+		function docCancel()
+		{
+			var retVal = confirm("You have elected to leave the note composition window.\n\nIf you have made any changes and have not saved your note, the changes will be lost.");
+			if(retVal)
+			{
+				document.tabularForm.Action.value = "delete";
+				glo_buildFormPost('tabularForm');
+				docFormSubmitSuccessful = true;
+				noPrompt=1;
+				window.location = "ticketnotes.ems?ticketId="+document.tabularForm.ticketId.value;
+			}
+			
+			closeIt();
+			window.location = "ticketnotes.ems?ticketId="+document.tabularForm.ticketId.value;
+		}
+		function docUndoEdit()
+		{
+			<xsl:choose>
+				<xsl:when test="root/Ticket/@Display = 'New'">
+					docCancel();
+				</xsl:when>
+				<xsl:otherwise>
+					noPrompt=1;
+					window.location = "ticketnotes.ems?selectId="+tabularForm.selectId.value;
+				</xsl:otherwise>
+			</xsl:choose>
+		}
+		function docHideBtn()
+		{
+			if (self.name=="splitpane")
+			{
+				toolButton[1].style.display = "none";
+			}
+		}
+		
+		function closeIt()
+		{
+			if(noPrompt == 0)
+			{
+				<xsl:if test="root/Ticket/@Display = 'New'">
+					return "You have elected to close the note composition window. If you have made any changes they will be lost. Are you sure you want to close this page?";											
+				</xsl:if>				
+			}
+		}
+		
+		function upFile()
+		{
+			document.tabularForm.lastCID.value = genID();
+			if ( glo_whichBrowser() == "Internet Explorer" )
+			{
+				document.tabularForm.doInsImage.value = "0";
+				window.frames["attframe"].document.forms["tabularForm"].elements["uploadFile"].click();
+				if(document.tabularForm.lastFile.value != '')
+				{
+					htmledit.insertImage(document.tabularForm.lastFile.value,document.tabularForm.lastCID.value);
+					document.tabularForm.lastFile.value = '';
+				}
+			}
+			else
+			{
+				document.tabularForm.doInsImage.value = "1";
+				window.frames["attframe"].document.forms["tabularForm"].elements["uploadFile"].click();			
+			}		
+		}
+		
+		window.onbeforeunload = closeIt;		
+		
+		window.onunload = function()
+		{
+	    if(noPrompt == 0)
+			{
+				<xsl:if test="root/Ticket/@Display = 'New'">
+					try {
+						document.tabularForm.Action.value = "delete";
+						glo_buildFormPost('tabularForm');					
+					}catch(e){}
+					noPrompt = 1;													
+				</xsl:if>				
+			}
+		}
+				
+	</script>
+	</head>
+<xsl:choose>
+<xsl:when test="root/Ticket/@Display = 'List'">
+
+	<body>
+	<xsl:attribute name="callBeforeOnLoad">xMenuBuild();docInitListCols();</xsl:attribute>	
+	<form action="" method="post" name="tabularForm">
+	<input type="hidden" value="{root/Ticket/@ID}" name="ticketId" />	
+	<input type="hidden" value="{root/TicketNote[1]/@TicketNoteID}" name="selectId" />		
+	<input type="hidden" value="" name="Action" />
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/> for Ticket ID: <xsl:value-of select="root/Ticket/@ID"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">										
+										<div xrequire="(gloListControl.ActiveRows.length==1)" class="toolBar" id="toolButton" name="toolButton"  title="View Note" onclick="docViewNote();">
+											<img src="images/ico_magnify.gif" width="24" height="22" alt="View Note"/>
+											View<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</div>											
+									</td>
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Add Note" onclick="docAddNote();">
+											<img src="images/ico_new.gif" width="24" height="22" alt="Add Note"/>
+											Add<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											<xsl:if test="not(/root/Ticket/@Access &gt; 2)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+										</div>											
+									</td>
+									<xsl:choose>
+									<xsl:when test="root/Contacts/@Count &gt; 1">
+									<!-- New Phone Note -->
+									<script language="JavaScript" type="text/javascript">									
+									var xMenu = new Array();
+									xMenu[0] = new Array();
+									xMenu[0][0] = new xMenuObject();
+									xMenu[0][1] = new xMenuItem('<img src="images/voipcall.gif" width="24" height="22" border="0" valign="bottom"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Add Phone Note<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<img src="images/ico_arrow6x.gif" width="6" height="6" border="0"/>', '', 1, null, null, 'AddPhoneNoteHolder');
+					
+									xMenu[1] = new Array();
+									xMenu[1][0] = new xMenuObject();
+									var x=1;
+									<xsl:for-each select="root/Contact">
+										xMenu[1][x] = new xMenuItem('For: <xsl:value-of select="@Name"/>', "docAddPhoneNote('<xsl:value-of select="@ID"/>');", 0);
+									   x++;				               	
+				               		</xsl:for-each>
+									</script>
+									<td id="AddPhoneNoteHolder" title="Add a Phone Note"></td>	
+									</xsl:when>
+									<xsl:otherwise>
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Add Phone Note" onclick="docAddPhoneNote();">
+											<img src="images/voipcall.gif" width="24" height="22" alt="Add Phone Note"/>
+											Add Phone Note<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											<xsl:if test="not(/root/Ticket/@Access &gt; 2)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+										</div>											
+									</td>
+									</xsl:otherwise>
+									</xsl:choose>																		
+									<td height="100%">										
+										<div xrequire="(gloListControl.ActiveRows.length==1)" class="toolBar" id="toolButton" name="toolButton"  title="Delete Note" onclick="docDeleteNote();">
+											<img src="images/ico_delete.gif" width="24" height="22" alt="Delete Note"/>
+											Delete<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											<xsl:if test="not(/root/Ticket/@Access &gt; 3)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+										</div>											
+									</td>
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Close" onclick="docClose();">
+											<img src="images/ico_close2.gif" width="24" height="22" alt="Close"/>
+											Close<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</div>											
+									</td>
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('Overview/Ticket_Notes.htm');">
+											<img src="images/ico_help.gif" width="24" height="22" alt="Show Help"/>
+											Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</div>											
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:hidden;">
+
+				<div id="ListHolder" style="overflow:hidden;height:100%;width:100%;position:relative;">
+				<!-- table-layout:fixed - very important, without, table will extend off page -->
+				<table border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed;height:100%;width:100%;">
+					<tr>
+						<!-- no properties here, height will depend on contents -->
+						<td style="width:100%;">
+							<!-- position:relative - very important, without, table won't scroll -->
+							<table id="ListTableTop" border="0" cellspacing="0" cellpadding="0" style="position:relative;user-select:none;">
+								<tr id="ListHeaderRow">
+									<td class="listHeaderCell" style="width:11px;">
+									<NOBR><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>									
+									</td>
+									<td class="listHeaderCell" style="width:11px;">
+									<NOBR><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>									
+									</td>
+									<td class="listHeaderCell" width="60">
+									<NOBR>Note<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+									<td class="listHeaderCell" width="120">
+									<NOBR>Agent<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+									<td class="listHeaderCell" width="60">
+									<NOBR>Date<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<!-- set the height of this cell to 100%! -->
+						<td style="height:100%;overflow:hidden;vertical-align:top;">
+							<div id="ListDivider" style="width:100%;height:100%;overflow:auto;" class="listBack" onscroll="OnListDividerScroll(id);">
+							<table id="ListTableBot" style="user-select:none;" border="0" cellspacing="0" cellpadding="0" allowMultiple="true">
+							<xsl:for-each select="root/TicketNote">
+								<tr id="listRow" class="rowOff" glc_form_tabularForm_selectId="{@TicketNoteID}" onclick="gloListControl.listRowClick()" ondblclick="gloListControl.keepActiveRow();docViewNote();" onMouseOver="tabRowOn()" onMouseOut="tabRowOff()">
+									<xsl:choose>
+									<xsl:when test="@IsVoip='1'">
+										<td name="phonenote" id="listCell" class="ticketCellOff" style="padding-left:0px !important;" title="Phone Note">
+											<nobr style="padding-left:1px;">
+											<img src="images/ico_11x_voip.gif" width="11" height="11" border="0" valign="bottom"/>
+											</nobr>
+										</td>
+									</xsl:when>
+									<xsl:otherwise>
+										<td name="phonenote" id="listCell" class="ticketCellOff" style="padding-left:0px !important;" title="Note">
+											<nobr style="padding-left:1px;">
+											<img src="images/ico_11x_notes.gif" width="11" height="11" border="0" valign="bottom"/>
+											</nobr>
+										</td>
+									</xsl:otherwise>
+									</xsl:choose>	
+										<td name="attach" id="listCell" class="ticketCellOff" style="padding-left:0px !important;" title="Attachment(s)">
+											<nobr style="padding-left:1px;">
+									<xsl:choose>
+									<xsl:when test="@NumAttach &gt; 0">										
+											<img src="images/ico_attach_11.gif" width="11" height="11" border="0" valign="bottom"/>											
+									</xsl:when>
+									<xsl:otherwise>										
+											<img src="images/ico_transparent.gif" width="11" height="11" border="0" valign="bottom"/>	
+									</xsl:otherwise>
+									</xsl:choose>
+											</nobr>
+										</td>
+									<td id="listCell" class="cellOff" title="{Preview}">
+										<nobr>
+										<xsl:value-of select="Preview"/>
+										</nobr>
+									</td>
+									<td id="listCell" class="cellOff" title="{@Agent}">
+										<nobr>
+										<xsl:value-of select="@Agent"/>
+										</nobr>
+									</td>
+									<td id="listCell" class="cellOff" title="{@DateCreated}">
+										<nobr>
+										<xsl:value-of select="@DateCreated"/>
+										</nobr>
+									</td>
+								</tr>
+							</xsl:for-each>
+							<xsl:if test="not(root/TicketNote)">
+								<tr style="display:none;"><td><br/></td><td><br/></td><td><br/></td><td><br/></td></tr>
+								<tr><td class="listBack" colspan="4" style="padding-left:5px;padding-top:15px;width:100%;"><i>No Ticket Notes Available</i></td></tr>
+							</xsl:if>
+							</table><!--listTableBot-->
+							</div><!--listDivider-->
+						</td>
+					</tr>
+				</table>
+				</div><!--listHolder-->
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+</xsl:when>
+<xsl:when test="root/Ticket/@Display = 'View'">
+	<body callonload="docHideBtn()">
+	<form action="" method="post" name="tabularForm">
+	<input type="hidden" value="{root/Ticket/@ID}" name="ticketId" />	
+	<input type="hidden" value="{root/TicketNote[1]/@TicketNoteID}" name="selectId" />		
+	<input type="hidden" value="" name="Action" />
+	<input type="hidden" value="1" name="beenread"/>
+	<input type="hidden" name="lastFile" value="" />
+	<input type="hidden" name="lastCID" value="" />
+	<input type="hidden" name="doInsImage" value="0" />
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/> for Ticket ID: <xsl:value-of select="root/Ticket/@ID"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Edit Note" onclick="docEditNote();">
+											<img src="images/ico_edit.gif" width="24" height="22" alt="Edit Note"/>
+											Edit<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											<xsl:if test="not(/root/TicketNote/@Access &gt; 2)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+										</div>											
+									</td>
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Close" onclick="docClose();">
+											<img src="images/ico_close2.gif" width="24" height="22" alt="Close"/>
+											Close<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;											
+										</div>											
+									</td>									
+									<xsl:if test="root/TicketNote/@usecuttoffdate = '0'">
+									<xsl:choose>
+									<xsl:when test="root/TicketNote/@beenread = '1'">
+										<td height="100%">										
+											<div class="toolBar" id="toolButton" name="toolButton"  title="Mark as Unread" onclick="onUnRead();">
+												<img src="images/ico_notes_unread.gif" width="24" height="22" alt="Mark as Unread"/>
+												<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Mark as Unread<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;											
+											</div>											
+										</td>
+										<td height="100%">										
+											<div class="toolBar" id="toolButton" name="toolButton"  title="Mark as Read" onclick="onRead();" style="display:none;">
+												<img src="images/ico_notes_read.gif" width="24" height="22" alt="Mark as Read"/>
+												<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Mark as Read<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;											
+											</div>											
+										</td>
+									</xsl:when>
+									<xsl:otherwise>
+										<td height="100%">										
+											<div class="toolBar" id="toolButton" name="toolButton"  title="Mark as Unread" onclick="onUnRead();" style="display:none;">
+												<img src="images/ico_notes_unread.gif" width="24" height="22" alt="Mark as Unread"/>
+												<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Mark as Unread<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;											
+											</div>											
+										</td>
+										<td height="100%">										
+											<div class="toolBar" id="toolButton" name="toolButton"  title="Mark as Read" onclick="onRead();">
+												<img src="images/ico_notes_read.gif" width="24" height="22" alt="Mark as Read"/>
+												<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Mark as Read<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;											
+											</div>											
+										</td>
+									</xsl:otherwise>
+									</xsl:choose>
+									</xsl:if>
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('Overview/Ticket_Notes.htm');">
+											<img src="images/ico_help.gif" width="24" height="22" alt="Show Help"/>
+											Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</div>											
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<xsl:if test="root/TicketNote/@IsVoip='1'">
+		<tr>
+			<td style="width:100%;">
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:100px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%" style="padding-left:5px;">
+										<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+											<tr>
+												<td style="width:80px;" align="right">
+													Elapsed Time:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+												</td>
+												<td>
+													<input type="text" id="timetextarea" name="timetextarea" value="{root/TicketNote/@TimeTextArea}" size="10" disabled="true"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<input type="button" id="start" name="start" value="Start" style="width:55px;" onclick="StartTimer({root/DOCUMENT/dateformat});"/> <input type="button" id="stop" name="stop" value="Stop" onclick="StopTimer({root/DOCUMENT/dateformat})"/> <input type="button" id="reset" name="reset" value="Reset" onclick="ResetTimer()"/>
+												</td>
+											</tr>
+											<tr>
+												<td style="width:80px;" align="right">
+													Start Time:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+												</td>
+												<td>
+													<input type="text" id="timestart" name="timestart" value="{root/TicketNote/@TimeStart}" size="39" disabled="true"/>
+												</td>
+											</tr>
+											<tr>
+												<td style="width:80px;" align="right">
+													Stop Time:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+												</td>
+												<td>
+													<input type="text" id="timestop" name="timestop" value="{root/TicketNote/@TimeStop}" size="39" disabled="true"/>
+												</td>
+											</tr>
+										</table>										
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		</xsl:if>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:hidden;">
+
+				<table style="width:100%;height:100%;table-layout:fixed;" border="0" cellspacing="0" cellpadding="0">
+					<tr id="information">
+						<td align="left" style="padding:10px;font-weight:bold;">
+							Creator:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/TicketNote/@Agent"/><br/>
+							Created:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/TicketNote/@DateCreated"/>
+						</td>
+					</tr>
+					<tr>
+						<td style="height:100%;">
+							<textarea name="note" contentEditable="false" style="width:100%;height:100%;">
+							<xsl:value-of select="root/TicketNote/Body"/>
+							</textarea>							
+						</td>
+					</tr>
+				</table>
+			</div>
+			</td>
+		</tr>
+		<xsl:if test="root/TicketNote/@NumAttach &gt; 0">
+		<tr>
+			<td>
+				<iframe name="attframe" src="attachments.ems?noteid={root/TicketNote/@TicketNoteID}&amp;notetype=1" width="100%" height="70px" border="0" scrolling="yes"/>
+			</td>
+		</tr>
+		<tr class="ListHeaderRow">
+			<td class="listHeaderCell" width="100%" height="5px">
+				<br/>
+			</td>		
+		</tr>
+		</xsl:if>
+	</table>
+	</form>
+	<xsl:if test="root/TicketNote/@IsVoip='1'">
+	<script type="text/javascript">
+		document.tabularForm.start.disabled = true;
+		document.tabularForm.stop.disabled = true;
+		document.tabularForm.reset.disabled = true;		
+	</script>
+	</xsl:if>
+	</body>
+
+</xsl:when>
+<xsl:otherwise>
+	<body callonload="doFocus();tabInit();">
+	<form action="" method="post" name="tabularForm">
+	<input type="hidden" value="{root/Ticket/@ID}" name="ticketId" />	
+	<input type="hidden" value="{root/TicketNote[1]/@TicketNoteID}" name="selectId" />		
+	<input type="hidden" value="" name="Action" />
+	<input type="hidden" value="{root/TicketNote/@IsVoip}" name="IsVoipNote" />
+	<input type="hidden" value="{root/TicketNote/@ContactID}" name="ContactID" />
+	<input type="hidden" name="lastFile" value="" />
+	<input type="hidden" name="lastCID" value="" />
+	<input type="hidden" name="doInsImage" value="0" />
+		<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="height:100%;">
+				<div id="tabs" style="position:absolute!important;top:8px!important;">
+					<span id="tab1" useContent="true" class="tabActive">Compose</span>
+					<span id="tab2" turl="noteattachments.ems?noteid={root/TicketNote[1]/@TicketNoteID}&amp;notetype=1" class="tab">Attachments</span>
+				</div>
+				<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td id="tab_holder" style="height:24px;"><br/></td>
+					</tr>
+					<tr>
+						<td id="tab_canvas" class="tabActiveColor" style="height:100%;border-style:outset;border-width:1px;padding:10px;overflow:hidden;">
+							<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td style="height:100%;border-style:inset;border-width:1px;overflow:hidden;">
+		
+									<iframe id="tabWindow" name="tabWindow" style="" frameborder="0" src="blank.htm" height="100%" width="100%" scrolling="No"></iframe>
+			
+									<div id="content1" style="overflow:hidden;display:block;visibility:visible;width:100%;height:100%;">
+									<!-- ####  So here is where New Message finally ended up! -->
+									
+										<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+											<tr>
+												<td style="width:100%;">
+													<xsl:call-template name="default_titlebar">
+														<xsl:with-param name="title_text">
+														<xsl:choose>
+														<xsl:when test="root/TicketNote/@IsVoip='1'">
+															Phone Note for Ticket ID: <xsl:value-of select="root/Ticket/@ID"/>
+														</xsl:when>
+														<xsl:otherwise>
+															<xsl:value-of select="root/DOCUMENT/TITLE"/> for Ticket ID: <xsl:value-of select="root/Ticket/@ID"/>
+														</xsl:otherwise>
+														</xsl:choose>					
+														</xsl:with-param>
+													</xsl:call-template>
+													<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+														<tr>
+															<td style="height:32px;" class="menubarx" nowrap="true">
+																<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+																	<tr>
+																		<td height="100%">										
+																			<div xrequire="true" class="toolBar" id="toolButton" name="toolButton"  title="Save" onclick="docSaveNote();">
+																				<img src="images/ico_save.gif" width="24" height="22" alt="Save"/>
+																				Save<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																			</div>											
+																		</td>									
+																		<td height="100%">										
+																			<div xrequire="true" class="toolBar" id="toolButton" name="toolButton"  title="Save &amp; Close" onclick="docSaveCloseNote();">
+																				<img src="images/ico_save.gif" width="24" height="22" alt="Save &amp; Close"/>
+																				Save &amp; Close<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																			</div>											
+																		</td>
+																		<td height="100%">										
+																			<div xrequire="true" class="toolBar" id="toolButton" name="toolButton"  title="Check Spelling" onclick="chkSpell(0);">
+																			<nobr>
+																			<img src="images/ico_spellcheck.gif" width="24" height="22" border="0" valign="bottom" alt="Check Spelling"/>
+																			Spelling<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																			</nobr>																				
+																			</div>											
+																		</td>
+																		<td height="100%">										
+																			<div class="toolBar" id="toolButton" name="toolButton"  title="Cancel" onclick="docUndoEdit();">
+																			<nobr>
+																			<img src="images/ico_cancel.gif" width="24" height="22" border="0" valign="bottom" alt="Cancel"/>
+																			Cancel<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																			</nobr>																				
+																			</div>											
+																		</td>																		
+																		<td height="100%">										
+																			<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('Overview/Ticket_Notes.htm');">
+																				<img src="images/ico_help.gif" width="24" height="22" alt="Show Help"/>
+																				Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																			</div>											
+																		</td>
+																	</tr>
+																</table>
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+											<xsl:if test="root/Spell/Check/@DcEnabled &gt; '1'">
+											<tr>
+												<td style="width:100%;">
+													<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+														<tr>
+															<td class="menubarx" nowrap="true">
+																<table  border="0" cellpadding="0" cellspacing="0">
+																	<tr>
+																		<td  style="padding:5px;">
+																			<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+																				<tr>
+																					<td>
+																							Spell Check Dictionary:
+																					</td>
+																					<td align="left" width="150px">
+																						<select name="DictionaryID">
+																							<xsl:for-each select="/root/Dictionaries/Dictionary">
+																								<xsl:if test="@IsEnabled = '1'">
+												                        <option>
+																									<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																									<xsl:if test="/root/Spell/Check/@DictionaryID = @ID">
+																									<xsl:attribute name="selected">true</xsl:attribute>
+																									</xsl:if>
+																									<xsl:value-of select="@Description"/>
+																								</option>
+																								</xsl:if>
+												                      </xsl:for-each>
+																						</select>
+																					</td>
+																				</tr>
+																			</table>
+																		</td>
+																	</tr>
+																</table>
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+											</xsl:if>
+											<xsl:if test="root/TicketNote/@IsVoip='1'">
+											<tr>
+												<td style="width:100%;">
+													<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+														<tr>
+															<td style="height:100px;" class="menubarx" nowrap="true">
+																<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+																	<tr>
+																		<td height="100%" style="padding-left:5px;">
+																			<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+																				<tr>
+																					<td style="width:80px;" align="right">
+																						Elapsed Time:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																					</td>
+																					<td>
+																						<input type="text" id="timetextarea" name="timetextarea" value="{/root/TicketNote/@TimeTextArea}" size="10" disabled="true"/>
+																						<input type="button" id="start" name="start" value="Start" style="width:55px;" onclick="StartTimer({root/DOCUMENT/dateformat});"/>
+																						<input type="button" id="stop" name="stop" value="Stop" onclick="StopTimer({root/DOCUMENT/dateformat})"/>
+																						<input type="button" id="reset" name="reset" value="Reset" onclick="ResetTimer()"/>
+																					</td>
+																				</tr>
+																				<tr>
+																					<td style="width:80px;" align="right">
+																						Start Time:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																					</td>
+																					<td>
+																						<input type="text" id="timestart" name="timestart" value="{/root/TicketNote/@TimeStart}" size="39" disabled="true"/>
+																						<xsl:if test="/root/TicketNote/@Access &gt; 2">
+																						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																						<xsl:choose>
+																						<xsl:when test="root/DOCUMENT/dateformat = '0'">
+																						<img src="images/cal.gif" width="16" height="16" border="0" alt="Set Date/Time" onclick="NewCal('timestart','mmddyyyy',true,12,'dropdown',false)"/>
+																						</xsl:when>
+																						<xsl:otherwise>
+																						<img src="images/cal.gif" width="16" height="16" border="0" alt="Set Date/Time" onclick="NewCal('timestart','ddmmyyyy',true,12,'dropdown',false)"/>
+																						</xsl:otherwise>
+																						</xsl:choose>
+																						</xsl:if>
+																					</td>
+																				</tr>
+																				<tr>
+																					<td style="width:80px;" align="right">
+																						Stop Time:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																					</td>
+																					<td>
+																						<input type="text" id="timestop" name="timestop" value="{/root/TicketNote/@TimeStop}" size="39" disabled="true"/>
+																						<xsl:if test="/root/TicketNote/@Access &gt; 2">
+																						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																						<xsl:choose>
+																						<xsl:when test="root/DOCUMENT/dateformat = '0'">
+																						<img src="images/cal.gif" width="16" height="16" border="0" alt="Set Date/Time" onclick="NewCal('timestop','mmddyyyy',true,12,'dropdown',false)"/>
+																						</xsl:when>
+																						<xsl:otherwise>
+																						<img src="images/cal.gif" width="16" height="16" border="0" alt="Set Date/Time" onclick="NewCal('timestop','ddmmyyyy',true,12,'dropdown',false)"/>
+																						</xsl:otherwise>
+																						</xsl:choose>
+																						</xsl:if>
+																					</td>
+																				</tr>
+																			</table>
+																			
+																		</td>
+																	</tr>
+																</table>
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+											</xsl:if>
+											<tr>
+												<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+												<div style="width:100%;height:100%;overflow:hidden;">
+													<table style="width:100%;height:100%;table-layout:fixed;" border="0" cellspacing="0" cellpadding="0">
+														<tr>
+															<td style="width:100%;height:100%;">
+																<div id="editregion" style="display:none;height:1px;width:1px;cursor:text;background:white;font-family:verdana;"></div>
+																<textarea name="note" style="width:100%;height:100%;">
+																<xsl:value-of select="root/TicketNote/Body"/>
+																</textarea>
+															</td>
+														</tr>
+													</table>
+												</div>
+												</td>
+											</tr>
+										</table>	
+									</div>	
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	</form>
+	<xsl:if test="root/TicketNote/@IsVoip='1'">
+	<script type="text/javascript">
+		<xsl:choose>
+			<xsl:when test="root/Ticket/@Display = 'New'">
+				StartTimer('<xsl:value-of select="root/DOCUMENT/dateformat"/>');
+			</xsl:when>
+			<xsl:otherwise>
+				document.tabularForm.start.disabled = true;
+				document.tabularForm.stop.disabled = true;
+				document.tabularForm.reset.disabled = true;	
+			</xsl:otherwise>
+		</xsl:choose>		
+	</script>
+	</xsl:if>
+	</body>
+</xsl:otherwise>
+</xsl:choose>
+	<script type="text/javascript">
+		<xsl:if test="root/TicketNote/@beenread = '0'">
+			<xsl:if test="root/user/usemarkasread = '1'">
+				var timeToMark = secondsToMarkAsRead * 1000;
+				timer = setTimeout("SetOnRead()", timeToMark);
+			</xsl:if>
+		</xsl:if>
+	</script>
+	</html>
+</xsl:template>
+</xsl:stylesheet>

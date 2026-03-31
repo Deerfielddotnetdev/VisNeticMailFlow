@@ -1,0 +1,48 @@
+<root> 
+<Address>
+	<Name>Deerfield Communications Inc.</Name>
+	<Street1>625 Kenmoor Ave SE Suite 301</Street1>
+	<Street2></Street2>
+	<City>Grand Rapids, Michigan USA 49546</City>
+</Address>
+<Phone>
+Phone:  +1 (989) 732-8856
+</Phone>
+<Fax>
+Fax:  +1 (989) 731-9299
+</Fax>
+<Email>
+Email:
+</Email>
+<EmailLink>
+sales@visnetic.com
+</EmailLink>
+<Support>
+support:
+</Support>
+<SupportLink>
+https://www.visnetic.com/support
+</SupportLink>
+<Website>
+other great products:
+</Website>
+<WebsiteLink>
+https://www.deerfield.net/products/
+</WebsiteLink>
+<Update>
+product updates:
+</Update>
+<UpdateLink>
+https://www.visnetic.com/download/
+</UpdateLink>
+<Purchase>
+Online Purchase
+</Purchase>
+<PurchaseLink>
+https://www.visnetic.com/pricing/buynow.aspx
+</PurchaseLink>
+<AntiVirus>
+	<PurchaseLink>https://www.visnetic.com/products/visnetic-mailflow/antivirus/pricing.htm</PurchaseLink>
+	<UpgradeLink>https://www.visnetic.com/products/visnetic-mailflow/antivirus/upgrade.htm</UpgradeLink>
+</AntiVirus>
+</root>

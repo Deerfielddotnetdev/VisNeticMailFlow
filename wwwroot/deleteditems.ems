@@ -1,0 +1,260 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+	<html>
+	<head>
+	
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/deleteditems.jmf"></script>
+	<script language="javascript" type="text/javascript">
+		function docCheckSelect() {
+			var result = false;
+			for (i=0; i &lt; document.tabularForm.elements.length; i++)
+			{
+				if (document.tabularForm.elements[i].name.indexOf("chkbox")!=-1)
+				{
+					if (document.tabularForm.elements[i].checked==true)
+					{
+						result = true;
+					}
+				}
+			}
+			return result;
+		}
+	</script>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	</head>
+
+	<body callOnLoad="">
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="Action" value="" />
+	<input type="hidden" name="IDCollection" value="" />
+	<input disabled="true" type="hidden" name="ViewName" value="{root/Summary/@ViewName}" />
+
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(docCheckSelect())"
+										 title="Restore the selected items" onclick="restore();"
+										>
+										<nobr>
+										<img src="images/ico_trashcan_restore.gif" width="24" height="22" border="0" valign="bottom"/>
+										<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Restore
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(docCheckSelect())"
+										 title="Permanently destroy the selected items" onclick="destroy('selected');">
+										<nobr>
+										<img src="images/ico_trashcan_delete.gif" width="24" height="22" border="0" valign="bottom"/>
+										<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Purge
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Permanently destroy all items" onclick="destroy('all');">
+										<nobr>
+										<img src="images/ico_trashcan_deleteall.gif" width="24" height="22" border="0" valign="bottom"/>
+										<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Purge All
+										</nobr>
+				  						</div>
+									</td>
+									<td nowrap="1" style="font-weight:bold;padding-left:10px;" title="Deleted Item Types"> 
+									View:
+									<span style="padding-left:3px;padding-right:8px;">
+									<select name="View" onChange="xview()">
+									<xsl:for-each select="root/Summary/Item">
+										<option value="{@ID}">
+										<xsl:if test="@ID = /root/Summary/@View">
+										<xsl:attribute name="selected">true</xsl:attribute>
+										</xsl:if>
+										<xsl:value-of select="@Name"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;(<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="@Count"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;)
+										</option>
+										</xsl:for-each>
+									</select>
+									</span>
+									</td>
+									<td nowrap="1" style="font-weight:bold;padding-left:10px;" title="Only display items deleted by this agent"> 
+									Filter:
+									<span style="padding-left:3px;padding-right:8px;">
+									<select name="AgentFilter" onChange="xfilter()">
+									<xsl:for-each select="root/AgentNames/Agent">
+										<option value="{@ID}">
+										<xsl:if test="@ID = /root/Summary/@AgentFilter"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+										<xsl:value-of select="@Name"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;(<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="@Count"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;)
+										</option>
+									</xsl:for-each>
+										</select>
+									</span>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Show Help" onclick="openHelp('administration/database_maintenance/Deleted_Items.htm');">
+										<nobr>
+										<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom"/>
+										Help
+										</nobr>
+				  						</div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto;">
+
+				<div class="listBack" style="height:100%;width:100%;overflow:auto;">
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td>
+							<!-- this would be the table to add width="100%" to if you wanted it to take up the whole screen, without it will be proportional to the content contained -->
+							<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%">
+								<tr>
+									<td class="subheader" colspan="2" style="padding-left:10px;">
+									<xsl:value-of select="root/Summary/@ViewName"/>
+									</td>
+								</tr>
+								<tr>
+									<td style="padding-right:1px;">
+									<xsl:if test="root/Item">
+										<table align="center" width="100%" cellspacing="0" cellpadding="0">
+											<tr>
+												<td width="%" class="altCellHeader" align="center"><input type="Checkbox" name="selectall" onclick="selectAll(this.checked)"/></td>
+												<td width="%" class="altCellHeader">ID</td>
+												<td width="%" class="altCellHeader">NAME</td>
+												<td width="%" class="altCellHeader">DELETED BY</td>
+												<td width="%" class="altCellHeader">DELETED TIME</td>
+												<td width="%" class="altCellHeader">DATE CREATED</td>
+											</tr>
+										<xsl:for-each select="root/Item">
+											<tr>
+												<td class="altCellHeaderChild" align="center"><input type="Checkbox" name="{concat('chkbox',@ID)}"/></td>
+												<td class="altCellHeaderChild"><xsl:value-of select="@ID"/></td>
+												<td class="altCellHeaderChild">
+												<!--<img src="./images/dot.gif" style="padding-right:5px;vertical-align:middle;"/>-->
+												<xsl:if test="@Name = ''"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</xsl:if>
+												<xsl:if test="@Name != ''"><xsl:value-of select="@Name" disable-output-escaping="yes"/></xsl:if>
+												</td>
+												<td class="altCellHeaderChild"><xsl:value-of select="@DeletedBy"/></td>
+												<td class="altCellHeaderChildX"><xsl:value-of select="@DeletedTime"/></td>
+												<td class="altCellHeaderChild"><xsl:value-of select="@DateCreated"/></td>
+											</tr>
+										</xsl:for-each>
+										</table>
+									</xsl:if>
+									<xsl:if test="not(root/Item)">
+										<table align="left" width="100%" cellspacing="0" cellpadding="0">
+											<tr>
+												<td style="font-weight:bold;padding-left:10px;">
+												None Available
+												</td>
+											</tr>
+										</table>
+									</xsl:if>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+				</div>
+			
+			</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<table class="menuColor" width="100%" style="border:1px outset;" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td width="100" class="statusInset">Page<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+							<xsl:value-of select="root/Page/@Current"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160; 
+							of<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/Page/@Count"/> 
+						</td>
+						<td style="padding-left: 5px;" >
+						<!-- logic functions for browsing -->
+						<xsl:variable name="prevID">
+							<!-- if current page is zero, set to current, 
+								otherwise set to page - 1 -->
+							<xsl:choose>
+								<xsl:when test = "root/Page/@Current = 0">
+									<xsl:value-of select = "root/Page/@Current" />
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:value-of select = "(root/Page/@Current)-1" />
+								</xsl:otherwise>
+							</xsl:choose>
+						</xsl:variable>
+									
+						<xsl:variable name="nextID">
+							<!-- if current page is max, set to current, 
+							otherwise set to page + 1 -->
+							<xsl:choose>
+								<xsl:when test = "root/Page/@Current &lt; root/Page/@Count">
+									<xsl:value-of select = "root/Page/@Current + 1" />
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:value-of select = "root/Page/@Current" />
+								</xsl:otherwise>
+							</xsl:choose>
+						</xsl:variable>						
+			
+						<a onmouseover="window.status='First Page'; return true;" onMouseOut="window.status='';"
+						href="./deleted
+items.ems?CurrentPage=1&amp;View={root/Summary/@View}&amp;AgentFilter={root/Summary/@AgentFilter}">
+						<xsl:if test="root/Page/@Count = 1"><xsl:attribute name="onclick">return false;</xsl:attribute></xsl:if>
+						<img src="images/btn-firstmessage.gif" width="15" height="14" alt="First Page" border="0"/></a>
+			
+						<a onmouseover="window.status='Previous Page'; return true;" onMouseOut="window.status='';" 
+						href="./deleted
+items.ems?CurrentPage={$prevID}&amp;View={root/Summary/@View}&amp;AgentFilter={root/Summary/@AgentFilter}">
+						<xsl:if test="root/Page/@Count = 1"><xsl:attribute name="onclick">return false;</xsl:attribute></xsl:if>
+						<img src="images/btn-prevmessage.gif" width="15" height="14" alt="Previous Page" border="0"/></a>
+			
+						<a onmouseover="window.status='Next Page'; return true;" onMouseOut="window.status='';"
+						href="./deleted
+items.ems?CurrentPage={$nextID}&amp;View={root/Summary/@View}&amp;AgentFilter={root/Summary/@AgentFilter}">
+						<xsl:if test="root/Page/@Count = 1"><xsl:attribute name="onclick">return false;</xsl:attribute></xsl:if>
+						<img src="images/btn-nextmessage.gif" width="15" height="14" alt="Next Page" border="0"/></a>
+			
+						<a onmouseover="window.status='Last Page'; return true;" onMouseOut="window.status='';" 
+						href="./deleted
+items.ems?CurrentPage={root/Page/@Count}&amp;View={root/Summary/@View}&amp;AgentFilter={root/Summary/@AgentFilter}">
+						<xsl:if test="root/Page/@Count = 1"><xsl:attribute name="onclick">return false;</xsl:attribute></xsl:if>
+						<img src="images/btn-lastmessage.gif" width="15" height="14" alt="Last Page" border="0"/></a>
+						</td>
+						<td></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+</xsl:template>
+</xsl:stylesheet>

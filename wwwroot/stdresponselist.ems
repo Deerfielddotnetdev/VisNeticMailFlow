@@ -1,0 +1,128 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+	<html>
+	<head>
+	<title></title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontroller.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontrollerrows.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/resize_handle.jmf"></script>
+	<script language="javascript">
+	function tabularClick()
+	{
+		<xsl:if test="root/Category/@Access != '1'">
+			var selectId = document.tabularForm.selectId.value;
+			if (selectId!="")
+			{
+			var catID = "<xsl:value-of select="root/Category/@ID" />";
+			parent.frames.frameRightBottom.location = "stdresponse.ems?id=" + selectId + "&amp;categoryId=" + catID;
+			}
+		</xsl:if>
+	}
+	function refreshMe()
+	{
+		//alert("this should refresh me")
+		location.reload();
+	}
+	</script>
+	
+	</head>
+
+	<body class="listBack" callBeforeOnLoad="docInitListCols();" callOnLoad="">
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="selectId" value="" />
+	<input type="hidden" name="Action" value="insert" />	
+
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/Category/@Name"/>
+					</xsl:with-param>
+				</xsl:call-template>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:hidden;">
+
+				<div id="ListHolder" style="overflow:hidden;height:100%;width:100%;position:relative;">
+				<!-- table-layout:fixed - very important, without, table will extend off page -->
+				<table border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed;height:100%;width:100%;">
+					<tr>
+						<!-- no properties here, height will depend on contents -->
+						<td style="width:100%;">
+							<!-- position:relative - very important, without, table won't scroll -->
+							<table id="ListTableTop" border="0" cellspacing="0" cellpadding="0" style="position:relative;user-select:none;">
+								<tr id="ListHeaderRow">
+									<xsl:if test="root/Category/@ID = '-3'">
+										<td class="listHeaderCell" width="60">
+										<NOBR>Category</NOBR>
+										<xsl:call-template name="list_resizeHandle"/>
+										</td>
+									</xsl:if>
+									<td class="listHeaderCell" width="60">
+									<NOBR>Subject</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+									<td class="listHeaderCell" width="75">
+									<NOBR>Last Modified</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<!-- set the height of this cell to 100%! -->
+						<td style="height:100%;overflow:hidden;vertical-align:top;">
+							<div id="ListDivider" style="width:100%;height:100%;overflow:auto;" class="listBack" onscroll="OnListDividerScroll(id);">
+							<table id="ListTableBot" style="user-select:none;" border="0" cellspacing="0" cellpadding="0" allowMultiple="false">
+							<xsl:for-each select="root/StdResponse">
+								<tr id="listRow" title="{@Name}" class="rowOff" glc_form_tabularForm_selectId="{@ID}" onClick="gloListControl.listRowClick();tabularClick();" onMouseOver="tabRowOn()" onMouseOut="tabRowOff()">
+									<xsl:if test="/root/Category/@ID = '-3'">
+										<td id="listCell" class="cellOff">
+										<NOBR>
+										<xsl:value-of select="@CategoryName" disable-output-escaping="yes" />
+										</NOBR>
+										</td>
+									</xsl:if>
+									<td id="listCell" class="cellOff">
+									<NOBR>
+									<xsl:value-of select="@Subject" disable-output-escaping="yes" />
+									</NOBR>
+									</td>
+									<td id="listCell" class="cellOff">
+									<NOBR>
+									<xsl:value-of select="@LastModified"/>
+									</NOBR>
+									</td>
+								</tr>
+							</xsl:for-each>
+							<xsl:if test="not(root/StdResponse)">
+								<tr>
+									<td><br/></td><td><br/></td>
+								</tr>
+							</xsl:if>
+							</table><!--listTableBot-->
+							</div><!--listDivider-->
+						</td>
+					</tr>
+				</table>
+				</div><!--listHolder-->
+
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

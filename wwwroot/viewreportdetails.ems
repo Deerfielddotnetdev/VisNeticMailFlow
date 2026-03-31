@@ -1,0 +1,311 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+	<html>
+	<head>
+	
+
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<xsl:if test="/root/Results">
+	<script LANGUAGE="javascript" src="./javascript/graph.jmf"/>
+	</xsl:if>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontroller.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontrollerrows.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/resize_handle.jmf"></script>
+	<script type="text/javascript" language="javascript">
+	
+	var SVGObj = null;
+	
+	/*---------------------------------------------------------------------------\                     
+	||  Comments:	Download the report as a CSV file
+	\*--------------------------------------------------------------------------*/
+	function DownloadCSV()
+	{
+		document.tabularForm.target = "DLFrame";
+		document.tabularForm.Action.value = "download";
+				
+		document.tabularForm.submit();
+	
+		document.tabularForm.Action.value = "";
+		document.tabularForm.target = "";
+	}
+	
+	/*---------------------------------------------------------------------------\                     
+	||  Comments:	Print the report
+	\*--------------------------------------------------------------------------*/
+	function Print()
+	{
+		//open the actual window to print the message;
+		var myAgentID = "<xsl:value-of select='/root/user/id'/>";
+		window.open("printreport.ems?ck_agentid=" + myAgentID + "&amp;graph=1","new","height=550,width=650,scrollbars=yes,status=no,toolbar=no,menubar=no,location=no");
+	}
+
+
+	
+	
+	<xsl:if test="/root/Results">
+	/*---------------------------------------------------------------------------\                     
+	||  Comments:	Display the reports graph.  This function is a callback
+	||				for chart.svgz
+	\*--------------------------------------------------------------------------*/
+	function DisplayGraph( Obj, bPrint )
+	{
+		<xsl:if test="/root/REPORT_OPTIONS/@FULL_LABELS = '1'">
+			Obj.SetFullLables(true);
+		</xsl:if>
+	
+		<xsl:for-each select="root/Row">
+		<xsl:choose>
+		<xsl:when test="/root/Title = 'Ticket Activity by TicketBox'">
+			Obj.addChartValue(<xsl:value-of select="Cell[11]"/>,"<xsl:value-of select="NameEsc"/>",false);
+		</xsl:when>
+		<xsl:otherwise>
+			Obj.addChartValue(<xsl:value-of select="Cell[2]"/>,"<xsl:value-of select="NameEsc"/>",false);
+		</xsl:otherwise>
+		</xsl:choose>
+		</xsl:for-each>
+		
+		if ( document.tabularForm.graph_type.value == "PIE" )
+		{
+			Obj.ShowPieGraph();
+		}
+		else if ( document.tabularForm.graph_type.value == "LINE" )
+		{
+			Obj.ShowLineGraph();
+		}
+		else
+		{
+			Obj.ShowBarGraph();
+		}
+	
+		if (!bPrint) 
+			SVGObj = Obj;
+	}
+	</xsl:if>
+	
+	/*---------------------------------------------------------------------------\                     
+	||  Comments:	Called when OnLoad() completes
+	\*--------------------------------------------------------------------------*/
+	function Initialize()
+	{
+		<xsl:if test="/root/Results">
+			CreateGraph(300,600,false);
+		</xsl:if>
+	}
+
+	</script>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	</head>
+
+	<body callBeforeOnLoad="docInitListCols();Initialize();" callOnLoad="">
+	<form name="tabularForm" method="get" action="">
+	<input type="hidden" name="graph_type" value="{/root/DOCUMENT/URLPARAMETERS/GRAPH_TYPE}" />
+	<input type="hidden" name="ID" value="{root/RRID}" />
+	<input type="hidden" name="Action" value="" />	
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">					
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Download Report as File" onclick="DownloadCSV()"
+										  >
+											<xsl:attribute name="xrequire">
+												<xsl:choose>
+													<xsl:when test="/root/Results">true</xsl:when>
+													<xsl:otherwise>false</xsl:otherwise>
+												</xsl:choose>
+											</xsl:attribute>
+											
+											<nobr>
+												<img src="images/ico_download.gif" width="24" height="22" border="0" align="bottom"/>
+												Download
+											</nobr>
+										  </div>
+									</td>
+									
+									<td height="100%">					
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										title="Print Report" onclick="Print()"
+										 >
+					
+											<xsl:attribute name="xrequire">
+												<xsl:choose>
+													<xsl:when test="/root/Results">true</xsl:when>
+													<xsl:otherwise>false</xsl:otherwise>
+												</xsl:choose>
+											</xsl:attribute>
+					
+											<nobr>
+												<img src="images/ico_print.gif" width="24" height="22" border="0" align="bottom"/>
+												Print
+											</nobr>
+										</div>
+									</td>
+				
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Show Help" onclick="openHelp('OverView/Scheduled_Reports.htm');">
+										<nobr>
+										<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom"/>
+										Help
+										</nobr>
+				  						</div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>					
+				</table>
+
+			</td>
+		</tr>
+		<tr> 
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;"> 
+			<xsl:if test="not(/root/Results)">
+				<span style="padding-top:5px;padding-left:5px;"><i>No Report Results Available</i></span>		
+			</xsl:if>
+			<div align="center" style="width:100%;height:100%;overflow:auto"> 
+			<table border="0" cellpadding="0" cellspacing="0">
+				<tr> 
+					<td align="center"> 
+					
+					  <br/><br/>
+					
+					  <xsl:choose>
+					  <xsl:when test="/root/Results">
+					  	
+					  <div id="title_div">
+					  <span style="font-size: 2em"><xsl:value-of select="/root/Title"/><br/></span>
+					  <span style="font-size: 1.25em"><xsl:value-of select="/root/SubTitle" disable-output-escaping="yes"/><br/></span>
+					  <xsl:if test="/root/SumPeriod"> 
+					  	<span style="font-size: 1.25em">Summary Period - <xsl:value-of select="/root/SumPeriod" disable-output-escaping="yes"/><br/><br/></span>	
+					  </xsl:if>
+					  </div>
+					  
+					  <table border="0" cellpadding="0" cellspacing="0" bordercolor="#000000" width="625" style="border-collapse:collapse">
+					    
+						<tr>
+						  <td align="right" width="80%"></td>
+					
+						  <td onclick="if (SVGObj) SVGObj.ShowBarGraph();document.tabularForm.graph_type.value='BAR'" align="center" style="background:#FFFFFF;border-left-style:solid;border-left-width:1;border-right-style:solid;border-right-width:1;border-top-style:solid;border-top-width: 1">
+							<a style="text-decoration:none;color=#000000" href="#">Bar</a>
+						  </td>
+					
+						  <td onclick="if (SVGObj) SVGObj.ShowLineGraph();document.tabularForm.graph_type.value='LINE'" align="center" style="background:#FFFFFF;border-left-style: solid; border-left-width: 1; border-right-style: solid; border-right-width: 1; border-top-style: solid; border-top-width: 1">
+							<a style="text-decoration:none;color=#000000" href="#">Line</a>
+						  </td>
+					
+						  <td onclick="if (SVGObj) SVGObj.ShowPieGraph();document.tabularForm.graph_type.value='PIE'" align="center" style="background:#FFFFFF;border-left-style: solid; border-left-width: 1; border-right-style: solid; border-right-width: 1; border-top-style: solid; border-top-width: 1">
+							<a style="text-decoration:none;color=#000000" href="#">Pie</a>
+						  </td>
+						</tr>
+					
+						<tr>
+					      <td id="graph_frame" colspan="4" align="center" style="background:#FFFFFF;height:305;width:625;border-style:solid;border-width:1;border-color:#000000"></td>
+					    </tr>
+					  
+					  </table>
+					
+					  <br/><br/>
+						
+						<div id="results">
+						<table id="results_table" border="1" style="border-collapse:collapse" width="625" bordercolor="#000000" cellpadding="4" cellspacing="0" >
+					
+						<tr bgcolor="#D1D1D1">
+							<xsl:for-each select="root/Column">
+								<td >
+									<xsl:if test="position() = 1">
+										<xsl:attribute name="colspan">2</xsl:attribute>
+									</xsl:if>
+									<b><nobr><xsl:value-of select="."/></nobr></b>
+								</td>
+							</xsl:for-each>
+						</tr>
+					
+						<xsl:for-each select="root/Row">
+							<tr>
+					
+							<xsl:choose>
+								<xsl:when test="position() mod 2 = 0">
+									<xsl:attribute name="STYLE">background-color:#FFFFDD;</xsl:attribute>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:attribute name="STYLE">background-color:#FFFFFF;</xsl:attribute>
+								</xsl:otherwise>
+							</xsl:choose>
+							
+							<td nowrap="true" style="width:4.5em;border-right-width:0;padding-right:0">
+								<span style="width:12px;height:10px">
+									<xsl:attribute name="STYLE">background-color:<xsl:value-of select="@Color"/>;</xsl:attribute>
+								</span>
+								<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="position()"/>.
+							</td>
+					
+							<xsl:for-each select="Cell">
+								<td>
+									<xsl:if test="position() = 1">
+										<xsl:attribute name="style">border-left-width:0;padding-left:0</xsl:attribute>
+									</xsl:if>
+									<xsl:value-of select="." disable-output-escaping="yes"/>
+								</td>
+							</xsl:for-each>
+							</tr>
+						</xsl:for-each>
+					
+						<xsl:if test="not(root/Row)">
+							<tr style="background-color:#FFFFFF">
+								<td>
+									<xsl:attribute name="colspan"><xsl:value-of select="count(root/Column) + 1"/></xsl:attribute>
+									<b>No records were returned</b>		
+								</td>
+							</tr>
+						</xsl:if>
+					
+						<xsl:for-each select="root/Information">
+							<tr style="background-color:#FFFFFF">
+								<td>
+									<xsl:attribute name="colspan"><xsl:value-of select="count(/root/Column) + 1"/></xsl:attribute>
+									<b><xsl:value-of select="."/></b>		
+								</td>
+							</tr>
+						</xsl:for-each>
+					
+						</table>
+						</div>
+					  <br/><br/>
+					  </xsl:when>
+					  <xsl:otherwise>
+						
+					  </xsl:otherwise>
+					  </xsl:choose>
+					  
+					</td>
+				</tr>
+			</table>
+		</div>		
+	</td>
+	</tr>
+	
+</table>
+</form>			
+<iframe src="download_blank.htm" name="DLFrame" style="display:none"/>
+
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

@@ -1,0 +1,234 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN" indent="yes" />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+<HTML>
+<HEAD>
+<TITLE>Manage Mailing Group Subscriptions</TITLE>
+<LINK rel="STYLESHEET" type="text/css" href="./stylesheets/standard.css"/>
+<script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"></script>
+<SCRIPT type="text/javascript" language="javascript">
+
+	function doRedirect()
+	{
+		var targetURL = new String(document.location);
+		if ( targetURL.indexOf("redirect") != -1 )
+		{
+			alert("Unable to redirect to subscription page");
+			return;
+		}
+		var nPos = targetURL.lastIndexOf("/");
+		targetURL = targetURL.substr(0,nPos+1) + "unsub.ems?redirect=true";
+		window.location = targetURL;
+	}
+	
+	function unsub (val)
+	{
+		if ( document.tabularForm.Email.value == "" )
+		{
+			doRedirect();
+		}
+		else
+		{
+			submitForm(val);
+		}
+	}
+		
+	function submitForm(val)
+	{
+		var submitform = true;
+		if(val==0)
+		{
+			var gIDs="";
+			var inputs = document.getElementsByTagName("input");
+			for (var i = 0; i &lt; inputs.length; i++)
+			{  
+			  if (inputs[i].type == "checkbox")
+			  {
+					if (inputs[i].checked)
+					{  
+				  	if(inputs[i].name.indexOf("u") != -1)
+				  	{
+					  	var gID = inputs[i].name.substr(1,inputs[i].name.length);
+							if (gIDs=="")
+							{
+								gIDs = gID;
+							}
+							else
+							{
+								gIDs = gIDs + ', ' + gID;
+							}
+						}
+					}
+				}
+			}
+			document.tabularForm.Group.value = gIDs;
+			document.tabularForm.Action.value="unsub";
+		}
+		else if(val==1)
+		{
+			document.tabularForm.Action.value="unsuball";
+		}
+		else if(val==3)
+		{
+			var gIDs="";
+			var inputs = document.getElementsByTagName("input");
+			for (var i = 0; i &lt; inputs.length; i++)
+			{  
+			  if (inputs[i].type == "checkbox")
+			  {
+					if (inputs[i].checked)
+					{  
+				  	if(inputs[i].name.indexOf("s") != -1)
+				  	{
+					  	var gID = inputs[i].name.substr(1,inputs[i].name.length);
+							if (gIDs=="")
+							{
+								gIDs = gID;
+							}
+							else
+							{
+								gIDs = gIDs + ', ' + gID;
+							}
+						}
+					}
+				}
+			}
+			document.tabularForm.Group.value = gIDs;
+			document.tabularForm.Action.value="sub";
+		}
+		
+		document.tabularForm.Email.value = document.tabularForm.Email.value.replace(/\s+/g,"");
+		if(document.tabularForm.Email.value.length != 0)
+		{
+			if (!glo_checkEmailAddress(document.tabularForm.Email.value))
+			{
+				submitform = false;
+			}
+		}
+		else
+		{
+			submitform = false;
+		}
+		if(submitform)
+		{
+			document.tabularForm.submit();
+		}
+		else
+		{
+			doRedirect();
+		}
+	}
+	
+</SCRIPT>
+
+</HEAD>
+
+<BODY style="background-color:#FFFFFF !important">
+
+<FORM NAME="tabularForm" method="post" action="unsub2.ems">
+<INPUT TYPE="hidden" NAME="Action" VALUE="unsub"/>
+<INPUT TYPE="hidden" NAME="Group" VALUE="0"/>
+<INPUT TYPE="hidden" NAME="Email" VALUE="{root/Unsub/@Email}"/>
+
+<TABLE WIDTH="100%" HEIGHT="90%" BORDER="0" CELLSPACING="0" CELLPADDING="0"  BACKGROUND="">
+<TR>
+<TD VALIGN="middle">
+<DIV ALIGN="center">
+
+<TABLE CELLPADDING="20" CELLSPACING="0" BORDER="0" BACKGROUND="" HEIGHT="">
+    <TR><TD><IMG src="./images/logo.gif"/></TD></TR>
+</TABLE>
+
+<TABLE CELLPADDING="2" CELLSPACING="0" BORDER="0">
+<xsl:if test="root/Unsub/Groups/Group">
+<TR>
+  <TD colspan="2" style="text-align:center;align:center;padding-bottom:10px;">
+  	<b>Successfully Unsubscribed <xsl:value-of select="root/Unsub/@Email"/> from</b>
+  </TD>
+</TR>
+<xsl:for-each select="root/Unsub/Groups/Group">
+	<TR>
+	<TD colspan="2" style="text-align:center;align:center;padding-bottom:10px;">
+	<font color="red"><b><xsl:value-of select="@Name"/></b></font>
+	</TD>
+	</TR>
+</xsl:for-each>
+</xsl:if>
+<xsl:if test="root/Subbed/Groups/Group">
+<TR>
+  <TD colspan="2" style="text-align:center;align:center;padding-bottom:10px;">
+  	A subscription confirmation email has been<br/>
+  	sent to <b><xsl:value-of select="root/Unsub/@Email"/></b> for<br/>
+  	the Mailing Groups listed below.<br/><br/>
+  	You must confirm the Mailing Group subscription by<br/>
+  	clicking the link in each confirmation email you receive.<br/><br/>
+  	<b><u>Confirmation email sent for</u></b>
+  </TD>
+</TR>
+<xsl:for-each select="root/Subbed/Groups/Group">
+	<TR>
+	<TD colspan="2" style="text-align:center;align:center;padding-bottom:10px;">
+	<font color="red"><b><xsl:value-of select="@Name"/></b></font>
+	</TD>
+	</TR>
+</xsl:for-each>
+</xsl:if>
+<xsl:if test="not(root/Groups/Group)">
+<TR>
+	<TD colspan="2" style="text-align:center;align:center;padding-bottom:10px;">
+	<font color="red"><b><xsl:value-of select="root/Unsub/@Email"/> not subscribed to any Mailing Groups</b></font>
+	</TD>
+</TR>
+</xsl:if>
+<xsl:if test="root/Sub/Groups/Group">
+<TR>
+  <TD colspan="2" style="text-align:center;align:center;padding-bottom:10px;">
+  	<b>Subscribe <xsl:value-of select="root/Unsub/@Email"/> to</b>
+  </TD>
+</TR>
+<xsl:for-each select="root/Sub/Groups/Group">
+	<TR>
+	<TD ALIGN="right" VALIGN="middle"><input type="checkbox" name="s{@ID}"/></TD>
+	<TD ALIGN="left" VALIGN="middle"><xsl:value-of select="@Name"/></TD>
+	</TR>
+</xsl:for-each>
+<TR><TD colspan="2" style="text-align:right;align:right;padding-top:10px;padding-bottom:10px;"><INPUT TYPE="button" onclick="unsub(3);" VALUE="Subscribe Selected"/></TD></TR>
+</xsl:if>
+<xsl:if test="root/Groups/Group">
+<xsl:variable name="origGroup"><xsl:value-of select="root/OrigGroup/@ID"/></xsl:variable>
+<TR>
+  <TD colspan="2" style="text-align:center;align:center;padding-bottom:10px;">
+  	<b>Unsubscribe <xsl:value-of select="root/Unsub/@Email"/> from</b>
+  </TD>
+</TR>
+<xsl:for-each select="root/Groups/Group">
+	<TR>
+	<TD ALIGN="right" VALIGN="middle">
+		<input type="checkbox" name="u{@ID}">
+		<xsl:if test="$origGroup = @ID"><xsl:attribute name="checked"/></xsl:if>
+		</input></TD>
+	<TD ALIGN="left" VALIGN="middle"><xsl:value-of select="@Name"/></TD>
+	</TR>
+</xsl:for-each>
+<TR><TD colspan="2" style="text-align:right;align:right;padding-top:10px;"><INPUT TYPE="button" onclick="unsub(0);" VALUE="Unsubscribe Selected"/></TD></TR>
+<TR><TD colspan="2" style="text-align:right;align:right;padding-top:3px;"><INPUT TYPE="button" onclick="unsub(1);" VALUE="Unsubscribe All"/></TD></TR>
+</xsl:if>
+</TABLE>
+<br/><br/>
+<SPAN style="font-size:10pt;">
+    <a href="http://www.visnetic.com" target="_blank">VisNetic<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#174; MailFlow</a>
+		is a Registered Trademark of<a href="http://www.deerfield.net/" target="_blank"> Deerfield Communications Inc. </a><br/>
+		Copyright<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#169; 2002-2017 All rights reserved.</SPAN>		
+</DIV>
+
+</TD>
+</TR>
+</TABLE>
+</FORM>
+</BODY>
+</HTML>
+
+</xsl:template>
+</xsl:stylesheet>
