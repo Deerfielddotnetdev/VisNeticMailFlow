@@ -1,0 +1,65 @@
+	var OptionID = 1;	
+	function adjustDoc()
+	{
+		if (OptionID==1)
+		{
+			if (parseInt(document.tabularForm.OptionMaxID.value) > 1)
+			{
+				OptionID = parseInt(document.tabularForm.OptionMaxID.value);
+			}
+		}
+		if (document.getElementById("OptionTable").rows.length)
+		{
+			if (document.getElementById("OptionTable").rows.length == 1)
+			{
+				tabularForm.ActionDelButton.rowIndex = "0";
+			}
+			else if (document.getElementById("OptionTable").rows.length > 1)
+			{
+				for (i = 0; i < document.getElementById("OptionTable").rows.length; i++)
+				{
+					document.getElementsByName("ActionDelButton")[i].rowIndex = parseInt(i);
+				}
+			}
+		}
+		if (document.tabularForm.TicketFieldTypeID && parseInt(document.tabularForm.TicketFieldTypeID.value)==3)
+		{
+			document.getElementById("optionTR").style.display = 'block';
+		}
+		else
+		{
+			document.getElementById("optionTR").style.display = 'none';
+		}
+	}
+	
+	function addOption()
+	{
+		var NewRowID = parseInt(document.getElementById("OptionTable").rows.length);
+		var NewRow = document.getElementById("OptionTable").insertRow(-1);
+		NewRow.id = OptionID;
+		var NewCell = NewRow.insertCell(-1);
+		NewCell.setAttribute("valign", "middle");
+		NewCell.setAttribute("width", "56px");
+		var strX = "<input type='button' rowIndex='"+NewRowID+"' name='ActionDelButton' value='Remove' class='childControlBtn' onclick='delOption();'>";
+		NewCell.innerHTML = strX;
+		strX = "<input type='text' name='OptionVal"+OptionID+"' value='' style='width:310px' maxlength='50'/>";
+		NewCell = NewRow.insertCell(-1);
+		NewCell.setAttribute("valign", "middle");
+		NewCell.setAttribute("width", "310px");
+		NewCell.innerHTML = strX;
+		strX = "<input type='text' name='OptionOrder"+OptionID+"' value='' style='width:40px' maxlength='2'/>";
+		NewCell = NewRow.insertCell(-1);
+		NewCell.setAttribute("valign", "middle");
+		NewCell.setAttribute("width", "40px");
+		NewCell.innerHTML = strX;		
+		OptionID++;
+		adjustDoc();
+	}
+	
+	function delOption()
+	{
+		var elm =  event.target || event.srcElement;
+		selectedIndex = elm.rowIndex;
+		OptionTable.deleteRow(selectedIndex);
+		adjustDoc();
+	}

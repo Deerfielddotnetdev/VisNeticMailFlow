@@ -1,0 +1,66 @@
+// $Header: /root/WWWROOT/javascript/standardresponse_menu.jmf,v 1.2 2005/11/29 20:47:21 markm Exp $
+
+function onDeleteClick()
+{
+	if(document.tabularForm.selectId.value > 1)
+	{
+		var deleteModal = glo_launchModalWindow("stdeletecat.ems", 250, 175, 'yes', 'no', 'no');
+	}
+}
+
+function processDelete(opt)
+{
+	document.tabularForm.Opt.value = opt;
+	document.tabularForm.Action.value = "delete";
+	docSubmit();
+}
+
+function docSubmit()
+{
+	var postResults = glo_buildFormPost('tabularForm');
+	var proceed = postResults[0];
+	if (proceed)
+	{
+		parent.frames.frameLeft.location = parent.frames.frameLeft.location;
+		parent.frames.frameRightBottom.location = "stdresponse.ems?id=0";
+		parent.frames.frameRightTop.location = "stdresponselist.ems?id=0";
+	}
+}	
+
+function onNewClick()
+{
+	parent.frames.frameRightBottom.location = "editstdrespcategory.ems?selectId=0";
+}
+
+function onRenameClick()
+{
+	if(document.tabularForm.selectId.value > 1)
+	{
+		parent.frames.frameRightBottom.location = "editstdrespcategory.ems?selectId=" + document.tabularForm.selectId.value;
+	}
+}
+
+function onSearchClick()
+{
+	parent.frames.frameRightBottom.location = "searchstandardresponse.ems";
+}
+
+function onButtonMouseOver(id)
+{
+	document.getElementById(id).className = "HiLightButton";
+}
+
+function onButtonMouseOut(id)
+{
+	document.getElementById(id).className = "NoHiLightButton";
+}
+
+function onButtonMouseDown(id)
+{
+	document.getElementById(id).className = "HiLightInsetButton";
+}
+
+function onButtonMouseUp(id)
+{
+	document.getElementById(id).className = "HiLightButton";
+}

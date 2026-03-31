@@ -1,0 +1,649 @@
+	var gloListControl = new Object();
+	gloListControl.ActiveRows = new Array();
+	gloListControl.starRowId = null;
+	gloListControl.stopRowId = null;
+
+	gloListControl.thisRow = new Object();
+	gloListControl.thisRow._index = null;
+	gloListControl.thisRow._type = null;
+	gloListControl.thisRow._active = null;
+	gloListControl.thisRow._getRow = null;
+
+	gloListControl.settings = new Object();	  
+	
+	gloListControl.settings.multi_select = function ()
+	{
+		return document.getElementById("ListTableBot").getAttribute("allowMultiple");	;
+	};
+	
+	gloListControl.extras = new Object();
+	
+	gloListControl.extras.collapseTickets = function ()
+	{
+		if (window.Tickets && window.Tickets.length)
+		for (var i = 0; i < Tickets.length; i++)
+		{
+			var nID = gloListControl.thisRow._getRow.getAttribute("glc_form_tabularForm_selectId");
+			if (Tickets[i].ticketid != nID)
+			if (document.getElementById("messagearea"+ Tickets[i].ticketid))
+			{
+				msgContainer = eval("messagearea"+ Tickets[i].ticketid);
+				msgIndicator = eval("document.msgindicator"+ Tickets[i].ticketid);
+				if (msgContainer.style.display == 'block')
+				{
+					msgContainer.style.display = 'none';
+					msgIndicator.src = expandico.src;
+				}
+			}
+		}
+		//if (usePreview==1)closesplit();
+	};
+	
+	gloListControl.extras.collapseAllTickets = function ()
+	{
+		if (window.Tickets && window.Tickets.length)
+		for (var i = 0; i < Tickets.length; i++)
+		{
+			if (document.getElementById("messagearea"+ Tickets[i].ticketid))
+			{
+				msgContainer = eval("messagearea"+ Tickets[i].ticketid);
+				msgIndicator = eval("document.msgindicator"+ Tickets[i].ticketid);
+				if (msgContainer.style.display == 'block')
+				{
+					msgContainer.style.display = 'none';
+					msgIndicator.src = expandico.src;
+				}
+			}
+		}
+		if (usePreview==1)closesplit();
+	};
+
+	gloListControl.setActiveRow = function (event)
+	{
+		var elem = (event.srcElement) ? event.srcElement : event.target;
+		
+		var id = null;
+		
+		while (elem.parentNode.tagName != "TABLE")
+		{
+			if (elem.tagName == "TR")
+			{
+				var tRowID = elem.getAttribute('tabRowId');
+				id = (tRowID!=null)? tRowID : elem.rowIndex;
+				break;
+			}
+			elem = elem.parentNode;
+		}
+		if(id!=null)
+		{
+			gloListControl.thisRow._index = parseInt(id);
+			var glcRowType = elem.getAttribute('glc_rowtype');
+			if (glcRowType=="ticket")
+			{
+				gloListControl.thisRow._type = "ticket";
+				var hasUnread = elem.getAttribute('hasunread');
+				var hasUnreadnotes = elem.getAttribute('hasunreadnotes');
+			
+				if((hasUnread == '1') || (hasUnreadnotes == '1'))
+					gloListControl.thisRow._active = (elem.className == trowOffUnreadClass) ? false:true;
+				else
+					gloListControl.thisRow._active = (elem.className == trowOffClass) ? false:true;
+			}
+			else
+			{
+				gloListControl.thisRow._type = "item";
+				gloListControl.thisRow._active = (elem.className==rowOffClass?false:true);
+			}
+			gloListControl.thisRow._getRow = elem;			
+		}
+		return id;
+	};
+
+	gloListControl.resetAllRows = function ()
+	{
+		var listRow = getListRows();
+		for(var i = 0; i < gloListControl.ActiveRows.length; i++)
+		{
+			var thisListRow = listRow.length? listRow[gloListControl.ActiveRows[i]] : listRow;
+			if (thisListRow)
+			{
+				gloListControl.updateRowClass(thisListRow,false);
+			}
+		}
+		gloListControl.resetActiveRows();
+		gloListControl.UpdateSelectData();
+	};
+	
+	gloListControl.updateRowClass = function(thisRow, switchOn)
+	{
+		if(thisRow.getAttribute)
+		{
+			var glcRowType = thisRow.getAttribute('glc_rowtype');
+			if (glcRowType=="ticket")
+			{
+				var hasUnread = thisRow.getAttribute('hasunread');
+				var hasUnreadNotes = thisRow.getAttribute('hasunreadnotes');
+				if((hasUnread == '1') || (hasUnreadNotes == '1'))
+					var thisRowClass = switchOn ? trowOnClassUnread : trowOffUnreadClass;
+				else
+					var thisRowClass = switchOn ? trowOnClass : trowOffClass;
+			}
+			else 
+			{
+				var thisRowClass = switchOn ? rowOnClass : rowOffClass;
+			}
+			thisRow.className = thisRowClass;
+		}
+	};
+
+	gloListControl.selectRow = function ()
+	{
+		var thisListRow = gloListControl.thisRow._getRow;
+		
+		if (thisListRow)
+		{
+			gloListControl.updateRowClass(thisListRow,true);
+			gloListControl.ActiveRows[gloListControl.ActiveRows.length] = gloListControl.thisRow._index;
+			gloListControl.UpdateSelectData();
+		}
+	};
+
+	gloListControl.selectRowByIndex = function (thisRowIndex, thisUpdate) 
+	{
+	//	SELECT BY INDEX IS USED FOR LOOPING THROUGH A SHIFT SELECTION,
+	//	WE DO NOT WANT TO UPDATE THE SELECT DATA UNLESS THIS FUNCTION WAS JUST USED
+	//	TO PRESERVE THE SELECTED ROW IN THE EVENT OF A DBLCLICK!
+	//	SEE gloListControl.keepActiveRow BELOW...
+		var listRow = getListRows();
+		var thisListRow = listRow.length? listRow[thisRowIndex] : listRow;
+		if (thisListRow)
+		{		
+			gloListControl.updateRowClass(thisListRow, true);
+			gloListControl.ActiveRows[gloListControl.ActiveRows.length] = thisRowIndex;
+		//	THIS IS THAT CONDITIONAL UPDATE I JUST MENTIONED
+			if (thisUpdate)
+			{	
+				gloListControl.UpdateSelectData();
+			}
+		}
+	};
+
+// ****************************************************************************
+// updateHasRead function
+// ****************************************************************************
+
+gloListControl.updateHasRead = function(thisRowIndex, nTotal, nHasUnread)
+{
+	var listRow = getListRows();
+	var thisListRow = listRow.length? listRow[thisRowIndex] : listRow;
+	if (thisListRow)
+	{
+		var sTitle = new String("");
+			
+		if(nHasUnread)
+		{
+			thisListRow.hasunread = '1';
+			sTitle = nTotal + " Message(s) in Ticket, " + nHasUnread + " Message(s) unread";
+		}
+		else
+		{
+			thisListRow.hasunread = '0';
+			sTitle = nTotal + " Message(s) in Ticket, 0 Message(s) unread";
+		}
+				
+		for(var i = 0; i < thisListRow.childNodes.length; i++)
+		{
+			if(thisListRow.childNodes[i].nodeType == 1)
+			{
+				if(thisListRow.childNodes[i].name == 'messagecount')
+				{
+					if(nTotal)
+						thisListRow.childNodes[i].title = sTitle;
+				}
+			}
+		}
+			
+		gloListControl.updateRowClass(thisListRow, true);
+	}
+}
+
+// ****************************************************************************
+
+// ****************************************************************************
+// updateHasReadNotes function
+// ****************************************************************************
+
+gloListControl.updateHasReadNotes = function(thisRowIndex, nTotal, nHasUnread)
+{
+	var listRow = getListRows();
+	var thisListRow = listRow.length? listRow[thisRowIndex] : listRow;
+	if (thisListRow)
+	{
+		var sTitle = new String("");
+			
+		if(nHasUnread)
+		{
+			thisListRow.hasunreadnotes = '1';
+			sTitle = nTotal + " Notes(s) in Ticket, " + nHasUnread + " Notes(s) unread";
+		}
+		else
+		{
+			thisListRow.hasunreadnotes = '0';
+			sTitle = nTotal + " Notes(s) in Ticket, 0 Notes(s) unread";
+		}
+				
+		for(var i = 0; i < thisListRow.childNodes.length; i++)
+		{
+			if(thisListRow.childNodes[i].nodeType == 1)
+			{
+				if(thisListRow.childNodes[i].name == 'notesect')
+				{
+					if(nTotal)
+					{
+						thisListRow.childNodes[i].title = sTitle;
+						thisListRow.childNodes[i].children[0].children[0].title = sTitle;
+					}
+				}
+				
+			}
+		}
+			
+		gloListControl.updateRowClass(thisListRow, true);
+	}
+}
+
+// ****************************************************************************
+	
+	gloListControl.hasRow = function (row) {
+		var result = false;
+		for (var x = 0; x < gloListControl.ActiveRows.length; x++)
+		{
+			if (gloListControl.ActiveRows[x] == row)
+				result = true;
+		}
+		return result;
+	};
+	
+	gloListControl.keepActiveRow = function () {
+		if (gloListControl.thisRow._active==true)
+		{
+			if (gloListControl.hasRow(gloListControl.thisRow._index)==false)
+			gloListControl.selectRowByIndex(gloListControl.thisRow._index, true);
+		}
+	};
+	
+	gloListControl.removeRow = function () {
+		var thisListRow = gloListControl.thisRow._getRow;
+		if (thisListRow)
+		{
+			gloListControl.updateRowClass(thisListRow,false);
+
+			//	Remove the row index from the Active Rows Array!
+			var TempRows = new Array();
+			for (var i = 0; i < gloListControl.ActiveRows.length; i++)
+			{
+				if (gloListControl.ActiveRows[i] != gloListControl.thisRow._index)
+					TempRows[TempRows.length] = gloListControl.ActiveRows[i];
+			}
+
+			gloListControl.resetActiveRows();
+
+			for (var i = 0; i < TempRows.length; i++)
+			{
+				gloListControl.ActiveRows[i] = TempRows[i];
+			}
+			gloListControl.UpdateSelectData();
+		}
+	};
+
+	gloListControl.resetActiveRows = function() {
+		gloListControl.ActiveRows.length = 0;
+		gloListControl.ActiveRows = new Array();
+	};
+
+	gloListControl.setRowState = function() {
+		if (gloListControl.thisRow._active)
+		{
+			if (gloListControl.ActiveRows.length > 1)
+			{
+				gloListControl.resetAllRows();
+				gloListControl.selectRow();
+			} else {
+				//	This line previously prevented a ticket from being unselected on a single click when already active...
+				//	Commented out on 5-12-03 by Mike O, because it doesn't really hurt anything and makes the new listRowCanvas code work better!
+				//if (gloListControl.thisRow._type!="ticket")
+				gloListControl.removeRow();
+			}
+		}
+		else
+		{
+			if (gloListControl.ActiveRows.length > 0)
+			{
+				gloListControl.resetAllRows();
+				gloListControl.selectRow();
+			} else {
+				gloListControl.selectRow();
+			}
+		}
+	};
+
+	gloListControl.UpdateSelectData = function ()
+	{
+		var listRow = getListRows();
+		if (gloListControl.ActiveRows.length > 0)
+		{
+			var thisFieldReset = false;
+			for (var i = 0; i < gloListControl.ActiveRows.length; i++)
+			{
+				var thisListRow = listRow.length? listRow[gloListControl.ActiveRows[i]] : listRow;
+				var attrs = thisListRow.attributes;
+				for(var x=attrs.length-1; x>=0; x--)
+				{
+					var thisAttrName = new String(attrs[x].name);
+					if (thisAttrName.indexOf("glc")!=-1)
+					{
+						if (thisAttrName.indexOf("glc_form_")!=-1)
+						{
+							var thisAttrValue = attrs[x].value;
+	
+							var thisFormName = thisAttrName.substring(9,thisAttrName.length);
+							var thisFieldName = thisFormName.substring(thisFormName.indexOf("_")+1,thisFormName.length);
+							var thisFormName = thisFormName.substring(0, thisFormName.indexOf("_"));
+							
+							var ff_handle = null;
+							var theForms = document.forms;
+							for ( var z = 0; z < theForms.length; z++ )
+							{
+								if ( theForms[z].getAttribute("name").toLowerCase() == thisFormName.toLowerCase() )
+								{
+									var theElements = theForms[z].elements;
+									for ( y = 0; y < theElements.length; y++ )
+									{
+										if ( theElements[y].getAttribute("name") != null )
+										{
+											if ( theElements[y].getAttribute("name").toLowerCase() == thisFieldName.toLowerCase() ) { ff_handle = theElements[y]; break; }
+										}
+									}									
+								}
+							}
+							
+							if (ff_handle)
+							{
+								if (!thisFieldReset)
+								{
+									ff_handle.value = "";
+									thisFieldReset = true;
+								}
+								if (ff_handle.value==""){ff_handle.value = thisAttrValue;}
+								else {ff_handle.value += ","+thisAttrValue;}
+							}
+						}
+					}
+				}
+			}
+		}
+		else if ( listRow.length > 0 )
+		{
+			var thisFieldReset = false;
+			for (var x = 0; x < listRow.length; x++)
+			{
+				var thisListRow = listRow.length? listRow[x] : listRow;			
+				var attrs = thisListRow.attributes;
+				for(var i=attrs.length-1; i>=0; i--)
+				{
+					var thisAttrName = new String(attrs[i].name);
+					if (thisAttrName.indexOf("glc")!=-1)
+					{
+						if (thisAttrName.indexOf("glc_form_")!=-1)
+						{
+							var thisFormName = thisAttrName.substring(9,thisAttrName.length);
+							var thisFieldName = thisFormName.substring(thisFormName.indexOf("_")+1,thisFormName.length);
+							var thisFormName = thisFormName.substring(0, thisFormName.indexOf("_"));
+							try{var ff_handle = eval(document.forms["tabularForm"].elements["selectId"]);}catch(e){}
+							if (ff_handle)
+							{
+								ff_handle.value = "";
+							}
+						}
+					}
+				}
+			}
+		}
+	};
+
+	gloListControl.ticketDblClick = function(e) {
+		if(!e) e = window.event;
+		
+		var SHIFT = e.shiftKey;
+		if (SHIFT || ticketdblclick)
+		{
+			if(!expclick)
+			{
+				var selectId = getSelectID(e);
+				return viewTicket(selectId); 
+			}
+			else
+			{
+				expclick = false;
+			}
+		}
+		gloListControl.keepActiveRow();
+		gloListControl.extras.collapseTickets();
+		var oImg = gloListControl.thisRow._getRow.children[0].children[0].children[0];
+		var oTicket = Tickets[gloListControl.thisRow._index];
+		gloListControl.thisRow._getRow.glc_form_tabularForm_selectId = oTicket.ticketid;
+		if (document.getElementById('messagearea' + gloListControl.thisRow._getRow.glc_form_tabularForm_selectId)) {
+			oContainer = eval('messagearea' + gloListControl.thisRow._getRow.glc_form_tabularForm_selectId);
+		} else {
+			oContainer = null;
+		}
+
+		if (oImg.src.indexOf('minus.gif') != -1) {
+			oImg.src = expandico.src;
+
+			if (oContainer != null) {
+				oContainer.style.display = 'none';
+				// Update messages and tickets
+			}
+			if (usePreview==1)closesplit();
+		} else {
+			oImg.src = contractico.src;
+			if (oContainer != null) {
+				//oTicket.forceUpdate('messages');
+				//oTicket.forceUpdate('notes');
+				oTicket.threadedMsg = new Array();
+				oTicket.sequenceMsg = new Array();
+				oTicket.whatsSelected = null;
+				oTicket.defaultOpen();
+				oContainer.style.display = 'block';
+				oTicket.selectSelection();	// simulate a click
+				
+			}
+		}
+	};
+	
+	gloListControl.ticketOpen = function() {
+		gloListControl.keepActiveRow();
+		var oImg = gloListControl.thisRow._getRow.children[0].children[0].children[0];
+		var oTicket = ( Tickets[gloListControl.thisRow._index] )? Tickets[gloListControl.thisRow._index] : null;
+		gloListControl.thisRow._getRow.glc_form_tabularForm_selectId = oTicket.ticketid;
+		gloListControl.extras.collapseTickets();	
+		if (document.getElementById('messagearea' + gloListControl.thisRow._getRow.glc_form_tabularForm_selectId)) {
+			oContainer = eval('messagearea' + gloListControl.thisRow._getRow.glc_form_tabularForm_selectId);
+		} else {
+			oContainer = null;
+		}
+
+		oImg.src = contractico.src;
+		if (oContainer != null) {
+			oTicket.threadedMsg = new Array();
+			oTicket.sequenceMsg = new Array();
+			oTicket.whatsSelected = null;
+			oTicket.defaultOpen();
+			oContainer.style.display = 'block';
+			oTicket.selectSelection();
+		}	
+	};
+	
+	gloListControl.ticketClose = function() {
+		gloListControl.keepActiveRow();
+		gloListControl.extras.collapseTickets();
+		var oImg = gloListControl.thisRow._getRow.children[0].children[0].children[0];
+		var oTicket = ( Tickets[gloListControl.thisRow._index] )? Tickets[gloListControl.thisRow._index] : null;
+		gloListControl.thisRow._getRow.glc_form_tabularForm_selectId = oTicket.ticketid;
+			
+		if (document.getElementById('messagearea' + gloListControl.thisRow._getRow.glc_form_tabularForm_selectId)) {
+			oContainer = eval('messagearea' + gloListControl.thisRow._getRow.glc_form_tabularForm_selectId);
+		} else {
+			oContainer = null;
+		}
+
+		oImg.src = expandico.src;
+		if (oContainer != null) {
+			oContainer.style.display = 'none';
+		}
+		if (usePreview==1)closesplit();
+	};
+
+	gloListControl.listRowClick = function (e)
+	{
+		if(!e) e = window.event;
+		var SHIFT = e.shiftKey;
+		var CTRL = false;
+		if(glo_whichOs() == "mac" || glo_whichOs() == "OSx")
+		{
+			CTRL = e.metaKey;
+		}
+		else
+		{
+			CTRL = e.ctrlKey;
+		}		
+		gloListControl.setActiveRow(e);
+		if (CTRL && !SHIFT && gloListControl.settings.multi_select())
+		{
+			gloListControl.starRowId = gloListControl.thisRow._index;
+			gloListControl.stopRowId = null;
+			if (gloListControl.thisRow._type=="ticket")
+			{
+				gloListControl.extras.collapseTickets();
+			}
+	
+			if (gloListControl.thisRow._active) {
+				gloListControl.removeRow();
+			} else {
+				gloListControl.selectRow();
+			}
+		}
+		else if  (SHIFT && gloListControl.settings.multi_select())
+		{
+			if (gloListControl.starRowId != null)
+			{
+				gloListControl.stopRowId = gloListControl.thisRow._index;
+			}
+			else
+			{
+				gloListControl.starRowId = gloListControl.thisRow._index;
+				gloListControl.setRowState();
+			}
+			if (gloListControl.stopRowId != null)
+			{
+				if (!CTRL)
+				{
+					gloListControl.resetAllRows();
+				}
+				if (gloListControl.thisRow._type=="ticket")
+				{
+					gloListControl.extras.collapseTickets();
+				}
+
+				var starAtDim = (gloListControl.stopRowId > gloListControl.starRowId) ? gloListControl.starRowId : gloListControl.stopRowId;
+				var stopAtDim = (gloListControl.stopRowId > gloListControl.starRowId) ? gloListControl.stopRowId : gloListControl.starRowId;
+
+				if (CTRL)
+				{
+					if (gloListControl.hasRow(starAtDim))
+						starAtDim++;
+				}
+				//var dateA = new Date();
+				while (starAtDim <= stopAtDim)
+				{
+					gloListControl.selectRowByIndex(starAtDim);
+					starAtDim++;
+				}
+				//var dateB = new Date();
+				//alert(dateB - dateA);
+				gloListControl.UpdateSelectData();
+				// last step is to clear the dims
+				//startRowId = rowId;
+				//stopRowId = null;
+			}
+		}
+		else
+		{
+			gloListControl.starRowId = gloListControl.thisRow._index;
+			gloListControl.stopRowId = null;
+//			if (gloListControl.thisRow._type=="ticket")
+//			{
+				
+				//listRowClick();
+//			}
+			/*
+			If the row is active and other rows are selected, select just the recent one
+			If the row is active and no other selections exist, unselect the recent one
+			If the row is inactive and other rows are selected, unselect them and select the recent one
+			If the row is inactive and no other rows are selected, just select the recent one
+			*/
+			gloListControl.setRowState();
+		}
+	};
+
+	gloListControl.listRowExpImgClick = function () {
+		var srcImg = window.event.srcElement;
+		var thiRow = srcImg.parentElement.parentElement.parentElement;
+		var tRowID = thiRow.getAttribute('tabRowId');
+		var tRowIn = tRowID ? parseInt(tRowID) : thiRow.rowIndex;
+
+		//srcImg.parentElement.parentElement.parentElement.click();
+
+		if (srcImg.src.indexOf("plus")!=-1)
+		{
+			srcImg.src = "./images/minus.gif";
+			if (document.getElementById("listRowCanvas"+tRowIn))
+			document.getElementById("listRowCanvas"+tRowIn).style.display = "block";
+		} else {
+			srcImg.src = "./images/plus.gif";
+			if (document.getElementById("listRowCanvas"+tRowIn))
+			document.getElementById("listRowCanvas"+tRowIn).style.display = "none";
+		}
+
+	};
+
+function tabRowOn() {
+//	rowId = findEventRowId();
+//	if (listRow.length)
+//	{
+//		if (listRow[rowId].getAttribute("title"))
+//		window.status = listRow[rowId].getAttribute("title");
+//	}else{
+//		if (listRow.getAttribute("title"))
+//		window.status = listRow.getAttribute("title");
+//	}
+}
+function tabRowOff() {
+//	window.status = '';
+}
+
+function AreTicketsAlreadySelected()
+{
+	var listRow = getListRows();
+	if(typeof listRow != "undefined")
+	{
+		for(var i = 0; i < listRow.length; i++)
+		{
+			if(listRow[i].className == trowOnClass || listRow[i].className == trowOnClassUnread)
+				return 1;
+		}
+	}
+	
+	return 0;
+}

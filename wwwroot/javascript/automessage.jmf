@@ -1,0 +1,175 @@
+	function adjustForm()
+	{
+		var submitform = true;
+		if (document.tabularForm.Description.value=="")
+		{
+			alert("You must set the description for this auto message.");
+			document.tabularForm.Description.focus();
+			submitform = false;
+			return;
+		}
+		
+		if (document.tabularForm.SendToPercent.value != 0 && document.tabularForm.SendToPercent.value != " ")
+		{
+			var num = parseInt (document.tabularForm.SendToPercent.value);
+	      		if ((num >= 1) && (num <= 100))
+	      		{
+	      		}
+	      		else
+	      		{
+	      			alert("The percentage of recipients to send to must be between 1-100.");
+				document.tabularForm.SendToPercent.focus();
+				submitform = false;
+				return;
+	      		}
+		}
+		else
+		{
+			alert("The percentage of recipients to send to must be between 1-100.");
+			document.tabularForm.SendToPercent.focus();
+			submitform = false;
+			return;
+		}
+		
+		if (document.tabularForm.WhenToSendVal.value != 0 && document.tabularForm.WhenToSendVal.value != " ")
+		{
+			var num = parseInt (document.tabularForm.WhenToSendVal.value);
+	      		if ((num >= 1) && (num <= 999))
+	      		{
+	      		}
+	      		else
+	      		{
+	      			alert("The send frequency must be between 1-999.");
+				document.tabularForm.WhenToSendVal.focus();
+				submitform = false;
+				return;
+	      		}
+		}
+		else
+		{
+			alert("The send frequency must be between 1-999.");
+			document.tabularForm.WhenToSendVal.focus();
+			submitform = false;
+			return;
+		}
+		
+		if (document.tabularForm.SrToSendID.value=="0" || document.tabularForm.SrToSendID.value=="" )
+		{
+			alert("You must select a standard response to be used for this message.");
+			document.tabularForm.AutoReplyResponseBtn.focus();
+			submitform = false;
+			return;
+		}
+		
+		var nSendFromType=0;
+		for (var i=0; i < document.tabularForm.SendFromTypeID.length; i++)
+	   	{
+	   		if (document.tabularForm.SendFromTypeID[i].checked)
+	      	{
+	      		nSendFromType = document.tabularForm.SendFromTypeID[i].value;
+	      	}
+	   	}
+				
+		if (nSendFromType == 2)
+		{
+			if (document.tabularForm.ReplyToAddress.value!="")
+			{
+				if (!glo_checkEmailAddress(document.tabularForm.ReplyToAddress.value))
+				{
+					alert("A valid From: email address is required.");
+					document.tabularForm.ReplyToAddress.focus();
+					submitform = false;
+					return;
+				}
+			} else {
+				alert("A valid From: email address is required.");
+				document.tabularForm.ReplyToAddress.focus();
+				submitform = false;
+				return;
+			}			
+		}
+		
+		if (submitform)
+		{
+			var postResults = glo_buildFormPost('tabularForm');
+			if (eval(postResults[0])==true)
+			{
+				glo_setOpenerLocation();
+				glo_doClose();
+			}
+		}
+	}
+
+	function docInitDisableForms()
+	{
+		adjDisable(document.tabularForm.CreateNewTicket);	
+	}
+
+	function adjDisable(object)
+	{
+		var fields = new Array();
+		if (object.name == "CreateNewTicket")
+		{
+			fields[0] = tabularForm.OwnerID;
+			fields[1] = tabularForm.TicketBoxID;
+			fields[2] = tabularForm.TicketCategoryID;
+		}
+		glo_disableForm(object.checked, fields);
+		
+		var nSendToType=0;
+		for (var i=0; i < document.tabularForm.SendToTypeID.length; i++)
+	   	{
+	   		if (document.tabularForm.SendToTypeID[i].checked)
+	      		{
+	      			nSendToType = document.tabularForm.SendToTypeID[i].value;
+	      		}
+	   	}
+				
+		if (nSendToType == 0)
+		{
+			document.getElementById('SendToTbID').disabled = false;
+			document.getElementById('SendToTcID').disabled = true;
+		}
+		else
+		{
+			document.getElementById('SendToTbID').disabled = true;
+			document.getElementById('SendToTcID').disabled = false;
+		}
+		
+		var nSendFromType2=0;
+		for (var i=0; i < document.tabularForm.SendFromTypeID.length; i++)
+	   	{
+	   		if (document.tabularForm.SendFromTypeID[i].checked)
+	      		{
+	      			nSendFromType2 = document.tabularForm.SendFromTypeID[i].value;
+	      		}
+	   	}
+				
+		if (nSendFromType2 == 2)
+		{
+			document.tabularForm.ReplyToAddress.disabled = false;
+			document.tabularForm.ReplyToName.disabled = false;
+		}
+		else
+		{
+			document.tabularForm.ReplyToAddress.disabled = true;
+			document.tabularForm.ReplyToName.disabled = true;
+		}
+	}
+
+	function resetCheck()
+	{
+		var ans = confirm("Are you sure you want to clear the results?");
+		if (ans)
+		{
+			var postResults = glo_buildFormPost('hitCountForm');
+			if (eval(postResults[0])==true)
+			{
+				docHitCountTxt.innerText = "0";
+				docFailCountTxt.innerText = "0";
+				docTotalCountTxt.innerText = "0";
+				docSentPercentTxt.innerText = "0";
+				glo_setOpenerLocation();
+			}
+		}
+	}

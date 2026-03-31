@@ -1,0 +1,171 @@
+ac_LIST_LENGTH = 0;
+ac_DRAWN = false;
+ac_LIST_MAX = 10;
+ac_VISIBLE = false;
+ac_TIMER = null;
+bPos = 0;
+
+function acAutoComplete(objID,e,aACList) {
+	if(!e) { e = window.event; }	
+	bPos=0;
+	tval = GetOBJ(objID).value;	
+	var semi = tval.lastIndexOf(";")+1;
+	var comma = tval.lastIndexOf(",")+1;
+	if((semi > 0 || comma > 0) && tval.length)
+	{
+		if(comma>semi){bPos=comma;}
+		else if(semi>=comma){bPos=semi;}
+		if(bPos==tval.length){ac_DRAWN = true; acHide(); return;}
+		else{tval = tval.substr(bPos,tval.length);ac_DRAWN = true;}		
+	}
+	
+	if(e.keyCode==8 || e.keyCode==46){acHide();return;}
+	
+	block = "[]{}().|?!$^*+=/\\";
+	for(i=0;i<block.length;i++) {
+		if(tval.indexOf(block.substr(i,1))!=-1) { acHide(); return; } }
+
+	if(!ac_DRAWN) {
+		window.setTimeout('GetOBJ("'+objID+'").focus(); GetOBJ("'+objID+'").value="'+tval+'";',100);
+		ac_DRAWN = true;
+	}
+
+	if(tval.length<1) { acHide(); return; }
+
+	if(e.keyCode==38 && ac_LIST_LENGTH) {
+		GetOBJ("idac_opt"+ac_LIST_LENGTH).focus();
+		return;
+	} else if(e.keyCode==40 && ac_LIST_LENGTH) {
+		GetOBJ("idac_opt1").focus();
+		return;
+	}
+	
+	alist = GetOBJ("auto_list");
+	outHTML = "";
+
+	ac_LIST_LENGTH = 0;
+
+	tval = tval.replace(/^\s+|\s+$/g, "");
+	treg = new RegExp(tval,"i");
+	
+	for(i=0;i<aACList.length;i++) {
+		if(aACList[i].match(treg)!=null) {
+			ac_LIST_LENGTH++;
+			tmod = aACList[i];
+			tmod = tmod.replace(/'/g, "\\'");
+			ttemp = aACList[i];
+			ttemp = ttemp.replace(/</g, "[");
+			ttemp = ttemp.replace(/>/g, "]");			
+			thtm = "<a href=\"#\" onmousedown=\"acSetValue('";
+			thtm+= objID+"','"+tmod+"'); return false;\" ";
+			thtm+= "id=\"idac_opt"+ac_LIST_LENGTH+"\" ";
+			thtm+= "onfocus=\"window.clearTimeout(ac_TIMER);\" ";
+			thtm+= "onblur=\"acDelayHide();\" ";
+			thtm+= "onkeydown=\"if(event.keyCode==13){acSetValue('"+objID+"', '"+tmod+"');}";
+			thtm+= "else{acMoveFocus("+ac_LIST_LENGTH+",event.keyCode);}\">";
+			thtm+= ttemp.substr(0,ttemp.search(treg)) + "<span class=\"ac_match\">";
+			thtm+= aACList[i].match(treg)[0] + "</span>";
+			thtm+= ttemp.substr((ttemp.search(treg)+tval.length),ttemp.length);
+			outHTML+= thtm+"</a>";
+			if(ac_LIST_MAX && ac_LIST_LENGTH>=ac_LIST_MAX) { break; }
+		}
+	}
+
+	if(!ac_VISIBLE && ac_LIST_LENGTH) {
+		ac_VISIBLE = true;
+		alist.style.display = "block";
+		tmp = GetPOS(GetOBJ(objID));
+
+		alist.style.left = tmp['x']+"px";
+		alist.style.top = (tmp['y']+tmp['h'])+"px";
+	}
+
+	if(!ac_LIST_LENGTH) { acHide(); }
+	
+	alist.innerHTML = outHTML;	
+	
+	return;
+}
+function acMoveFocus(objIdx,keyCode) {
+	if(keyCode==38) {
+		if(objIdx==1) { GetOBJ("idac_opt"+ac_LIST_LENGTH).focus(); }
+		else { GetOBJ("idac_opt"+(objIdx-1)).focus(); }
+	}
+	else if(keyCode==40) {
+		if(objIdx==ac_LIST_LENGTH) { GetOBJ("idac_opt1").focus(); }
+		else { GetOBJ("idac_opt"+(objIdx+1)).focus(); }
+	}
+	return;
+}
+function acDelayHide() {
+	ac_TIMER = window.setTimeout('acHide();',80);
+}
+function acHide() {
+	if(GetOBJ("auto_list"))
+	{
+		GetOBJ("auto_list").style.display = "none";
+	}
+	ac_VISIBLE = false;
+}
+function acSetValue(objID,szValue) {
+	var sVal = GetOBJ(objID).value;
+	sVal = sVal.substr(0,bPos);
+	if(bPos > 0)
+	{
+		sVal = sVal + " " + szValue;
+	}
+	else
+	{
+		sVal = sVal + szValue;
+	}
+	
+	GetOBJ(objID).value = sVal;
+	acHide();
+	SetCaretAtEnd(GetOBJ(objID));
+	return;
+}
+function SetCaretAtEnd(elem) {
+	var elemLen = elem.value.length;
+	if (document.selection) {
+	    elem.focus();
+	    var oSel = document.selection.createRange();
+	    oSel.moveStart('character', -elemLen);
+	    oSel.moveStart('character', elemLen);
+	    oSel.moveEnd('character', 0);
+	    oSel.select();
+	}
+	else if (elem.selectionStart || elem.selectionStart == '0') {
+	    elem.selectionStart = elemLen;
+	    elem.selectionEnd = elemLen;
+	    elem.focus();
+	} 
+} 
+
+if(typeof GetOBJ!='function') {
+	function GetOBJ(objID) {
+		if(document.getElementById) {
+			return document.getElementById(objID);
+		} else if(document.all) {
+			return document.all[objID];
+		}
+		return null;
+	}
+}
+if(typeof GetPOS!='function') {
+	function GetPOS(obj) {
+		pos = new Array();
+		pos['x'] = 0;
+		pos['y'] = 0;
+		pos['w'] = obj.offsetWidth;
+		pos['h'] = obj.offsetHeight;
+
+		tmpOBJ = obj;
+
+		do {
+			pos['x']+= tmpOBJ.offsetLeft;
+			pos['y']+= tmpOBJ.offsetTop;
+		} while (tmpOBJ = tmpOBJ.offsetParent);
+
+		return pos;
+	}
+}

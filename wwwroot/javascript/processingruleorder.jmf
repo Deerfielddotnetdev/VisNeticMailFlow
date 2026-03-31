@@ -1,0 +1,67 @@
+	var selectedRow;
+
+	function switchClk(xObject)
+	{
+		selectedRow = parseInt(xObject.rowIndex);
+	}
+
+	function nudge(dir)
+	{
+		proceed = false;
+		if (dir=="up")
+		{
+			var curRowID = selectedRow;
+			var nexRowID = selectedRow - 1;
+			if ((selectedRow-1) >= 0)
+			{
+				proceed = true;
+			}
+		}
+		else
+		{
+			var curRowID = selectedRow;
+			var nexRowID = selectedRow + 1;
+			if ((selectedRow+1) < parseInt(document.tabularForm.RuleCount.value))
+			{
+				proceed = true;
+			}
+		}
+		if (proceed)
+		{
+			var objCURruledesc = listRow[curRowID].children[1];
+			var objNEXruledesc = listRow[nexRowID].children[1];
+			var objCURisenabled = listRow[curRowID].children[2];
+			var objNEXisenabled = listRow[nexRowID].children[2];
+			var objCURhitcount = listRow[curRowID].children[3];
+			var objNEXhitcount = listRow[nexRowID].children[3];
+			var objCURruleorder = eval('document.tabularForm.ruleorder'+curRowID);
+			var objNEXruleorder = eval('document.tabularForm.ruleorder'+nexRowID);
+			var txtCURruledesc = objCURruledesc.innerText;
+			var txtCURisenabled = objCURisenabled.innerText;
+			var txtCURhitcount = objCURhitcount.innerText;
+			var txtNEXruledesc = objNEXruledesc.innerText;
+			var txtNEXisenabled = objNEXisenabled.innerText;
+			var txtNEXhitcount = objNEXhitcount.innerText;
+			var valCURruleorder = objCURruleorder.value;
+			var valNEXruleorder = objNEXruleorder.value;
+			objCURruledesc.innerText = txtNEXruledesc;
+			objNEXruledesc.innerText = txtCURruledesc;
+			objCURisenabled.innerText = txtNEXisenabled;
+			objNEXisenabled.innerText = txtCURisenabled;
+			objCURhitcount.innerText = txtNEXhitcount;
+			objNEXhitcount.innerText = txtCURhitcount;
+			objCURruleorder.value = valNEXruleorder;
+			objNEXruleorder.value = valCURruleorder;
+			var curRowSelectId;
+			var nexRowSelectId;
+
+			curRowSelectId = listRow[curRowID].getAttribute('glc_form_tabularForm_selectId');
+			nexRowSelectId = listRow[nexRowID].getAttribute('glc_form_tabularForm_selectId');
+
+			listRow[curRowID].setAttribute('glc_form_tabularForm_selectId', nexRowSelectId);
+			listRow[nexRowID].setAttribute('glc_form_tabularForm_selectId', curRowSelectId);
+			listRow[nexRowID].click();
+
+			document.tabularForm.RowMovement.value = "true";
+		}
+	}

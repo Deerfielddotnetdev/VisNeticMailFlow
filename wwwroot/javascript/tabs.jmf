@@ -1,0 +1,136 @@
+var tabs, tabArray, activeTab;
+
+function tabInit(){
+	if (window.tabInited) return;
+
+	tabs=document.getElementById('tabs');
+	tabs.getElementsWithClass=get_elements_with_class_from_classList;
+	tabArray=tabs.getElementsWithClass("*", ["tab", "tabActive"]);
+	activeTab=tabs.getElementsWithClass("*", ["tabActive"])[0]||tabArray[0];
+
+	for (var i=0;i < tabArray.length; i++){
+		var _tab;
+			_tab=tabArray[i];
+			if (_tab.getAttribute("useContent"))
+				_tab.content=document.getElementById("content"+(i+1));
+			else
+				_tab.turl=_tab.getAttribute("turl");
+			_tab.onmouseover=hoverTab;
+			_tab.onmouseout=hoverOff;
+			//_tab.onmousedown=depressTab;
+			_tab.onclick=depressTab;
+			_tab.depressTab=depressTab;
+	}
+	//activeTab.className="tab tabActive";
+	
+//	tabWindow.location = activeTab.turl;
+	if (activeTab.getAttribute("useContent"))
+	{
+		activeTab.content.style.display="block";
+		activeTab.content.style.visibility="visible";
+		if(document.getElementById("tabWindow"))
+		{
+			with (document.getElementById("tabWindow"))
+			{
+				style.display="none";
+				style.visibility="hidden";
+				src = "blank.htm";
+			}
+		}
+	}
+	else
+	{
+		with (document.getElementById("tabWindow"))
+		{
+			style.display="block";
+			style.visibility="visible";
+			//src = activeTab.turl;
+		}
+	}
+
+	window.tabInited=true;
+}
+
+function hoverTab(){
+	if (activeTab==this) return;
+	this.className="tab tabHover";
+}
+
+function hoverOff(){
+	if (activeTab==this) return;
+	this.className="tab";
+}
+
+function depressTab(e){
+	if (activeTab==this) return;
+//	this.className="tab tabActive";
+	this.className="tabActive";
+	if (activeTab) resetTab(activeTab);
+	activeTab=this;
+
+	if (this.getAttribute("useContent"))
+	{
+		this.content.style.display="block";
+		this.content.style.visibility="visible";
+	} else {
+		//tabWindow.location = activeTab.turl;
+		with (document.getElementById("tabWindow"))
+		{
+			style.display="block";
+			style.visibility="visible";
+			src = activeTab.turl;
+		}
+	}
+}
+
+function resetTab(tab){
+	tab.className="tab";
+	//tab.content.style.display="none";
+	//tab.content.style.visibility="hidden";
+	if (tab.getAttribute("useContent"))
+	{
+		tab.content.style.display="none";
+		tab.content.style.visibility="hidden";
+		//with (document.getElementById("tabWindow"))
+		//{
+		//	style.display="none";
+		//	style.visibility="hidden";
+		//	src = "blank.htm";
+		//}
+	}
+	else
+	{
+		with (document.getElementById("tabWindow"))
+		{
+			style.display="none";
+			style.visibility="hidden";
+			//src = "blank.htm";
+		}
+	}
+
+}
+
+get_elements_with_class_from_classList=function(tagName, classList){
+	var returnedCollection=new Array(0);
+	var collection=(this.all&&tagName=="*")?this.all:this.getElementsByTagName(tagName);
+	for(var i=0; i<collection.length; i++)
+		jloop:for(var j=0;j<classList.length; j++)
+		if(collection[i].className.test(classList[j], " ")){
+			returnedCollection[returnedCollection.length]=collection[i];
+			break jloop;
+		}
+	return returnedCollection;
+};
+
+if(!String.prototype.test){
+	String.prototype.test=function(inp, delim){
+		var exps=getTokenizedExps(inp, delim);
+		return(exps.global.test(this)||exps.ends.test(this));
+	};
+	function getTokenizedExps(inp, delim){
+		return {
+			global:new RegExp(delim+inp+delim, "\g"),
+			ends:new RegExp("^"+inp+delim+"|^"+inp+"$|"+delim+inp+"$", "\g")
+		};
+	}
+}

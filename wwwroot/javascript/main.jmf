@@ -1,0 +1,62 @@
+function docStoreRows() {
+		var rightCurHeight = document.getElementById("rightpane").offsetHeight;
+	  var containerHeight = document.getElementById("container").offsetHeight;
+	  var rightPercent = Math.round(rightCurHeight/containerHeight*100);
+	  var valTemp = new String(document.all.container.rows);
+	  var valString = new String(rightPercent + "%,*");
+		valString = valString.replace(",",".");
+		
+		setCookie("main_rows", valString, "01/01/2099");
+		if (window.ActiveXObject)
+		{
+			if (document.cookie && getCookieCount("main_rows") > 0)
+			{
+				var widths = getCookieNum("main_rows", getCookieCount("main_rows"));
+				var rowWidths = widths.replace(".",",");
+				document.getElementById("container").rows = rowWidths;
+			}
+			else
+			{
+				document.getElementById("container").rows = "50%,*";
+			}
+			
+			if (document.getElementById("container").rows == "100%,*" || document.getElementById("container").rows == "100%,0%")
+			{
+				document.getElementById("container").rows = "50%,*";
+			}
+		}
+}
+function docStoreCols(numCols)
+{
+	  var xPane = document.getElementById('leftpane');
+	  var doco = (xPane.contentDocument ? xPane.contentDocument : xPane.contentWindow.document);
+	  var bdy = doco.body;
+	  var leftCurWidth = bdy.offsetWidth;
+	  numCols = leftCurWidth + ",100%";
+		var valString = new String(numCols);
+	  valString = valString.replace(",",".");
+	  var s_array = valString.split(".");
+		numCols = s_array[0];
+		if((numCols) < 150)
+	    {
+	    	var sTemp = 150;
+	    }
+	    else if(numCols > 2000)
+	    {
+	    	var sTemp = numCols/100;
+	    	if(sTemp < 150)
+	    		sTemp = 150;
+	    }
+	    else
+	    {
+	    	var sTemp = numCols;
+	    }	    	
+		valString = sTemp + ".100%";
+	  setCookie("main_cols", valString, "01/01/2099");
+}
+
+function docUpdateTitle(sLoc)
+{
+	window.parent.document.getElementById("titlebarmenutext").innerText = self.frames[1].document.title; // rightpane
+	window.parent.document.getElementById("titlebarmenutext").textContent = self.frames[1].document.title; // rightpane
+}

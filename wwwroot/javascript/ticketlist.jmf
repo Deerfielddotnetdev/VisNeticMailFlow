@@ -1,0 +1,1259 @@
+function listRowClick()
+{	
+
+	if (window.event.srcElement.getAttribute("glc_form_tabularForm_selectId") != null)
+	{
+		oEvent = window.event.srcElement;
+	}
+	else
+	{
+		oEvent = window.event.srcElement;
+		while (oEvent.parentElement.tagName != "TABLE")
+		{
+			oEvent = oEvent.parentElement;
+			if (oEvent.getAttribute("glc_form_tabularForm_selectId") != null)
+			break;
+		}
+		oImg = oEvent.children[0].children[0].children[0];
+		tabularForm.selectId.value = oEvent.glc_form_tabularForm_selectId;
+		if(document.getElementById('messagearea' + tabularForm.selectId.value)) {
+			oContainer = eval('messagearea' + tabularForm.selectId.value);
+		} else {
+			oContainer = null;
+		}
+		if (oImg.src.indexOf('./images/minus.gif') != -1) {
+			
+			oImg.src = expandico.src;
+			if (oContainer != null) {
+				oContainer.style.display = 'none';				
+			}
+			if (usePreview==1)closesplit();
+		 } else {
+			oImg.src = contractico.src;
+			if (oContainer != null) {
+				Tickets[oEvent.tabRowId].forceUpdate('messages');
+				Tickets[oEvent.tabRowId].forceUpdate('notes');
+				oContainer.style.display = 'block';
+				Tickets[oEvent.tabRowId].selectSelection();	
+				
+			}
+		}
+	}		
+	
+	for (i = 0; i < Tickets.length; i++) {
+		if(Tickets[i].ticketid != oEvent.glc_form_tabularForm_selectId) {
+			msgContainer = eval('messagearea' + Tickets[i].ticketid);
+			msgIndicator = eval('document.msgindicator' + Tickets[i].ticketid);
+			if(msgContainer.style.display == 'block') {
+				msgContainer.style.display = 'none';
+				msgIndicator.src = expandico.src;
+			}
+		}
+	}
+	
+}
+
+/* form handlers */
+function ticketFunc(doWhat)
+{
+	if(glo_isBtnDisabled()){return false;}		
+	var selectId = window.document.tabularForm.selectId.value;
+	var listRow = getListRows();			
+	
+	if (doWhat == 'new') {
+		glo_launchMsgCompWindow(null, null, ticketboxview, ticketboxid, null, null, null);
+	}
+	if (doWhat == 'addtoticket') {
+		glo_launchMsgCompWindow(null, null, ticketboxview, ticketboxid, selectId, null, null);
+	}
+	
+	if (selectId.length != 0)
+	{
+		if (doWhat == 'delete')
+		{
+			var selectIdArr = selectId.split(",");
+			var usrResponse = null;
+			if (selectIdArr.length > 1)
+				usrResponse = confirm('Are you sure you want to delete these tickets?');
+			else
+				usrResponse = confirm('Are you sure you want to delete this ticket?');
+			if (usrResponse)
+			{
+				if (docName=="ticketsearchresults.ems" || docName=="contacthistory.ems")
+				{
+					document.tabularForm.Action.value = doWhat;
+					var postResults = glo_buildFormPost('tabularForm');
+					var reXML = postResults[2];			
+					if (reXML.selectSingleNode("/root/UpdateAllCounts"))
+					{
+						parent.frames.menu.updateTicketCount();
+					}
+					glo_doReload('ListHolder',window.location.href);
+				}
+				else
+				{
+					document.tabularForm.Action.value = doWhat;
+					var postResults = glo_buildFormPost('tabularForm');
+					if (postResults[0]==true)
+					{
+						var reXML = postResults[2];			
+						if (reXML.selectSingleNode("/root/UpdateAllCounts"))
+						{
+							parent.frames.menu.updateTicketCount();
+						}
+						
+						var newUrl = "";
+						if(docName == "mytickets.ems")
+						{
+							if(reXML.selectSingleNode("/root/TicketBoxItemList/@customviewid"))
+							{
+								var nCustomView = reXML.selectSingleNode("/root/TicketBoxItemList/@customviewid").value;
+								if(nCustomView != 0)
+									newUrl = "./"+docName+"?CustomTicketBoxView="+nCustomView+"&CurrentPage="+currentpage;
+								else
+									newUrl = "./"+docName+"?TicketBoxView="+ticketboxview+"&CurrentPage="+currentpage;
+							}
+							else
+							{
+								newUrl = "./"+docName+"?TicketBoxView="+ticketboxview+"&CurrentPage="+currentpage;
+							}
+						}	
+						else
+						{
+							newUrl = "./"+docName+"?TicketBoxView="+ticketboxview+"&CurrentPage="+currentpage;
+						}
+						glo_doReload('ListHolder',newUrl);
+					}
+				}
+			}
+		}
+		if (doWhat == 'restore')
+		{
+			var selectIdArr = selectId.split(",");
+			var usrResponse = null;
+			if (selectIdArr.length > 1)
+			{
+				alert('Multiple Tickets selected, please select a single Ticket to restore!');						
+			}
+			else
+			{
+				var oTicket = ( Tickets[gloListControl.thisRow._index] )? Tickets[gloListControl.thisRow._index] : null;
+				if (oTicket.isdeleted == '1')
+				{
+					usrResponse = confirm('Are you sure you want to restore this ticket?');
+				}
+				else
+				{
+					alert('The selected Ticket is not deleted and cannot be restored!');
+				}
+			}
+			if (usrResponse)
+			{
+				if (docName=="ticketsearchresults.ems" || docName=="contacthistory.ems")
+				{
+					document.tabularForm.Action.value = doWhat;
+					var postResults = glo_buildFormPost('tabularForm');
+					//if (postResults[1].indexOf('Refresh')!=-1)
+						var reXML = postResults[2];			
+						if (reXML.selectSingleNode("/root/UpdateAllCounts"))
+						{
+							parent.frames.menu.updateTicketCount();
+						}
+						glo_doReload('ListHolder',window.location.href);
+				} else {
+					document.tabularForm.Action.value = doWhat;
+					var postResults = glo_buildFormPost('tabularForm');
+					if (postResults[0]==true)
+					{
+						var reXML = postResults[2];			
+						if (reXML.selectSingleNode("/root/UpdateAllCounts"))
+						{
+							parent.frames.menu.updateTicketCount();
+						}
+						var newUrl = "./"+docName+"?TicketBoxView="+ticketboxview+"&CurrentPage="+currentpage;
+						glo_doReload('ListHolder',newUrl);
+					}
+				}
+			}
+		}
+		if (doWhat == 'unlock')
+		{
+			var selectIdArr = selectId.split(",");
+			var usrResponse = null;
+			if (selectIdArr.length > 1)
+				usrResponse = confirm('Are you sure you want to unlock these tickets?');
+			else
+				usrResponse = confirm('Are you sure you want to unlock this ticket?');
+			if (usrResponse)
+			{
+				if (docName=="ticketsearchresults.ems")
+				{
+					document.tabularForm.Action.value = doWhat;
+					var postResults = glo_buildFormPost('tabularForm');
+					var reXML = postResults[2];			
+					if (reXML.selectSingleNode("/root/UpdateAllCounts"))
+					{
+						parent.frames.menu.updateTicketCount();
+					}
+					glo_doReload('ListHolder',window.location.href);
+				}						
+			}
+		}
+		if (doWhat == 'contact') {
+		
+			glo_launchModelessWindow('./modalframe.ems?file=multiplecontacts.ems&ticketID='+selectId+'&ticketboxview='+ticketboxview, 400, 400, 'yes', 'no', 'no');
+			
+			if (listRow.length)
+			{
+				for (var x = 0; x < listRow.length; x++)
+				{
+					if (listRow[x].getAttribute("glc_form_tabularForm_selectId")==selectId)
+					{					
+						listRow[x].focus();
+						if (Tickets[x]) Tickets[x].forceUpdate('notes');
+					}
+				}
+			} else {
+				if (Tickets[0]) Tickets[0].forceUpdate('notes');
+			}
+		}
+		if (doWhat == 'voipcall')
+		{
+			glo_launchModelessWindow('./modalframe.ems?file=voipcall.ems&ticket='+selectId, 600, 400, 'yes', 'no', 'no');	
+		}
+		if (doWhat == 'notes') {
+		
+			glo_launchModalWindow('./modalframe.ems?file=ticketnotes.ems&ticket='+selectId, 600, 400, 'yes', 'no', 'no');
+			if (listRow.length)
+			{
+				for (var x = 0; x < listRow.length; x++)
+				{
+					if (listRow[x].glc_form_tabularForm_selectId==selectId)
+					{					
+						listRow[x].focus();
+						if (Tickets[x]) Tickets[x].forceUpdate('notes');
+					}
+				}
+			} else {
+				if (Tickets[0]) Tickets[0].forceUpdate('notes');
+			}
+		}
+	}
+}
+function docShowTicketNotes(selID,aRowID)
+{
+	if (selID) glo_launchModalWindow('./modalframe.ems?file=ticketnotes.ems&ticket='+selID, 600, 400, 'yes', 'no', 'no');
+	if (aRowID && Tickets[aRowID]) Tickets[aRowID].forceUpdate('notes');
+}
+function docShowTicketProps(props,selID,aRowID)
+{
+	glo_launchModalWindow('./modalframe.ems?file=ticketproperties.ems&ticketID='+selID+'&aRowID='+aRowID+'&method='+props, 400, 265, 'yes', 'no', 'no');
+}
+function ticketProps()
+{
+	var selectId = document.tabularForm.selectId.value;			
+	if (selectId.length !=0)
+	{
+		glo_launchModalWindow('./modalframe.ems?file=ticketproperties.ems&method=props&ticketID='+selectId+'&TicketBoxView='+ticketboxview+'&tbid='+ticketboxid, 600, 600, 'yes', 'no', 'no');
+	}
+}
+function reassignTicket()
+{
+
+	var selectId = document.tabularForm.selectId.value;
+	if (selectId.length !=0)
+	{
+		glo_launchModalWindow('./modalframe.ems?file=ticketproperties.ems&method=owner&ticketID='+selectId+'&TicketBoxView='+ticketboxview, 400, 315, 'yes', 'no', 'no');
+	}
+}
+function moveTicket()
+{
+	var selectId = document.tabularForm.selectId.value;
+	if (selectId.length !=0)
+	{
+		glo_launchModalWindow('./modalframe.ems?file=ticketproperties.ems&method=ticketbox&ticketID='+selectId+'&TicketBoxView='+ticketboxview, 400, 315, 'yes', 'no', 'no');
+	}
+}
+function stateTicket()
+{
+	var selectId = document.tabularForm.selectId.value;
+	if (selectId.length !=0)
+	{
+		glo_launchModalWindow('./modalframe.ems?file=ticketproperties.ems&method=state&ticketID='+selectId+'&TicketBoxView='+ticketboxview, 400, 315, 'yes', 'no', 'no');
+	}
+}
+function closeTicket()
+{
+	var selectId = document.tabularForm.selectId.value;
+	if (selectId.length !=0)
+	{
+		glo_launchModalWindow('./modalframe.ems?file=ticketproperties.ems&method=close&ticketID='+selectId+'&TicketBoxView='+ticketboxview, 400, 300, 'yes', 'no', 'no');
+	}
+}
+function printTicket()
+{
+	var selectId = document.tabularForm.selectId.value;
+	if (selectId.length !=0)
+	{
+		glo_launchModalWindow('./modalframe.ems?file=ticketprint.ems&ticketID='+selectId, 400, 300, 'yes', 'no', 'no');
+	}
+}
+function mergeTicket(numSel)
+{
+	var selectId = document.tabularForm.selectId.value;
+	if (numSel !=0)
+	{
+		if (numSel == 1)
+		{
+			document.location = 'ticketsearch.ems?MergeID='+selectId;
+		}
+		else
+		{
+			var myObject = new Object();
+			myObject.windowObj = window;
+			myObject.ticketId = selectId;
+			glo_launchModalWindow('./modalframe.ems?file=changeticket.ems&ticketID='+selectId, 325, 220, 'yes', 'no', 'no', myObject);
+		}
+	}
+}		
+
+function mergeTicketAction(doWhat)
+{
+	var selectId = document.tabularForm.selectId.value;
+	if(doWhat == "merge")
+	{
+		var thisUrl = "changeticket.ems?postXML=1&MergeId="+selectId+"&changeTicketBoxView="+ticketboxview+"&Action=merge";
+		var useThisForm = new Array();
+		var postResults = glo_buildFormPost('tabularForm', thisUrl, null, useThisForm);
+		if (postResults[0]==true)
+		{
+			var reXML = postResults[2];
+			var newPageId = reXML.selectSingleNode("/root/TicketBoxView/@TYPE").value;
+			var newPage = (newPageId==1)?"mytickets.ems":"ticketlist.ems";
+			var newTicketBoxView = reXML.selectSingleNode("/root/TicketBoxView/@ID").value;
+			var newTicketId = reXML.selectSingleNode("/root/DestTicket/@ID").value;
+			var newLoc = newPage+"?ticketboxview="+newTicketBoxView+"&ticket="+newTicketId;
+			parent.frames.rightpane.location = newLoc;
+			var newLink = (newPageId==1)?"nobrInbox":"nobrTicketsView"+newTicketBoxView;
+			parent.frames.menu.UpdateNonAdminLink(newLink);
+		} 					
+	}
+	else if(doWhat == "mergeExist")
+	{
+		parent.frames.rightpane.location = 'ticketsearch.ems?MergeID='+selectId+'&ticketboxview='+ticketboxview;
+		parent.frames.menu.UpdateNonAdminLink('spanTicketSearch');
+	}
+}
+
+function doMergeTicket() {
+	var selectId = document.tabularForm.selectId.value;
+	if(selectId == ""){
+		alert("Please select a ticket to merge with!");
+	} else {
+		var thisUrl = "changeticket.ems?postXML=1&MergeId="+changeTicketMergeId+"&changeTicketBoxView="+changeTicketBoxView+"&destTicketId="+selectId+"&Action=mergeExist";
+		var useThisForm = new Array();
+		var postResults = glo_buildFormPost('tabularForm', thisUrl, null, useThisForm);
+		if (postResults[0]==true)
+		{
+			var reXML = postResults[2];
+			var newPageId = reXML.selectSingleNode("/root/TicketBoxView/@TYPE").value;
+			var newPage = (newPageId==1)?"mytickets.ems":"ticketlist.ems";
+			var newTicketBoxView = reXML.selectSingleNode("/root/TicketBoxView/@ID").value;
+			var newTicketId = reXML.selectSingleNode("/root/DestTicket/@ID").value;
+			var newLoc = newPage+"?ticketboxview="+newTicketBoxView+"&ticket="+newTicketId;
+			parent.frames.rightpane.location = newLoc;
+			var newLink = (newPageId==1)?"nobrInbox":"nobrTicketsView"+newTicketBoxView;
+			parent.frames.menu.UpdateNonAdminLink(newLink);
+		} 			
+	}
+}
+
+function manageLinks()
+{
+	parent.frames.rightpane.location = 'ticketlinks.ems?ownerid='+agentid;
+	parent.frames.menu.UpdateNonAdminLink('spanTicketLinks');
+}
+			
+function viewLinks(TicketID)
+{
+	glo_launchNewWindow("ticketlinks.ems?ticketid="+TicketID );	
+}
+			
+function getLinks(TicketID,LinkCount)
+{
+	var myObject = new Object();
+	myObject.windowObj = window;
+	myObject.ticketId = TicketID;
+	myObject.linkCount = LinkCount;
+	glo_launchModalWindow('./modalframe.ems?file=changeticket.ems&ticketlink=1&linkCount='+LinkCount+'&ticketID='+TicketID, 440, 220, 'yes', 'no', 'no', myObject);
+}
+	
+function linkTicket()
+{
+	var selectId = document.tabularForm.selectId.value;
+	var myObject = new Object();
+	myObject.windowObj = window;
+	myObject.ticketId = selectId;
+	glo_launchModalWindow('./modalframe.ems?file=changeticket.ems&ticketlink=1&ticketID='+selectId, 440, 220, 'yes', 'no', 'no', myObject);
+}	
+
+function linkTicketAction(doWhat,linkName)
+{
+	var selectId = document.tabularForm.selectId.value;
+	if(doWhat == "linkTickets")
+	{
+		var thisUrl = "changeticket.ems?postXML=1&LinkId="+selectId+"&linkName="+linkName+"&ChangeTicketBoxView="+ticketboxview+"&Action=linkTickets";
+		var useThisForm = new Array();
+		var postResults = glo_buildFormPost('tabularForm', thisUrl, null, useThisForm);
+		if (postResults[0]==true)
+		{
+			var reXML = postResults[2];
+			var newPageId = reXML.selectSingleNode("/root/TicketBoxView/@TYPE").value;
+			if(newPageId == 0)
+			{
+				parent.frames.rightpane.location = parent.frames.rightpane.location;
+				parent.frames.menu.UpdateNonAdminLink('spanTicketSearch');
+			}
+			else
+			{
+				var newPage = (newPageId==1)?"mytickets.ems":"ticketlist.ems";
+				var newTicketBoxView = reXML.selectSingleNode("/root/TicketBoxView/@ID").value;
+				var newTicketId = reXML.selectSingleNode("/root/DestTicket/@ID").value;
+				var newLoc = newPage+"?ticketboxview="+newTicketBoxView+"&ticket="+newTicketId;
+				parent.frames.rightpane.location = newLoc;
+				var newLink = (newPageId==1)?"nobrInbox":"nobrTicketsView"+newTicketBoxView;
+				parent.frames.menu.UpdateNonAdminLink(newLink);
+			}
+		}
+	}
+	else if(doWhat == "linkTicketsTicket")
+	{
+		parent.frames.rightpane.location = 'ticketsearch.ems?linkName='+linkName+'&linkTbView='+ticketboxview+'&LinkID='+selectId;
+		parent.frames.menu.UpdateNonAdminLink('spanTicketSearch');
+	}
+	else if(doWhat == "linkTicketsLink")
+	{
+		parent.frames.rightpane.location = 'ticketlinks.ems?Action=addtolink&ChangeTicketBoxView='+ticketboxview+'&srcticketID='+selectId;
+		parent.frames.menu.UpdateNonAdminLink('spanTicketLinks');
+	}
+	else if(doWhat == "delTicketFromLink")
+	{
+		var selectIdArr = selectId.split(",");
+		var usrResponse = null;
+		if (selectIdArr.length > 1)
+		{
+			usrResponse = confirm('Are you sure you want to remove these tickets from this Ticket Link?\n\nIf one or fewer Tickets remain in the Ticket Link the Link will be deleted.');
+		}
+		else
+		{
+			usrResponse = confirm('Are you sure you want to remove this ticket from this Ticket Link?\n\nIf one or fewer Tickets remain in the Ticket Link the Link will be deleted.');
+		}
+		if (usrResponse)
+		{
+			var thisUrl = "changeticket.ems?postXML=1&TicketID="+selectId+"&LinkID="+changeTicketLinkId+"&Action=delTickets";
+			var useThisForm = new Array();
+			var postResults = glo_buildFormPost('tabularForm', thisUrl, null, useThisForm);
+			if (postResults[0]==true)
+			{
+				var newLoc = "ticketsearchresults.ems?nocancel=1&Action=search&hideleft=1&ticketlink=2&ticketlinkid=" + changeTicketLinkId
+				document.location = newLoc;
+				parent.frames.menu.UpdateNonAdminLink('spanTicketSearch');
+			}
+		} 
+	}
+}
+
+function doLinkTicket() {
+	var selectId = document.tabularForm.selectId.value;
+	if(selectId == ""){
+		alert("Please select a ticket to link to!");
+	} else {
+		var thisUrl = "changeticket.ems?postXML=1&LinkId="+changeTicketLinkId+"&LinkName="+changeTicketLinkName+"&ChangeTicketBoxView="+changeTicketLinkTbView+"&destTicketId="+selectId+"&Action=linkExist";
+		var useThisForm = new Array();
+		var postResults = glo_buildFormPost('tabularForm', thisUrl, null, useThisForm);
+		if (postResults[0]==true)
+		{
+			var reXML = postResults[2];
+			var newPageId = reXML.selectSingleNode("/root/TicketBoxView/@TYPE").value;
+			var newPage = (newPageId==1)?"mytickets.ems":"ticketlist.ems";
+			var newTicketBoxView = reXML.selectSingleNode("/root/TicketBoxView/@ID").value;
+			var newTicketId = reXML.selectSingleNode("/root/DestTicket/@ID").value;
+			var newLoc = newPage+"?ticketboxview="+newTicketBoxView+"&ticket="+newTicketId;
+			parent.frames.rightpane.location = newLoc;
+			var newLink = (newPageId==1)?"nobrInbox":"nobrTicketsView"+newTicketBoxView;
+			parent.frames.menu.UpdateNonAdminLink(newLink);
+		} 			
+	}
+}
+
+function viewMsg(type,msgObj)
+{
+	if(isNaN(parseInt(treeForm.selectId.value)) != true)
+	{
+		msgType = (msgObj.inbound == '1') ? 'inbound' : 'outbound';
+		
+		if(sFileName == 'ticketsearchresults.ems')
+			qString = 'msg=' + msgObj.messageId + '&type=' + msgType + '&ticketboxview=' + ticketboxview + '&tsresult=1';
+		else
+			qString = 'msg=' + msgObj.messageId + '&type=' + msgType + '&ticketboxview=' + ticketboxview;
+			
+		if (type == 'preview' && usePreview == 1)
+		{								
+			opensplit('./vmsgframe.ems?file=viewmsg.ems&' +qString);
+		}
+		else
+		{
+			glo_launchViewMessage(qString);
+		}
+
+	}
+}
+
+function getSelectID(event)
+{
+	var selectId = document.tabularForm.selectId.value;
+	if(!selectId)
+	{
+		gloListControl.listRowClick(event);
+		selectId = document.tabularForm.selectId.value;
+	}
+	return selectId;
+}
+
+function viewTicket(selectId)
+{
+	if(selectId == "" || typeof selectId == "undefined")
+	{
+		selectId = document.tabularForm.selectId.value;
+	}
+	
+	if(selectId == "")
+	{
+		alert("Please select a ticket");
+	}
+	else
+	{
+		if(window.dialogArguments != null)
+		{
+			var callerWindowObj = dialogArguments;
+			callerWindowObj.parent.frames[0].glo_launchNewWindow("mailflow.ems?rightpane=ticketsearchresults.ems$action=search$hideleft=1$ticketid="+selectId+"$MAXLINES=100$nocancel=1");
+		}
+		else
+		{
+			glo_launchNewWindow("mailflow.ems?rightpane=ticketsearchresults.ems$action=search$hideleft=1$ticketid="+selectId+"$MAXLINES=100$nocancel=1");}
+	}	
+}
+function updateInboundMsgAsRead(msgID, beenRead)
+{
+	var getURL = "/updateinbound.ems?OutputXML=1&msgID=" + msgID + "&beenRead=" + beenRead;
+
+	//alert(getURL);
+
+	try
+	{
+		xmlhttp.open('GET', getURL, false);
+		if(xmlhttp.overrideMimeType){ xmlhttp.overrideMimeType('text/xml'); }
+		xmlhttp.send();
+
+		//alert("XMLHTTP Request Sent\n\nWith this alert there will be three requests to the ISAPI extension\nwithout this alert two requests are seen by the ISAPI extension");
+		
+		if (xmlhttp.responseXML && xmlhttp.responseXML.xml && xmlhttp.status == 200) 
+		{
+			return 1;
+		}
+	}
+	catch(e) 
+	{
+		alert("An error occurred connecting to the server.\nThe server is either offline, or you have been disconnected from the Internet.");	
+	}
+	
+	return 0;	
+}
+
+function updateNoteAsRead(noteID, beenRead)
+{
+	var getURL = "/updateticketnotes.ems?OutputXML=1&selectid=" + noteID + "&beenRead=" + beenRead;
+
+	try
+	{
+		xmlhttp.open('GET', getURL, false);
+		if(xmlhttp.overrideMimeType){ xmlhttp.overrideMimeType('text/xml'); }
+		xmlhttp.send();
+
+		//alert("XMLHTTP Request Sent\n\nWith this alert there will be three requests to the ISAPI extension\nwithout this alert two requests are seen by the ISAPI extension");
+		
+		if (xmlhttp.responseXML && xmlhttp.responseXML.xml && xmlhttp.status == 200) 
+		{
+			return 1;
+		}
+	}
+	catch(e) 
+	{
+		alert("An error occurred connecting to the server.\nThe server is either offline, or you have been disconnected from the Internet.");	
+	}
+	
+	return 0;	
+}
+	
+function hdlTreeClick(objcol)
+{
+	if (objcol.length)
+	{
+		for(i = 0; i < objcol.length; i++)
+		{
+			if(objcol[i].getAttribute('selected') == 'true')
+			{
+				obj = objcol[i];break;
+			}
+		}
+	}
+	else
+	{
+		obj = objcol;
+	}
+	
+	//if(obj.parentNode)
+		//obj.parentNode.style.fontWeight = "normal";
+	
+	if(obj.id.indexOf('notes') != -1 && obj.id.indexOf('sys') == -1)
+	{
+		// tree type is a note
+		ticketDim = obj.getAttribute('ticketDim');
+		var ticketNoteID = document.treeForm.selectId.value;
+		url = './ticketNotes.ems?selectId=' + document.treeForm.selectId.value;// +'&amp;TicketID='+obj.getAttribute('ticketId');
+		
+		if(document.getElementById('threadTree' + obj.getAttribute('ticketId')))
+		{
+			if(glo_whichBrowser()=='Firefox')
+			{
+				var threadTree = 'threadTree' + obj.getAttribute('ticketId');
+				var theDivs = glo_elementsById(threadTree);
+				clearTree(theDivs);
+			}
+			else
+			{
+				var threadTree = eval('threadTree' + obj.getAttribute('ticketId'));
+				clearTree(threadTree);
+			}
+		}
+		
+		if(document.getElementById('sequenceTree' + obj.getAttribute('ticketId')))
+		{
+			if(glo_whichBrowser()=='Firefox')
+			{
+				var seqTree = 'sequenceTree' + obj.getAttribute('ticketId');
+				var theDivs = glo_elementsById(seqTree);
+				clearTree(theDivs);
+			}
+			else
+			{
+				var seqTree = eval('sequenceTree'+obj.getAttribute('ticketId'));
+				clearTree(seqTree);
+			}
+		}
+		
+		var ticketObj = Tickets[ticketDim];
+		var nUnReadCount = 0;	// Total unread notes in ticket
+		
+		// Verify we have a valid Ticket Object
+		//var bUpdated = false;
+		if(ticketObj)
+		{
+			for(var j = 0; j < ticketObj.notes.length; j++)
+			{
+				if(ticketObj.notes[j].beenread == 0)
+					nUnReadCount++;
+			}
+				
+			if(nUnReadCount > 0)
+			{
+				gloListControl.updateHasReadNotes(ticketObj.rowId, ticketObj.notecount, nUnReadCount);
+			}
+			else
+			{
+				gloListControl.updateHasReadNotes(ticketObj.rowId, ticketObj.notecount);
+				parent.frames.menu.updateTicketCount();
+			}		
+		}
+		
+		if(usePreview == 1)
+		{
+			opensplit(url); 
+		}
+		else
+		{
+			closesplit();
+			glo_launchModalWindow('./modalframe.ems?file=' + url, 600, 400, 'yes', 'no', 'no');
+		}
+	}
+	else if (obj.id.indexOf('sys') != -1)
+	{
+		// tree type is sys note
+		msgid = obj.getAttribute('msgid');
+		inbound = obj.getAttribute('inbound');
+		archiveid = obj.getAttribute('archiveid');
+		
+		url = '/vmsgframe.ems?file=viewmsg.ems&archiveid=' + archiveid +'&msg='+msgid+'&type='+inbound;
+		if(usePreview == 1) {
+			opensplit(url); 
+		}else{
+			closesplit();
+			glo_launchModalWindow('./modalframe.ems?file=' + url, 600, 400, 'yes', 'no', 'no');
+		}				
+	}
+	else
+	{	
+		// tree type is a message
+		ticketDim = obj.getAttribute('ticketDim') ? obj.getAttribute('ticketDim') : obj.ticketDim;
+		msgDim = obj.getAttribute('msgDim') ? obj.getAttribute('msgDim') : obj.msgDim;
+		type = obj.getAttribute('type') ? obj.getAttribute('type') : obj.type;
+		
+		notesTree = 'notesTree' + Tickets[ticketDim].ticketid;
+		threadTree = 'threadTree' + Tickets[ticketDim].ticketid;
+		seqTree = 'sequenceTree' + Tickets[ticketDim].ticketid;
+		
+		if(document.getElementById(notesTree))
+		{
+			var notesTree = eval(notesTree);
+			clearTree(notesTree);
+		}
+		
+		var nUnReadCount = 0;
+		TicketObj = Tickets[ticketDim];
+		
+		if(type == 'threaded')
+		{							
+			for(var i = 0; i < TicketObj.threadedMsg.length; i++)
+			{
+				MsgObj = TicketObj.threadedMsg[i];
+				if(MsgObj.beenread == 0)
+					nUnReadCount++;
+			}
+			
+			if(document.getElementById(seqTree))
+			{
+				var seqTree = eval(seqTree);
+				clearTree(seqTree);
+			}
+			
+			MsgObj = Tickets[ticketDim].threadedMsg[msgDim];
+			
+		}
+		else
+		{				
+			MsgObj = Tickets[ticketDim].sequenceMsg[msgDim];
+			
+			
+			for(var i = 0; i < TicketObj.sequenceMsg.length; i++)
+			{
+				MsgObj = TicketObj.sequenceMsg[i];
+				if(MsgObj.beenread == 0)
+					nUnReadCount++;
+			}
+			
+			if(document.getElementById(threadTree))
+			{
+				var threadTree = eval(threadTree);
+				clearTree(threadTree);
+			}
+			
+			MsgObj = Tickets[ticketDim].sequenceMsg[msgDim];					
+		}
+		
+		Tickets[ticketDim].setSelection(MsgObj);
+		
+		if(nUnReadCount > 0)
+			gloListControl.updateHasRead(TicketObj.rowId, TicketObj.msgcount, nUnReadCount);
+		else
+			gloListControl.updateHasRead(TicketObj.rowId, TicketObj.msgcount);
+		
+		if(usePreview == 1)
+			viewMsg('preview',MsgObj);
+	}	
+
+}
+
+function hdlTreeDblClick(objcol) {
+	var obj = null;
+	if ( objcol.length )
+	{
+		for(i = 0; i < objcol.length; i++)
+		{
+			if(objcol[i].getAttribute('selected') == 'true')
+			{
+				obj = objcol[i];
+				break;
+			}
+		}
+	}
+	else
+	{
+		obj = objcol;
+		if(!obj.id)
+		{
+			obj = objcol.msgRow;
+		}
+	}
+	
+	if(obj.id.indexOf('notes') != -1 && obj.id.indexOf('sys') == -1) {
+		// tree type is a ticket
+		url = 'ticketNotes.ems&selectId=' + document.treeForm.selectId.value;// +'&amp;TicketID='+obj.getAttribute('ticketId');
+		closesplit();
+		glo_launchModalWindow('./modalframe.ems?file=' + url, 600, 400, 'yes', 'no', 'no');
+	
+	} else if (obj.id.indexOf('sys') != -1){
+		// tree type is sys note
+		msgid = obj.getAttribute('msgid');
+		inbound = obj.getAttribute('inbound');
+		archiveid = obj.getAttribute('archiveid');
+		
+		url = 'archiveid=' + archiveid +'&msg='+msgid+'&type='+inbound;
+		glo_launchViewMessage(url);
+		
+	} else {
+		ticketDim = obj.getAttribute('ticketDim') ? obj.getAttribute('ticketDim') : obj.ticketDim;
+		msgDim = obj.getAttribute('msgDim') ? obj.getAttribute('msgDim') : obj.msgDim;
+		type = obj.getAttribute('type') ? obj.getAttribute('type') : obj.type;
+		
+		if(type == 'threaded') {
+			targetObj = Tickets[ticketDim].threadedMsg[msgDim];
+		} else {
+			targetObj = Tickets[ticketDim].sequenceMsg[msgDim];
+		}
+		viewMsg('newwin',targetObj);
+	}
+}
+	
+function viewFunc(func)
+{
+	if (func == 'owned')
+	{
+		var newVal = (parseInt(document.tabularForm.ShowOwnedItems.value) == 1) ? 0 : 1;
+		
+		var newUrl = new String("./"+docName+"?TicketBoxView="+ticketboxview+"&CurrentPage="+currentpage);
+		newUrl = newUrl + "&ShowOwnedItems="+newVal;
+		document.location = newUrl;
+		parent.frames.menu.updateTicketCount();
+	}
+	if (func == 'closed')
+	{
+		var newVal = (parseInt(document.tabularForm.ShowClosedItems.value) == 1) ? 0 : 1;
+		
+		var newUrl = "";
+		
+		if(usecustomview != 0)
+		{
+			newUrl = new String("./"+docName+"?CustomTicketBoxView="+usecustomview+"&CurrentPage="+currentpage+"&AgentID="+customagentid);
+			newUrl = newUrl + "&ShowClosedItems="+newVal;
+		}
+		else
+		{
+			newUrl = new String("./"+docName+"?TicketBoxView="+ticketboxview+"&CurrentPage="+currentpage);
+			newUrl = newUrl + "&ShowClosedItems="+newVal;
+		}
+		
+		document.location = newUrl;
+		parent.frames.menu.updateTicketCount();
+	}
+}
+
+function columnFunc(func)
+{
+	if (func == 'owned')
+	{
+		var newVal = (parseInt(document.tabularForm.ShowOwnedItems.value) == 1) ? 0 : 1;
+		
+		var newUrl = new String("./"+docName+"?TicketBoxView="+ticketboxview+"&CurrentPage="+currentpage);
+		newUrl = newUrl + "&ShowOwnedItems="+newVal;
+		document.location = newUrl;
+		parent.frames.menu.updateTicketCount();
+	}
+	if (func == 'closed')
+	{
+		var newVal = (parseInt(document.tabularForm.ShowClosedItems.value) == 1) ? 0 : 1;
+		
+		var newUrl = "";
+		
+		if(usecustomview != 0)
+		{
+			newUrl = new String("./"+docName+"?CustomTicketBoxView="+usecustomview+"&CurrentPage="+currentpage+"&AgentID="+customagentid);
+			newUrl = newUrl + "&ShowClosedItems="+newVal;
+		}
+		else
+		{
+			newUrl = new String("./"+docName+"?TicketBoxView="+ticketboxview+"&CurrentPage="+currentpage);
+			newUrl = newUrl + "&ShowClosedItems="+newVal;
+		}
+		
+		document.location = newUrl;
+		parent.frames.menu.updateTicketCount();
+	}
+}
+
+function tSort(column,asc) 
+{	
+
+	if (!bResizedCols )
+	{
+		var newUrl = "";
+		
+		if(usecustomview != 0)
+		{
+			newUrl = new String("./"+docName+"?CustomTicketBoxView="+usecustomview+"&CurrentPage="+currentpage+"&AgentID="+customagentid);
+			newUrl = newUrl + "&SortBy="+column+"&SortAscending="+((asc == 1)?0:1);
+			newUrl = newUrl + "&Action=sort";
+			
+		}
+		else
+		{
+			newUrl = new String("./"+docName+"?TicketBoxView="+ticketboxview+"&CurrentPage="+currentpage);
+			newUrl = newUrl + "&SortBy="+column+"&SortAscending="+((asc == 1)?0:1);
+			newUrl = newUrl + "&Action=sort";
+		}
+		glo_doReload('ListHolder',newUrl);
+	}
+	bResizedCols = false;
+}
+
+function getOldest(num)
+{
+
+	document.tabularForm.Action.value = "getoldest";
+	document.tabularForm.selectId.value = num;
+	var postResults = glo_buildFormPost('tabularForm');
+	if (postResults[0]==true)
+	{
+		var reXML = postResults[2];			
+		if (reXML.selectSingleNode("/root/UpdateAllCounts"))
+		{
+			// Have to..
+			parent.frames.menu.updateTicketCount();
+		}
+		var newUrl = "./"+docName+"?TicketBoxView="+ticketboxview+"&CurrentPage="+currentpage;
+		document.location = newUrl;
+	} 
+}
+
+function conFunc(func,contact) {
+	if (contact != '') {
+		if (func == 'history') {
+			glo_launchNewWindow("mailflow.ems?rightpane=contacthistory.ems$contactid="+contact);
+			//document.location='contacthistory.ems?contactid='+contact+'&ticketboxview='+ticketboxview;
+		}
+		if (func == 'edit') {
+			document.location='contact.ems?contact='+contact;	
+		}
+	}
+}
+function doChangeTicketModal(ID,Type,doWhat) {
+	if(doWhat == 'new') {
+		document.location = 'changeticket.ems?msgId='+ID+'&msgType='+Type+'&destTicketId=0&Action=change';
+	} else if(doWhat == 'move') {
+		document.location = 'ticketsearch.ems?msgID='+ID+'&msgtype='+Type;	
+	}
+	closesplit();
+}
+function doChangeTicket(showDest) {
+	var selectId = document.tabularForm.selectId.value;
+	if(selectId == ""){
+		alert("Please select a destination ticket");
+	} else {
+		var thisUrl = "changeticket.ems?postXML=1&msgId="+changeTicketMsgId+"&msgType="+changeTicketMsgType+"&changeTicketBoxView="+changeTicketBoxView+"&changeTicketShowDest="+changeTicketShowDest+"&destTicketId="+selectId+"&Action=change";
+		var useThisForm = new Array();
+		var postResults = glo_buildFormPost('tabularForm', thisUrl, null, useThisForm);
+		if (postResults[0]==true)
+		{
+			var reXML = postResults[2];
+			var newPageId = reXML.selectSingleNode("/root/TicketBoxView/@TYPE").value;
+			var newPage = (newPageId==1)?"mytickets.ems":"ticketlist.ems";
+			var newTicketBoxView = reXML.selectSingleNode("/root/TicketBoxView/@ID").value;
+			var newTicketId = reXML.selectSingleNode("/root/DestTicket/@ID").value;
+			var newLoc = newPage+"?ticketboxview="+newTicketBoxView+"&ticket="+newTicketId;
+			parent.frames.rightpane.location = newLoc;
+			var newLink = (newPageId==1)?"nobrInbox":"nobrTicketsView"+newTicketBoxView;
+			parent.frames.menu.UpdateNonAdminLink(newLink);
+		} 			
+	}
+}
+function takeOwnership()
+{ 
+	if(document.tabularForm.selectId.value != "")
+	{
+		document.tabularForm.Action.value = "takeownership";
+		var postResults = glo_buildFormPost('tabularForm');
+		if (postResults[0]==true)
+		{
+			var reXML = postResults[2];			
+			if (reXML.selectSingleNode("/root/UpdateAllCounts"))
+			{
+				parent.frames.menu.updateTicketCount();
+			}
+			if(docName == "ticketsearchresults.ems")
+			{
+				glo_doReload('ListHolder',window.location.href);
+			}
+			else
+			{
+				var necUrls = glo_remUrlVar(document.location.search, "ticket=");
+				if( necUrls != "" && necUrls != false)
+				{
+					necUrls = glo_remUrlVar(necUrls, "TicketBoxView=");
+					if( necUrls != "" && necUrls != false)
+					{
+						necUrls = glo_remUrlVar(necUrls, "CurrentPage=");
+					}
+				}
+				if( necUrls == false)
+				{
+					necUrls = "";
+				}
+				var newLoc = "./"+docName+"?TicketBoxView="+ticketboxview+"&CurrentPage="+currentpage+necUrls.replace("?","&");
+				glo_doReload('ListHolder',newLoc);
+			}
+			
+		} 
+	}
+}
+
+function escalate(){
+	if	(document.tabularForm.selectId.value != ""){
+		document.tabularForm.Action.value = "escalate";
+		var postResults = glo_buildFormPost('tabularForm');
+		if (postResults[0]==true)
+		{
+			var reXML = postResults[2];			
+			if (reXML.selectSingleNode("/root/UpdateAllCounts"))
+			{
+				// Have to...
+				parent.frames.menu.updateTicketCount();
+			}
+			var necUrls = glo_remUrlVar(document.location.search, "ticket=");
+			if( necUrls != "" && necUrls != false)
+			{
+				necUrls = glo_remUrlVar(necUrls, "TicketBoxView=");
+				if( necUrls != "" && necUrls != false)
+				{
+					necUrls = glo_remUrlVar(necUrls, "CurrentPage=");
+				}
+			}
+			if( necUrls == false)
+			{
+				necUrls = "";
+			}
+			var newLoc = "./"+docName+"?TicketBoxView="+ticketboxview+"&CurrentPage="+currentpage+necUrls.replace("?","&");
+			glo_doReload('ListHolder',newLoc);
+		} 
+	}
+}
+
+function createTickets()
+{
+	// creates the list of tickets, etc
+	Tickets.length = 0;
+	var arr = new Array(); 
+  arr = document.getElementsByName("TicketObject");		
+	if (arr.length)
+	{
+		for(toDim=0; toDim < arr.length; toDim++)
+		{
+			thisId = Tickets.length;
+			Tickets[thisId] = new Ticket(thisId);
+			Tickets[thisId].init();
+		}
+		glo_decodeListCell();
+	}
+	else if (document.TicketObject)
+	{
+		// one ticket
+		Tickets[0] = new Ticket(0);
+		Tickets[0].init();
+		glo_decodeListCell();
+	}
+	else
+	{
+		// no tickets!
+	}
+	try
+	{
+		document.getElementById("numTickets").innerHTML = "Number Tickets: <b>" + Tickets.length + "</b>";
+	}
+	catch(e){}
+}
+
+function toggleElm() {
+	// used to toggle the message area on and off.
+	
+	img = window.event.srcElement;
+	container = window.event.srcElement.parentElement;
+	currentView = Tickets[container.getAttribute('ticketDim')].currentView;
+	
+	if (currentView == 'threaded') {
+		msg = Tickets[container.getAttribute('ticketDim')].threadedMsg[container.msgDim];
+	} else {
+		msg = Tickets[container.getAttribute('ticketDim')].sequenceMsg[container.msgDim];
+	}
+
+	for (i = 0; i < msg.objChildren.length; i++) {
+		if(msg.objChildren[i].msgContainer.style.display == 'none') {
+			msg.objChildren[i].msgContainer.style.display = 'block';
+			img.src = contractico.src;
+		} else {
+			msg.objChildren[i].msgContainer.style.display = 'none';
+			img.src = expandico.src;
+		}
+	}
+	event.cancelBubble = true;
+}
+
+function updateTicketAndMsgToRead(ticketID, nRead)
+{	
+	var ticketObj = null;  // Ticket Object variable to work with
+	var nUnReadCount = 0;	// Total unread messages in ticket
+	
+	// Loop thru Tickets array and find the ticket object with
+	// The ticket id we passed in
+	for(var i = 0; i < Tickets.length; i++)
+	{
+		if(Tickets[i].ticketid == ticketID)
+		{
+			ticketObj = Tickets[i];
+			break;
+		}
+	}
+	
+	// Verify we have a valid Ticket Object
+	if(ticketObj)
+	{
+		var treeId = 'threadTree' + ticketID;		// id name of our threadMsg div
+		var seqId = 'sequenceTree' + ticketID;		// id name of our sequenceMsg div
+		
+		var obj = document.getElementById(treeId);	// Our msg div object try threadMsg first
+		
+		// No threadMsg so try sequenceMsg
+		if(obj == null)
+			obj = document.getElementById(seqId);		
+		
+		// Neither one has been created
+		if(obj != null)
+		{
+			var type = obj.getAttribute('type');	// Get type from our msg div
+			
+			var MsgObj = ticketObj.whatsSelected;
+			
+			MsgObj.beenread = nRead;
+			
+			updateInboundMsgAsRead(MsgObj.messageId, nRead);
+			
+			if(type == 'threaded')
+			{
+				for(var i = 0; i < TicketObj.threadedMsg.length; i++)
+				{
+					MsgObj = TicketObj.threadedMsg[i];
+					if(MsgObj.beenread == 0)
+						nUnReadCount++;
+				}
+			}
+			else
+			{
+				for(var i = 0; i < ticketObj.sequenceMsg.length; i++)
+				{
+					MsgObj = ticketObj.sequenceMsg[i];
+					if(MsgObj.beenread == 0)
+						nUnReadCount++;
+				}
+			}
+			
+			MsgObj = ticketObj.whatsSelected;
+			
+			if(nRead)
+				MsgObj.msgContainer.style.fontWeight = "normal";
+			else
+				MsgObj.msgContainer.style.fontWeight = "bold";
+			
+			if(nUnReadCount > 0)
+			{
+				gloListControl.updateHasRead(ticketObj.rowId, ticketObj.msgcount, nUnReadCount);
+			}
+			else
+			{
+				gloListControl.updateHasRead(ticketObj.rowId, ticketObj.msgcount);
+				parent.frames.menu.updateTicketCount();
+			}				
+		}
+		
+	}
+}
+
+function updateTicketAndNoteToRead(ticketID, ticketNoteID, nRead)
+{
+var ticketObj = null;  // Ticket Object variable to work with
+var nUnReadCount = 0;	// Total unread notes in ticket
+
+for(var i = 0; i < Tickets.length; i++)
+{
+	if(Tickets[i].ticketid == ticketID)
+	{
+		ticketObj = Tickets[i];
+		break;
+	}
+}
+		
+// Verify we have a valid Ticket Object
+if(ticketObj)
+{
+	for(var j = 0; j < ticketObj.notes.length; j++)
+	{
+		if(ticketObj.notes[j].noteId == ticketNoteID)
+		{
+			ticketObj.notes[j].beenread = nRead;
+			if(nRead)
+				ticketObj.notes[j].NoteContainer.style.fontWeight = "normal";
+			else
+				ticketObj.notes[j].NoteContainer.style.fontWeight = "bold";
+			updateNoteAsRead(ticketObj.notes[j].noteId, nRead);
+		}
+	}
+	
+	
+	for(var k = 0; k < ticketObj.notes.length; k++)
+	{
+		if(ticketObj.notes[k].beenread == 0)
+			nUnReadCount++;
+	}
+	
+	if(nUnReadCount > 0)
+	{
+		gloListControl.updateHasReadNotes(ticketObj.rowId, ticketObj.notecount, nUnReadCount);
+	}
+	else
+	{
+		gloListControl.updateHasReadNotes(ticketObj.rowId, ticketObj.notecount);
+		parent.frames.menu.updateTicketCount();
+	}			
+}
+}
+
+function updateTicketRead(ticketID, rowID, numMsgs, numNotes, nRead)
+{	
+	var getURL = "/ticketread.ems?ticketid=" + ticketID + "&action=" + nRead;
+
+	try
+	{
+		xmlhttp.open('GET', getURL, false);
+		if(xmlhttp.overrideMimeType){ xmlhttp.overrideMimeType('text/xml'); }
+		xmlhttp.send();
+
+		//alert("XMLHTTP Request Sent\n\nWith this alert there will be three requests to the ISAPI extension\nwithout this alert two requests are seen by the ISAPI extension");
+		
+		if (xmlhttp.responseXML && xmlhttp.responseXML.xml && xmlhttp.status == 200) 
+		{
+			return 1;
+		}
+	}
+	catch(e) 
+	{
+		alert("An error occurred connecting to the server.\nThe server is either offline, or you have been disconnected from the Internet.");	
+	}
+	
+	return 0;
+}

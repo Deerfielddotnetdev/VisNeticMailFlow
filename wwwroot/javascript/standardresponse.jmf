@@ -1,0 +1,50 @@
+
+function newRows() {
+		
+		var NewRowID = parseInt(document.all.attachTable.rows.length);
+		var newRow = document.all.attachTable.insertRow(-1);
+		
+		var strX ="<input class='' name='file" + fileIndex +"' type='file'>";
+		var NewCell = newRow.insertCell(-1);
+		NewCell.innerHTML = strX;
+		
+		var NewCell = newRow.insertCell(-1);
+		NewCell.width = "10";
+		
+		var strX ="<input class='childControlBtn' type='button' value='Remove' name='button1' onClick='delRow();' rowIndex='" + NewRowID + "'>";
+		var NewCell = newRow.insertCell(-1);
+		
+		NewCell.innerHTML = strX;
+		
+		
+		
+		
+		document.all.tabularForm.fileindex.value = document.all.tabularForm.fileindex.value + "file" + fileIndex + ",";
+		
+		fileIndex++;
+	
+	}
+	
+	function delRow() {
+	
+		selectedIndex = parseInt(event.srcElement.rowIndex);
+	
+		document.all.attachTable.deleteRow(selectedIndex);
+		idRows();
+	}
+	
+	
+	function idRows() {
+		if(document.all.attachTable.rows.length == 0) {
+		
+		} else if (document.all.attachTable.rows.length == 1){
+			document.all.button1.rowIndex = '0';
+		} else if (document.all.attachTable.rows.length > 1) {
+			for (var i = 0; i < document.all.attachTable.rows.length; i++) {
+				
+				document.all.button1[i].rowIndex = parseInt(i);
+				//document.all.button1[i].value = "Remove "+parseInt(i)
+				
+			}
+		}
+	}	

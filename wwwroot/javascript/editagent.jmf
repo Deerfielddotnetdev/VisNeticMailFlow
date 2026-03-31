@@ -1,0 +1,429 @@
+	function OpenNT()
+	{
+		glo_launchModalWindow('./modalframe.ems?file=ntagents.ems$domain='+document.tabularForm.domain.value, 400, 200, 'yes', 'no', 'no');
+	}
+	function OpenVMS()
+	{
+		glo_launchModalWindow('./modalframe.ems?file=vmsagents.ems', 400, 200, 'yes', 'no', 'no');
+	}
+	function populateForm(thisContact, thisDomain) {
+		params = thisContact.split(",");
+		a = thisContact.indexOf(',++,');
+		b = thisContact.substring(0,a);
+		c = thisContact.length;
+		d = thisContact.substring(a+4,c);
+		document.tabularForm.username.value = params[0];
+		document.tabularForm.firstname.value = params[1];
+		if (thisDomain)	document.tabularForm.domain.value = thisDomain;
+		if (params[2]) document.tabularForm.DefaultEmail.value = params[2];
+	}
+	function adjustSec(well)
+	{
+		if (well==0)
+		{
+			document.getElementById('PasswordSection').style.display = "block";
+			document.getElementById('DomainSection').style.display = "none";
+			document.getElementById('VMSection').style.display = "none";
+		}
+		if (well==1)
+		{
+			document.getElementById('PasswordSection').style.display = "none";
+			document.getElementById('VMSection').style.display = "none";
+			document.getElementById('DomainSection').style.display = "block";
+		}
+		if (well==2)
+		{
+			document.getElementById('PasswordSection').style.display = "none";
+			document.getElementById('DomainSection').style.display = "none";
+			document.getElementById('VMSection').style.display = "block";
+		}
+	}
+//	#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@
+//	[	Page Specific Variables
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	[	Name: InfoID
+//	[	Desc: a unique identifier for any dynamically generated additional info sections
+//	[	Note: value will be reset when page loads if adjustDoc() finds a greater value
+//	[	Page: accessrights.ems
+	var InfoID = 1;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	adjustDoc()
+//	[	Desc:	used to adjust value of InfoID if necessary, and reassign the rowIndex attribute once the page has loaded completely!
+//	[ 	Param:	None.
+//	[	Page:	newcontact.ems; editcontact.ems;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function adjustDoc()
+	{
+//{		if InfoId is already = 1, check for a higher value in the form!
+		if (InfoID==1)
+		{
+//{			If a higher value is present in the form,
+			if (parseInt(document.tabularForm.PersonalDataMaxID.value) > 1)
+			{
+//{				reasign InfoID to the higher value!
+				InfoID = parseInt(document.tabularForm.PersonalDataMaxID.value);
+			}
+		}
+//{		if a username is not provided, focus on this field!
+		if (document.tabularForm.username.value.length ==0)
+			{document.tabularForm.username.focus();}
+//{		if there is a collection of rows
+		if (document.all.AdditionalInfoTable.rows.length)
+		{
+//{			reassign any rowIndex(s)!
+//{			if there is only one row, then there is a single button, not a collection!
+			if (document.all.AdditionalInfoTable.rows.length == 1)
+			{
+//{				reassign the single button's rowIndex!
+				tabularForm.MatchDelButton.rowIndex = "0";
+			}
+//{			if there is more than one row, then there is a collection of buttons!
+			else if (document.all.AdditionalInfoTable.rows.length > 1)
+			{
+//{				loop through them,
+				for (i = 0; i < document.all.AdditionalInfoTable.rows.length; i++)
+				{
+//{					reassigning their rowIndex!
+					document.all.MatchDelButton[i].rowIndex = parseInt(i);
+				}
+			}
+		}//^ if (document.all.AdditionalInfoTable.rows.length)
+	}//^ function adjustDoc()
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	delOption()
+//	[	Desc:	used to delete a row in the AdditionalInfoTable, and reassign the rowIndex(s) respectively!
+//	[ 	Param:	None.
+//	[	Page:	newcontact.ems; editcontact.ems;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function delOption()
+	{
+//{		retrieve the rowIndex from the MatchDelButton that fired this function to begin with!
+		selectedIndex = parseInt(event.srcElement.rowIndex);
+//{		if there is only one row, then there is only one button!
+		if (document.all.AdditionalInfoTable.rows.length == 1)
+		{
+//{			delete that thing already!
+			AdditionalInfoTable.deleteRow(selectedIndex);
+		}
+//{		if there is 2 rows, then there are two buttons this time!
+		else if (document.all.AdditionalInfoTable.rows.length == 2)
+		{
+//{			delete the selected row!
+			AdditionalInfoTable.deleteRow(selectedIndex);
+//{			reset the rowIndex value of the other button!
+			tabularForm.MatchDelButton.rowIndex = "0";
+		}
+//{		if there are more than 2 rows, there are more than two buttons == collection!
+		else if (document.all.AdditionalInfoTable.rows.length > 2)
+		{
+//{			delete the selected row!
+			AdditionalInfoTable.deleteRow(selectedIndex);
+//{			loop through the remaining rows, reassigning the rowIndex(s) accordingly!
+			for (i = 0; i < document.all.AdditionalInfoTable.rows.length; i++)
+			{document.all.MatchDelButton[i].rowIndex = parseInt(i);}
+		}
+	}//^ function delOption()
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	addOption()
+//	[	Desc:	used to insert a new row into AdditionalInfoTable, and populate that row with necessary form elements!
+//	[ 	Param:	None.
+//	[	Page:	newcontact.ems; editcontact.ems;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function addOption()
+	{
+//{		Grab current length of AdditionalInfoTable as length is also value of a new row, starts @ zero
+		var NewRowID = parseInt(document.all.AdditionalInfoTable.rows.length);
+//{		Inserts the New Row, as well as sets the object Reference to NewRow
+		var NewRow = document.all.AdditionalInfoTable.insertRow(-1);
+//{		sets the id of the NewRow = page specific unique identifier!
+		NewRow.id = InfoID;
+//{		begin constructing HTML for newCell!
+		var strX = "<select name='PersonalDataType"+InfoID+"' onChange='adjDefault(this);'>";
+//{		if there is a collection of Personal Data Types,
+		if (document.all.hiPDId.length)
+		{
+//{			loop through them, adding them as options to the select box!
+			for (i = 0; i < document.all.hiPDId.length; i++)
+			{
+				strX = strX + "<option value='"+document.all.hiPDId[i].value+"'>"+document.all.hiPDName[i].value+"</option>";
+			}
+		}
+//{		if there is only one Personal Data Type,
+		else if (tabularForm.hiPDId)
+		{
+//{			add it to the select box anyway! what the hell?  why not!?
+			strX = strX + "<option value='"+tabularForm.hiPDId.value+"'>"+tabularForm.hiPDName.value+"</option>";
+		}
+		strX = strX + "</select><input type='text' maxlength='255' name='PersonalData"+InfoID+"'>";
+		strX = strX + "<input type='button' rowIndex='"+NewRowID+"' name='MatchDelButton' value='Remove' class='childControlBtn' onclick='delOption();'>";
+		strX = strX + "<input type='button' class='childControlBtn' name='MakeDefaultButton' value='Make Default' cursar='PersonalDataType"+InfoID+"' onClick=makeDefault('PersonalData"+InfoID+"');>";
+//{		insert a NewCell!
+		var NewCell = NewRow.insertCell(-1);
+//{		reposition the cell slightly!
+		NewCell.setAttribute("valign", "middle");
+//{		set the cell contents = the HTML dynamically constructed above! (strX)
+		NewCell.innerHTML = strX;
+//{		Now increment that page specific unique identifier, for the next time, should there be...
+		InfoID++;
+//{		update the value on the form for persistent values if error!
+	}//^ function addOption()
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	adjDefault()
+//	[	Desc:	used to hide/show a "MakeDefault" button for the additional info items!
+//	[ 	Param:	xObject = the select box that called the function
+//	[	Page:	newcontact.ems; editcontact.ems;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function adjDefault(xObject)
+	{
+//{		grab the select box name, from the select box that called the function
+		var myName = xObject.name;
+//{		grab the current value from the select box!
+		var curVal = xObject.value;
+//{		if there is more than one row, there is more than one button, let's figure out which one I want to play with!
+		if (document.all.AdditionalInfoTable.rows.length > 1)
+		{
+//{			loop through the collection of rows, also collection of MakeDefaultButtons!
+			for (i = 0; i < document.all.AdditionalInfoTable.rows.length; i++)
+			{
+//{				sets thisCursar = the current MakeDefaultButton.cursar attribute
+//{				"You may need to look at editcontact.ems to understand this better..."
+				thisCursar = document.all.MakeDefaultButton[i].cursar;
+//{				if this buttons cursar value = the current select box name, this is it!
+				if (thisCursar==myName)
+				{
+//{					set my objBtn var to reference the appropriate button!
+					objBtn = document.all.MakeDefaultButton[i];
+				}
+			}
+		}
+//{		if there is only one row, then there is only one button! use tabularForm as reference!
+		else
+		{
+//{			set my objBtn var to reference the appropriate button!
+			objBtn = tabularForm.MakeDefaultButton;
+		}
+//{		if the select box has "EmailAddress" selected,
+		if (curVal==1)
+		{
+//{			make the "MakeDefault" button visible!
+			objBtn.style.visibility = 'visible';
+		}
+//{		if the select box does not have "EmailAddress" selected,
+		else
+		{
+//{			make the "makeDefault" button hidden! quick!
+			objBtn.style.visibility = 'hidden';
+		}
+	}//^ function adjDefault(xObject)
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	makeDefault()
+//	[	Desc:	used to switch the values of an AdditionalInfo Item with that of DefaultEmailAddress!
+//	[ 	Param:	what is actually a string value that references the text field of the additionalinfo item
+//	[	Page:	newcontact.ems; editcontact.ems;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function makeDefault(what)
+	{
+//{		create a reference for the text field!
+		obj = eval("tabularForm."+what);
+//{		temporarily store the current DefaultEmailAddress!
+		curVal = tabularForm.DefaultEmail.value;
+//{		set the DefaultEmail field = the temp value just created!
+		tabularForm.DefaultEmail.value = obj.value;
+//{		set the current additional info text field = the previous default email address!
+		obj.value = curVal;
+	}//^ function makeDefault(what)
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	switchSelect(xObject)
+//	[	Desc:	used to dynamically switch the contents of a selectBox[x] drop down
+//	[ 	Param:	xObject is the object reference for the "AgentOrGroup[x]" select box that called the function
+//	[	Page:	alertconfig.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function switchSelect(xObject)
+	{
+//{		grabs ID for all associated objects from ID in Name
+		//thisID = parseInt(xObject.name.replace('AgentOrGroup',''));
+//{		grabs value of AgentOrGroup field, (Agent || Group)
+		thisVal = xObject.value;
+//{		grabs selectBox object for transformation
+		objSelectBox = document.getElementById('selectBox');
+//{		rename this selectBox according to the data it will contain, of course maintain the same ID
+		if (thisVal=="Group") { objSelectBox.name = "Group"; }
+		if (thisVal=="Agent") { objSelectBox.name = "Agent"; }
+//{		remove all options from the selectBox
+		objSelectBox.options.length = 0;
+//{		if Agent is selected, add all available agent options to selectBox
+		if (thisVal=="Agent")
+		{
+//{			if there is more than one hidden Agent Field,
+			if (document.all.hiAgentName.length)
+			{
+				newOption = new Option();
+				newOption.text = 'None';
+				newOption.value = 0;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+//{				loop through them, adding them as options to the select box
+				for (i = 0; i < document.all.hiAgentName.length; i++)
+				{
+					newOption = new Option();
+					newOption.text = document.all.hiAgentName[i].value;
+					newOption.value = document.all.hiAgentID[i].value;
+					objSelectBox.options[objSelectBox.options.length] = newOption;
+				}
+			}
+//{			if there is only one hidden agent Field,
+			else if (tabularForm.hiAgentName)
+			{
+//{				add it as an option to the select box!
+				newOption = new Option();
+				newOption.text = 'None';
+				newOption.value = 0;
+				newOption = new Option();
+				newOption.text = tabularForm.hiAgentName.value;
+				newOption.value = tabularForm.hiAgentID.value;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+			}
+		}//^ if (thisVal=="Agent")
+//{		if Group is selected, add all group options to selectBox
+		if (thisVal=="Group")
+		{
+//{			if there is more than one hidden group field,
+			if (document.all.hiGroupName.length)
+			{
+				newOption = new Option();
+				newOption.text = 'None';
+				newOption.value = 0;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+//{				
+//{				loop through them, adding them as options to the select box
+				for (i = 0; i < document.all.hiGroupName.length; i++)
+				{
+					newOption = new Option();
+					newOption.text = document.all.hiGroupName[i].value;
+					newOption.value = document.all.hiGroupID[i].value;
+					objSelectBox.options[objSelectBox.options.length] = newOption;
+				}
+			}
+//{			if there is only one hidden Group field,
+			else if (tabularForm.hiGroupName)
+			{
+//{				add it as an option to the select box!
+				newOption = new Option();
+				newOption.text = 'None';
+				newOption.value = 0;
+				objSelectBox.options[objSelectBox.options.length] = newOption;				
+				newOption = new Option();
+				newOption.text = tabularForm.hiGroupName.value;
+				newOption.value = tabularForm.hiGroupID.value;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+			}
+		}//^if (thisVal=="Group")
+	}// close function switchSelect(xObject)
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	switchSelectApp(xObject)
+//	[	Desc:	used to dynamically switch the contents of a selectBox[x] drop down
+//	[ 	Param:	xObject is the object reference for the "AgentOrGroup[x]" select box that called the function
+//	[	Page:	alertconfig.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function switchSelectApp(xObject)
+	{
+//{		grabs ID for all associated objects from ID in Name
+		//thisID = parseInt(xObject.name.replace('AgentOrGroup',''));
+//{		grabs value of AgentOrGroup field, (Agent || Group)
+		thisVal = xObject.value;
+//{		grabs selectBox object for transformation
+		objSelectBox = document.getElementById('selectBoxApp');
+//{		rename this selectBox according to the data it will contain, of course maintain the same ID
+		if (thisVal=="Group") { objSelectBox.name = "GroupApp"; }
+		if (thisVal=="Agent") { objSelectBox.name = "AgentApp"; }
+//{		remove all options from the selectBox
+		objSelectBox.options.length = 0;
+//{		if Agent is selected, add all available agent options to selectBox
+		if (thisVal=="Agent")
+		{
+//{			if there is more than one hidden Agent Field,
+			if (document.all.hiAgentName.length)
+			{
+				newOption = new Option();
+				newOption.text = 'None';
+				newOption.value = 0;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+//{				loop through them, adding them as options to the select box
+				for (i = 0; i < document.all.hiAgentName.length; i++)
+				{
+					newOption = new Option();
+					newOption.text = document.all.hiAgentName[i].value;
+					newOption.value = document.all.hiAgentID[i].value;
+					objSelectBox.options[objSelectBox.options.length] = newOption;
+				}
+			}
+//{			if there is only one hidden agent Field,
+			else if (tabularForm.hiAgentName)
+			{
+//{				add it as an option to the select box!
+				newOption = new Option();
+				newOption.text = 'None';
+				newOption.value = 0;				
+				newOption = new Option();
+				newOption.text = tabularForm.hiAgentName.value;
+				newOption.value = tabularForm.hiAgentID.value;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+			}
+		}//^ if (thisVal=="Agent")
+//{		if Group is selected, add all group options to selectBox
+		if (thisVal=="Group")
+		{
+//{			if there is more than one hidden group field,
+			if (document.all.hiAppGroupName.length)
+			{
+				newOption = new Option();
+				newOption.text = 'None';
+				newOption.value = 0;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+//{				
+//{				loop through them, adding them as options to the select box
+				for (i = 0; i < document.all.hiAppGroupName.length; i++)
+				{
+					newOption = new Option();
+					newOption.text = document.all.hiAppGroupName[i].value;
+					newOption.value = document.all.hiAppGroupID[i].value;
+					objSelectBox.options[objSelectBox.options.length] = newOption;
+				}
+			}
+//{			if there is only one hidden Group field,
+			else if (tabularForm.hiGroupName)
+			{
+//{				add it as an option to the select box!
+				newOption = new Option();
+				newOption.text = 'None';
+				newOption.value = 0;
+				objSelectBox.options[objSelectBox.options.length] = newOption;				
+				newOption = new Option();
+				newOption.text = tabularForm.hiAppGroupName.value;
+				newOption.value = tabularForm.hiAppGroupID.value;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+			}
+		}//^if (thisVal=="Group")
+	}// close function switchSelectApp(xObject)
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#

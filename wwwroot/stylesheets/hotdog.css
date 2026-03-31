@@ -1,0 +1,738 @@
+	xml {
+  	display:none;
+	}
+	*:focus {
+  	outline:none;
+	}
+	html {
+		height:100%;
+	}
+	body {
+		font-family:Tahoma, "Trebuchet MS", Verdana, sans-serif !important;
+		font-size:9pt !important;
+		margin:0px !important;
+		border:0px !important;
+		background-color:#E2DCC8 !important;
+		overflow:hidden;
+		cursor:default;
+	}
+	IMG {
+		margin:0px!important
+	}
+	TD {
+		font-size:9pt;
+	}
+	INPUT {
+		font-size:9pt;
+		font-family:Tahoma, "Trebuchet MS", Verdana, sans-serif !important;
+	}
+	SELECT	{
+		font-size:9pt;
+		font-family:Tahoma, "Trebuchet MS", Verdana, sans-serif !important;
+	}
+	TEXTAREA {
+		font-size:9pt;
+		font-family:Tahoma, "Trebuchet MS", Verdana, sans-serif !important;
+	}
+
+/*======[ Main Sections ]======*/
+	#menusection {
+		position:static;
+	}
+	#statusbar {
+		border:1px outset;
+		height:0px;
+		width:100%;
+		background:#FEC51D;
+	}
+	.statusInset {
+		border:1px inset;
+		font-size:8pt;
+		padding-right:5px;
+		padding-left:5px;
+	}
+	.messageview {
+		padding:10px;
+		background:#FFFFFF;
+	}
+
+/*======[ Error Sections ]======*/
+	.errorHeader {
+		border-width:2px 2px 1px 2px;
+		border-style:outset;
+		background-color:#0A246A;
+		color:#FFFFFF;
+	}
+	.errorMessage {
+		border-width:1px 2px 2px 2px;
+		border-style:inset;
+		background-color:#FFFFFF;
+		color:#000000;
+	}
+
+/*======[ Header Sections ]======*/
+	.header {
+		width:100%;
+		border:1px outset;
+	}	
+	.headerCell {
+		font-size:12pt;
+		font-weight:bold;
+		color:#FFFFFF;
+		padding-left:5px;
+		padding-right:5px;
+		height:25px;
+		background-image:url('../images/gradient.gif');
+
+		background-repeat:no-repeat;
+		background-color:#a6b1cc;
+	}
+	.headerGradient	{
+		background-image:url('../images/gradient.gif');
+
+		background-repeat:no-repeat;
+		background-color:#a6b1cc;
+	}
+	.subheader {
+		font-size:9pt;
+		font-weight:bold;
+		color:#FFFFFF;
+		background-color:#0A246A;
+		height:26px;
+		padding-left:5px;
+		/*border-style	:outset;
+		border-width:1px;*/
+	}
+
+/*======[ TicketBoxList Definitions ]======*/
+	.adminbranch {
+		font-size:9pt;
+		padding-left:4px;
+   	margin-left:8px;
+		cursor:pointer;
+		color:#000000;
+	}
+	.branch {
+   	/*margin-left:8px;*/
+		cursor:pointer;
+		color:#000000;
+		margin-bottom:3px;
+	}
+	.branchOn {
+    background:#00BF00;
+		color:#FFFFFF;
+		margin-bottom:3px;
+	}
+	.childBranch {
+		cursor:pointer;
+		color:#000000;
+		margin-top:3px;
+		margin-bottom:3px;
+		margin-left:10px;
+	}
+	.mainbranch {
+    font-size:9pt;
+	}
+	.adminMenu {
+    font-size:9pt;
+		color:#000000;
+		text-decoration	:none;
+	}
+	#rollButton {
+		background:#FEC51D;
+		font-size:9pt;
+		cursor:pointer;
+		height:18;
+		width:100%;
+		border-style:outset;
+		border-width:1px;
+		padding-left:3px;
+	}
+	#rollContent {
+		background-color:#E2DCC8;
+		color:#000000;
+		height:0px;
+		width:100%;
+		overflow:auto;
+	}
+
+/*======[ Table Definitions ]======*/
+	.childControlBtn{
+		font-size:9pt;
+		margin-left:2px;
+		cursor:pointer;
+		padding-left:1px;
+		padding-right:1px;
+	}
+	.childControlBtnDis{
+		font-size:9pt;
+		margin-left:2px;
+		cursor:default;
+		padding-left:1px;
+		padding-right:1px;
+		background:#FEC51D;
+		color:#FFFFFF;
+	}
+	.adultControlBtn{
+		font-size:9pt;
+		margin-left:2px;
+		cursor:pointer;
+		padding-left:1px;
+		padding-right:1px;
+	}
+	.headerControlBtn{
+		font-size:9pt;
+		margin-left:2px;
+		cursor:pointer;
+		vertical-align	:text-bottom;
+		padding-left:1px;
+		padding-right:1px;
+	}
+	.subSectionHeader {
+		font-size:9pt;
+		color:#000000;
+		font-weight:bold;
+		border:1px solid #808080;
+		padding-left:5px;
+		padding-top:2px;
+		padding-bottom	:2px;
+		background-color:#C8C8C8;
+	}
+	.subSectionWrapper {
+		border-right:1px solid #808080;
+		border-left:1px solid #808080;
+		border-bottom:1px solid #808080;
+		padding-top:10px;
+		padding-bottom	:10px;
+	}
+	.altCellHeader {
+		border-left:1px solid #808080;
+		border-bottom:1px solid #808080;
+		border-top:1px solid #808080;
+		padding-left:5px;
+		background-color:#C8C8C8;
+		font-weight:bold;
+	}
+	.altCellHeaderX {
+		border:1px solid #808080;
+		padding-left:5px;
+		background-color:#C8C8C8;
+		font-weight:bold;
+	}
+	.altCellHeaderChkBox {
+		border-top:1px solid #808080;
+		border-left:1px solid #808080;
+		border-bottom:1px solid #808080;
+		background-color:#C8C8C8;
+		font-weight:bold;
+	}
+	.altCellHeaderChkBoxX {
+		border-style:solid;
+		border-width:1px;
+		border-color:#808080;
+		background-color:#C8C8C8;
+		font-weight:bold;
+	}
+	.altCellHeaderChild {
+		border-left:1px solid #808080;
+		border-bottom:1px solid #808080;
+		padding-left:5px;
+	}
+	.altCellHeaderChildChkBox {
+		border-left:1px solid #808080;
+		border-bottom:1px solid #808080;
+	}
+	.altCellHeaderChildChkBoxX {
+		border-left:1px solid #808080;
+		border-bottom:1px solid #808080;
+		border-right:1px solid #808080;
+	}
+	.altCellHeaderChildX {
+		border-left:1px solid #808080;
+		border-right:1px solid #808080;
+		border-bottom:1px solid #808080;
+		padding-left:5px;
+	}
+
+/*======[ Menu Definitions ]======*/
+	.xMenuOption {
+		font-size:9pt;
+    cursor:pointer;
+		padding-top:1px;
+		padding-bottom	:0px;
+		padding-left:2px;
+		padding-right:2px;
+	}
+	.xMenuOptionOff {
+		background-color:#FEC51D;
+		color:#000000;
+	}
+	.xMenuOptionOn {
+		background-color:#00BF00;
+		color:#FFFFFF;
+	}
+	.xMenu {
+		font-size:9pt;
+    cursor:pointer;
+		padding-left:3px;
+		padding-top:3px;
+		padding-right:3px;
+		padding-bottom	:2px;
+		margin-left:0px;
+		margin-right:0px;
+	}
+	.menuOn {
+		border-bottom:1px solid buttonshadow;
+		border-left:1px solid buttonhighlight;
+		border-right:1px solid buttonshadow;
+		border-top:1px solid buttonhighlight;
+		color:#000000;
+	}
+	.menuOff {
+		padding-left:3px;
+		padding-top:3px;
+		padding-right:3px;
+		padding-bottom	:2px;
+		border-width:1px;
+		border-style:solid;
+		border-color:#FEC51D;
+		color:#000000;
+	}
+	.menuClk {
+		border-bottom:1px solid buttonhighlight;
+		border-left:1px solid buttonshadow;
+		border-right:1px solid buttonhighlight;
+		border-top:1px solid buttonshadow;
+		padding-left:4px;
+		padding-top:4px;
+		padding-right:2px;
+		padding-bottom	:1px;
+	}
+	.menubarx {
+		border:1px outset;
+		background-color:#FEC51D;
+		vertical-align	:middle;
+		color:#000000;
+	}
+	.menuButton {
+		font-size:9pt;
+    cursor:pointer;
+		padding-left:1px;
+		padding-top:1px;
+		padding-right:4px;
+		padding-bottom	:1px;
+		margin-left:0px;
+		margin-right:0px;
+	}
+	.itemClk {
+		border-bottom:1px solid buttonhighlight;
+		border-left:1px solid buttonshadow;
+		border-right:1px solid buttonhighlight;
+		border-top:1px solid buttonshadow;
+		padding-top:2px;
+		padding-left:2px;
+		padding-bottom	:0px;
+		padding-right:3px;
+	}
+	.itemOn {
+		border-bottom:1px solid buttonshadow;
+		border-left:1px solid buttonhighlight;
+		border-right:1px solid buttonshadow;
+		border-top:1px solid buttonhighlight;
+	}
+	.itemDis {
+		cursor:default;
+		border-width:1px;
+		border-style:solid;
+		border-color:#FEC51D;
+	}
+	.itemOff {
+		padding-left:1px;
+		padding-top:1px;
+		padding-right:4px;
+		padding-bottom	:1px;
+		border-width:1px;
+		border-style:solid;
+		border-color:#FEC51D;
+	}
+	.menuColor {
+		background:#FEC51D;
+	}
+	.bodyColor {
+		background-color:#E2DCC8 !important;
+	}
+/*======[ List Control Stuff ]======*/
+	.listHeaderCell {
+		background:#FEC51D;
+		border-style:outset;
+		border-width:1px;
+		font-size:9pt;
+		padding-left:3px;
+		padding-top:1px;
+		padding-bottom	:1px;
+		cursor:default;		
+	}
+	#listRow {
+		cursor:pointer;
+	}
+	.rowOff {
+		background-color:#FEF2CF;
+		color:#000000;
+	}
+	.rowOn {
+		background-color:#00BF00;
+		color:#FFFFFF;
+	}
+	#listCell {
+		font-size:9pt;
+		padding-left:3px;
+		text-overflow:ellipsis;
+		overflow:hidden;
+		white-space:nowrap;
+		margin-left:1px;
+		margin-right:1px;		
+	}
+	.cellOff {
+		border-color:#FEF2CF;
+	}
+	.cellOn {
+		border-color:#00BF00;
+	}
+	.listBack {
+		background:#FEF2CF;	
+	}
+	.ticketOff {
+		background-color:#E2DCC8;
+		color:#000000;
+		font-weight:normal;
+	}
+	.ticketOffUnRead {
+		background-color:#E2DCC8;
+		color:#000000;
+		font-weight:bold;
+	}
+	.ticketOn {
+		background-color:#00BF00;
+		color:#FFFFFF;
+		font-weight:normal;
+	}
+	.ticketOnUnRead {
+		background-color:#00BF00;
+		color:#FFFFFF;
+		font-weight:bold;
+	}
+	.ticketCellOff {
+		border-color:#E2DCC8;
+	}
+	.ticketCellOn {
+		border-color:#00BF00;
+	}
+
+/*======[ Reply Definitions ]======*/
+	#replyquoted {
+		border-left:2px solid #0000FF;
+		margin-left:5px;
+		padding-left:10px;
+		padding-top:10px;
+		padding-bottom	:10px;
+	}
+	#replyunquoted {
+		border-left:0px;
+		margin-left:5px;
+		padding-left:5px;
+		padding-top:0px;
+		padding-bottom	:0px;
+		z-index:10;
+		color:#0000FF;
+	}
+/*=============[ Status / Upload Bar ] ==========*/
+	.progressRight {
+		filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=1, StartColorStr='#0A246A', EndColorStr='#C0C0C0');
+		width:40;
+		height:12; 
+	}
+	.progressLeft {
+		filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=1, EndColorStr='#0A246A', StartColorStr='#C0C0C0');
+		width:40;
+		height:12; 
+	}
+	#slidecontainer {
+		width:150; 
+		height:12; 
+		border-width:1px; 
+		border-style:inset; 
+		overflow:hidden;
+	}
+	#slider {
+		position:absolute;
+	}
+	.progressin {
+		background-color:#0A246A;		
+	}
+
+/*=======================================*/
+	#tabs {
+	 	HEIGHT:22px;
+   	Z-INDEX:10000;
+		width:900px;
+    POSITION:absolute;
+    TOP	:12px;
+    LEFT:20px;
+    CURSOR:default! important;
+    FONT-WEIGHT:700! important;
+    FONT-SIZE:9pt;
+    FONT-FAMILY:arial, sans-serif;
+    WHITE-SPACE:nowrap! important;
+	}
+	.tab {
+    BORDER-RIGHT:2px outset;
+    BORDER-TOP:2px outset;
+    BORDER-LEFT:2px outset;
+		PADDING-LEFT:7px;
+    PADDING-TOP:2px;
+    PADDING-RIGHT:7px;	
+    PADDING-BOTTOM	:1px;
+		Z-INDEX:100;
+    COLOR:#171717;
+		margin-left:3px;
+    WHITE-SPACE:nowrap;
+    POSITION:relative;
+    BACKGROUND-COLOR:#b9b9b9;
+	}
+	.tabHover {
+    BORDER-RIGHT:2px outset;
+    BORDER-TOP:2px outset;
+    BORDER-LEFT:2px outset;
+
+    PADDING-LEFT:7px;
+    PADDING-TOP:2px;
+    PADDING-RIGHT:7px;
+    PADDING-BOTTOM	:1px;
+
+    Z-INDEX:100;
+    COLOR:#171717;
+    WHITE-SPACE:nowrap;
+    POSITION:relative;
+    BACKGROUND-COLOR:#cecece;
+	}
+	.tabActive {
+    BORDER-RIGHT:2px outset;
+    BORDER-TOP:2px outset;
+    BORDER-LEFT:2px outset;
+    PADDING-LEFT:7px;
+    PADDING-TOP:2px;
+    PADDING-RIGHT:7px;
+    PADDING-BOTTOM	:1px;
+		margin-left:4px;
+    Z-INDEX:10000;
+    COLOR:#171717;
+    WHITE-SPACE:nowrap;
+    POSITION:relative;
+    TOP	:2px;
+    BACKGROUND-COLOR:#FEC51D important;
+	}
+	.tabActiveColor {
+		BACKGROUND-COLOR:#FEC51D important;
+	}
+	td.ButtonText {
+		color:#000000;
+	}
+	tr.LabelText {
+		color:#000000;
+	}
+
+/* ---------- HTML Editor -------------- */
+	.editorbutton {
+    text-align :center;
+    border-width :1px;
+  }
+  .editorbuttonon {
+		 border-style 	:inset;
+	 }
+	 .editorbuttonoff {
+		 border-style 	:outset;
+	 }	
+
+/* ----------- 3.0 ------------------ */
+	table.StandardResponseMenu {
+		background-color:#FEC51D;
+	}
+	form.StandardResponseMenu {
+		background-color:#FEC51D;
+		border-top:solid 1px buttonhighlight;
+		border-left:solid 1px buttonhighlight;
+		border-right:solid 1px buttonshadow;
+		border-bottom:solid 1px buttonshadow;
+	}
+	div.TreeRoot {
+		font-weight:bold;
+		cursor:pointer;
+	}
+	div.TreeParent {
+		padding-left:0px;
+		cursor:pointer;
+	}
+	div.TreeParentClick {
+		padding-left:0px;
+		cursor:pointer;
+	}
+	span.TreeParentText {
+		color:#000000;
+		background-color:#E2DCC8;
+	}
+	span.TreeParentTextClicked {
+		color:#FFFFFF;
+		background-color:#0A246A;
+	}
+	div.MenuButton {
+		border:1px outset;
+		width:50px;
+	}
+	div.Label {
+		position:absolute;
+		top	:2px;
+		left:10px;
+	}
+	input.Text {
+		position:absolute;
+		top	:1px;
+		left:159px;
+		width:250px;
+	}
+	input.RadioContains {
+		position:absolute;
+		top	:0px;
+		left:415px;
+	}
+	input.RadioExact {
+		position:absolute;
+		top	:0px;
+		left:490px;
+	}
+	span.ContainsLabel {
+		position:absolute;
+		top:2px;
+		left:436px;
+	}
+	span.ExactLabel	{
+		position:absolute;
+		top:2px;
+		left:511px;
+	}
+	div.Menu {
+		position:absolute;
+		top:0px;
+		left:0px;
+		height:29px;
+		width:100%;
+		background-color:#FEC51D;
+		border-top:solid 1px buttonhighlight;
+		border-left:solid 1px buttonhighlight;
+		border-right:solid 1px buttonshadow;
+		border-bottom:solid 1px buttonshadow;
+	}
+	div.HiLightButton	{
+		height:28px;
+		border-top:outset 1px buttonhighlight;
+		border-left:outset 1px buttonhighlight;
+		border-right:outset 1px buttonshadow;
+		border-bottom:outset 1px buttonshadow;
+	}
+	div.NoHiLightButton	{
+		height:28px;
+		border:solid 1px #FEC51D;
+	}
+	div.HiLightInsetButton	{
+		height:28px;
+		border-top:inset 1px buttonshadow;
+		border-left:inset 1px buttonshadow;
+		border-right:inset 1px buttonhighlight;
+		border-bottom:inset 1px buttonhighlight;
+	}
+	textarea.Alert	{
+		border:solid 1px #E2DCC8;
+		background-color:#E2DCC8;
+		overflow:auto;
+	}
+	.leftmenuNoHiLight {
+		color:	#000000;
+	}
+	.leftmenuHiLight {
+		color:#FFFFFF;
+		background-color:#0A246A;
+		outline-style:none;
+	}
+	.newbuttondef	{
+		padding:1px 3px 1px 3px;
+		margin:0px;
+		border:1px solid #FEC51D;
+	}
+	.newbutton {
+		cursor:pointer;
+	}
+	.newbuttondisabled {
+		cursor:default;
+	}
+	.newbuttonmouseover	{
+		border-color:"ThreeDHighlight ThreeDDarkShadow ThreeDDarkShadow ThreeDHighlight";
+	}
+	.newbuttonmousedown	{
+		border-color:"ThreeDDarkShadow ThreeDHighlight ThreeDHighlight ThreeDDarkShadow";
+		padding:"2px 2px 0px 4px";
+	}
+	
+	.toolBar {
+	  height:28px;
+		border:solid 1px #FEC51D;
+		m:expression(this.onmouseover =  new Function("this.className = 'toolBar-hover';"));
+	  h:expression(this.onmousedown =  new Function("this.className = 'toolBar-click';"));
+	}
+	.toolBar:hover,
+	.toolBar-hover {
+	  height:28px;
+		border-top:outset 1px buttonhighlight;
+		border-left:outset 1px buttonhighlight;
+		border-right:outset 1px buttonshadow;
+		border-bottom:outset 1px buttonshadow;
+	  m:expression(this.onmouseout = new Function("this.className = 'toolBar';"));
+	}
+	.toolBar-click {
+	  height:28px;
+		border-top:inset 1px buttonshadow;
+		border-left:inset 1px buttonshadow;
+		border-right:inset 1px buttonhighlight;
+		border-bottom:inset 1px buttonhighlight;
+	  h:expression(this.onmouseup = new Function("this.className = 'toolBar';"));
+	}
+	.toolBarDis {
+	  height:28px;
+		border:solid 1px #FEC51D;
+	}
+	#auto_list {
+		display:block;
+		padding:2px;
+		width:350px;
+		border:1px solid;
+		z-index:999;
+		position:absolute;
+		overflow:hidden;
+		left:0;
+		top:0;
+		opacity:1.0;
+		filter:alpha(opacity=100);
+	}
+	#auto_list a,#auto_list a:link,#auto_list a:visited {
+		display:block;
+		padding:2px;
+		clear:both;
+		background:#FFF;
+		text-decoration:none;
+		color:#000;
+	}
+	#auto_list a:hover,#auto_list a:active,#auto_list a:focus {
+		background:#FDD;
+	}
+	.ac_match {
+		font-weight:bold;
+		color:#C00;
+	}

@@ -1,0 +1,1117 @@
+/*---------------------------------------------------------------------------\            
+||  Comments:	Construction	              
+\*--------------------------------------------------------------------------*/
+function DatePicker( oDate ) 
+{
+	// check arguments	
+	if ( typeof(oDate) == "object" )
+	{
+		this._selectedDate = oDate || new Date();
+		this._none = oDate == null;
+		
+		if (oDate)
+			this._populateInput = true;
+	}
+	else if ( typeof(oDate) == "string" )
+	{
+		this._selectedDate = new Date;
+		dateArray = oDate.split(",");
+
+		if ( dateArray.length == 3 )
+		{
+			this._selectedDate.setMonth(dateArray[0] - 1);
+			this._selectedDate.setDate(dateArray[1]);
+			this._selectedDate.setFullYear(dateArray[2]);
+
+			this._populateInput = true;
+		}
+	}
+	else
+	{
+		this._selectedDate = new Date;
+	}
+
+	this._matrix = [[],[],[],[],[],[],[]];
+	this._showNone = false;
+	this._showToday = true;
+	this._firstWeekDay = 6;	
+	this._redWeekDay = 6;
+	this._bCreatedCalandar = false;
+	
+	this._dontChangeNone = false;
+}
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Static fields describing the name of the 
+||				months and days	              
+\*--------------------------------------------------------------------------*/
+DatePicker.months = [
+	"January", "February", "March", "April",
+	"May", "June", "July", "August",
+	"September", "October", "November", "December"];
+
+DatePicker.days = ["M", "T", "W", "T", "F", "S", "S"];
+
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Create object nodes. 
+||			
+||				Node Structure:
+||
+||				<SPAN>
+||					<DIV><INPUT><BUTTON></DIV>
+||					<DIV><CALANDAR></DIV> <-- Added by CreateCalandar()
+||				</SPAN>        
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype.create = function ( name ) 
+{
+	var dp = this;
+
+	this._document = document;
+	this._el = document.createElement( "span" );
+
+	// create hidden value
+	this._value = document.createElement( "input" );
+	this._value.name = name;
+	this._value.type = "hidden";
+
+	// create input box
+	this._input = document.createElement( "input" );
+
+	// if a date was specified, populate the field
+	if ( this._populateInput )
+	{
+		this._input.value = FormatToDefaultDate(this.getDate().getFullYear(), this.getDate().getMonth(), this.getDate().getDate());
+	}
+
+	this._input.onkeydown = function (e)
+	{
+		if ( dp._bCreatedCalandar )
+		{
+			if ( e == null ) 
+				e = document.parentWindow.event;
+			
+			var kc = e.keyCode != null ? e.keyCode : e.charCode;
+
+			if ( kc == 13 )
+			{
+				if(dp._el.releaseCapture)
+				{
+					dp._el.releaseCapture();
+				}
+				dp._data_div.style.display = "none";
+			}
+		}
+	};
+
+	// create drop button
+	this._button = document.createElement( "button" );
+	if(glo_whichBrowser()!="Internet Explorer"){this._button.setAttribute('type','button');}
+	this._button.style.width = 20;
+	this._button.style.height = 20;	
+	var urlValue = "URL('./images/cal.gif')"; 
+	this._button.style.backgroundImage = urlValue;
+	this._button.style.backgroundRepeat = "no-repeat";
+	this._button.style.backgroundPosition = "center";
+	this._button.style.border = "0";
+	
+	// add the input box and button to the document
+	var input_div = document.createElement( "div" );
+	input_div.appendChild( this._value );
+	input_div.appendChild( this._input );
+	input_div.appendChild( this._button );
+	this._el.appendChild( input_div );
+    
+	// handle drop button click	              
+	this._button.onmousedown = function () 
+	{	
+		if ( !dp._bCreatedCalandar )
+			dp.CreateCalandar();
+	
+		if ( dp._data_div.style.display != "block" )
+		{
+			if(dp._el.setCapture)
+				dp._el.setCapture(false);
+
+			if(ValidateDefaultDate(dp._input.value))
+			{
+				var UserDate = new Date( ParseYearFromDefaultDate( dp._input.value ), 
+										 ParseMonthFromDefaultDate( dp._input.value ) - 1, 
+				                         ParseDateFromDefaultDate( dp._input.value ) );
+				dp.setDate(UserDate);
+			}
+
+			dp._data_div.style.display = "block";
+		}
+		else
+		{
+		if(dp._el.releaseCapture)
+			{
+				dp._el.releaseCapture();
+			}
+				dp._data_div.style.display = "none";
+		}
+
+		window.event.cancelBubble = true;			
+	};
+
+	// this is a hack as the browser doesn't fire the 
+	// second onclick() event when dblclicking a button. 
+	this._button.ondblclick = function () 
+	{
+		this.onmousedown();
+	};
+
+	this._button.onkeydown = function (e)
+	{
+		if ( e == null ) 
+			e = document.parentWindow.event;
+		
+		var kc = e.keyCode != null ? e.keyCode : e.charCode;
+
+		if ( kc == 32 || kc == 13 || kc==27 )
+			this.onmousedown();
+	};
+
+	// hide the calandar div if the user clicks on any 
+	// other control or if we lose the mouse capture
+	this._el.onmousedown = function ()
+	{
+		var object = event.srcElement;
+
+		if ( object == this )
+		{
+			if(this.releaseCapture)
+			{
+				this.releaseCapture();
+			}
+			return;
+		}
+		
+		while ( object != null )
+		{
+			if ( object == this )
+				return;
+
+			object = object.parentNode;
+		}
+		
+		if(this.releaseCapture)
+		{
+			this.releaseCapture();
+		}
+		
+	};
+
+	this._el.onlosecapture = function ()
+	{
+		dp._data_div.style.display = "none";
+	};
+
+	return this._el;
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Create the calandar div.  This allows the calandar to
+||				be created the first time it is expanded, improving
+||				the page load time.	              
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype.CreateCalandar = function ()
+{
+	var dp = this;
+	var Node = null;
+
+	// create the div for the calandar
+	this._data_div = document.createElement( "div" );
+	this._data_div.className = "datePicker";
+	this._data_div.style.display = "none";
+	this._data_div.style.position = "absolute";
+	this._data_div.style.zIndex = 1000;
+
+	// header
+	var div = document.createElement( "div" );
+	div.className = "header";
+	this._data_div.appendChild( div );
+	
+	var headerTable = document.createElement( "table" );
+	headerTable.className = "headerTable";
+	headerTable.cellSpacing = 0;
+	div.appendChild( headerTable );
+	
+	var tBody = document.createElement( "tbody" );
+	headerTable.appendChild( tBody );
+	
+	var tr = document.createElement( "tr" );
+	tBody.appendChild( tr );
+	
+	var	td = document.createElement( "td" );
+	Node = document.createElement( "button" );
+	if(glo_whichBrowser()!="Internet Explorer"){Node.setAttribute('type','button');}
+	Node.style.width = 22;
+	Node.style.height = 22;
+	Node.style.fontSize = "8";
+	Node.style.fontFamily = "Arial";
+	Node.onmousedown = function() { dp.goToPreviousYear(); };
+	Node.ondblclick = function() { this.onmousedown(); };
+	Node.appendChild( document.createTextNode("<<") );
+	td.appendChild( Node );
+	tr.appendChild( td );
+
+	td = document.createElement( "td" );
+	Node = document.createElement( "button" );
+	if(glo_whichBrowser()!="Internet Explorer"){Node.setAttribute('type','button');}
+	Node.style.width = 22;
+	Node.style.height = 22;
+	Node.style.fontSize = "8";
+	Node.style.fontFamily = "Arial";
+	Node.onmousedown = function() { dp.goToPreviousMonth(); };
+	Node.ondblclick = function() { this.onmousedown(); };
+	Node.appendChild( document.createTextNode("<") );
+	td.appendChild( Node );
+	tr.appendChild( td );
+
+	td = document.createElement( "td" );
+	td.className = "labelContainer";
+	tr.appendChild( td );
+	this._topLabel = document.createElement( "a" );
+	this._topLabel.className = "topLabel";
+	this._topLabel.href = "#";
+	this._topLabel.appendChild( document.createTextNode( String.fromCharCode( 160 ) ) );
+	td.appendChild( this._topLabel );
+	
+	this._labelPopup = document.createElement( "div" );
+	this._labelPopup.className = "labelPopup";
+
+	td = document.createElement( "td" );
+	Node = document.createElement( "button" );
+	if(glo_whichBrowser()!="Internet Explorer"){Node.setAttribute('type','button');}
+	Node.style.width = 22;
+	Node.style.height = 22;
+	Node.style.fontSize = "8";
+	Node.style.fontFamily = "Arial";
+	Node.onmousedown = function () { dp.goToNextMonth(); };
+	Node.ondblclick = function () { this.onmousedown(); };
+	Node.appendChild( document.createTextNode(">") );
+	td.appendChild( Node );
+	tr.appendChild( td );
+
+	td = document.createElement( "td" );
+	Node = document.createElement( "button" );
+	if(glo_whichBrowser()!="Internet Explorer"){Node.setAttribute('type','button');}
+	Node.style.width = 22;
+	Node.style.height = 22;
+	Node.style.fontSize = "8";
+	Node.style.fontFamily = "Arial";
+	Node.style.textAlign = "left";
+	Node.onmousedown = function () { dp.goToNextYear(); };
+	Node.ondblclick = function () { this.onmousedown(); };
+	Node.appendChild( document.createTextNode(">>") );
+	td.appendChild( Node );
+	tr.appendChild( td );
+	
+	// grid
+	div = document.createElement( "div" );
+	div.className = "grid";
+	this._data_div.appendChild( div );
+	this._table = div;
+	
+	// footer
+	div = document.createElement( "div" );
+	div.className = "footer";
+	this._data_div.appendChild( div );
+	
+	var footerTable = document.createElement( "table" );
+	footerTable.className = "footerTable";
+	footerTable.cellSpacing = 0;
+	div.appendChild( footerTable );
+	
+	tBody = document.createElement( "tbody" );
+	footerTable.appendChild( tBody );
+	
+	tr = document.createElement( "tr" );
+	tBody.appendChild( tr );
+	
+	td = document.createElement( "td" );
+	this._todayButton = document.createElement( "button" );
+	if(glo_whichBrowser()!="Internet Explorer"){this._todayButton.setAttribute('type','button');}
+	this._todayButton.className = "todayButton";
+	this._todayButton.appendChild( document.createTextNode( "Today" ) );
+	td.appendChild( this._todayButton );
+	tr.appendChild( td );
+	
+	td = document.createElement( "td" );
+	td.className = "filler";
+	td.appendChild( document.createTextNode( String.fromCharCode( 160 ) ) );
+	tr.appendChild( td );
+	
+	td = document.createElement( "td" );
+	this._noneButton = document.createElement( "button" );
+	if(glo_whichBrowser()!="Internet Explorer"){this._noneButton.setAttribute('type','button');}
+	this._noneButton.className = "noneButton";
+	this._noneButton.appendChild( document.createTextNode( "None" ) );
+	td.appendChild( this._noneButton );
+	tr.appendChild( td );
+		
+	this._createTable( document );
+	
+	this._updateTable();
+	this._setTopLabel();
+
+	if ( !this._showNone )
+		this._noneButton.style.visibility = "hidden";
+	
+	if ( !this._showToday )
+		this._todayButton.style.visibility = "hidden";
+
+	// calandar buttons
+	this._todayButton.onclick = function () { dp.goToToday(); };
+	this._noneButton.onclick = function () { dp.setDate( null ); };
+	this._data_div.onselectstart = function () { return false; };
+		
+	this._table.onclick = function ( e ) 
+	{
+		// find event
+		if ( e == null ) 
+			e = document.parentWindow.event;
+		
+		// find td
+		var el = e.target != null ? e.target : e.srcElement;
+		
+		while ( el.nodeType != 1 )
+			el = el.parentNode;
+		
+		while ( el != null && el.tagName && el.tagName.toLowerCase() != "td" )
+			el = el.parentNode;
+		
+		// if no td found, return
+		if ( el == null || el.tagName == null || el.tagName.toLowerCase() != "td" )
+			return;
+		
+		var n = null;
+		
+		if ( el.firstChild )
+			n = Number( el.firstChild.data );
+
+		if ( isNaN( n ) || n <= 0 || n == null )
+			return;
+		
+		var d = new Date( dp._selectedDate );				
+		d.setDate( n );
+		dp.setDate( d );
+
+		dp._input.value = FormatToDefaultDate(dp.getDate().getFullYear(), dp.getDate().getMonth(), dp.getDate().getDate());
+		if ( typeof dp._input.onchange == "function" )
+				dp._input.onchange();
+		
+		if(dp._el.releaseCapture)
+		{
+			dp._el.releaseCapture();
+		}	
+		dp._data_div.style.display = "none";
+	};
+	
+	// show popup
+	this._topLabel.onclick = function ( e ) 
+	{
+		dp._showLabelPopup();
+		return false;
+	};
+	
+	this._data_div.onkeydown = function ( e ) 
+	{
+		if ( e == null ) 
+			e = document.parentWindow.event;
+		
+		var kc = e.keyCode != null ? e.keyCode : e.charCode;
+		var d = new Date( dp._selectedDate ).valueOf();
+
+		switch ( kc )
+		{
+		case 37: // left
+			d -= 24 * 60 * 60 * 1000;
+			break;
+		case 39: // right
+			d += 24 * 60 * 60 * 1000;
+			break;
+		case 38: // up
+			d -= 7 * 24 * 60 * 60 * 1000;
+			break;
+		case 40:	// down
+			d += 7 * 24 * 60 * 60 * 1000;
+			break;
+		case 13: // enter
+			dp._input.value = FormatToDefaultDate(dp.getDate().getFullYear(), dp.getDate().getMonth(), dp.getDate().getDate());
+			if(dp._el.releaseCapture)
+			{
+				dp._el.releaseCapture();
+			}
+			this.style.display = "none";
+			return false;
+		
+		case 27: // escape
+			if(dp._el.releaseCapture)
+			{
+				dp._el.releaseCapture();
+			}
+			this.style.display = "none";
+			return false;
+
+		default:
+			return true;
+		}
+
+		dp.setDate( new Date( d ) );
+		return false;
+	};
+	
+	// ie6 extension
+	this._data_div.onmousewheel = function ( e ) 
+	{
+		if ( e == null ) 
+			e = document.parentWindow.event;
+
+		var n = - e.wheelDelta / 120;
+		
+		if ( n > 0 )
+		{
+			for( var i = 0; i < n; i++ )
+			{
+				dp.goToNextMonth();
+			}
+		}
+		else
+		{
+			for( var i = 0; i > n; i-- )
+			{
+				dp.goToPreviousMonth();
+			}
+		}
+		
+		return false;
+	};
+	
+	this._el.appendChild(this._data_div);
+	this._bCreatedCalandar = true;
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Updates the value of the control.  This function needs to 
+||				be called before submitting the form.	              
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype.Update = function ( bValidate )
+{
+	if(ValidateDefaultDate(this._input.value))
+	{
+		var UserDate = new Date( ParseYearFromDefaultDate( this._input.value ), ParseMonthFromDefaultDate( this._input.value ) - 1, 
+				                 ParseDateFromDefaultDate( this._input.value ) );
+
+		this._value.value = UserDate.getMonth() + 1 + "," + UserDate.getDate() + "," + UserDate.getFullYear();
+
+		return true;
+	}
+	
+	this._value.value = "";
+
+	if ( bValidate )
+	{
+		alert("The date specified is not valid");
+		this._input.focus();
+		this._input.select();
+	}
+
+	return false;
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Sets the date	              
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype.setDate = function ( oDate ) 
+{
+	this._hideLabelPopup();
+
+	// if null then set None
+	if ( oDate == null ) 
+	{
+		if ( !this._none ) 
+		{
+			this._none = true;
+			this._setTopLabel();
+			this._updateTable();
+			
+			if ( typeof this.onchange == "function" )
+				this.onchange();	
+		}
+
+		return;
+	}
+
+	// if string or number create a Date object
+	if ( typeof oDate == "string" || typeof oDate == "number" ) 
+		oDate = new Date( oDate );	
+	
+	// do not update if not really changed
+	if ( this._selectedDate.getDate() != oDate.getDate() ||
+		this._selectedDate.getMonth() != oDate.getMonth() || 
+		this._selectedDate.getFullYear() != oDate.getFullYear() ||
+		this._none ) 
+	{	
+		if ( !this._dontChangeNone )
+			this._none = false;
+		
+		this._selectedDate = new Date( oDate );
+	
+		this._setTopLabel();
+		this._updateTable();
+		
+		if ( typeof this.onchange == "function" )
+			this.onchange();
+	}
+	
+	if ( !this._dontChangeNone )
+		this._none = false;
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Returns the selected date	
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype.getDate = function () 
+{
+	if ( this._none ) return null;
+		return new Date( this._selectedDate );
+};
+
+DatePicker.prototype.isSelectedDateOK = function(today)
+{
+	if(this._none)
+		return -1;
+	
+	if(this._selectedDate <= today)
+		return 1;
+		
+	return 0;
+}
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Creates the table elements and inserts them 
+||				into the date picker              
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype._createTable = function ( document ) 
+{
+	var str, i;
+	var rows = 6;
+	var cols = 7;
+	var currentWeek = 0;
+
+	var table = document.createElement( "table" );
+	table.className = "gridTable";
+	table.cellSpacing = 0;
+	
+	var tBody = document.createElement( "tbody" );
+	table.appendChild( tBody );
+	
+	// days row
+	var tr = document.createElement( "tr" );
+	tr.className = "daysRow";
+
+	var td, tn;
+	var nbsp = String.fromCharCode( 160 );
+	for ( i = 0; i < cols; i++ ) {
+		td = document.createElement( "td" );
+		td.appendChild( document.createTextNode( nbsp ) );
+		tr.appendChild( td );
+	}
+	tBody.appendChild( tr );
+	
+	// upper line
+	tr = document.createElement( "tr" );
+	td = document.createElement( "td" );
+	td.className = "upperLine";
+	td.colSpan = 7;
+	tr.appendChild( td );
+	tBody.appendChild( tr );
+
+	// rest
+	for ( i = 0; i < rows; i++ ) 
+	{
+		tr = document.createElement( "tr" );
+		
+		for ( var j = 0; j < cols; j++ ) 
+		{
+			td = document.createElement( "td" );
+			td.appendChild( document.createTextNode( nbsp ) );
+			tr.appendChild( td );
+		}
+
+		tBody.appendChild( tr );
+	}
+
+	str += "</table>";
+	
+	if ( this._table != null )
+		this._table.appendChild( table );
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	This method updates all the text nodes inside 
+||				the table as well as all the classNames on the tds	              
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype._updateTable = function ( bDateOnly ) 
+{
+	// if no element no need to continue
+	if ( this._table == null ) return;
+	
+	var i;
+	var str = "";
+	var rows = 6;
+	var cols = 7;
+	var currentWeek = 0;
+		
+	var cells = new Array( rows );
+	this._matrix = new Array( rows );
+	for ( i = 0; i < rows; i++ ) 
+	{
+		cells[i] = new Array( cols );
+		this._matrix[i] = new Array( cols );
+	}
+
+
+	// convert to ISO, Monday is 0 and 6 is Sunday
+	var weekDay = ( this._selectedDate.getDay() + 6 ) % 7;
+	var colIndex = ( weekDay - this._firstWeekDay + 7 ) % 7;
+
+	// Set the tmpDate to this month
+	var tmpDate = new Date( this._selectedDate.getFullYear(),
+							this._selectedDate.getMonth(), 1 );
+	var today = new Date();
+	// go thorugh all days this month and store the text
+	// and the class name in the cells matrix
+	for ( i = 1; i < 32; i++ ) 
+	{
+		tmpDate.setDate( i );
+		// convert to ISO, Monday is 0 and 6 is Sunday
+		var weekDay = ( tmpDate.getDay() + 6 ) % 7;
+		var colIndex = ( weekDay - this._firstWeekDay + 7 ) % 7;
+		if ( tmpDate.getMonth() == this._selectedDate.getMonth() ) {
+
+			var isToday = tmpDate.getDate() == today.getDate() && 
+						tmpDate.getMonth() == today.getMonth() &&
+						tmpDate.getFullYear() == today.getFullYear();
+		
+			cells[currentWeek][colIndex] = { text: "", className: "" };
+			
+			if ( this._selectedDate.getDate() == tmpDate.getDate() && !this._none )
+				cells[currentWeek][colIndex].className += "selected ";
+			if ( isToday )
+				cells[currentWeek][colIndex].className += "today ";
+			if ( ( tmpDate.getDay() + 6 ) % 7 == this._redWeekDay ) // ISO
+				cells[currentWeek][colIndex].className += "red";
+			
+			cells[currentWeek][colIndex].text =			
+				this._matrix[currentWeek][colIndex] = tmpDate.getDate();
+			
+			if ( colIndex == 6 )
+				currentWeek++;			
+		}
+	}
+	
+	// fix day letter order if not standard
+	var weekDays = DatePicker.days;												
+	if (this._firstWeekDay != 0) {
+		weekDays = new Array(7);
+		for ( i = 0; i < 7; i++)
+			weekDays[i] = DatePicker.days[ (i + this._firstWeekDay) % 7];
+	}
+
+	// update text in days row
+	var tds = this._table.firstChild.tBodies[0].rows[0].cells;
+	for ( i = 0; i < cols; i++ )
+		tds[i].firstChild.data = weekDays[i];
+		
+	// update the text nodes and class names
+	var trs = this._table.firstChild.tBodies[0].rows;
+	var tmpCell;
+	var nbsp = String.fromCharCode( 160 );
+	for ( var y = 0; y < rows; y++ ) {
+		for (var x = 0; x < cols; x++) {
+			tmpCell = trs[y + 2].cells[x];
+			if ( typeof cells[y][x] != "undefined" ) {
+				tmpCell.className = cells[y][x].className;
+				tmpCell.firstChild.data = cells[y][x].text;
+			}
+			else {
+				tmpCell.className = "";
+				tmpCell.firstChild.data = nbsp;
+			}
+		}
+	}
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Sets the label showing the year and selected month	              
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype._setTopLabel = function () 
+{
+	var str = this._selectedDate.getFullYear() + " " + DatePicker.months[ this._selectedDate.getMonth() ];
+	if ( this._topLabel != null )
+		this._topLabel.lastChild.data = str;
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Advances the calander to the next year	              
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype.goToNextYear = function () 
+{
+	var d = new Date( this._selectedDate );
+	d.setFullYear( this._selectedDate.getFullYear() + 1 );
+	
+	this._dontChangeNone = true;
+	this.setDate( d );
+	this._dontChangeNone = false;
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Advances the calander to the next year	              
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype.goToPreviousYear = function () 
+{
+	var d = new Date( this._selectedDate );
+	d.setFullYear( this._selectedDate.getFullYear() - 1 );
+	
+	this._dontChangeNone = true;
+	this.setDate( d );
+	this._dontChangeNone = false;
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Advances the calander to the next month	              
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype.goToNextMonth = function () 
+{
+	var d = new Date( this._selectedDate );
+
+	var current_date = d.getDate();
+	var current_month = d.getMonth();
+
+	d.setMonth( current_month + 1 );
+
+	while ( d.getDate() != current_date )
+	{
+		d.setDate( --current_date );
+		d.setMonth( current_month + 1 );
+	}
+
+	this._dontChangeNone = true;
+	this.setDate( d );
+	this._dontChangeNone = false;
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Sets the calander to the previous month
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype.goToPreviousMonth = function () 
+{	
+	var d = new Date( this._selectedDate );
+
+	var current_date = d.getDate();
+	var current_month = d.getMonth();
+
+	d.setMonth( current_month - 1 );
+
+	while ( d.getDate() != current_date )
+	{
+		d.setDate( --current_date );
+		d.setMonth( current_month - 1 );
+	}
+
+	this._dontChangeNone = true;
+	this.setDate( d );
+	this._dontChangeNone = false;
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Sets the calander to today's date
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype.goToToday = function () 
+{
+	if ( this._none )
+		// change the selectedDate to force update if none was true
+		this._selectedDate = new Date( this._selectedDate + 10000000000 );
+	this._none = false;
+	this.setDate( new Date() );
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Hides / Shows the "Today" button
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype.setShowToday = function ( bShowToday ) 
+{
+	if ( typeof bShowToday == "string" )
+		bShowToday = !/false|0|no/i.test( bShowToday );
+		
+	if ( this._todayButton != null )
+		this._todayButton.style.visibility = bShowToday ? "visible" : "hidden";
+	this._showToday = bShowToday;
+};
+
+DatePicker.prototype.getShowToday = function () {
+	return this._showToday;
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Hides / Shows the "None" button
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype.setShowNone = function ( bShowNone ) 
+{
+	if ( typeof bShowNone == "string" )
+		bShowNone = !/false|0|no/i.test( bShowNone );
+
+	if ( this._noneButton != null )
+		this._noneButton.style.visibility = bShowNone ? "visible" : "hidden";
+	this._showNone = bShowNone;
+};
+
+DatePicker.prototype.getShowNone = function () 
+{
+	return this._showNone;
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Sets the first day of the week as this may be
+||				different in some contries	              
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype.setFirstWeekDay = function ( nFirstWeekDay ) 
+{
+	if ( this._firstWeekDay != nFirstWeekDay ) 
+	{
+		this._firstWeekDay = nFirstWeekDay;
+		this._updateTable();
+	}
+};
+
+DatePicker.prototype.getFirstWeekDay = function () 
+{
+	return this._firstWeekDay;
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Sets which day of the week should be displayed in red.
+||				0 is monday and 6 is sunday as in the ISO standard.              
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype.setRedWeekDay = function ( nRedWeekDay ) 
+{
+	if ( this._redWeekDay != nRedWeekDay ) 
+	{
+		this._redWeekDay = nRedWeekDay;
+		this._updateTable();
+	}
+};
+
+DatePicker.prototype.getRedWeekDay = function () 
+{
+	return this._redWeekDay;
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Displays the pop-up when the user clicks on the month label
+\*--------------------------------------------------------------------------*/
+DatePicker.prototype._showLabelPopup = function ()
+{
+	var dateContext = function ( dp, d ) 
+	{
+		return function ( e ) 
+		{
+			dp._dontChangeNone = true;
+			dp._hideLabelPopup();
+			dp.setDate( d );
+			dp._dontChangeNone = false;
+			return false;
+		};
+	};
+	
+	var dp = this;
+	
+	// clear all old elements in the popup
+	while ( this._labelPopup.hasChildNodes() )
+		this._labelPopup.removeChild( this._labelPopup.firstChild );
+	
+	var a, tmp;
+	for ( var i = -3; i < 4; i++ ) 
+	{
+		tmp = new Date( this._selectedDate );
+		tmp.setDate(1);	// set day to 1 to prevent overflow with shorter months
+		tmp.setMonth( tmp.getMonth() + i );
+		
+		a = this._document.createElement( "a" );
+		a.href = "javascript:void 0;";
+		a.onclick = dateContext( dp, tmp );
+		a.appendChild( this._document.createTextNode( tmp.getFullYear() + " " +
+									DatePicker.months[ tmp.getMonth() ] ) );
+		if ( i == 0 )
+			a.className = "selected";
+		this._labelPopup.appendChild( a );
+	}
+	
+	this._topLabel.parentNode.insertBefore( this._labelPopup, this._topLabel.parentNode.firstChild );
+};
+
+DatePicker.prototype._hideLabelPopup = function () 
+{
+	if ( this._labelPopup.parentNode )
+		this._labelPopup.parentNode.removeChild( this._labelPopup );
+};
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Updates two date picker controls to reflect a date range
+\*--------------------------------------------------------------------------*/
+function SetDateRange(nSel, objStartDate, objEndDate)
+{
+	var StartDate = new Date();
+	var EndDate	  = new Date();
+
+	switch(nSel)
+	{	
+		case "0": // last 30
+			StartDate.setDate(StartDate.getDate()-29);
+			break;
+		case "1": // last 14
+			StartDate.setDate(StartDate.getDate()-13);
+			break;
+		case "2": // last 7
+			StartDate.setDate(StartDate.getDate()-6);
+			break;
+		case "3": // today
+			break;
+		case "4": // yesterday
+			StartDate.setDate(StartDate.getDate()-1);
+			EndDate.setDate(EndDate.getDate()-1);
+			break;
+		case "5": // this week
+			StartDate.setDate(StartDate.getDate()-StartDate.getDay());
+			break;
+		case "6": // last week
+			StartDate.setDate(StartDate.getDate()-StartDate.getDay()-7);
+			EndDate.setDate(EndDate.getDate()-EndDate.getDay()-1);
+			break;
+		case "7": // this month
+			StartDate.setDate(1);
+			break;
+		case "8": // last month
+			StartDate.setMonth(StartDate.getMonth()-1);
+			StartDate.setDate(1);
+			EndDate.setDate(0);
+			break;
+		case "9": // this quarter
+			StartDate.setDate(1);
+			StartDate.setMonth( Math.floor(StartDate.getMonth() / 3) * 3 );
+			break;
+		case "10": // last quarter
+			StartDate.setDate(1);
+			StartDate.setMonth( (Math.floor(StartDate.getMonth() / 3) - 1) * 3 );
+			EndDate.setMonth( (Math.floor(EndDate.getMonth() / 3)) * 3 );
+			EndDate.setDate(0);
+			break;
+		case "11":	// this year
+			StartDate.setMonth(0);
+			StartDate.setDate(1);
+			break;
+		case "12":	// last year
+			StartDate.setFullYear(StartDate.getFullYear()-1);
+			StartDate.setMonth(0);
+			StartDate.setDate(1);
+			EndDate.setMonth(0);
+			EndDate.setDate(0);
+			break;
+		case "13": // all dates
+			StartDate.setDate(1);
+			StartDate.setMonth(0);
+			StartDate.setFullYear(2000);
+			break;
+		default:
+			return;
+	}
+	
+	objStartDate._input.value = FormatToDefaultDate(StartDate.getFullYear(), StartDate.getMonth(), StartDate.getDate());
+
+	objEndDate._input.value = FormatToDefaultDate(EndDate.getFullYear(), EndDate.getMonth(), EndDate.getDate());
+}
+
+function FormatToDefaultDate(nYear, nMonth, nDay)
+{
+	var sDate = "";
+	var sDay = (nDay < 10) ? "0" + nDay : nDay;
+	var sMonth = ((nMonth + 1) < 10) ? "0" + (nMonth + 1) : (nMonth + 1);
+	sDate += sDay + "/" + sMonth + "/" + nYear;
+	return sDate;
+}
+
+function IsDefaultDate(sDate)
+{
+	var sCheckDate = new String(sDate);
+	var dateValues = sCheckDate.split("/");
+	if(dateValues.length > 2 && dateValues.length < 4)
+	{
+		var sYear = new String(dateValues[2]);
+		if(sYear.length != 4)
+			return false;
+		
+		if(isNaN(sYear))
+			return false;
+		
+		var nYear = parseInt(sYear, 10);
+		if(nYear < 1970 || nYear > 2035)
+			return false;
+			
+		var sMonth = new String(dateValues[1]);
+		if(sMonth.length != 2)
+			return false;
+			
+		if(isNaN(sMonth))
+			return false;
+			
+		var nMonth = parseInt(sMonth, 10);
+		if(nMonth < 1 || nMonth > 12)
+			return false;
+		
+		var sDate = new String(dateValues[0]);
+		if(sDate.length != 2)
+			return false;
+			
+		if(isNaN(sDate))
+			return false;
+			
+		var nDate = parseInt(sDate, 10);
+		if(nDate < 1 || nDate > 31)
+			return false;
+	}
+	else
+		return false;
+	
+	return true;
+}
+
+function ValidateDefaultDate(sDate)
+{
+	return IsDefaultDate(sDate);
+}
+
+function ParseYearFromDefaultDate(sDate)
+{
+	var sCheckDate = new String(sDate);
+	var dateValues = sCheckDate.split("/");
+	return dateValues[2];
+}
+
+function ParseMonthFromDefaultDate(sDate)
+{
+	var sCheckDate = new String(sDate);
+	var dateValues = sCheckDate.split("/");
+	return dateValues[1];
+}
+
+function ParseDateFromDefaultDate(sDate)
+{
+	var sCheckDate = new String(sDate);
+	var dateValues = sCheckDate.split("/");
+	return dateValues[0];
+}
+

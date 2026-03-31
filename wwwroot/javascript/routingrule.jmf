@@ -1,0 +1,742 @@
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Something to consider...
+//	[	MatchTextTable.rows[i], this index should always correspond directly with document.all.MatchDelButton[i]
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@
+//	[	Page Specific Variables
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	[	Name: MatchID
+//	[	Desc: a unique identifier for any dynamically generated match text specifications
+//	[	Note: value will be reset when page loads if adjustDoc() finds a greater value
+//	[	Page: newroutingrule.ems; editroutingrule.ems;
+		var MatchID = 1;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	addOption(What)
+//	[	Desc:	used to dynamically convert contents of a text field, to an option of a combo box!
+//	[ 	Param:	What contains a partial field name of the combo box that the option should be added to!
+//	[	Page:	newroutingrule.ems; editroutingrule.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function addOption(What)
+	{
+//{		capture the combo box the option will be added to.
+		toWhat = eval("tabularForm."+What+"Address");
+//{		capture the text field where the option text will come from.
+		fromWhat = eval("tabularForm.New"+What+"Address");
+
+//{		create a numeric value to use as an ID for the newly created option
+	//		MaxID = (parseInt(eval("tabularForm."+What+"MaxID.value"))+1);
+
+//{		if the text field is not empty, try adding its value as an option
+		if(fromWhat.value != '')
+		{
+//{			create a new Option!
+			newOption = new Option();
+//{			set the new options text value = the from What text field's value
+			newOption.text = fromWhat.value;
+
+//{			set the ID value of the new option!
+	//			newOption.value = MaxID;
+
+//{			create a processing directive!
+			var matchFound = false;
+//{			loop through the current combo box list
+			for (var i = 0; i < toWhat.length; i++)
+			{
+//{				if this option's text is the same as what I wish to insert
+				if(toWhat[i].text == fromWhat.value)
+				{
+//{					there is an identical match!
+					matchFound = true;
+				}
+			}
+//{			if an identical match was not found...
+			if (matchFound==false)
+			{
+//{				actually inserts the option into the combo box!
+				toWhat.options[toWhat.options.length] = newOption;
+//{				clear the text field's value!
+				fromWhat.value = '';
+			}
+//{			if an identical match was found...
+			else
+			{
+//{				clear out the text field's value, and do nothing!
+				fromWhat.value = '';
+			}
+		}//^ if (fromWhat.value != '')
+		else {
+			alert("You must specify an address in order to add it to the list.");
+			fromWhat.focus();
+		}
+	}//^ function addOption()
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	delOption(What)
+//	[	Desc:	used to dynamically convert contents of a text field, to an option of a combo box!
+//	[ 	Param:	What contains the field name of the combo box that the option should be deleted from!
+//	[	Page:	newroutingrule.ems; editroutingrule.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function delOption(What)
+	{
+//{		grab the combo box by reference!
+		fromWhat = eval("document.tabularForm."+What);
+//{		if the user has made a selection within this combo box then proceed!
+		if(fromWhat.selectedIndex != -1)
+		{
+//{			clear out the selected option
+			fromWhat[fromWhat.selectedIndex].text = '';
+//{			define Array Object to hold current options
+			fromObject = new Array();
+//{			fill array with current options, excluding the option we just cleared out
+			for (i = 0; i < fromWhat.length; i++)
+			{
+				if (fromWhat[i].text != '')
+				{
+					fromObject[fromObject.length] = fromWhat[i].text;
+				}
+			}
+//{			set the combo box's length back to zero for recreation
+			fromWhat.options.length = 0;
+//{			loop through the combo box's options, recreating the select box without the removed option!
+			for (var i = 0; i < fromObject.length; i++)
+			{
+				newOption = new Option();
+				newOption.text = fromObject[i];
+				fromWhat.options[fromWhat.options.length] = newOption;
+			}
+//{			deselect any options selected in the combo box!
+			fromWhat.selectedIndex = -1;
+		}//^ if (fromWhat.selectedIndex != -1)
+	}//^ function delOption(What)
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	addMatchText()
+//	[	Desc:	used to dynamically add another Match Text section to the page!
+//	[ 	Param:	None.
+//	[	Page:	newroutingrule.ems; editroutingrule.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function addMatchText()
+	{
+		var NewRowID = parseInt(MatchTextTable.rows.length);
+		var NewRow = MatchTextTable.insertRow(-1);
+		NewRow.id = MatchID;
+		var strX = "<table width='100%;' border='0' cellspacing='0' cellpadding='0'><tr><td style='padding-right:5px;width:30%;'>Text in the Message:</td><td style='width:70%;' align='left'><select name='MatchLocation"+MatchID+"'>";
+		if (document.all.hiMatLocatID.length)
+		{
+			for (i = 0; i < document.all.hiMatLocatID.length; i++)
+			{
+				strX = strX + "<option value='"+document.all.hiMatLocatID[i].value+"'>"+document.all.hiMatLocatName[i].value+"</option>";
+			}
+		}
+		else if (tabularForm.hiMatLocatID)
+		{
+			strX = strX + "<option value='"+tabularForm.hiMatLocatID.value+"'>"+tabularForm.hiMatLocatName.value+"</option>";
+		}
+		strX = strX + "</select></td></tr><tr><td style='padding-right:5px;padding-top:3px;width:30%;vertical-align:top;'>Use Regular Expression (RegEx):</td><td style='width:70%;' align='left'><input type='Checkbox' name='IsRegEx"+MatchID+"'>";
+		strX = strX + "</input></td></tr><tr><td style='padding-right:5px;padding-top:3px;width:30%;vertical-align:top;'>Matches:</td><td style='width:70%;' align='left'><textarea style='width:350px;height:45px;' name='MatchText"+MatchID+"'></textarea>";
+		strX = strX + "</td></tr><tr><td style='padding-right:5px;width:30%;'>&#160;</td><td style='width:70%;' align='left'><input type='button' rowIndex='"+NewRowID+"' name='MatchDelButton' class='childControlBtn' value='Delete' onclick='delMatchText();'/></td></tr></table>";
+		var NewCell = NewRow.insertCell(-1);
+		NewCell.setAttribute("align", "left");
+		NewCell.setAttribute("height", "150");
+		NewCell.innerHTML = strX;
+		MatchID++;
+		document.tabularForm.MatchTextMaxID.value = MatchID;
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	delMatchText()
+//	[	Desc:	used to dynamically delete a selected Match Text section on the page!
+//	[ 	Param:	None.
+//	[	Page:	newroutingrule.ems; editroutingrule.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function delMatchText()
+	{
+//{		grab the necessary rowIndex off of the button that fired this function!
+		selectedIndex = parseInt(event.srcElement.rowIndex);
+//{		if there is only one row in the table, there is only one button!
+		if (document.all.MatchTextTable.rows.length == 1)
+		{
+//{			delete the selected row, and do nothing else!
+			MatchTextTable.deleteRow(selectedIndex);
+		}
+//{		if there is two rows, there are two buttons!
+		else if (document.all.MatchTextTable.rows.length == 2)
+		{
+//{			delete the selected row!
+			MatchTextTable.deleteRow(selectedIndex);
+//{			reassign the rowIndex to the remaining button!
+			tabularForm.MatchDelButton.rowIndex = "0";
+		}
+//{		if there is more than two rows, there is a collection of buttons!
+		else if (document.all.MatchTextTable.rows.length > 2)
+		{
+//{			delete the selected row!
+			MatchTextTable.deleteRow(selectedIndex);
+//{			loop through the remaining rows, and reassign their rowIndex(s)
+			for (i = 0; i < document.all.MatchTextTable.rows.length; i++)
+			{document.all.MatchDelButton[i].rowIndex = parseInt(i);}
+		}
+	}//^ function delMatchText()
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	adjustDoc()
+//	[	Desc:	used to reassign the MatchID if a higher value is found, also reassigns the rowIndex(s) after the page loads!
+//	[ 	Param:	None.
+//	[	Page:	newroutingrule.ems; editroutingrule.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function adjustDoc()
+	{
+//{		if the MatchID is currently set to 1
+		if (MatchID==1)
+		{
+//{			check to see if there is a higher value in the form! and if so, assign it!
+			if (parseInt(document.tabularForm.MatchTextMaxID.value) > 1)
+			MatchID = parseInt(document.tabularForm.MatchTextMaxID.value);
+		}
+//{		if there is one row in the table,
+		if (document.all.MatchTextTable.rows.length == 1)
+		{
+//{			set the rowIndex for the button!
+			tabularForm.MatchDelButton.rowIndex = "0";
+		}
+//{		if there is more than one row in the table,
+		else if (document.all.MatchTextTable.rows.length > 1)
+		{
+//{			loop through the rows, and reassign the rowIndex(s) for the buttons accrodingly!
+			for (i = 0; i < document.all.MatchTextTable.rows.length; i++)
+			{
+				document.all.MatchDelButton[i].rowIndex = parseInt(i);
+			}
+		}
+	}//^ function adjustDoc()
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	adjustForm()
+//	[	Desc:	used to prepare the data prior to form submission!
+//	[ 	Param:	None.
+//	[	Page:	newroutingrule.ems; editroutingrule.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function adjustForm()
+	{
+	var submitform = true;
+		
+		var agVal=0;
+		for (var i=0; i < document.tabularForm.AssignOwnership.length; i++)
+		{
+			if (document.tabularForm.AssignOwnership[i].checked)
+				{
+					agVal = document.tabularForm.AssignOwnership[i].value;
+				}
+		}
+		
+		if(agVal == 5)
+		{
+			var agIDs="";
+			var inputs = document.getElementsByTagName("input");
+			var twoChecked = false;
+			
+			for (var i = 0; i < inputs.length; i++) {  
+			  if (inputs[i].type == "checkbox") {		    
+				if (inputs[i].checked) {  
+				  if (inputs[i].id.substring(0,4) == "ckAg")
+				  {
+					var agID = inputs[i].id.slice(4);
+					if (agIDs=="")
+					{
+						agIDs = agID;
+					}
+					else
+					{
+						twoChecked = true;
+						agIDs = agIDs + ', ' + agID;
+					}
+				  }			 
+				}  
+			  }  
+			}
+			if (twoChecked)
+			{
+				document.tabularForm.AGRouteCollection.value = agIDs;
+			}
+			else
+			{
+				alert("You must select at least two Agents if Assign\n\rOwnership by Round Robin is enabled!");
+				submitform = false;
+			}
+		}
+		
+		// Determine value for DoNotAssign
+		var nDoNotAssign=0;
+		if(document.tabularForm.chkOoo.checked){nDoNotAssign=nDoNotAssign+1;}
+		if(document.tabularForm.chkOffline.checked){nDoNotAssign=nDoNotAssign+2;}
+		if(document.tabularForm.chkDnd.value==1){nDoNotAssign=nDoNotAssign+4;}
+		if(document.tabularForm.chkNotAvail.checked){nDoNotAssign=nDoNotAssign+8;}
+		if(document.tabularForm.chkAway.checked){nDoNotAssign=nDoNotAssign+16;}
+		if(document.tabularForm.chkOnline.checked){nDoNotAssign=nDoNotAssign+32;}
+		document.tabularForm.DoNotAssign.value = nDoNotAssign;
+		
+		if (document.all.TicketboxMembers.rows.length >= 1)
+		{
+			var totalPer=0;
+			TBMembersList = "";
+			for (i = 0; i < document.all.TicketboxMembers.rows.length; i++)
+			{
+				thisID = document.all.TicketboxMembers.rows[i].id;
+				thisPer = document.getElementById("tbPer"+thisID);
+				if (thisPer.value != "")
+				{
+					if (TBMembersList=="")
+					{
+						totalPer =  parseInt(thisPer.value);
+						TBMembersList = thisID + ", " +thisPer.value;
+					}
+					else
+					{
+						totalPer =  parseInt(totalPer) +  parseInt(thisPer.value);
+						TBMembersList = TBMembersList.concat(", "+thisID + ", " +thisPer.value);
+					}
+				}
+			}
+			var tbVal=0;
+			for (var i=0; i < document.tabularForm.AssignTicketBox.length; i++)
+		   	{
+		   		if (document.tabularForm.AssignTicketBox[i].checked)
+		      		{
+		      			tbVal = document.tabularForm.AssignTicketBox[i].value;
+		      		}
+		   	}
+			
+			if (tbVal == 2)
+			{
+				if (totalPer == 100)
+				{
+					document.tabularForm.TBRouteCollection.value = TBMembersList;
+				}
+				else
+				{
+					alert("You have specified a total of "+ totalPer +"%. The total\n\rpercentage assigned to TicketBoxes must equal 100%.");
+					submitform = false;
+				}
+			}
+		}
+			
+//{		if there is more than one row,
+		if (document.all.MatchTextTable.rows.length >= 1)
+		{
+//{			create a container var to hold the comma delimmited list of ID's
+			MatchTextList = "";
+//{			loop through the available rows
+			for (i = 0; i < document.all.MatchTextTable.rows.length; i++)
+			{
+//{				capture the rowID, which is also the MatchTextID
+				thisID = document.all.MatchTextTable.rows[i].id;
+//{				if this is the first time through the loop,
+				if (MatchTextList=="")
+				{	MatchTextList = thisID;	}
+//{				if this is not the first time through the loop,
+				else
+				{	MatchTextList = MatchTextList.concat(", "+thisID);	}
+			}
+//{			set the form field value to the contents of the id container!
+			document.tabularForm.MatchTextCollection.value = MatchTextList;
+		}//^ if (document.all.MatchTextTable.rows.length)
+//{		create an array to hold all of the objects that I need to fill collection fields for!
+		var theseObjects = new Array();
+		theseObjects[0] = "MatchToAddress";
+		theseObjects[1] = "MatchFromAddress";
+		theseObjects[2] = "ForwardToAddress";
+		theseObjects[3] = "ForwardCcAddress";
+//{		loop through these objects!		
+		for (x = 0; x < theseObjects.length; x++)
+		{
+//{			if there is at least one option specified...
+			if (eval("tabularForm."+theseObjects[x]+".length") >= 1)
+			{
+//{				create a container to hold the comma delimmited list of addresses!
+				List = "";
+//{				loop through the options of the select box!
+				for (i = 0; i < eval("tabularForm."+theseObjects[x]+".length"); i++)
+				{
+//{					capture the text, in this case the email address!
+					curVal = eval("tabularForm."+theseObjects[x]).options[i].text;
+//{					if this is the first time through the loop
+					if (List=="")
+					{	List = curVal;	}
+//{					if this is not the first time through the loop
+					else
+					{	List = List.concat(", "+curVal);	}
+				}
+//{				set the hidden form field value to the value of the container var!
+				eval("document.tabularForm."+theseObjects[x]+"Collection").value = List;
+			}
+		}
+		
+		if (document.tabularForm.AutoReplyEnabled.checked)
+		{
+			if (document.tabularForm.AutoReplyEmailAddress.value!="")
+			{
+				if (!glo_checkEmailAddress(document.tabularForm.AutoReplyEmailAddress.value))
+				{
+					alert("If Auto Reply is enabled, a valid email address is required to reply from.");
+					document.tabularForm.AutoReplyEmailAddress.focus();
+					submitform = false;
+				}
+			} else {
+				alert("If Auto Reply is enabled, a valid email address is required to reply from.");
+					document.tabularForm.AutoReplyEmailAddress.focus();
+				submitform = false;
+			}
+			if (document.tabularForm.AutoReplyStandardResponseId.value=="0" ||document.tabularForm.AutoReplyStandardResponseId.value=="" )
+			{
+				alert("If Auto Reply is enabled, you must select a standard response to be used.");
+				document.tabularForm.AutoReplyResponseBtn.focus();
+				submitform = false;
+			}
+		}
+		
+		var mmVal=0;
+		for (var i=0; i < document.tabularForm.MatchMethod.length; i++)
+		{
+			if (document.tabularForm.MatchMethod[i].checked)
+				{
+					mmVal = document.tabularForm.MatchMethod[i].value;
+				}
+		}
+		
+		if (mmVal == 2)
+		{
+			document.tabularForm.chkCreateNewTickets.value = "1";
+		}
+		else
+		{
+			document.tabularForm.chkCreateNewTickets.value = "0";
+		}		
+		
+		if (document.tabularForm.ForwardCopyEnabled.checked)
+		{
+			var e = document.tabularForm.ForwardFromId;
+			if(e.options[e.selectedIndex].value == -1)
+			{
+				if (document.tabularForm.ForwardFromEmail.value!="")
+				{
+					if (!glo_checkEmailAddress(document.tabularForm.ForwardFromEmail.value))
+					{
+						alert("If Forward From defined email address is selected, a valid\r\nemail address is required in the From Email Address field.");
+						document.tabularForm.ForwardFromEmail.focus();
+						submitform = false;
+					}
+				} else {
+					alert("If Forward From defined email address is selected, a valid\r\nemail address is required in the From Email Address field.");
+						document.tabularForm.ForwardFromEmail.focus();
+					submitform = false;
+				}
+			}
+		}				
+				
+//{		submit the form already! jeez!
+		if (submitform)
+		{
+			//document.tabularForm.submit();
+			var postResults = glo_buildFormPost('tabularForm');
+			if (eval(postResults[0])==true)
+			{
+				glo_setOpenerLocation();
+				parent.close();
+			}
+		}
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+function docInitDisableForms() {
+	adjDisable(document.tabularForm.AutoReplyEnabled);
+	adjDisable(document.tabularForm.AlertEnable);
+	adjDisable(document.tabularForm.ForwardCopyEnabled);
+	adjDisable(document.tabularForm.ShredEnabled);
+	adjDisable(document.tabularForm.OfficeHours);	
+	chkAssignTb();
+	chkAssignOwner();
+}
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	adjDisable(object)
+//	[	Desc:	used to enable or disable a particular section of the page, based on the value of the checkbox!
+//	[ 	Param:	object is actually the checkbox whose value changed, and thus fired this function!
+//	[	Page:	newroutingrule.ems; editroutingrule.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function adjDisable(object)
+	{
+//{		create a new Array to hold the field names I wish to adjust!
+		var fields = new Array();
+		if (object.name == "OfficeHours")
+		{
+			fields[0] = document.tabularForm.SetHours;
+				
+			if ((document.tabularForm.OfficeHours.options[document.tabularForm.OfficeHours.selectedIndex].value == 0) || nRrID == 0)
+			{
+				glo_disableForm(0,fields);
+			}
+			else
+			{
+				glo_disableForm(1,fields);
+			}
+			return;
+		}
+
+//{		if the user clickt Enable Auto Reply
+		if (object.name == "AutoReplyEnabled")
+		{
+//{			this is the list of field names within the AutoReply section!
+			fields[0] = tabularForm.AutoReplyStdResponseName;
+			fields[1] = tabularForm.AutoReplyStandardResponseId;
+			fields[2] = tabularForm.AutoReplyResponseBtn;
+			fields[3] = tabularForm.AutoReplyQuoteMsg;
+			fields[4] = tabularForm.AutoReplyCloseTicket;
+			fields[5] = tabularForm.AutoReplyEmailAddress;
+			fields[6] = tabularForm.AutoReplyInTicket;
+		}
+//{		if the user clickt Enable Alert
+		if (object.name == "AlertEnable")
+		{
+//{			this is the list of field names within the Alert section!
+			fields[0] = tabularForm.AgentOrGroup;
+			fields[1] = tabularForm.selectBox;
+			fields[2] = tabularForm.AlertText;
+			fields[3] = tabularForm.AlertIncludeSubject;
+		}
+		else if (object.name == "ForwardCopyEnabled")
+		{
+			fields[0] = tabularForm.NewForwardToAddress;
+			fields[1] = tabularForm.ForwardToAddressBtnAdd;
+			fields[2] = tabularForm.ForwardToAddress;
+			fields[3] = tabularForm.ForwardToAddressBtnDel;
+			fields[4] = tabularForm.NewForwardCcAddress;
+			fields[5] = tabularForm.ForwardCcAddressBtnAdd;
+			fields[6] = tabularForm.ForwardCcAddress;
+			fields[7] = tabularForm.ForwardCcAddressBtnDel;
+			fields[8] = tabularForm.ForwardFromId;
+			fields[9] = tabularForm.ForwardFromName;
+			fields[10] = tabularForm.ForwardFromEmail;
+			fields[11] = tabularForm.ForwardInTicket;
+			fields[12] = tabularForm.AllowRemoteReply;
+			fields[13] = tabularForm.QuoteOriginal;
+			fields[14] = tabularForm.chkMultiMail;			
+		}
+		else if (object.name == "ShredEnabled")
+		{
+			fields[0] = tabularForm.DeleteOptionId;
+		}		
+		
+		glo_disableForm(object.checked, fields);
+		
+		if (object.name == "ForwardCopyEnabled")
+		{
+			if(object.checked)
+			{
+				var e = tabularForm.ForwardFromId;
+				adjustFrom(e.options[e.selectedIndex].value);
+			}
+			else
+			{
+				adjustFrom(0);
+			}			
+		}
+	}//^ function adjDisable(object)
+
+	function chkAssignTb()
+	{
+		var nAssignTicketBox;
+		for (var i=0; i < document.tabularForm.AssignTicketBox.length; i++)
+	   	{
+	   		if (document.tabularForm.AssignTicketBox[i].checked)
+	      		{
+	      			nAssignTicketBox = document.tabularForm.AssignTicketBox[i].value;
+	      		}
+	   	}
+				
+		if (nAssignTicketBox == 2)
+		{
+			document.all.TicketboxMembers.disabled = false;
+			document.tabularForm.ConsiderAllOwned.disabled = false;
+			var inputs=document.all.TicketboxMembers.getElementsByTagName('input');
+	    for(var i=0; i<inputs.length; ++i)
+	    {
+	        inputs[i].disabled=false;
+			}
+		}
+		else
+		{
+			document.all.TicketboxMembers.disabled = true;
+			document.tabularForm.ConsiderAllOwned.disabled = true;
+			var inputs=document.all.TicketboxMembers.getElementsByTagName('input');
+	    for(var i=0; i<inputs.length; ++i)
+	    {
+	        inputs[i].disabled=true;
+			}
+		}	
+	}
+
+	function chkAssignOwner()
+	{
+		var nAssignOwner;
+		for (var i=0; i < document.tabularForm.AssignOwnership.length; i++)
+	   	{
+	   		if (document.tabularForm.AssignOwnership[i].checked)
+	      		{
+	      			nAssignOwner = document.tabularForm.AssignOwnership[i].value;
+	      		}
+	   	}
+				
+		if (nAssignOwner == 5)
+		{
+			document.all.AgentMembers.disabled = false;
+			var inputs=document.all.AgentMembers.getElementsByTagName('input');
+	    for(var i=0; i<inputs.length; ++i)
+	    {
+	        inputs[i].disabled=false;
+			}
+		}
+		else
+		{
+			document.all.AgentMembers.disabled = true;
+			var inputs=document.all.AgentMembers.getElementsByTagName('input');
+	    for(var i=0; i<inputs.length; ++i)
+	    {
+	        inputs[i].disabled=true;
+			}			
+		}	
+	}
+
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	resetCheck()
+//	[	Desc:	used to confirm if the user truly wants to reset the hit count for the selected routing rule
+//	[ 	Param:	None.
+//	[	Page:	editroutingrule.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function resetCheck()
+	{
+		var ans = confirm("Are you sure you want to reset the hit count?");
+		if (ans)
+		{
+			//hitCountForm.submit();
+			var postResults = glo_buildFormPost('hitCountForm');
+			if (eval(postResults[0])==true)
+			{
+				glo_setOpenerLocation();
+				docHitCountTxt.innerText = "0";
+			}
+		}
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+
+function insertResponseData(returnID, returnName)
+{
+	tabularForm.AutoReplyStdResponseId = returnID;
+	tabularForm.AutoReplyStdResponseName = returnName;
+}
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	switchSelect(xObject)
+//	[	Desc:	used to dynamically switch the contents of a selectBox[x] drop down
+//	[ 	Param:	xObject is the object reference for the "AgentOrGroup[x]" select box that called the function
+//	[	Page:	alertconfig.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function switchSelect(xObject)
+	{
+//{		grabs ID for all associated objects from ID in Name
+		//thisID = parseInt(xObject.name.replace('AgentOrGroup',''));
+//{		grabs value of AgentOrGroup field, (Agent || Group)
+		thisVal = xObject.value;
+//{		grabs selectBox object for transformation
+		objSelectBox = document.getElementById('selectBox');
+//{		rename this selectBox according to the data it will contain, of course maintain the same ID
+		if (thisVal=="Group") { objSelectBox.name = "Group"; }
+		if (thisVal=="Agent") { objSelectBox.name = "Agent"; }
+//{		remove all options from the selectBox
+		objSelectBox.options.length = 0;
+//{		if Agent is selected, add all available agent options to selectBox
+		if (thisVal=="Agent")
+		{
+//{			if there is more than one hidden Agent Field,
+			if (document.all.hiAgentName.length)
+			{
+//{				loop through them, adding them as options to the select box
+				for (i = 0; i < document.all.hiAgentName.length; i++)
+				{
+					newOption = new Option();
+					newOption.text = document.all.hiAgentName[i].value;
+					newOption.value = document.all.hiAgentID[i].value;
+					objSelectBox.options[objSelectBox.options.length] = newOption;
+				}
+			}
+//{			if there is only one hidden agent Field,
+			else if (tabularForm.hiAgentName)
+			{
+//{				add it as an option to the select box!
+				newOption = new Option();
+				newOption.text = tabularForm.hiAgentName.value;
+				newOption.value = tabularForm.hiAgentID.value;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+			}
+		}//^ if (thisVal=="Agent")
+//{		if Group is selected, add all group options to selectBox
+		if (thisVal=="Group")
+		{
+//{			if there is more than one hidden group field,
+			if (document.all.hiGroupName.length)
+			{
+//{				loop through them, adding them as options to the select box
+				for (i = 0; i < document.all.hiGroupName.length; i++)
+				{
+					newOption = new Option();
+					newOption.text = document.all.hiGroupName[i].value;
+					newOption.value = document.all.hiGroupID[i].value;
+					objSelectBox.options[objSelectBox.options.length] = newOption;
+				}
+			}
+//{			if there is only one hidden Group field,
+			else if (tabularForm.hiGroupName)
+			{
+//{				add it as an option to the select box!
+				newOption = new Option();
+				newOption.text = tabularForm.hiGroupName.value;
+				newOption.value = tabularForm.hiGroupID.value;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+			}
+		}//^if (thisVal=="Group")
+	}// close function switchSelect(xObject)
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+function adjustFrom(val)
+{
+	var fields = new Array();
+	fields[0] = tabularForm.ForwardFromName;
+	fields[1] = tabularForm.ForwardFromEmail;
+	
+	if (val==-1)
+	{
+		glo_disableForm(1, fields);
+	}
+	else
+	{
+		glo_disableForm(0, fields);
+	}	
+}

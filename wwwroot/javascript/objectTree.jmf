@@ -1,0 +1,261 @@
+function initObjTree(obj) {
+	if(obj.length) {
+		for (i = 0; i < obj.length; i++) {
+			if ( obj[i].addEventListener )
+			{
+	      if(glo_whichBrowser()=='Firefox')
+	      {
+	      	obj[i].addEventListener('click', function myEvent() { testFfClick(this,obj) }, false);
+	      	obj[i].addEventListener('contextmenu', function myConEvent() { testFfContextClick(this,obj) }, false);
+	      }
+	      else
+	      {
+	      	obj[i].addEventListener('click', function myEvent() { testClick(obj) }, false);	
+	      }     	      
+	    }
+	    else if ( obj[i].attachEvent )
+	    {
+	    	obj[i].attachEvent('onclick', function myEvent() { testClick(obj) } );
+	    }
+	    
+			if ( obj[i].addEventListener )
+			{
+	      if(glo_whichBrowser()=='Firefox')
+	      {
+	      	obj[i].addEventListener('dblclick', function myOtherEvent() { testFfDblClick(this,obj) }, false);
+	      }
+	      else
+	      {
+	      	obj[i].addEventListener('dblclick', function myOtherEvent() { testClick(obj) }, false);	
+	      }
+	    }
+	    else if ( obj[i].attachEvent )
+	    {
+	      obj[i].attachEvent('ondblclick', function myOtherEvent() { testClick(obj) });
+	    }  
+			obj[i].style.cursor = 'hand';
+		}
+	} else {
+		if ( obj.addEventListener )
+		{
+      if(glo_whichBrowser()=='Firefox')
+      {
+      	obj.addEventListener('click', function myEvent() { testFfClick(this,obj) }, false);
+      	obj.addEventListener('contextmenu', function myConEvent() { testFfContextClick(this,obj) }, false);
+      }
+      else
+      {
+      	obj.addEventListener('click', function myEvent() { testClick(obj) }, false);
+      }	
+	  }      
+    else if ( obj.attachEvent )
+    {
+      obj.attachEvent('onclick', function myEvent() { testClick(obj) } );
+    }
+		if ( obj.addEventListener )
+		{
+	    if(glo_whichBrowser()=='Firefox')
+      {
+      	obj.addEventListener('dblclick', function myOtherEvent() { testFfDblClick(this,obj) }, false);
+      }
+      else
+      {
+      	obj.addEventListener('dblclick', function myEvent() { testClick(obj) }, false);
+      }
+	  }
+	  else if ( obj.attachEvent )
+	  {
+	  	obj.attachEvent('ondblclick', function myEvent() { testClick(obj) } );
+	  }
+		
+		obj.style.cursor = 'hand';
+	}
+}
+
+function clearTree(obj)
+{
+	if(obj.length)
+	{
+		for (i = 0; i < obj.length; i++)
+		{
+			obj[i].setAttribute('selected', 'false');			
+			obj[i].className = "branch";
+		} 
+	}
+	else
+	{
+		obj.setAttribute('selected', 'false');
+		obj.className = "branch";
+	}
+}
+
+var timer;
+var eType;
+var eElm;
+function testClick(obj)
+{
+	eType = window.event.type;
+	eElm = window.event.srcElement;
+	if (eType == 'click')
+	{
+		if (timer) clearTimeout(timer);
+  	timer = setTimeout(function() { objTreeClick(obj); }, 125);        
+  }
+  else if (eType == 'dblclick')
+  {
+  	clearTimeout(timer);
+  	objTreeDblClick(obj);
+  }
+  else if (eType == 'contextmenu')
+  {
+  	obj = eval(eElm.id);
+  	timer = setTimeout(function() { objTreeClick(obj); }, 50);
+  }
+}  
+
+function testFfClick(div,obj)
+{
+	eType = 'click';
+	eElm = div;
+	if (eType == 'click')
+	{
+		if (timer) clearTimeout(timer);
+  	timer = setTimeout(function() { objTreeClick(obj); }, 125);        
+  }
+  else if (eType == 'dblclick')
+  {
+  	clearTimeout(timer);
+  	objTreeDblClick(obj);
+  }
+  else if (eType == 'contextmenu')
+  {
+  	obj = eval(eElm.id);
+  	timer = setTimeout(function() { objTreeClick(obj); }, 50);
+  }
+}
+
+function testFfDblClick(div,obj)
+{
+	eType = 'dblclick';
+	eElm = div;
+	if (eType == 'click')
+	{
+		if (timer) clearTimeout(timer);
+  	timer = setTimeout(function() { objTreeClick(obj); }, 125);        
+  }
+  else if (eType == 'dblclick')
+  {
+  	clearTimeout(timer);
+  	objTreeDblClick(obj);
+  }
+  else if (eType == 'contextmenu')
+  {
+  	obj = eval(eElm.id);
+  	timer = setTimeout(function() { objTreeClick(obj); }, 50);
+  }
+}
+
+function testFfContextClick(div,obj)
+{
+	eType = 'contextmenu';
+	eElm = div;
+	if (eType == 'click')
+	{
+		if (timer) clearTimeout(timer);
+  	timer = setTimeout(function() { objTreeClick(obj); }, 125);        
+  }
+  else if (eType == 'dblclick')
+  {
+  	clearTimeout(timer);
+  	objTreeDblClick(obj);
+  }
+  else if (eType == 'contextmenu')
+  {
+  	obj = eval(eElm.id);
+  	timer = setTimeout(function() { objTreeClick(obj); }, 50);
+  }
+}
+
+function objTreeClick(obj) {	
+	onClass = "branch branchOn";
+	offClass = "branch";	
+	
+	if (eElm.tagName == 'IMG') {
+		elm = eElm.parentElement;
+	} else {
+		elm = eElm;
+	}
+	
+	thisId = elm.getAttribute('treeId');
+	
+	for (i = 0; i < obj.length; i++) {
+		obj[i].setAttribute('selected', 'false');
+	}
+	
+	if(elm.getAttribute('selected') == 'true') {
+		//elm.setAttribute('selected', 'false');
+	} else {
+		elm.setAttribute('selected', 'true');
+		treeId = elm.getAttribute('treeId');
+		document.treeForm.selectId.value = treeId;
+	}
+	
+	if (obj.length) {
+		for (i = 0; i < obj.length; i++) {
+			if(obj[i])
+			{
+				obj[i].className = (obj[i].getAttribute('selected') == 'true') ? onClass : offClass;
+			}
+		}
+	} else {
+		obj.className = (obj.getAttribute('selected') == 'true') ? onClass : offClass;
+	}
+	if(window.hdlTreeClick != null) {
+		hdlTreeClick(obj);
+	}
+}
+
+function objTreeDblClick(obj) {
+	onClass = "branch branchOn";
+	offClass = "branch";	
+	
+	if (eElm.tagName == 'IMG') {
+		elm = eElm.parentElement;
+	} else {
+		elm = eElm;
+	}
+	
+	thisId = elm.getAttribute('treeId');
+	
+	if(!obj.length)
+	{
+		obj.setAttribute('selected', 'false');
+	}
+	else
+	{
+		for (i = 0; i < obj.length; i++) {
+			obj[i].setAttribute('selected', 'false');
+		}
+	
+	}
+	
+	
+	if(elm.getAttribute('selected') == 'true') {
+		//elm.setAttribute('selected', 'false');
+	} else {
+		elm.setAttribute('selected', 'true');
+		treeId = elm.getAttribute('treeId');
+		document.treeForm.selectId.value = treeId;
+	}
+	
+	if (obj.length) {
+		for (i = 0; i < obj.length; i++) {
+			obj[i].className = (obj[i].getAttribute('selected') == 'true') ? onClass : offClass;
+		}
+	} else {
+		obj.className = (obj.getAttribute('selected') == 'true') ? onClass : offClass;
+	}
+	if(window.hdlTreeDblClick != null) {
+		hdlTreeDblClick(obj);
+	}
+}

@@ -1,0 +1,273 @@
+var ColumnIndex;
+var TDcellWidth;
+var evtParent;
+var labelWidth;
+var bChangedCursor;
+var bResize;
+var bResizedCols = false; 
+
+function updateCols()
+{
+
+	var listHeaderRow = document.getElementById("ListHeaderRow");
+	var listTableBot = document.getElementById("ListTableBot");	
+	if(listHeaderRow)
+	{
+		if (listHeaderRow.children.length > 1)
+		{
+			// use this var to store the widths and indexes of any fixed columns
+			var fixedColOffSetWidths = new Array();
+			
+			// use this var to store the widths and indexes of any sizable columns
+			var resizColOffSetWidths = new Array();
+			
+			// use this var to keep the totals available for easy access
+			var fixedColOffSetTotal = 0;
+			
+			// use this var to keep the totals available for easy access
+			var resizColOffSetTotal = 0;
+			
+			// keep appending to the new row's total offsetWidth
+			var curRowOffSetWidth = 0;
+
+			//	loop through the cells in the header
+			for (var i = 0; i < listHeaderRow.children.length; i++)
+			{
+				if(listHeaderRow.children[i].nodeType == 1)
+				{
+					if(listHeaderRow.children[i].getAttribute("xNoResize"))
+					{
+						// the width being used is the offset of the NOBR element inside the cell, plus a 2px border
+						var topCellWidth = listHeaderRow.children[i].children[0].offsetWidth;
+						var botCellWidth = listTableBot.rows[0].children[i].offsetWidth;
+						var thisWidth = (botCellWidth > topCellWidth) ? botCellWidth + 2 : topCellWidth + 2;
+						
+						// set the column header cell to the NewWidth
+						listHeaderRow.children[i].style.width = thisWidth;
+						
+						// set the table cell to the NewWidth
+						listTableBot.rows[0].children[i].style.width = thisWidth;
+						
+						// this is a fixed width column, so add its width the array
+						fixedColOffSetWidths[i] = thisWidth;
+						
+						// set this index of the sizable array to null to preserve the column indexes
+						resizColOffSetWidths[i] = null;
+						
+						// in either event we must preserve total values for easy access
+						fixedColOffSetTotal += thisWidth;
+						
+						// keep appending to the new row's total offsetWidth
+						curRowOffSetWidth += thisWidth;
+					}
+					else
+					{
+						// this is the offsetWidth of the header cell, which should include the border
+						var thisWidth = listHeaderRow.children[i].offsetWidth + 2;
+						
+						// set this index of the fixed width array to null to preserve the column indexes
+						fixedColOffSetWidths[i] = null;
+						fixedColOffSetWidths[i] = thisWidth;
+						
+						// this is not a fixed width column so this index of the sizable array to the current offSetWidth
+						resizColOffSetWidths[i] = thisWidth;
+						
+						// in either event we must preserve total values for easy access
+						resizColOffSetTotal += thisWidth;
+						
+						// keep appending to the new row's total offsetWidth
+						curRowOffSetWidth += thisWidth;
+					}
+				}
+			}
+			
+			// we need to know the size of space available
+			var MaxAvailOffSetWidth; 
+			if ( glo_whichBrowser() == "Internet Explorer")
+			{
+				MaxAvailOffSetWidth = document.body.offsetWidth - 16;
+			}
+			else if (glo_whichBrowser() == "Firefox")
+			{
+				MaxAvailOffSetWidth = document.body.offsetWidth - 35;
+			}
+			else
+			{
+				if ((docName == "ticketlist.ems" || docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "approvals.ems") && glo_whichBrowser() == "Chrome" )
+				{
+					if (listHeaderRow.children.length > 11)
+					{
+					    MaxAvailOffSetWidth = document.body.offsetWidth - 43;
+					}
+					else
+					{
+					    MaxAvailOffSetWidth = document.body.offsetWidth - 35;
+					}
+				}
+				else
+				{
+					MaxAvailOffSetWidth = document.body.offsetWidth - 17;
+				}				
+			}			
+		
+			// we only want to calculate percentages for resizable columns
+			var resizColOffSetPct = new Array();
+			
+			// we only want to calculate new widths for resizable columns
+			var newResizColOffSetWidths = new Array();
+			
+			//	we use this as an extra check to fix things up in the end!
+			var theNewRowOffSetWidth = 0;
+
+			for (var i=0; i < resizColOffSetWidths.length; i++)
+			{
+				//	now that we have an array of widths for resizable columns we can find the percentage of the table that they take up currently
+				resizColOffSetPct[i] = resizColOffSetWidths[i]? (resizColOffSetWidths[i]/(curRowOffSetWidth-fixedColOffSetTotal)):(null);
+				//	and once we know their percentages, we can calculate what their new offsetWidth SHOULD be!
+				newResizColOffSetWidths[i] = resizColOffSetWidths[i]? (Math.round(resizColOffSetPct[i]*(MaxAvailOffSetWidth-fixedColOffSetTotal))):null;
+				//	let's keep adding to the new width for the row itself
+				
+				if(resizColOffSetWidths[i])
+				{
+					theNewRowOffSetWidth =theNewRowOffSetWidth + (newResizColOffSetWidths[i])
+				}
+				else
+				{
+					theNewRowOffSetWidth = theNewRowOffSetWidth + (fixedColOffSetWidths[i]);
+				}
+			}
+			
+			//	IF THE NewRowWidth < TotalDivWidth THEN WE WILL WANT TO ADD THE DIFFERENCE TO THE LAST COLUMN SO IT FITS PERFECTLY
+			if (theNewRowOffSetWidth < MaxAvailOffSetWidth)
+			{
+				//	THE SIZE GAP DIFFERENCE
+				var thisOffsetWidthDiff = MaxAvailOffSetWidth - theNewRowOffSetWidth;
+				//	ADD THE SIZE GAP DIF TO THE LAST COLUMN
+				var current = newResizColOffSetWidths[newResizColOffSetWidths.length - 1];
+				newResizColOffSetWidths[newResizColOffSetWidths.length - 1] = current + thisOffsetWidthDiff;
+			}
+			
+			//	IF THE NewRowWidth > TotalDivWidth THEN WE WILL WANT TO SUBTRACT THE DIFFERENCE IN SIZE FROM THE LAST COLUMN
+			if (theNewRowOffSetWidth > MaxAvailOffSetWidth)
+			{
+				//	hOW MUCH WE NEED TO SUBTRACT FROM THE LAST COLUMN
+				var thisOffsetWidthDiff = theNewRowOffSetWidth - MaxAvailOffSetWidth;
+				// SUBTRACT THE DIFFERENCE ALREADY!
+				var current = newResizColOffSetWidths[newResizColOffSetWidths.length - 1];
+				newResizColOffSetWidths[newResizColOffSetWidths.length - 1] = current - thisOffsetWidthDiff;
+			}
+		
+			//	FINALLY, LOOP the resizable cells and reset their widths
+			for(i=0; i < newResizColOffSetWidths.length; i++)
+			{
+				if(listHeaderRow.children[i] && listTableBot.rows[0].children[i])
+				{
+					if ( newResizColOffSetWidths[i] < 0 )
+					{
+						var thisCellNewWidth = fixedColOffSetWidths[i] + newResizColOffSetWidths[i];
+					}
+					else
+					{
+						var thisCellNewWidth = newResizColOffSetWidths[i]?(newResizColOffSetWidths[i]):(fixedColOffSetWidths[i]);
+					}
+					
+					
+					if(listHeaderRow.children[i].nodeType == 1){
+						listHeaderRow.children[i].style.width = thisCellNewWidth+"px";
+					}
+						
+					if(listTableBot.rows[0].children[i].nodeType == 1)
+					{
+						listTableBot.rows[0].children[i].style.width = thisCellNewWidth+"px";
+					}
+				}
+			}
+			
+			var theDoc = docName;
+			if (docName == "ticketlist.ems")
+			{
+				theDoc = ticketboxview;				
+			}
+			
+			if (document.cookie && getCookieCount(theDoc) > 0)
+			{
+				var docStoredColWidths = getCookieNum(theDoc, getCookieCount(theDoc));
+				var docStoredColWidthsArr = docStoredColWidths.split(".");
+				for(i=0; i < listHeaderRow.children.length; i++)
+				{
+					if (docStoredColWidthsArr[i] != "null")
+					{
+						listHeaderRow.children[i].style.width = docStoredColWidthsArr[i];
+						listTableBot.rows[0].children[i].style.width = docStoredColWidthsArr[i];
+					}
+				}
+				if (listHeaderRow.children.length > docStoredColWidthsArr.length)
+				{
+					for (x = i; x < listHeaderRow.children.length - i; x++)
+					{
+						listHeaderRow.children[x].style.width=50;
+						listTableBot.rows[0].children[x].style.width=50;
+					}
+				}
+			}
+		}
+	}
+}
+
+function initColumn()
+{
+	if (document.getElementById("ListHeaderRow"))
+	{
+		document.getElementById("ListTableTop").style.width = "100%";
+		document.getElementById("ListHeaderRow").children[0].style.width = "100%";
+	}
+	if (document.getElementById("ListTableBot"))
+	{
+		document.getElementById("ListTableBot").style.width = "100%";	
+		document.getElementById("ListTableBot").rows[0].children[0].style.width = "100%";
+	}
+	if (document.getElementById("ListTableTop")) document.getElementById("ListTableTop").style.tableLayout = "fixed";
+	if (document.getElementById("ListTableBot")) document.getElementById("ListTableBot").style.tableLayout = "fixed";
+}
+
+function docInitListCols() 
+{
+	if (updateCols) updateCols();
+	if (!document.getElementById("tdNoTickets"))
+	{
+		if (document.getElementById("ListTableTop")) document.getElementById("ListTableTop").style.tableLayout = "fixed";
+		if (document.getElementById("ListTableBot")) document.getElementById("ListTableBot").style.tableLayout = "fixed";
+	}
+}
+
+function storeColumnWidths()
+{
+	var valString = new String("");
+	var listHeaderRow = document.getElementById("ListHeaderRow");
+	
+	for(var i=0; i < listHeaderRow.children.length; i++)
+	{
+		if(listHeaderRow.children[i].nodeType == 1)
+		{
+			if (!listHeaderRow.children[i].getAttribute("xNoResize"))
+			{
+				valString += ((valString!="")? ".":"") + listHeaderRow.children[i].style.width;
+			}
+			else
+			{
+				valString += ((valString!="")? ".":"") +null;
+			}
+		}
+	}
+	if (docName != "contactsearchresults.ems")
+	{
+		if (docName == "ticketlist.ems")
+		{
+			setCookie(ticketboxview, valString, "01/01/2099");
+		}
+		else
+		{
+			setCookie(docName, valString, "01/01/2099");
+		}
+	}
+}

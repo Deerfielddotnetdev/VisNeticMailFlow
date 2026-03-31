@@ -1,0 +1,1004 @@
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	Capture the keydown event!
+	document.onkeydown = function(event){checkKeyCode(event);};
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	The File Name contained within this pages location string!
+	var docName = getDocumentName(document.location);
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+function selectAllTickets()
+{
+	gloListControl.resetAllRows();
+	gloListControl.starRowId = 0;
+		gloListControl.stopRowId = listRow.length - 1;
+		var starAtDim = (gloListControl.stopRowId > gloListControl.starRowId) ? gloListControl.starRowId : gloListControl.stopRowId;
+	var stopAtDim = (gloListControl.stopRowId > gloListControl.starRowId) ? gloListControl.stopRowId : gloListControl.starRowId;
+	while (starAtDim <= stopAtDim)
+	{
+		gloListControl.selectRowByIndex(starAtDim);
+		starAtDim++;
+	}
+	gloListControl.UpdateSelectData();
+	gloListControl.extras.collapseAllTickets();
+}
+
+function checkKeyCode(e)
+{
+	if(!e){e=window.event;}
+	
+	if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "outbox.ems" || docName == "sentitems.ems" || docName == "drafts.ems" || docName == "ticketlist.ems")
+	{
+		var singleSelected = (gloListControl.ActiveRows.length == 1)? true:false;
+		var noneSelected = (gloListControl.ActiveRows.length == 0)? true:false;
+	}
+	
+	if(singleSelected)
+	{
+		if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+		{
+			var oImg = gloListControl.thisRow._getRow.children[0].children[0].children[0];
+			var oTicket = ( Tickets[gloListControl.thisRow._index] )? Tickets[gloListControl.thisRow._index] : null;
+	
+			if (oImg.src.indexOf('minus.gif') != -1 && oTicket != null)
+			{
+				var msgObj = oTicket.whatsSelected;
+				if(msgObj)
+				{
+					msgType = msgObj.inbound;
+					if(msgType == 0)
+					{
+						outboundType = msgObj.outboundtype;
+						isDraft = msgObj.isdraft;
+						useCutoff = 1;
+					}
+					else
+					{
+						beenRead = msgObj.beenread;
+						useCutoff = msgObj.usecutoff;
+						isDraft = 0;
+					}
+				}
+				else
+				{
+					msgType=2;
+				}
+			}	
+		}
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	Indicates whether or not ctrl, alt or shift keys are selected!
+	var ctrlPressed=0;
+	var altPressed=0;
+	var shiftPressed=0;
+	ctrlPressed = e.ctrlKey;
+	altPressed = e.altKey;
+	shiftPressed = e.shiftKey;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	Gets the keyCode of the selected key!
+	var theKey = e.keyCode;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	if(theKey == 13 || (theKey == 79 && ctrlPressed) )
+	{
+		if(docName == "outbox.ems" || docName == "sentitems.ems" || docName == "drafts.ems")
+		{
+			if (singleSelected)
+			{
+			 	tabRowDblClick();
+			 }
+			else
+			{
+				alert("This function is only available when a single message is selected!");
+			}
+		}
+		if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+		{
+			if (oImg.src.indexOf('minus.gif') != -1 && oTicket != null)
+			{
+				var MsgObj = oTicket.whatsSelected;
+				if(MsgObj)
+				{
+					hdlTreeDblClick(MsgObj);
+				}
+			}
+		}
+	
+	}
+	if(theKey == 32)
+	{
+		if(docName == "outbox.ems" || docName == "sentitems.ems" || docName == "drafts.ems")
+		 {
+		 }
+		 else
+		 {
+			if (singleSelected)
+			{
+				gloListControl.ticketDblClick()
+			}
+			else
+			{
+				alert("This function is only available when a single ticket is selected!");
+			}
+		}
+	}
+	if(theKey == 35)
+	{
+		if(docName == "outbox.ems" || docName == "sentitems.ems" || docName == "drafts.ems")
+	 	{
+	 		listRow[listRow.length - 1].focus();
+			listRow[listRow.length - 1].click();
+	 	}
+	 	else
+	 	{
+		 	if (oImg.src.indexOf('minus.gif') == -1)
+			{
+		 		listRow[listRow.length - 1].focus();
+				listRow[listRow.length - 1].click();
+			}
+			else
+			{
+				var TicketObj = null;  
+				var ticketID = oTicket.ticketid;
+				for(var i = 0; i < Tickets.length; i++)
+				{
+					if(Tickets[i].ticketid == ticketID)
+					{
+						TicketObj = Tickets[i];
+						break;
+					}
+				}		
+				if(TicketObj)
+				{
+					var treeId = 'threadTree' + ticketID;
+					var seqId = 'sequenceTree' + ticketID;
+					var obj = document.getElementById(treeId);
+					if(obj == null)
+					{
+						obj = document.getElementById(seqId);		
+					}
+					if(obj != null)
+					{
+						var type = obj.getAttribute('type');
+						if(type == 'threaded')
+						{
+							var numMsgs = TicketObj.threadedMsg.length;
+						}
+						else
+						{
+							var numMsgs = TicketObj.sequenceMsg.length;
+						}
+						var nextRow = numMsgs - 1;
+						if(type == 'threaded')
+						{
+							TicketObj.threadedMsg[nextRow].msgRow.focus();
+							TicketObj.threadedMsg[nextRow].msgRow.click();
+						}
+						else
+						{
+							TicketObj.sequenceMsg[nextRow].msgRow.focus();
+							TicketObj.sequenceMsg[nextRow].msgRow.click();
+						}
+					}
+				}
+		 		
+			}
+	 	}
+	}
+	if(theKey == 36)
+	{
+		if(docName == "outbox.ems" || docName == "sentitems.ems" || docName == "drafts.ems")
+		{
+	 		listRow[0].focus();
+			listRow[0].click();
+	 	}
+	 	else
+	 	{
+		 	if (oImg.src.indexOf('minus.gif') == -1)
+			{
+		 		listRow[0].focus();
+				listRow[0].click();
+			}
+			else
+			{
+				var TicketObj = null;  
+				var ticketID = oTicket.ticketid;
+				for(var i = 0; i < Tickets.length; i++)
+				{
+					if(Tickets[i].ticketid == ticketID)
+					{
+						TicketObj = Tickets[i];
+						break;
+					}
+				}		
+				if(TicketObj)
+				{
+					var treeId = 'threadTree' + ticketID;
+					var seqId = 'sequenceTree' + ticketID;
+					var obj = document.getElementById(treeId);
+					if(obj == null)
+					{
+						obj = document.getElementById(seqId);		
+					}
+					if(obj != null)
+					{
+						var type = obj.getAttribute('type');
+						if(type == 'threaded')
+						{
+							var numMsgs = TicketObj.threadedMsg.length;
+						}
+						else
+						{
+							var numMsgs = TicketObj.sequenceMsg.length;
+						}
+						var nextRow = 0;
+						if(type == 'threaded')
+						{
+							TicketObj.threadedMsg[nextRow].msgRow.focus();
+							TicketObj.threadedMsg[nextRow].msgRow.click();
+						}
+						else
+						{
+							TicketObj.sequenceMsg[nextRow].msgRow.focus();
+							TicketObj.sequenceMsg[nextRow].msgRow.click();
+						}
+					}
+				}
+			}
+	 	}
+	}
+	if(theKey == 37)
+	{
+		if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+		{
+			if (gloListControl.ActiveRows.length == 1)
+			{
+			 	gloListControl.ticketClose()
+			 }
+			else
+			{
+				alert("This function is only available when a single ticket is selected!");
+			}
+		}
+	}
+	if(theKey == 38)
+	{
+		if (singleSelected)
+		{
+		 	
+		 		if(docName == "outbox.ems" || docName == "sentitems.ems" || docName == "drafts.ems")
+		 		{
+		 			var selectedRow = gloListControl.starRowId
+			 		gloListControl.resetAllRows()
+			 		gloListControl.selectRowByIndex(selectedRow - 1, false)
+			 		gloListControl.starRowId = selectedRow - 1;
+			 		gloListControl.thisRow._index = gloListControl.starRowId;
+			 		gloListControl.UpdateSelectData()
+			 		ticketFunc('open');
+		 		}
+		 		else
+		 		{
+				 	if (oImg.src.indexOf('minus.gif') != -1)
+					{
+						var TicketObj = null;  
+						var ticketID = oTicket.ticketid;
+						for(var i = 0; i < Tickets.length; i++)
+						{
+							if(Tickets[i].ticketid == ticketID)
+							{
+								TicketObj = Tickets[i];
+								break;
+							}
+						}		
+						if(TicketObj)
+						{
+							var treeId = 'threadTree' + ticketID;
+							var seqId = 'sequenceTree' + ticketID;
+							var obj = document.getElementById(treeId);
+							if(obj == null)
+							{
+								obj = document.getElementById(seqId);		
+							}
+							if(obj != null)
+							{
+								var type = obj.getAttribute('type');
+								var MsgObj = TicketObj.whatsSelected;
+								if(type == 'threaded')
+								{
+									var numMsgs = TicketObj.threadedMsg.length;
+									for(var i = 0; i < TicketObj.threadedMsg.length; i++)
+									{
+										MsgObj = TicketObj.threadedMsg[i];
+										if(MsgObj == TicketObj.whatsSelected)
+										{
+											myRow = i;	
+										}
+									}
+								}
+								else
+								{
+									var numMsgs = TicketObj.sequenceMsg.length;
+									
+									for(var i = 0; i < TicketObj.sequenceMsg.length; i++)
+									{
+										MsgObj = TicketObj.sequenceMsg[i];
+										if(MsgObj == TicketObj.whatsSelected)
+										{
+											myRow = i;	
+										}
+										
+									}
+								}
+								if(myRow != 0)
+								{
+									var nextRow = --myRow;
+									if(type == 'threaded')
+									{
+										TicketObj.threadedMsg[nextRow].msgRow.focus();
+										TicketObj.threadedMsg[nextRow].msgRow.click();
+									}
+									else
+									{
+										TicketObj.sequenceMsg[nextRow].msgRow.focus();
+										TicketObj.sequenceMsg[nextRow].msgRow.click();
+									}
+								}
+							}
+						}
+					}
+					else
+					{
+					 	if(gloListControl.starRowId != 0)
+		 				{
+					 		var elem = window.event.srcElement;
+					 		while (elem.parentElement.tagName != "TABLE")
+							{
+								if (elem.tagName == "TR")
+								{
+									var i = elem.tabRowId;
+									i=--i;
+									listRow[i].focus();
+									listRow[i].click();
+									break;
+								}
+								elem = elem.parentElement;
+							}
+						}
+					}
+				}
+		 	
+		 }
+		else
+		{
+			alert("This function is only available when a single ticket is selected!");
+		}
+	}
+	if(theKey == 39)
+	{
+		if (oImg.src.indexOf('minus.gif') == -1)
+		{
+			if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+			{
+				if (gloListControl.ActiveRows.length == 1)
+				{
+				 	gloListControl.ticketOpen()
+				 }
+				else
+				{
+					alert("This function is only available when a single ticket is selected!");
+				}
+			}
+		}
+	}
+	if(theKey == 40)
+	{
+		if (singleSelected)
+		{
+		 	
+				if(docName == "outbox.ems" || docName == "sentitems.ems" || docName == "drafts.ems")
+		 		{
+		 			var selectedRow = gloListControl.starRowId;
+				 	gloListControl.resetAllRows()
+				 	gloListControl.selectRowByIndex(selectedRow + 1, false)
+				 	gloListControl.starRowId = selectedRow + 1;
+				 	gloListControl.thisRow._index = gloListControl.starRowId;
+				 	gloListControl.UpdateSelectData()
+				 	ticketFunc('open');
+		 		}
+		 		else
+		 		{
+					if (oImg.src.indexOf('minus.gif') != -1)
+					{
+						var TicketObj = null;  
+						var ticketID = oTicket.ticketid;
+						for(var i = 0; i < Tickets.length; i++)
+						{
+							if(Tickets[i].ticketid == ticketID)
+							{
+								TicketObj = Tickets[i];
+								break;
+							}
+						}		
+							
+						if(TicketObj)
+						{
+							var treeId = 'threadTree' + ticketID;
+							var seqId = 'sequenceTree' + ticketID;
+							var obj = document.getElementById(treeId);
+							if(obj == null)
+							{
+								obj = document.getElementById(seqId);		
+							}
+							if(obj != null)
+							{
+								var type = obj.getAttribute('type');
+								var MsgObj = TicketObj.whatsSelected;
+								if(type == 'threaded')
+								{
+									var numMsgs = TicketObj.threadedMsg.length;
+									for(var i = 0; i < TicketObj.threadedMsg.length; i++)
+									{
+										MsgObj = TicketObj.threadedMsg[i];
+										if(MsgObj == TicketObj.whatsSelected)
+										{
+											myRow = i;	
+										}
+									}
+								}
+								else
+								{
+									var numMsgs = TicketObj.sequenceMsg.length;
+									
+									for(var i = 0; i < TicketObj.sequenceMsg.length; i++)
+									{
+										MsgObj = TicketObj.sequenceMsg[i];
+										if(MsgObj == TicketObj.whatsSelected)
+										{
+											myRow = i;	
+										}
+										
+									}
+								}
+																	
+								if(myRow < numMsgs - 1)
+								{
+									var nextRow = ++myRow;
+									if(type == 'threaded')
+									{
+										
+										TicketObj.threadedMsg[nextRow].msgRow.focus();
+										TicketObj.threadedMsg[nextRow].msgRow.click();
+									}
+									else
+									{
+										TicketObj.sequenceMsg[nextRow].msgRow.focus();
+										TicketObj.sequenceMsg[nextRow].msgRow.click();
+									}
+								}
+							}
+						}
+						
+					}
+					else
+					{
+						if(gloListControl.starRowId != listRow.length - 1)
+		 				{
+							var elem = window.event.srcElement;
+						 	while (elem.parentElement.tagName != "TABLE")
+							{
+								if (elem.tagName == "TR")
+								{
+									var i = elem.tabRowId;
+									i=++i;
+									listRow[i].focus();
+									listRow[i].click();
+									break;
+								}
+								elem = elem.parentElement;
+							}
+						}
+					}
+				}
+			
+		 }
+		else
+		{
+			alert("This function is only available when a single ticket is selected!");
+		}
+	}
+	if(theKey == 46 || (theKey == 68 && ctrlPressed))
+	{
+		if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+		{
+			if (oImg.src.indexOf('minus.gif') != -1)
+			{
+				if(usePrev)
+				{
+					if (!noneSelected)
+					{
+						parent.splitpane.msgframe.deleteTicket();
+					}
+					else
+					{
+						alert("You must select at least one item!");
+					}
+				}
+				else
+				{
+					alert("This function is only available when the message\npreview pane is enabled or when you open the\nmessage in a new window!");
+				}
+			}
+			else
+			{
+				if (!noneSelected)
+				{
+				 	ticketFunc('delete');
+				}
+				else
+				{
+					alert("You must select at least one item!");
+				}
+			}
+		}
+		if(docName == "drafts.ems")
+		{
+			if (!noneSelected)
+			{
+			 	ticketFunc('delete');
+			 }
+			else
+			{
+				alert("You must select at least one item!");
+			}
+		}
+	}
+	if(theKey == 65 && ctrlPressed)
+ 	{
+ 		gloListControl.resetAllRows()
+		gloListControl.starRowId = 0;
+ 		gloListControl.stopRowId = listRow.length - 1;
+ 		var starAtDim = (gloListControl.stopRowId > gloListControl.starRowId) ? gloListControl.starRowId : gloListControl.stopRowId;
+		var stopAtDim = (gloListControl.stopRowId > gloListControl.starRowId) ? gloListControl.stopRowId : gloListControl.starRowId;
+		while (starAtDim <= stopAtDim)
+		{
+			gloListControl.selectRowByIndex(starAtDim);
+			starAtDim++;
+		}
+		gloListControl.UpdateSelectData();
+		gloListControl.extras.collapseAllTickets();
+	}
+	if(theKey == 67 && altPressed)
+	{
+		if (singleSelected)
+		{
+			ticketFunc('contact');
+		}
+		else
+		{
+			alert("This function is only available when a single ticket is selected!");
+		}
+	}
+	if(theKey == 70 && ctrlPressed)
+	{
+		if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+		{
+			if (oImg.src.indexOf('minus.gif') != -1)
+			{
+				if(usePrev)
+				{
+					if (!noneSelected)
+					{
+						parent.splitpane.msgframe.msgforward();
+					}
+					else
+					{
+						alert("You must select at least one item!");
+					}
+				}
+				else
+				{
+					alert("This function is only available when the message\npreview pane is enabled or when you open the\nmessage in a new window!");
+				}
+			}
+		}
+		if(docName == "outbox.ems" || docName == "sentitems.ems" || docName == "drafts.ems")
+		 		{
+				if(usePrev)
+				{
+					if (!noneSelected)
+					{
+						parent.splitpane.msgframe.msgforward();
+					}
+					else
+					{
+						alert("You must select at least one item!");
+					}
+				}
+				else
+				{
+					alert("This function is only available when the message\npreview pane is enabled or when you open the\nmessage in a new window!");
+				}
+		}
+	}
+	if(theKey == 72 && ctrlPressed)
+	{
+		if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+		{
+			if (oImg.src.indexOf('minus.gif') != -1)
+			{
+				var myhClick = "hmsgviewtype"+oTicket.ticketid;
+				document.getElementById(myhClick).click();	
+			}
+		}
+	}
+	if(theKey == 73 && ctrlPressed)
+	{
+		if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+		{
+			if (oImg.src.indexOf('minus.gif') != -1)
+			{
+				var myiClick = "imsgviewtype"+oTicket.ticketid;
+				document.getElementById(myiClick).click();
+			}
+		}
+	}
+	if(theKey == 76 && ctrlPressed)
+	{
+		if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+		{
+			if (oImg.src.indexOf('minus.gif') != -1)
+			{
+				if(usePrev)
+				{
+					if (!noneSelected)
+					{
+						if(isDraft == 0)
+						{
+							parent.splitpane.msgframe.replyAll();
+						}
+					}
+					else
+					{
+						alert("You must select at least one item!");
+					}
+				}
+				else
+				{
+					alert("This function is only available when the message\npreview pane is enabled or when you open the\nmessage in a new window!");
+				}
+			}
+		}
+		if(docName == "outbox.ems" || docName == "sentitems.ems")
+		 		{
+				if(usePrev)
+				{
+					if (!noneSelected)
+					{
+						parent.splitpane.msgframe.replyAll();
+					}
+					else
+					{
+						alert("You must select at least one item!");
+					}
+				}
+				else
+				{
+					alert("This function is only available when the message\npreview pane is enabled or when you open the\nmessage in a new window!");
+				}
+		}
+	}
+	if(theKey == 80 && ctrlPressed)
+	{
+		if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+		{
+			if (oImg.src.indexOf('minus.gif') != -1)
+			{
+				if(usePrev)
+				{
+					if (!noneSelected)
+					{
+						parent.splitpane.msgframe.funcPrintMsg();
+					}
+					else
+					{
+						alert("You must select at least one item!");
+					}
+				}
+				else
+				{
+					alert("This function is only available when the message\npreview pane is enabled or when you open the\nmessage in a new window!");
+				}
+			}
+		}
+		if(docName == "outbox.ems" || docName == "sentitems.ems" || docName == "drafts.ems")
+		 		{
+				if(usePrev)
+				{
+					if (!noneSelected)
+					{
+						parent.splitpane.msgframe.funcPrintMsg();
+					}
+					else
+					{
+						alert("You must select at least one item!");
+					}
+				}
+				else
+				{
+					alert("This function is only available when the message\npreview pane is enabled or when you open the\nmessage in a new window!");
+				}
+		}
+	}
+	if(theKey == 81 && ctrlPressed)
+	{
+		if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+		{
+			if (oImg.src.indexOf('minus.gif') != -1)
+			{
+				if(useCutoff == 0)
+				{
+					if (!noneSelected)
+					{
+						if(!beenRead)
+						{
+							parent.splitpane.msgframe.onRead();
+						}
+					}
+					else
+					{
+						alert("You must select at least one item!");
+					}
+				}
+			}
+		}
+	}
+	if(theKey == 82 && ctrlPressed)
+	{
+		if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+		{
+			if (oImg.src.indexOf('minus.gif') != -1)
+			{
+				if(usePrev)
+				{
+					if (!noneSelected)
+					{
+						if(isDraft == 0)
+						{
+							parent.splitpane.msgframe.reply();
+						}
+					}
+					else
+					{
+						alert("You must select at least one item!");
+					}
+				}
+				else
+				{
+					alert("This function is only available when the message\npreview pane is enabled or when you open the\nmessage in a new window!");
+				}
+			}
+		}
+		if(docName == "outbox.ems" || docName == "sentitems.ems")
+		 		{
+				if(usePrev)
+				{
+					if (!noneSelected)
+					{
+						parent.splitpane.msgframe.reply();
+					}
+					else
+					{
+						alert("You must select at least one item!");
+					}
+				}
+				else
+				{
+					alert("This function is only available when the message\npreview pane is enabled or when you open the\nmessage in a new window!");
+				}
+		}
+	}
+	if(theKey == 85 && ctrlPressed)
+	{
+		if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+		{
+			if (oImg.src.indexOf('minus.gif') != -1)
+			{
+				if(useCutoff == 0)
+				{
+					if (!noneSelected)
+					{
+						if(beenRead)
+						{
+							parent.splitpane.msgframe.onUnRead();
+						}
+					}
+					else
+					{
+						alert("You must select at least one item!");
+					}
+				}
+			}
+		}
+	}
+	if(theKey == 86 && ctrlPressed)
+	{
+		if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+		{
+			if (oImg.src.indexOf('minus.gif') != -1)
+			{
+				if(usePrev)
+				{
+					if (!noneSelected)
+					{
+						if(isDraft == 0)
+						{
+							parent.splitpane.msgframe.changeTicket();
+						}
+					}
+					else
+					{
+						alert("You must select at least one item!");
+					}
+				}
+				else
+				{
+					alert("This function is only available when the message\npreview pane is enabled or when you open the\nmessage in a new window!");
+				}
+			}
+		}
+	}
+	if(docName == "mytickets.ems" || docName == "ticketsearchresults.ems" || docName == "ticketlist.ems")
+	{
+		if(theKey == 78 && altPressed)
+	 	{
+	 		if (!noneSelected)
+			{
+				ticketFunc('notes');
+			}
+			else
+			{
+				alert("You must select at least one item!");
+			}
+		}
+		if(theKey == 80 && altPressed)
+	 	{
+	 		if (!noneSelected)
+			{
+				ticketProps();
+			}
+			else
+			{
+				alert("You must select at least one item!");
+			}
+		}
+		if(theKey == 87 && ctrlPressed)
+	 	{
+	 		if (!noneSelected)
+			{
+				closeTicket();
+			}
+			else
+			{
+				alert("You must select at least one item!");
+			}
+		}
+	}
+	if(docName != "ticketsearchresults.ems")
+	{
+		if(theKey == 71 && altPressed)
+	 	{
+		 	if(docName != "outbox.ems")
+	 		{
+		 		getOldest(1);
+			}
+		}
+		if(theKey == 77 && ctrlPressed)
+	 	{
+	 		if (singleSelected)
+			{
+				ticketFunc('addtoticket');
+			}
+			else
+			{
+				alert("This function is only available when a single ticket is selected!");
+			}
+		}
+		if(theKey == 78 && ctrlPressed)
+	 	{
+	 		glo_launchModalWindow('./modalframe.ems?file=newticket.ems$ticketboxview='+ticketboxview, 600, 560, 'yes', 'no', 'no')
+	 	}
+		if(theKey == 79 && altPressed)
+	 	{
+	 		if(docName != "outbox.ems" || docName != "sentitems.ems" || docName != "drafts.ems")
+	 		{
+		 		if (!noneSelected)
+				{
+					takeOwnership();
+				}
+				else
+				{
+					alert("You must select at least one item!");
+				}
+			}
+		}
+		if(theKey == 82 && altPressed)
+	 	{
+	 		if(docName != "outbox.ems" || docName != "sentitems.ems" || docName != "drafts.ems")
+	 		{
+		 		if (!noneSelected)
+				{
+					reassignTicket();
+				}
+				else
+				{
+					alert("You must select at least one item!");
+				}
+			}
+			else
+			{
+				if (singleSelected)
+				{
+					ticketFunc('revoke');
+				}
+				else
+				{
+					alert("This function is only available when a single ticket is selected!");
+				}
+			}
+		}
+		if(theKey == 84 && ctrlPressed)
+	 	{
+	 		if(docName != "outbox.ems" || docName != "sentitems.ems" || docName != "drafts.ems")
+	 		{
+	 			glo_launchMsgCompWindow(null, null, ticketboxview, ticketboxid, null, null, null);
+	 		}
+	 		else
+	 		{
+	 			ticketFunc('new');
+	 		}
+	 	}
+	 }
+	if(docName == "ticketsearchresults.ems")
+	{
+		if(theKey == 82 && ctrlPressed)
+	 	{
+	 		if (!noneSelected)
+			{
+				ticketFunc('restore');
+			}
+			else
+			{
+				alert("You must select at least one item!");
+			}
+		}
+	}
+	if(theKey == 112 && altPressed)
+	{
+    		switch (docName)
+		{
+			case "ticketsearchresults.ems":
+				openHelp('Overview/Tickets.htm')
+				break;
+			case "mytickets.ems":
+				openHelp('My_Shortcuts/My_Tickets.htm');
+				break;
+			case "ticketlist.ems":
+				openHelp('Overview/Tickets.htm');
+				break;
+			case "outbox.ems":	
+				openHelp('My_Shortcuts/outbox.htm');
+				break;
+			case "sentitems.ems":	
+				openHelp('My_Shortcuts/sent_items.htm');
+				break;
+			case "drafts.ems":	
+				openHelp('My_Shortcuts/drafts.htm');
+				break;
+		}
+   	}
+ 	if(theKey == 116 && altPressed)
+	{
+		document.location.reload();
+	}
+return false;
+}

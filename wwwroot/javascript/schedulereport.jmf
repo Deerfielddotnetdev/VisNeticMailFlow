@@ -1,0 +1,316 @@
+function adjustForm()
+{
+	om = document.getElementById('divom');
+  	tdtb = document.getElementById('divtdtb');
+  	tdown = document.getElementById('divtdown');
+  	tdtc = document.getElementById('divtdtc');
+  	sruse = document.getElementById('divsruse');
+  	srcat = document.getElementById('divsrcat');
+  	srauth = document.getElementById('divsrauth');
+	flag1=document.getElementById('Flag1');
+	flag2=document.getElementById('Flag2');
+	
+	if (om.style.display != 'none' )
+	{
+		if(document.getElementById('Flag1divom').checked)
+		{
+			document.getElementById('Flag1').value = 1;
+		}		
+	}
+	else if(tdtb.style.display != 'none' )
+	{
+		if(document.getElementById('Flag1divtdtb').checked)
+		{
+			document.getElementById('Flag1').value = 1;
+		}		
+	}
+	else if(tdown.style.display != 'none' )
+	{
+		if(document.getElementById('Flag1divtdown').checked)
+		{
+			document.getElementById('Flag1').value = 1;
+		}
+		if(document.getElementById('Flag2divtdown').checked)
+		{
+			document.getElementById('Flag2').value = 1;
+		}
+		
+	}
+	else if(tdtc.style.display != 'none' )
+	{
+		if(document.getElementById('Flag1divtdtc').checked)
+		{
+			document.getElementById('Flag1').value = 1;
+		}
+		if(document.getElementById('Flag2divtdtc').checked)
+		{
+			document.getElementById('Flag2').value = 1;
+		}
+	}
+	else if(sruse.style.display != 'none' )
+	{
+		if(document.getElementById('Flag1divsruse').checked)
+		{
+			document.getElementById('Flag1').value = 1;
+		}
+		if(document.getElementById('Flag2divsruse').checked)
+		{
+			document.getElementById('Flag2').value = 1;
+		}
+	}
+	else if(srcat.style.display != 'none' )
+	{
+		if(document.getElementById('Flag1divsrcat').checked)
+		{
+			document.getElementById('Flag1').value = 1;
+		}
+		if(document.getElementById('Flag2divsrcat').checked)
+		{
+			document.getElementById('Flag2').value = 1;
+		}
+	}
+	else if(srauth.style.display != 'none' )
+	{
+		if(document.getElementById('Flag1divsrauth').checked)
+		{
+			document.getElementById('Flag1').value = 1;
+		}
+		if(document.getElementById('Flag2divsrauth').checked)
+		{
+			document.getElementById('Flag2').value = 1;
+		}
+	}
+		
+	var submitform = true;
+	if (document.tabularForm.Description.value=="")
+	{
+		alert("You must set the description for this scheduled report!");
+		document.tabularForm.Description.focus();
+		submitform = false;
+		return;
+	}
+	
+	if (document.tabularForm.MaxResults.value != " ")
+	{
+		var num = parseInt (document.tabularForm.MaxResults.value);
+      		if ((num >= 0) && (num <= 999))
+      		{
+      		}
+      		else
+      		{
+      			alert("The Max Rows value must be between 0-999!");
+			document.tabularForm.MaxResults.focus();
+			submitform = false;
+			return;
+      		}
+	}
+	else
+	{
+		alert("The Max Rows value must be between 0-999!");
+		document.tabularForm.MaxResults.focus();
+		submitform = false;
+		return;
+	}
+	
+	if(document.tabularForm.SendResultToEmail.checked)
+	{
+		if (!glo_checkEmailAddress(document.tabularForm.ResultEmailTo.value))
+		{
+			alert("You must enter a valid email address!");
+			document.tabularForm.ResultEmailTo.focus();
+			submitform = false;
+			return;
+		}			
+	}
+		
+	if (submitform)
+	{
+		var postResults = glo_buildFormPost('tabularForm');
+		if (eval(postResults[0])==true)
+		{
+			glo_setOpenerLocation();
+			glo_doClose();
+		}
+	}
+}
+
+function setFreqDiv()
+{
+	var nRunFreq;
+	for (var i=0; i < document.tabularForm.RunFreq.length; i++)
+ 	{
+ 		if (document.tabularForm.RunFreq[i].checked)
+		{
+			nRunFreq = document.tabularForm.RunFreq[i].value;
+		}
+ 	}
+	divDaly = document.getElementById('divdaily');
+	divWkly = document.getElementById('divweekly');
+	divMtly = document.getElementById('divmonthly');
+	divAnly = document.getElementById('divannualy');
+	divDaly.style.display = "none";
+	divWkly.style.display = "none";
+	divMtly.style.display = "none";
+	divAnly.style.display = "none";	
+	if (nRunFreq == 0)
+	{
+		divDaly.style.display = "";		
+	}
+	else if (nRunFreq == 1)
+	{
+		divWkly.style.display = "";	
+	}
+	else if (nRunFreq == 2)
+	{
+		divMtly.style.display = "";	
+	}
+	else if (nRunFreq == 3)
+	{
+		divAnly.style.display = "";
+	}   	
+}
+
+function setReportDiv(sv)
+{
+	tb = document.getElementById('divtb');
+  	agents = document.getElementById('divagents');
+  	tc = document.getElementById('divtc');
+  	sr = document.getElementById('divsr');
+  	rr = document.getElementById('divrr');
+  	ms = document.getElementById('divms');
+  	ts = document.getElementById('divts');
+  	om = document.getElementById('divom');
+  	tdtb = document.getElementById('divtdtb');
+  	tdown = document.getElementById('divtdown');
+  	tdtc = document.getElementById('divtdtc');
+  	sruse = document.getElementById('divsruse');
+  	srcat = document.getElementById('divsrcat');
+  	srauth = document.getElementById('divsrauth');
+  	sumper = document.getElementById('SumPeriod');
+  	maxres = document.getElementById('MaxResults');
+  	
+  	tb.style.display = "none";
+	agents.style.display = "none";
+	tc.style.display = "none";
+	sr.style.display = "none";
+	rr.style.display = "none";
+	ms.style.display = "none";
+	ts.style.display = "none";
+	om.style.display = "none";
+	tdtb.style.display = "none";
+	tdown.style.display = "none";
+	tdtc.style.display = "none";
+	sruse.style.display = "none";
+	srcat.style.display = "none";
+	srauth.style.display = "none";
+	sumper.disabled = false;
+	maxres.disabled = false;
+	
+  	var nroid;
+  	for (i = 0; i < document.all.rid.length; i++)
+	{
+		if(document.all.rid[i].value == sv)
+		{
+			nroid = document.all.roid[i].value;
+		}		
+	}
+  	
+  	if(nroid==1 || nroid==10 || nroid==11)
+  	{
+  		tb.style.display = "block";
+  	}
+  	else if(nroid==2 || nroid==6)
+  	{
+  		agents.style.display = "block";
+  	}
+  	else if(nroid==3)
+  	{
+  		tc.style.display = "block";
+  	}
+  	else if(nroid==4)
+  	{
+  		rr.style.display = "block";
+  	}
+  	else if(nroid==5)
+  	{
+  		ms.style.display = "block";
+  	}
+  	else if(nroid==7)
+  	{
+  		sr.style.display = "block";
+  	}
+  	
+  	
+  	if(sv==12 || sv==13 || sv==14)
+  	{
+  		ts.style.display = "block";
+  	}
+  	
+  	var nrtid;
+  	for (i = 0; i < document.all.rid.length; i++)
+	{
+		if(document.all.rid[i].value == sv)
+		{
+			nrtid = document.all.rtid[i].value;
+		}		
+	}
+
+	if(nrtid==2 || nrtid==6 || nrtid==7)
+  	{
+  		om.style.display = "block";
+  	}
+  	
+  	if(nrtid==4 && nroid==1)
+  	{
+  		tb.style.display = "none";
+  		tdtb.style.display = "block";
+  	}
+  	if(nrtid==4 && nroid==6)
+  	{
+  		agents.style.display = "none";
+  		tdown.style.display = "block";
+  	}
+  	if(nrtid==4 && nroid==3)
+  	{
+  		tc.style.display = "none";
+  		tdtc.style.display = "block";
+  	}
+  	
+  	if(nrtid==5 && nroid==7)
+  	{
+  		sruse.style.display = "block";
+  	}
+  	if(nrtid==5 && nroid==8)
+  	{
+  		srcat.style.display = "block";
+  	}
+  	if(nrtid==5 && nroid==9)
+  	{
+  		srauth.style.display = "block";
+  	}
+  	if(nrtid==10)
+  	{   		
+  		sumper.options[1].selected = true;
+  		sumper.disabled = true;
+  		maxres.value = 250;
+  		maxres.disabled = true;
+  		tdtb.style.display = "block";
+  	}
+}
+
+function docInitDisableForms()
+{
+	adjDisable(document.tabularForm.SendResultToEmail);	
+}
+
+function adjDisable(object)
+{
+	var fields = new Array();
+	if (object.name == "SendResultToEmail")
+	{
+		fields[0] = tabularForm.ResultEmailTo;
+		fields[1] = tabularForm.IncludeResultFile;		
+	}
+	
+	glo_disableForm(object.checked, fields);		
+}

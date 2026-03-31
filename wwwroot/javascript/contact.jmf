@@ -1,0 +1,296 @@
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Something to consider...
+//	[	AdditionalInfoTable.rows[i], this index should always correspond directly with document.all.MatchDelButton[i]
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@
+//	[	Page Specific Variables
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	[	Name: InfoID
+//	[	Desc: a unique identifier for any dynamically generated additional info sections
+//	[	Note: value will be reset when page loads if adjustDoc() finds a greater value
+//	[	Page: accessrights.ems
+	var InfoID = 1;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	adjustDoc()
+//	[	Desc:	used to adjust value of InfoID if necessary, and reassign the rowIndex attribute once the page has loaded completely!
+//	[ 	Param:	None.
+//	[	Page:	newcontact.ems; editcontact.ems;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function adjustDoc()
+	{
+//{		if InfoId is already = 1, check for a higher value in the form!
+		if (InfoID==1)
+		{
+//{			If a higher value is present in the form,
+			if (parseInt(document.tabularForm.PersonalDataMaxID.value) > 1)
+			{
+//{				reasign InfoID to the higher value!
+				InfoID = parseInt(document.tabularForm.PersonalDataMaxID.value);
+			}
+		}
+//{		if there is a collection of rows
+		if (document.all.AdditionalInfoTable.rows.length)
+		{
+//{			reassign any rowIndex(s)!
+//{			if there is only one row, then there is a single button, not a collection!
+			if (document.all.AdditionalInfoTable.rows.length == 1)
+			{
+//{				reassign the single button's rowIndex!
+				tabularForm.MatchDelButton.rowIndex = "0";
+			}
+//{			if there is more than one row, then there is a collection of buttons!
+			else if (document.all.AdditionalInfoTable.rows.length > 1)
+			{
+//{				loop through them,
+				for (i = 0; i < document.all.AdditionalInfoTable.rows.length; i++)
+				{
+//{					reassigning their rowIndex!
+					document.all.MatchDelButton[i].rowIndex = parseInt(i);
+				}
+			}
+		}//^ if (document.all.AdditionalInfoTable.rows.length)
+		
+	}//^ function adjustDoc()
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	adjustForm()
+//	[	Desc:	used to fill a collection field with a comma dellimited list of all ID's related to additional information!
+//	[	Desc~	also used to validate the some data within the form!
+//	[ 	Param:	None.
+//	[	Page:	newcontact.ems; editcontact.ems;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function adjustForm()
+	{
+
+//	( @ Fill Collection Field @ Begin )-----------------------
+//{		if there is at least on row,
+		if (document.all.AdditionalInfoTable.rows.length)
+		{
+//{			create a string variable to contain the list temporarily!
+			AdditionalInfoList = "";
+//{			loop through any available rows!
+			for (i = 0; i < document.all.AdditionalInfoTable.rows.length; i++)
+			{
+//{				capture the current row's ID!
+				thisID = document.all.AdditionalInfoTable.rows[i].id;
+//{				if this is the first time in the loop...
+				if (AdditionalInfoList=="")
+				{	AdditionalInfoList = thisID;	}
+//{				if this is not the first time in the loop...
+				else
+				{	AdditionalInfoList = AdditionalInfoList.concat(", "+thisID);	}
+			}
+//{			set the collection field's value to the value of the collection string variable!
+			document.tabularForm.PersonalDataIdCollection.value = AdditionalInfoList;
+		}//^ if (document.all.AdditionalInfoTable.rows.length)
+//	( @ Fill Collection Field @ End )-----------------------
+/*
+//	( @ Validate Form Data @ Begin )-----------------------
+		var lookAt = "";
+		var userMsg = "";
+		if (tabularForm.FullName.value==""&&tabularForm.DefaultEmail.value!="")
+		{
+			var emailGood = glo_checkEmailAddress(tabularForm.DefaultEmail.value);
+			if (!emailGood)
+			{
+				lookAt = tabularForm.DefaultEmail;
+				userMsg+= "	The Email address provided was invalid.\n";
+			}
+		}
+		else if (tabularForm.FullName.value!="" && tabularForm.DefaultEmail.value=="")
+		{
+			var checkWhat = tabularForm.FullName;
+			if (checkWhat.value=="")
+			{
+				lookAt = checkWhat;
+				userMsg += "	A Full Name must be provided.\n";
+			}
+		}
+		else if (tabularForm.FullName.value=="" && tabularForm.DefaultEmail.value=="")
+		{
+			lookAt = tabularForm.FullName;
+			userMsg+= "	Please provide either a Full Name or a Default Email Address for this contact.\n";
+		}
+		if (userMsg=="")
+		{
+			document.tabularForm.submit();
+		}
+		else
+		{
+			alert("Your request cannot be processed due to the following reasons:\n"+userMsg);
+			lookAt.focus();
+		}
+//	( @ Validate Form Data @ End )-----------------------
+*/
+		var postResults = glo_buildFormPost('tabularForm');
+		var proceed = postResults[0];
+		if (proceed==true)
+		{
+			glo_doClose();
+		}
+
+	}//^ function adjustForm()
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	addOption()
+//	[	Desc:	used to insert a new row into AdditionalInfoTable, and populate that row with necessary form elements!
+//	[ 	Param:	None.
+//	[	Page:	newcontact.ems; editcontact.ems;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function addOption()
+	{
+//{		Grab current length of AdditionalInfoTable as length is also value of a new row, starts @ zero
+		var NewRowID = parseInt(document.all.AdditionalInfoTable.rows.length);
+//{		Inserts the New Row, as well as sets the object Reference to NewRow
+		var NewRow = document.all.AdditionalInfoTable.insertRow(-1);
+//{		sets the id of the NewRow = page specific unique identifier!
+		NewRow.id = InfoID;
+//{		begin constructing HTML for newCell!
+		var strX = "<select onChange='adjDefault(this);' name='PersonalDataType"+InfoID+"'>";
+//{		if there is a collection of Personal Data Types,
+		if (document.all.hiPDId.length)
+		{
+//{			loop through them, adding them as options to the select box!
+			for (i = 0; i < document.all.hiPDId.length; i++)
+			{
+				strX = strX + "<option value='"+document.all.hiPDId[i].value+"'>"+document.all.hiPDName[i].value+"</option>";
+			}
+		}
+//{		if there is only one Personal Data Type,
+		else if (tabularForm.hiPDId)
+		{
+//{			add it to the select box anyway!
+			strX = strX + "<option value='"+tabularForm.hiPDId.value+"'>"+tabularForm.hiPDName.value+"</option>";
+		}
+		strX = strX + "</select><input type='text' maxlength='255' size='45' name='PersonalData"+InfoID+"'>";
+		strX = strX + "<input type='button' class='childControlBtn' rowIndex='"+NewRowID+"' name='MatchDelButton' value='Remove' onclick='delOption();'>";		
+//{		insert a NewCell!
+		var NewCell = NewRow.insertCell(-1);
+//{		reposition the cell slightly!
+		NewCell.setAttribute("align", "right");
+//{		set the cell contents = the HTML dynamically constructed above! (strX)
+		NewCell.innerHTML = strX;
+//{		Now increment that page specific unique identifier, for the next time, should there be...
+		InfoID++;
+//{		update the value on the form for persistent values if error!
+		document.tabularForm.PersonalDataMaxID.value = InfoID;
+	}//^ function addOption()
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	delOption()
+//	[	Desc:	used to delete a row in the AdditionalInfoTable, and reassign the rowIndex(s) respectively!
+//	[ 	Param:	None.
+//	[	Page:	newcontact.ems; editcontact.ems;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function delOption()
+	{
+//{		retrieve the rowIndex from the MatchDelButton that fired this function to begin with!
+		selectedIndex = parseInt(event.srcElement.rowIndex);
+//{		if there is only one row, then there is only one button!
+		if (document.all.AdditionalInfoTable.rows.length == 1)
+		{
+//{			delete that thing already!
+			AdditionalInfoTable.deleteRow(selectedIndex);
+		}
+//{		if there is 2 rows, then there are two buttons this time!
+		else if (document.all.AdditionalInfoTable.rows.length == 2)
+		{
+//{			delete the selected row!
+			AdditionalInfoTable.deleteRow(selectedIndex);
+//{			reset the rowIndex value of the other button!
+			tabularForm.MatchDelButton.rowIndex = "0";
+		}
+//{		if there are more than 2 rows, there are more than two buttons == collection!
+		else if (document.all.AdditionalInfoTable.rows.length > 2)
+		{
+//{			delete the selected row!
+			AdditionalInfoTable.deleteRow(selectedIndex);
+//{			loop through the remaining rows, reassigning the rowIndex(s) accordingly!
+			for (i = 0; i < document.all.AdditionalInfoTable.rows.length; i++)
+			{document.all.MatchDelButton[i].rowIndex = parseInt(i);}
+		}
+	}//^ function delOption()
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	adjDefault()
+//	[	Desc:	used to hide/show a "MakeDefault" button for the additional info items!
+//	[ 	Param:	xObject = the select box that called the function
+//	[	Page:	newcontact.ems; editcontact.ems;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function adjDefault(xObject)
+	{
+//{		grab the select box name, from the select box that called the function
+		var myName = xObject.name;
+//{		grab the current value from the select box!
+		var curVal = xObject.value;
+//{		if there is more than one row, there is more than one button, let's figure out which one I want to play with!
+		if (document.all.AdditionalInfoTable.rows.length > 1)
+		{
+//{			loop through the collection of rows, also collection of MakeDefaultButtons!
+			for (i = 0; i < document.all.AdditionalInfoTable.rows.length; i++)
+			{
+//{				sets thisCursar = the current MakeDefaultButton.cursar attribute
+//{				"You may need to look at editcontact.ems to understand this better..."
+				thisCursar = document.all.MakeDefaultButton[i].cursar;
+//{				if this buttons cursar value = the current select box name, this is it!
+				if (thisCursar==myName)
+				{
+//{					set my objBtn var to reference the appropriate button!
+					objBtn = document.all.MakeDefaultButton[i];
+				}
+			}
+		}
+//{		if there is only one row, then there is only one button! use tabularForm as reference!
+		else
+		{
+//{			set my objBtn var to reference the appropriate button!
+			objBtn = tabularForm.MakeDefaultButton;
+		}
+//{		if the select box has "EmailAddress" selected,
+		if (curVal==1)
+		{
+//{			make the "MakeDefault" button visible!
+			objBtn.style.visibility = 'visible';
+		}
+//{		if the select box does not have "EmailAddress" selected,
+		else
+		{
+//{			make the "makeDefault" button hidden! quick!
+			objBtn.style.visibility = 'hidden';
+		}
+	}//^ function adjDefault(xObject)
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	makeDefault()
+//	[	Desc:	used to switch the values of an AdditionalInfo Item with that of DefaultEmailAddress!
+//	[ 	Param:	what is actually a string value that references the text field of the additionalinfo item
+//	[	Page:	newcontact.ems; editcontact.ems;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function makeDefault(what)
+	{
+//{		create a reference for the text field!
+		obj = eval("tabularForm."+what);
+//{		temporarily store the current DefaultEmailAddress!
+		curVal = tabularForm.DefaultEmail.value;
+//{		set the DefaultEmail field = the temp value just created!
+		tabularForm.DefaultEmail.value = obj.value;
+//{		set the current additional info text field = the previous default email address!
+		obj.value = curVal;
+	}//^ function makeDefault(what)
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+

@@ -1,0 +1,110 @@
+function toggleTree(id) 
+{
+	var contract = new Image();
+	contract.src = './images/minus.gif';
+
+	var expand = new Image();
+	expand.src = './images/plus.gif';
+
+	// objects for manipulation
+	imgObj = document.getElementById('img' + id);
+	divObj = document.getElementById('div' + id);
+
+	dim = 0;
+	
+	if(imgObj.src == expand.src) 
+	{
+		// the element is closed
+		
+		while(dim <= (divObj.childNodes.length - 1))
+		{
+			if(divObj.childNodes[dim].tagName == 'DIV') 
+				divObj.childNodes[dim].style.display = 'block';
+
+			dim++;
+		}
+
+		imgObj.src = contract.src;
+		setCookie(id, 0, "01/01/2099");
+	} 
+	else 
+	{
+		// the element is open
+		while(dim <= (divObj.childNodes.length - 1)) 
+		{
+			if(divObj.childNodes[dim].tagName == 'DIV') 
+			{
+				if(divObj.childNodes[dim].id != 'menusection')
+					divObj.childNodes[dim].style.display = 'none';
+			}
+
+			dim++;
+		}
+
+		imgObj.src = expand.src;
+		setCookie(id, 1, "01/01/2099");
+	}		
+}
+
+function openTree(id) 
+{
+	var contract = new Image();
+	contract.src = './images/minus.gif';
+
+	var expand = new Image();
+	expand.src = './images/plus.gif';
+
+	// objects for manipulation
+	imgObj = document.getElementById('img' + id);
+	divObj = document.getElementById('div' + id);
+
+	dim = 0;
+	
+	if(imgObj.src == expand.src) 
+	{
+		// the element is closed
+		
+		while(dim <= (divObj.childNodes.length - 1))
+		{
+			if(divObj.childNodes[dim].tagName == 'DIV') 
+				divObj.childNodes[dim].style.display = 'block';
+
+			dim++;
+		}
+
+		imgObj.src = contract.src;
+	} 
+}
+
+function toggleAll(val)
+{
+	var contract = new Image();
+	contract.src = './images/minus.gif';
+	var expand = new Image();
+	expand.src = './images/plus.gif';
+	var x = document.images;
+	if(val == 0)
+	{
+		for (var i=0;i<x.length;i++)
+		{
+			if(x[i].src == expand.src) 
+			{
+				var str=x[i].id;
+				str=str.replace(/img_/,"_");						
+				toggleTree(str);
+			}
+		}
+	}
+	if(val == 1)
+	{
+		for (var i=0;i<x.length;i++)
+		{
+			if(x[i].src == contract.src)
+			{
+				var str=x[i].id;
+				str=str.replace(/img_/,"_");						
+				toggleTree(str);
+			}
+		}
+	}
+}

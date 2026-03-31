@@ -1,0 +1,637 @@
+var rcmen = null;
+var rcmenIsShown = false;
+var rcmen2 = null;
+var rcmenIsShown2 = false;
+var rcmen3 = null;
+var rcmenIsShown3 = false;
+var rcmen4 = null;
+var rcmenIsShown4 = false;
+var rcmen5 = null;
+var rcmenIsShown5 = false;
+var rcmen6 = null;
+var rcmenIsShown6 = false;
+var rcMenu="";
+var preitem="";
+var rcMenu2="";
+var preitem2="";
+var rcMenu3="";
+var preitem3="";
+var rcMenu4="";
+var preitem4="";
+var rcMenu5="";
+var preitem5="";
+var rcMenu6="";
+var preitem6="";
+
+function init()
+{
+	rcmen = null;
+	var docName = getDocumentName(document.location);
+	var selectId = document.tabularForm.selectId.value;
+	if (selectId.length != 0)
+	{
+		if(docName == "sentitems.ems")
+		{
+			menh=198;	
+		}
+		if(docName == "outbox.ems")
+		{
+			menh=198;	
+		}
+		if(docName == "drafts.ems")
+		{
+			menh=162;
+		}
+		if(docName == "ticketlist.ems" || docName == "ticketsearchresults.ems" || docName == "contacthistory.ems")
+		{
+			menh=260;
+		}
+		if(docName == "mytickets.ems")
+		{
+			menh=198;
+		}
+		if(docName == "alertlist.ems")
+		{
+			menh=126;
+		}
+		if(docName == "client.ems")
+		{
+			menh=126;
+		}
+		menw=rcMenu_width;
+		var winBottom = parent.document.getElementById("rightpane").offsetHeight;
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			menx=event.screenX;
+			meny=event.screenY;			
+		}
+		else
+		{
+			menx=event.clientX;
+			meny=event.clientY;
+			if((meny+menh)>winBottom)
+			{
+				meny = winBottom-menh-20;
+			}
+		}
+		
+		if (window.createPopup)
+	 	{       
+    	if (!rcmen)
+    	{
+	      rcmen=window.createPopup();
+				rcmen.document.write(rcMenu);
+	    }
+    	rcmen.show(menx,meny,menw,menh);
+  	}
+  	else
+  	{
+	    removeRcmen();
+	    rcmen = document.createElement("div");
+      rcmen.style.position = "absolute";
+      rcmen.style.width = "260px";	        
+      rcmen.style.top = meny;
+      rcmen.style.left = menx;
+      rcmen.id = "rcmen";
+      var theMenu = rcMenu + "</div>";	        
+      rcmen.innerHTML = theMenu;
+      document.body.appendChild (rcmen);
+      window.addEventListener ('click', removeRcmen, true);
+      rcmenIsShown = true;              
+      event.stopPropagation ();
+	      
+    }
+		return false;
+	}
+	else
+	{
+		alert("You must select at least one item!");
+		return false;
+	}
+}
+
+function removeRcmen(event)
+{
+  if (rcmenIsShown)
+  {
+    document.body.removeChild(document.getElementById("rcmen"));  
+    rcmenIsShown = false;
+  }
+  if (rcmenIsShown2)
+  {
+    document.body.removeChild(document.getElementById("rcmen2"));
+    rcmenIsShown2 = false;
+  }
+  if (rcmenIsShown3)
+  {
+    document.body.removeChild(document.getElementById("rcmen3"));
+    rcmenIsShown3 = false;
+  }
+  if (rcmenIsShown4)
+  {
+    document.body.removeChild(document.getElementById("rcmen4"));
+    rcmenIsShown4 = false;
+  }
+  if (rcmenIsShown5)
+  {
+    document.body.removeChild(document.getElementById("rcmen5"));
+    rcmenIsShown5 = false;
+  }
+  if (rcmenIsShown6)
+  {
+    document.body.removeChild(document.getElementById("rcmen6"));
+    rcmenIsShown6 = false;
+  }  
+}
+
+function init2()
+{
+	var docName = getDocumentName(document.location);
+	var selectId = document.tabularForm.selectId.value;
+	if (selectId.length != 0)
+	{
+		if(docName == "ticketlist.ems" || docName == "mytickets.ems" || docName == "ticketsearchresults.ems")
+		{
+			menh2=234;
+		}
+		menw2=rcMenu_width;
+		var winBottom = parent.document.getElementById("rightpane").offsetHeight;
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			menx2=event.screenX;
+			meny2=event.screenY;
+		}
+		else
+		{
+			menx2=event.clientX;
+			meny2=event.clientY;
+			if((meny2+menh2)>winBottom)
+			{
+				meny2 = winBottom-menh2-20;
+			}
+		}
+		if (window.createPopup)
+	 	{       
+    	if (!rcmen2)
+    	{
+	      rcmen2=window.createPopup();
+				rcmen2.document.write(rcMenu2);
+	    }
+    	rcmen2.show(menx2,meny2,menw2,menh2);			
+  	}
+  	else
+  	{
+	    removeRcmen();
+  		rcmen2 = document.createElement ("div");
+      rcmen2.style.position = "absolute";
+      rcmen2.style.width = "260px";	        
+      rcmen2.style.top = meny2;
+      rcmen2.style.left = menx2;
+      rcmen2.id = "rcmen2";
+  		var theMenu2 = rcMenu2 + "</div>";	        
+      rcmen2.innerHTML = theMenu2;
+      document.body.appendChild (rcmen2);
+      window.addEventListener ('click', removeRcmen, true);
+      rcmenIsShown2 = true;              
+      event.stopPropagation ();
+    }		
+		return false
+	}
+	else
+	{
+		alert("You must select at least one item!");
+		return false
+	}
+}
+
+function init3()
+{
+	var docName = getDocumentName(document.location);
+	var selectId = document.tabularForm.selectId.value;
+	if (selectId.length != 0)
+	{
+		if(docName == "ticketlist.ems" || docName == "mytickets.ems" || docName == "ticketsearchresults.ems")
+		{
+			menh3=234;
+		}
+		menw3=rcMenu_width;
+		var winBottom = parent.document.getElementById("rightpane").offsetHeight;
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			menx3=event.screenX;
+			meny3=event.screenY;
+		}
+		else
+		{
+			menx3=event.clientX;
+			meny3=event.clientY;
+			if((meny3+menh3)>winBottom)
+			{
+				meny3 = winBottom-menh3-20;
+			}
+		}
+		if (window.createPopup)
+	 	{       
+    	if (!rcmen3)
+    	{
+	      rcmen3=window.createPopup();
+				rcmen3.document.write(rcMenu2);
+	    }
+    	rcmen3.show(menx3,meny3,menw3,menh3);			
+  	}
+  	else
+  	{
+	    removeRcmen();
+  		rcmen3 = document.createElement ("div");
+      rcmen3.style.position = "absolute";
+      rcmen3.style.width = "260px";	        
+      rcmen3.style.top = meny3;
+      rcmen3.style.left = menx3;
+      rcmen3.id = "rcmen3";
+      var theMenu3 = rcMenu3 + "</div>";	        
+      rcmen3.innerHTML = theMenu3;
+      document.body.appendChild (rcmen3);
+      window.addEventListener ('click', removeRcmen, true);
+      rcmenIsShown3 = true;              
+      event.stopPropagation ();
+    }		
+		return false
+	}
+	else
+	{
+		alert("You must select at least one item!");
+		return false
+	}
+}
+
+function init4()
+{
+	var docName = getDocumentName(document.location);
+	var selectId = document.tabularForm.selectId.value;
+	if (selectId.length != 0)
+	{
+		if(docName == "ticketlist.ems" || docName == "mytickets.ems" || docName == "ticketsearchresults.ems")
+		{
+			menh4=234;
+		}
+		menw4=rcMenu_width;
+		var winBottom = parent.document.getElementById("rightpane").offsetHeight;
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			menx4=event.screenX;
+			meny4=event.screenY;
+		}
+		else
+		{
+			menx4=event.clientX;
+			meny4=event.clientY;
+			if((meny4+menh4)>winBottom)
+			{
+				meny4 = winBottom-menh4-20;
+			}
+		}
+		if (window.createPopup)
+	 	{       
+    	if (!rcmen4)
+    	{
+	      rcmen4=window.createPopup();
+				rcmen4.document.write(rcMenu2);
+	    }
+    	rcmen4.show(menx4,meny4,menw4,menh4);			
+  	}
+  	else
+  	{
+	    removeRcmen();
+  		rcmen4 = document.createElement ("div");
+      rcmen4.style.position = "absolute";
+      rcmen4.style.width = "260px";	        
+      rcmen4.style.top = meny4;
+      rcmen4.style.left = menx4;
+      rcmen4.id = "rcmen4";
+      var theMenu4 = rcMenu4 + "</div>";	        
+      rcmen4.innerHTML = theMenu4;
+      document.body.appendChild (rcmen4);
+      window.addEventListener ('click', removeRcmen, true);
+      rcmenIsShown4 = true;              
+      event.stopPropagation ();	    
+    }		
+		return false
+	}
+	else
+	{
+		alert("You must select at least one item!");
+		return false
+	}
+}
+
+function init5()
+{
+	var docName = getDocumentName(document.location);
+	var selectId = document.tabularForm.selectId.value;
+	if (selectId.length != 0)
+	{
+		if(docName == "ticketlist.ems" || docName == "mytickets.ems" || docName == "ticketsearchresults.ems")
+		{
+			menh5=234;
+		}
+		menw5=rcMenu_width;
+		var winBottom = parent.document.getElementById("rightpane").offsetHeight;
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			menx5=event.screenX;
+			meny5=event.screenY;
+		}
+		else
+		{
+			menx5=event.clientX;
+			meny5=event.clientY;
+			if((meny5+menh5)>winBottom)
+			{
+				meny5 = winBottom-menh5-20;
+			}
+		}
+		if (window.createPopup)
+	 	{       
+    	if (!rcmen5)
+    	{
+	      rcmen5=window.createPopup();
+				rcmen5.document.write(rcMenu2);
+	    }
+    	rcmen5.show(menx5,meny5,menw5,menh5);			
+  	}
+  	else
+  	{
+	    removeRcmen();
+  		rcmen5 = document.createElement ("div");
+      rcmen5.style.position = "absolute";
+      rcmen5.style.width = "260px";	        
+      rcmen5.style.top = meny5;
+      rcmen5.style.left = menx5;
+      rcmen5.id = "rcmen5";
+      var theMenu5 = rcMenu5 + "</div>";	        
+      rcmen5.innerHTML = theMenu5;
+      document.body.appendChild (rcmen5);
+      window.addEventListener ('click', removeRcmen, true);
+      rcmenIsShown5 = true;              
+      event.stopPropagation ();	    
+    }		
+		return false
+	}
+	else
+	{
+		alert("You must select at least one item!");
+		return false
+	}
+}
+
+function init6()
+{
+	var docName = getDocumentName(document.location);
+	var selectId = document.tabularForm.selectId.value;
+	if (selectId.length != 0)
+	{
+		if(docName == "ticketlist.ems" || docName == "mytickets.ems" || docName == "ticketsearchresults.ems")
+		{
+			menh6=234;
+		}
+		menw6=rcMenu_width;
+		var winBottom = parent.document.getElementById("rightpane").offsetHeight;
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			menx6=event.screenX;
+			meny6=event.screenY;
+		}
+		else
+		{
+			menx6=event.clientX;
+			meny6=event.clientY;
+			if((meny6+menh6)>winBottom)
+			{
+				meny6 = winBottom-menh6-20;
+			}
+		}
+		if (window.createPopup)
+	 	{       
+    	if (!rcmen6)
+    	{
+	      rcmen6=window.createPopup();
+				rcmen6.document.write(rcMenu2);
+	    }
+    	rcmen6.show(menx6,meny6,menw6,menh6);			
+  	}
+  	else
+  	{
+	    removeRcmen();
+  		rcmen6 = document.createElement ("div");
+      rcmen6.style.position = "absolute";
+      rcmen6.style.width = "260px";	        
+      rcmen6.style.top = meny6;
+      rcmen6.style.left = menx6;
+      rcmen6.id = "rcmen6";
+      var theMenu6 = rcMenu6 + "</div>";	        
+      rcmen6.innerHTML = theMenu6;
+      document.body.appendChild (rcmen6);
+      window.addEventListener ('click', removeRcmen, true);
+      rcmenIsShown6 = true;              
+      event.stopPropagation ();
+    }		
+		return false
+	}
+	else
+	{
+		alert("You must select at least one item!");
+		return false
+	}
+}
+
+function rcMenu_init()
+{
+	rcMenu+=("<style type='text/css'>.textul{position:absolute;top:0px;color:"+rcMenu_titletext+";writing-mode:tb-rl;padding-top:10px;filter: flipH() flipV() dropShadow( Color=000000,offX=-2,offY=-2,positive=true);z-Index:10;width:100%;height:100%;font: bold 12px sans-serif}.gradientul{position:relative;top:0px;left:0px;width:100%;background-color:"+rcMenu_titlecol2+";height:100%;z-Index:9;FILTER: alpha( style=1,opacity=0,finishOpacity=100,startX=100,finishX=100,startY=0,finishY=100)}.contra{background-color:"+rcMenu_titlecol1+";border:1px inset "+rcMenu_bg+";height:98%;width:18px;z-Index:8;top:0px;left:0px;margin:2px;position:absolute;}.men{position:absolute;top:0px;left:0px;padding-left:0px;background-color:"+rcMenu_bg+";border:2px outset "+rcMenu_bg+";z-Index:1;}.men a{margin:1px;cursor:default;padding-bottom:0px;padding-left:1px;padding-right:1px;padding-top:0px;text-decoration:none;height:100%;width:100%;color:"+rcMenu_cl+";font:normal 12px sans-serif;}.men a:hover{background:"+rcMenu_bgov+";color:"+rcMenu_clov+";} BODY{overflow:hidden;border:0px;padding:0px;margin:0px;}.ico{border:none;float:left;}</style><div class='men'>")
+}
+
+function rcMenu2_init()
+{
+	rcMenu2+=("<style type='text/css'>.textul{position:absolute;top:0px;color:"+rcMenu_titletext+";writing-mode:tb-rl;padding-top:10px;filter: flipH() flipV() dropShadow( Color=000000,offX=-2,offY=-2,positive=true);z-Index:10;width:100%;height:100%;font: bold 12px sans-serif}.gradientul{position:relative;top:0px;left:0px;width:100%;background-color:"+rcMenu_titlecol2+";height:100%;z-Index:9;FILTER: alpha( style=1,opacity=0,finishOpacity=100,startX=100,finishX=100,startY=0,finishY=100)}.contra{background-color:"+rcMenu_titlecol1+";border:1px inset "+rcMenu_bg+";height:98%;width:18px;z-Index:8;top:0px;left:0px;margin:2px;position:absolute;}.men2{position:absolute;top:0px;left:0px;padding-left:0px;background-color:"+rcMenu_bg+";border:2px outset "+rcMenu_bg+";z-Index:1;}.men2 a{margin:1px;cursor:default;padding-bottom:0px;padding-left:1px;padding-right:1px;padding-top:0px;text-decoration:none;height:100%;width:100%;color:"+rcMenu_cl+";font:normal 12px sans-serif;}.men2 a:hover{background:"+rcMenu_bgov+";color:"+rcMenu_clov+";} BODY{overflow:hidden;border:0px;padding:0px;margin:0px;}.ico{border:none;float:left;}</style><div class='men2'>")
+}
+
+function rcMenu3_init()
+{
+	rcMenu3+=("<style type='text/css'>.textul{position:absolute;top:0px;color:"+rcMenu_titletext+";writing-mode:tb-rl;padding-top:10px;filter: flipH() flipV() dropShadow( Color=000000,offX=-2,offY=-2,positive=true);z-Index:10;width:100%;height:100%;font: bold 12px sans-serif}.gradientul{position:relative;top:0px;left:0px;width:100%;background-color:"+rcMenu_titlecol2+";height:100%;z-Index:9;FILTER: alpha( style=1,opacity=0,finishOpacity=100,startX=100,finishX=100,startY=0,finishY=100)}.contra{background-color:"+rcMenu_titlecol1+";border:1px inset "+rcMenu_bg+";height:98%;width:18px;z-Index:8;top:0px;left:0px;margin:2px;position:absolute;}.men3{position:absolute;top:0px;left:0px;padding-left:0px;background-color:"+rcMenu_bg+";border:2px outset "+rcMenu_bg+";z-Index:1;}.men3 a{margin:1px;cursor:default;padding-bottom:0px;padding-left:1px;padding-right:1px;padding-top:0px;text-decoration:none;height:100%;width:100%;color:"+rcMenu_cl+";font:normal 12px sans-serif;}.men3 a:hover{background:"+rcMenu_bgov+";color:"+rcMenu_clov+";} BODY{overflow:hidden;border:0px;padding:0px;margin:0px;}.ico{border:none;float:left;}</style><div class='men3'>")
+}
+
+function rcMenu4_init()
+{
+	rcMenu4+=("<style type='text/css'>.textul{position:absolute;top:0px;color:"+rcMenu_titletext+";writing-mode:tb-rl;padding-top:10px;filter: flipH() flipV() dropShadow( Color=000000,offX=-2,offY=-2,positive=true);z-Index:10;width:100%;height:100%;font: bold 12px sans-serif}.gradientul{position:relative;top:0px;left:0px;width:100%;background-color:"+rcMenu_titlecol2+";height:100%;z-Index:9;FILTER: alpha( style=1,opacity=0,finishOpacity=100,startX=100,finishX=100,startY=0,finishY=100)}.contra{background-color:"+rcMenu_titlecol1+";border:1px inset "+rcMenu_bg+";height:98%;width:18px;z-Index:8;top:0px;left:0px;margin:2px;position:absolute;}.men4{position:absolute;top:0px;left:0px;padding-left:0px;background-color:"+rcMenu_bg+";border:2px outset "+rcMenu_bg+";z-Index:1;}.men4 a{margin:1px;cursor:default;padding-bottom:0px;padding-left:1px;padding-right:1px;padding-top:0px;text-decoration:none;height:100%;width:100%;color:"+rcMenu_cl+";font:normal 12px sans-serif;}.men4 a:hover{background:"+rcMenu_bgov+";color:"+rcMenu_clov+";} BODY{overflow:hidden;border:0px;padding:0px;margin:0px;}.ico{border:none;float:left;}</style><div class='men4'>")
+}
+
+function rcMenu5_init()
+{
+	rcMenu5+=("<style type='text/css'>.textul{position:absolute;top:0px;color:"+rcMenu_titletext+";writing-mode:tb-rl;padding-top:10px;filter: flipH() flipV() dropShadow( Color=000000,offX=-2,offY=-2,positive=true);z-Index:10;width:100%;height:100%;font: bold 12px sans-serif}.gradientul{position:relative;top:0px;left:0px;width:100%;background-color:"+rcMenu_titlecol2+";height:100%;z-Index:9;FILTER: alpha( style=1,opacity=0,finishOpacity=100,startX=100,finishX=100,startY=0,finishY=100)}.contra{background-color:"+rcMenu_titlecol1+";border:1px inset "+rcMenu_bg+";height:98%;width:18px;z-Index:8;top:0px;left:0px;margin:2px;position:absolute;}.men5{position:absolute;top:0px;left:0px;padding-left:0px;background-color:"+rcMenu_bg+";border:2px outset "+rcMenu_bg+";z-Index:1;}.men5 a{margin:1px;cursor:default;padding-bottom:0px;padding-left:1px;padding-right:1px;padding-top:0px;text-decoration:none;height:100%;width:100%;color:"+rcMenu_cl+";font:normal 12px sans-serif;}.men5 a:hover{background:"+rcMenu_bgov+";color:"+rcMenu_clov+";} BODY{overflow:hidden;border:0px;padding:0px;margin:0px;}.ico{border:none;float:left;}</style><div class='men5'>")
+}
+
+function rcMenu6_init()
+{
+	rcMenu6+=("<style type='text/css'>.textul{position:absolute;top:0px;color:"+rcMenu_titletext+";writing-mode:tb-rl;padding-top:10px;filter: flipH() flipV() dropShadow( Color=000000,offX=-2,offY=-2,positive=true);z-Index:10;width:100%;height:100%;font: bold 12px sans-serif}.gradientul{position:relative;top:0px;left:0px;width:100%;background-color:"+rcMenu_titlecol2+";height:100%;z-Index:9;FILTER: alpha( style=1,opacity=0,finishOpacity=100,startX=100,finishX=100,startY=0,finishY=100)}.contra{background-color:"+rcMenu_titlecol1+";border:1px inset "+rcMenu_bg+";height:98%;width:18px;z-Index:8;top:0px;left:0px;margin:2px;position:absolute;}.men6{position:absolute;top:0px;left:0px;padding-left:0px;background-color:"+rcMenu_bg+";border:2px outset "+rcMenu_bg+";z-Index:1;}.men6 a{margin:1px;cursor:default;padding-bottom:0px;padding-left:1px;padding-right:1px;padding-top:0px;text-decoration:none;height:100%;width:100%;color:"+rcMenu_cl+";font:normal 12px sans-serif;}.men6 a:hover{background:"+rcMenu_bgov+";color:"+rcMenu_clov+";} BODY{overflow:hidden;border:0px;padding:0px;margin:0px;}.ico{border:none;float:left;}</style><div class='men6'>")
+}
+
+function rcMenu_item(txt,ico,lnk)
+{
+	if(txt == "hr")
+	{
+		preitem+=("<hr></hr>")
+	}
+	else
+	{
+		if(!ico)ico='./images/rc.gif';
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			preitem+=("<a href='#' onmousedown='parent.window.location.href=\""+lnk+"\"'><img src='"+ico+"' width='16' height='16' class='ico'> "+txt+"</a>")
+		}
+		else
+		{
+			preitem+=("<a href='#' onmousedown='window.location.href=\""+lnk+"\"'><img src='"+ico+"' width='16' height='16'> "+txt+"</a><br/>")
+		}	
+	}
+}
+
+function rcMenu2_item(txt,ico,lnk)
+{
+	if(txt == "hr")
+	{
+		preitem2+=("<hr></hr>")
+	}
+	else
+	{
+		if(!ico)ico='./images/rc.gif';
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			preitem2+=("<a href='#' onmousedown='parent.window.location.href=\""+lnk+"\"'><img src='"+ico+"' width='16' height='16' class='ico'> "+txt+"</a>")
+		}
+		else
+		{
+			preitem2+=("<a href='#' onmousedown='window.location.href=\""+lnk+"\"'><img src='"+ico+"' width='16' height='16'> "+txt+"</a><br/>")
+		}	
+	}
+}
+
+function rcMenu3_item(txt,ico,lnk)
+{
+	if(txt == "hr")
+	{
+		preitem3+=("<hr></hr>")
+	}
+	else
+	{
+		if(!ico)ico='./images/rc.gif';
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			preitem3+=("<a href='#' onmousedown='parent.window.location.href=\""+lnk+"\"'><img src='"+ico+"' width='16' height='16' class='ico'> "+txt+"</a>")
+		}
+		else
+		{
+			preitem3+=("<a href='#' onmousedown='window.location.href=\""+lnk+"\"'><img src='"+ico+"' width='16' height='16'> "+txt+"</a><br/>")
+		}	
+	}
+}
+
+function rcMenu4_item(txt,ico,lnk)
+{
+	if(txt == "hr")
+	{
+		preitem4+=("<hr></hr>")
+	}
+	else
+	{
+		if(!ico)ico='./images/rc.gif';
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			preitem4+=("<a href='#' onmousedown='parent.window.location.href=\""+lnk+"\"'><img src='"+ico+"' width='16' height='16' class='ico'> "+txt+"</a>")
+		}
+		else
+		{
+			preitem4+=("<a href='#' onmousedown='window.location.href=\""+lnk+"\"'><img src='"+ico+"' width='16' height='16'> "+txt+"</a><br/>")
+		}	
+	}
+}
+
+function rcMenu5_item(txt,ico,lnk)
+{
+	if(txt == "hr")
+	{
+		preitem5+=("<hr></hr>")
+	}
+	else
+	{
+		if(!ico)ico='./images/rc.gif';
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			preitem5+=("<a href='#' onmousedown='parent.window.location.href=\""+lnk+"\"'><img src='"+ico+"' width='16' height='16' class='ico'> "+txt+"</a>")
+		}
+		else
+		{
+			preitem5+=("<a href='#' onmousedown='window.location.href=\""+lnk+"\"'><img src='"+ico+"' width='16' height='16'> "+txt+"</a><br/>")
+		}	
+	}
+}
+
+function rcMenu6_item(txt,ico,lnk)
+{
+	if(txt == "hr")
+	{
+		preitem6+=("<hr></hr>")
+	}
+	else
+	{
+		if(!ico)ico='./images/rc.gif';
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			preitem6+=("<a href='#' onmousedown='parent.window.location.href=\""+lnk+"\"'><img src='"+ico+"' width='16' height='16' class='ico'> "+txt+"</a>")
+		}
+		else
+		{
+			preitem6+=("<a href='#' onmousedown='window.location.href=\""+lnk+"\"'><img src='"+ico+"' width='16' height='16'> "+txt+"</a><br/>")
+		}	
+	}
+}
+
+function rcMenu_close()
+{
+	rcMenu+=preitem;
+	document.write("<div id='men' style='width:"+rcMenu_width+"'></div>");
+	document.getElementById('men').innerHTML=preitem
+}
+
+function rcMenu2_close()
+{
+	rcMenu2+=preitem2;
+	document.write("<div id='men2' style='width:"+rcMenu_width+"'></div>");
+	document.getElementById('men2').innerHTML=preitem2
+}
+
+function rcMenu3_close()
+{
+	rcMenu3+=preitem3;
+	document.write("<div id='men3' style='width:"+rcMenu_width+"'></div>");
+	document.getElementById('men3').innerHTML=preitem3
+}
+
+function rcMenu4_close()
+{
+	rcMenu4+=preitem4;
+	document.write("<div id='men4' style='width:"+rcMenu_width+"'></div>");
+	document.getElementById('men4').innerHTML=preitem4
+}
+
+function rcMenu5_close()
+{
+	rcMenu5+=preitem5;
+	document.write("<div id='men5' style='width:"+rcMenu_width+"'></div>");
+	document.getElementById('men5').innerHTML=preitem5
+}
+
+function rcMenu6_close()
+{
+	rcMenu6+=preitem6;
+	document.write("<div id='men6' style='width:"+rcMenu_width+"'></div>");
+	document.getElementById('men6').innerHTML=preitem6
+}

@@ -1,0 +1,259 @@
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	destroy(what)
+//	[	Desc:	used to remove items out of the administrative trash can
+//	[ 	Param:	what can be equal to "selected" || "olderthan" || "all"
+//	[	Page:	deleteditems.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function destroy(what)
+	{
+//{		simplify my form reference
+		form = document.tabularForm;
+//{		if we want to destroy the selected items...
+		if (what=="selected")
+		{
+//{			run this func to populate the IDCollection field with a comma delimmited list of ID's
+			populateCollection();
+//{			if the Collection field is not empty, then there is actually something to submit!
+			if (form.IDCollection.value > "")
+			{
+//{				prompt user to confirm whether they realy want to perform this action
+				ans = confirm("Are you sure you want to permanently destroy the selected "+form.ViewName.value+"?");
+//{				if they said yes
+				if (ans)
+				{
+//{					loop through the form elements
+					for (i = 0; i < form.elements.length; i++)
+					{
+//{						ignore these fields as they are needed to perform this action
+						if (
+							form.elements[i].name != "Action" &&
+							form.elements[i].name != "IDCollection" && 
+							form.elements[i].name != "View" && 
+							form.elements[i].name != "AgentFilter"
+							)
+						{
+//{							otherwise, disable the field, we don't need this data for this task!
+							form.elements[i].disabled = true;
+						}
+					}
+//{					actions speak louder than words! haha! that was a joke!
+					form.Action.value = "destroy_selected";
+//{					what are you waiting for?  submit the form already!
+					form.submit();
+				}
+			}
+		}
+//{		if we want to destroy all items...
+		else if (what=="all")
+		{
+//{			we better make sure this is what the user really wants to do... ask them!
+			ans = confirm("Are you sure you want to permanently destroy all "+form.ViewName.value+"?");
+//{			if they said yes...
+			if (ans)
+			{
+//{				loop through the form elements on the page
+				for (i = 0; i < form.elements.length; i++)
+				{
+//{					ignore these fields.. we need them to perform this task
+					if (
+						form.elements[i].name != "Action" && 
+						form.elements[i].name != "View" && 
+						form.elements[i].name != "AgentFilter"
+						)
+					{
+//{						but go ahead and disable the field if it's not one we need!
+						form.elements[i].disabled = true;
+					}
+				}
+//{				the Action says it all! to the processor that is!
+				form.Action.value = "destroy_all";
+//{				submit the form!
+				form.submit();
+			}
+		}
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	restore()
+//	[	Desc:	used to restore selected items
+//	[ 	Param:	None.
+//	[	Page:	deleteditems.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function restore()
+	{
+//{		simplify my form reference!
+		form = document.tabularForm;
+//{		run this function to populate the collection field with Id's belonging to those items selected!
+		populateCollection();
+//{		if the collection field is not empty, then there is actually data to submit!
+		if (form.IDCollection.value > "")
+		{
+//{			just to be safe let's make sure that is what the user actually wants to do!
+			ans = confirm("Are you sure you want to restore the selected "+form.ViewName.value+"?");
+//{			if they said yes...
+			if (ans)
+			{
+//{				loop through the form elements on the page
+				for (i = 0; i < form.elements.length; i++)
+				{
+//{					ignore these fields, we need them to perform the task desired!
+					if (
+						form.elements[i].name != "Action" &&
+						form.elements[i].name != "IDCollection" && 
+						form.elements[i].name != "View" && 
+						form.elements[i].name != "AgentFilter"
+						)
+					{
+//{						but we should disable any other field that we do not need!
+						form.elements[i].disabled = true;
+					}
+				}
+//{				the form processor needs to know what we intend on doing
+				form.Action.value = "restore_selected";
+//{				why am I still talking to you!?  submit the form!
+				form.submit();
+			}
+		}
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	populateCollection()
+//	[	Desc:	used to fill the IDCollection field with a comma delimitted list of ID's
+//	[ 	Param:	None.
+//	[	Page:	deleteditems.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function populateCollection()
+	{
+//{		simplify my form reference!
+		form = document.tabularForm;
+//{		enable the collection field, we're gonna need it!
+		form.IDCollection.disabled = false;
+//{		create a var to conatin the string of ID's temporarily
+		collString = "";
+//{		loop through the form elements on the page
+		for (i = 0; i < form.elements.length; i++)
+		{
+//{			ignore these fields! why? because!
+			if (
+				form.elements[i].name != "Action" &&
+				form.elements[i].name != "IDCollection" && 
+				form.elements[i].name != "View" && 
+				form.elements[i].name != "AgentFilter" && 
+				form.elements[i].name != "ViewName" && 
+				form.elements[i].name != "selectall"
+				)
+			{
+//{				otherwise, for every checkbox that is checked..
+				if (form.elements[i].checked==true)
+				{
+//{					if this is the first time through the form elements loop
+					if (collString=="")
+					{
+//{						then set the container var to the ID value
+						collString = form.elements[i].name.replace("chkbox", "");
+					}
+//{					otherwise...
+					else
+					{
+//{						just concatenate the next ID to the end of the collection string!
+						collString = collString.concat(", "+form.elements[i].name.replace("chkbox", ""));
+					}
+				}
+			}
+		}
+//{		after the loop has completed, set the collection field to the value of the string!
+		form.IDCollection.value = collString;
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	xview()
+//	[	Desc:	used to refresh the page displaying the type of data selected
+//	[ 	Param:	None.
+//	[	Page:	deleteditems.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function xview()
+	{
+		nexlocation = "deleteditems.ems";
+		nexlocation = nexlocation+"?view="+tabularForm.View.value;
+		window.location = nexlocation;
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	xfilter()
+//	[	Desc:	used to refresh the page displaying the type of data selected
+//	[ 	Param:	None.
+//	[	Page:	deleteditems.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function xfilter()
+	{
+		nexlocation = "deleteditems.ems";
+		nexlocation = nexlocation+"?view="+tabularForm.View.value;
+		nexlocation = nexlocation+"&AgentFilter="+tabularForm.AgentFilter.value;
+		window.location = nexlocation;
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	selectall(well)
+//	[	Desc:	used to check or uncheck all checkboxes on the page, based on selectall checkbox
+//	[ 	Param:	well = "true" || "false", whether selectall is checked!
+//	[	Page:	deleteditems.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function selectAll(well)
+	{
+//{		simplify my form reference
+		form = document.tabularForm;
+//{		if the selectall checkbox is indeed checked...
+		if (well)
+		{
+//{			loop through the collection of form elements
+			for (i = 0; i < form.elements.length; i++)
+			{
+//{				ignore these fields, they are not the checkboxes we want to modify!
+				if (
+					form.elements[i].name != "Action" &&
+					form.elements[i].name != "IDCollection" && 
+					form.elements[i].name != "View" && 
+					form.elements[i].name != "AgentFilter" && 
+					form.elements[i].name != "ViewName" && 
+					form.elements[i].name != "selectall"
+					)
+				{
+//{					otherwise, check that checkbox!
+					form.elements[i].checked = true;
+				}
+			}
+		}
+//{		if the selectall checkbox has been unchecked...
+		else
+		{
+//{			loop though the form elements
+			for (i = 0; i < form.elements.length; i++)
+			{
+//{				again ignoring these elements as they are not the ones we wish to modify
+				if (
+					form.elements[i].name != "Action" &&
+					form.elements[i].name != "IDCollection" && 
+					form.elements[i].name != "View" && 
+					form.elements[i].name != "AgentFilter" && 
+					form.elements[i].name != "ViewName" && 
+					form.elements[i].name != "selectall"
+					)
+				{
+//{					otherwise, uncheck this checkbox
+					form.elements[i].checked = false;
+				}
+			}
+		}
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#

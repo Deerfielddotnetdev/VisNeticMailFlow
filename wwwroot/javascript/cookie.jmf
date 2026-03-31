@@ -1,0 +1,85 @@
+		function setCookie (name, value, expires)
+		{
+			expires = new Date(expires);
+			var expString = ((expires == null) ? " " : ("; expires=" + expires.toGMTString()));
+			document.cookie = name +"="+ escape (value) + expString;
+		}
+		function ClearCookie (name)
+		{
+			var ThreeDays = 3 * 24 * 60 * 60 * 1000;
+			var expDate = new Date();
+			expDate.setTime (expDate.getTime() - ThreeDays);
+			document.cookie = name + "=DoesNotMatter; expires=" + expDate.toGMTString();
+		}
+		function DeleteAllCookies()
+		{
+			if (document.cookie)
+			{
+				var ThreeDays = 3 * 24 * 60 * 60 * 1000;
+				var expDate = new Date();
+				expDate.setTime(expDate.getTime() - ThreeDays);
+	
+				var keepCookieArr = new Array();
+					keepCookieArr[0] = "EMSSessionID";
+				
+				if (document.cookie.indexOf(";")!=-1)
+				{
+					var currCookieArr = document.cookie.split(";");
+					for (var x = 0; x < currCookieArr.length; x++)
+					{
+						var removeThisCookie = true;
+						for (var i = 0; i < keepCookieArr.length; i++)
+						{
+							if (currCookieArr[x].indexOf(keepCookieArr[i])!=-1)
+							removeThisCookie = false;
+						}
+						if (removeThisCookie)
+						ClearCookie(currCookieArr[x].substring(0,currCookieArr[x].indexOf("=")));
+					}
+				} else {
+					var removeThisCookie = true;
+					for (var i = 0; i < keepCookieArr.length; i++)
+					{
+						if (document.cookie.indexOf(keepCookieArr[i])!=-1)
+						removeThisCookie = false;
+					}
+					if (removeThisCookie)
+					ClearCookie(document.cookie.substring(0,document.cookie.indexOf("=")));
+				}
+			}
+		}
+		function getCookieCount (name)
+		{
+			var result = 0;
+			var myCookie = " "+ document.cookie +";";
+			var searchName = " "+ name +"=";
+			var nameLength = searchName.length;
+			var startOfCookie = myCookie.indexOf(searchName);
+			while (startOfCookie != -1)
+			{
+				result+=1;
+				startOfCookie = myCookie.indexOf(searchName, startOfCookie+nameLength);
+			}
+			return result;
+		}
+		function getCookieNum(name, cookieNum)
+		{
+			var result = null;
+			if (cookieNum >= 1)
+			{
+				var myCookie = " "+ document.cookie +";";
+				var searchName = " "+ name +"=";
+				var nameLength = searchName.length;
+				var startOfCookie = myCookie.indexOf(searchName);
+				var cntr = 0;
+				for (cntr = 1; cntr < cookieNum; cntr++)
+					startOfCookie = myCookie.indexOf(searchName, startOfCookie + nameLength);
+				if (startOfCookie != -1)
+				{
+					startOfCookie += nameLength;
+					var endOfCookie = myCookie.indexOf(";", startOfCookie);
+					result = unescape(myCookie.substring(startOfCookie, endOfCookie));
+				}
+			}
+			return result;
+		}

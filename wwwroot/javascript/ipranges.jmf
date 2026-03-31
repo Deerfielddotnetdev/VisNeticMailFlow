@@ -1,0 +1,195 @@
+//	#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@
+//	[	Page Specific Variables
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	[	Name: nextAlertID
+//	[	Desc: a unique identifier for any dynamically generated alert specifications
+//	[	Note: value will be reset when page loads if adjustDoc() finds a greater value
+//	[	Page: alertconfig.ems
+		var nextRangeID = 1;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	adjustDoc()
+//	[	Desc:	used to reassign the nextAlertID if a higher value is found, and reassign the rowIndex(s) after the page loads!
+//	[ 	Param:	None.
+//	[	Page:	alertconfig.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function adjustDoc()
+	{
+//		[~]======================================
+//{			reassign the nextAlertID is a greater value is present within the form
+//		[o]======================================
+//{			if the nextAlertID is currently set to 1
+		if (nextRangeID==1)
+		{
+//{				check to see if there is a higher value in the form! and if so, assign it!
+			if (parseInt(document.tabularForm.MaxID.value) > 1)
+			nextRangeID = parseInt(document.tabularForm.MaxID.value);
+		}
+//		[x]======================================
+
+//		[~]======================================
+//{			loop through buttons on page and update rowIndex(s)
+//		[o]======================================
+		if (document.all.RangeTable.rows.length)
+		{
+//{				if there is only one row in the table
+			if (document.all.RangeTable.rows.length == 2)
+			{
+//{					set the rowIndex for the button!
+				tabularForm.DelButton.rowIndex = "1";
+			}
+//{				if there is more than one row in the table
+			else if (document.all.RangeTable.rows.length > 2)
+			{
+//{					loop through the rows, reassigning their rowIndex(s) accrodingly!
+				for (i = 0; i < document.all.RangeTable.rows.length - 1; i++)
+				{
+					document.all.DelButton[i].rowIndex = parseInt(i) + 1;
+				}
+			}
+		}
+//		[x]======================================
+	}// close function adjustDoc()
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	adjustForm()
+//	[	Desc:	used to fill collection field with ID's before submitting the form!
+//	[ 	Param:	None.
+//	[	Page:	alertConfig.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function adjustForm( bClose )
+	{
+//{			create a "container" for the collection of ID's
+		var RangeColl = "";
+//{			if there are 2 rows, there is only one alert specification
+		if (document.all.RangeTable.rows.length == 2)
+		{
+//{				capture the alert's ID
+			thisID = document.all.RangeTable.rows[1].id;
+//{				add to collection "container" value
+			RangeColl = thisID;
+		}
+//{			if there are more than 2 rows, there are multiple alert specifications
+		else if (document.all.RangeTable.rows.length > 2)
+		{
+//{				loop through them, adding their ID to the collection value
+			for (i = 1; i < document.all.RangeTable.rows.length; i++)
+			{
+//{					capture the ID of the current row
+				thisID = document.all.RangeTable.rows[i].id;
+//{					if this is the first time in the loop
+				if (RangeColl=="")
+				{	RangeColl = thisID;	}
+//{					if this is not the first time in the loop
+				else
+				{	RangeColl = RangeColl.concat(", "+thisID);	}
+			}
+		}
+//{			set collection field = to the contents of the collection "container"
+		document.tabularForm.IDCollection.value = RangeColl;
+//{			submit the form already!
+		//document.tabularForm.submit();
+		var postResults = glo_buildFormPost('tabularForm');
+		if (eval(postResults[0])==true)
+		{
+			if (!bClose){
+				glo_setOpenerLocation();
+			}
+			glo_doClose();
+		}
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	deleteAlert()
+//	[	Desc:	used to dynamically delete a selected Alert section on the page!
+//	[ 	Param:	None.
+//	[	Page:	alertconfig.js
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function delRange()
+	{
+//{		grab the necessary rowIndex off of the button that fired this function!
+		selectedIndex = parseInt(event.srcElement.rowIndex);
+//{		if there are two rows in the table, there is only one button!
+		if (document.all.RangeTable.rows.length == 2)
+		{
+//{			delete the selected row, and do nothing else!
+			RangeTable.deleteRow(selectedIndex);
+			//noalerts.style.display = "block";
+		}
+//{		if there are three rows, there are two buttons!
+		else if (document.all.RangeTable.rows.length == 3)
+		{
+//{			delete the selected row!
+			RangeTable.deleteRow(selectedIndex);
+//{			reassign the rowIndex to the remaining button!
+			tabularForm.DelButton.rowIndex = "1";
+		}
+//{		if there are more than three rows, there is a collection of buttons!
+		else if (document.all.RangeTable.rows.length > 3)
+		{
+//{			delete the selected row!
+			RangeTable.deleteRow(selectedIndex);
+//{			loop through the remaining rows, and reassign their rowIndex(s)
+			for (i = 0; i < document.all.RangeTable.rows.length - 1; i++)
+			{document.all.DelButton[i].rowIndex = parseInt(i) + 1;}
+		}
+	}// close function delAlert()
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	addAlert()
+//	[	Desc:	used to dynamically add another Alert section to the page!
+//	[ 	Param:	None.
+//	[	Page:	alertconfig.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function addRange()
+	{
+//{		hide the "No Alerts presently configured" message!
+		//noalerts.style.display = "none";
+//{			the row Count always serves as the perfect new row ID because it is one based, whereas the row indexes are zero based
+		var NewRowID = parseInt(document.all.RangeTable.rows.length);
+//{			insert a new row
+		var NewRow = document.all.RangeTable.insertRow(-1);
+//{			give the new row and ID = to the nextAlertID
+		NewRow.id = nextRangeID;
+//{			create a container var to hold the innerHTML contents of a new cell
+		var strX = "<input maxlength='15' type='text' style='width:100%' value='' name='LowerRange"+nextRangeID+"'>";
+//{			with that said, create the new cell
+		var NewCell = NewRow.insertCell(-1);
+//{			some simple display adjustments
+//		NewCell.className = 'altCellHeaderChild';
+//		NewCell.style.paddingLeft = "0px";
+//{			insert the new innerHTML contents
+		NewCell.innerHTML = strX;
+//{			create a container var to hold the innerHTML contents of a new cell
+		var strX = "<input maxlength='15' type='text' style='width:100%' value='' name='UpperRange"+nextRangeID+"'>";
+//{			with that said, create the new cell
+		var NewCell = NewRow.insertCell(-1);
+//{			some simple display adjustments
+//		NewCell.className = 'altCellHeaderChild';
+//		NewCell.style.paddingLeft = "0px";
+//{			insert the new innerHTML contents
+		NewCell.innerHTML = strX;
+//{			create a container var to hold the innerHTML contents of a new cell
+		var strX = "<input class='childControlBtn' rowIndex='"+NewRowID+"' type='button' name='DelButton' value='x' onClick='delRange()'>";
+//{			with that said, create the new cell
+		var NewCell = NewRow.insertCell(-1);
+//{			some simple display adjustments
+//		NewCell.className = 'altCellHeaderChildChkBoxX';
+		NewCell.setAttribute("align", 'center');
+//{			insert the new innerHTML contents
+		NewCell.innerHTML = strX;
+
+//{		increment the page specific unique identifier!
+		nextRangeID++;
+//{		update the max ID val on the form!
+		//document.tabularForm.MatchTextMaxID.value = MatchID;
+
+	}// close function addAlert()
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#

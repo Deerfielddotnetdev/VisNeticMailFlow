@@ -1,0 +1,47 @@
+		expandico = new Image();
+		expandico.src = './images/plus.gif';
+		
+		contractico = new Image();
+		contractico.src = './images/minus.gif';
+		
+		dotico = new Image();
+		dotico.src = './images/dot.gif';
+		
+		inboundico = new Image();
+		inboundico.src = './images/ico_15x_inboundmessage.gif';
+		
+		outboundico = new Image();
+		outboundico.src = './images/ico_15x_outboundmessage.gif';
+
+		draftico = new Image();
+		draftico.src = './images/ico_15x_draftmessage.gif';
+		
+		historyico = new Image();
+		historyico.src = './images/ico_15x_history.gif';
+		
+		priority1 = new Image();
+		priority2 = new Image();
+		priority3 = new Image();
+		priority4 = new Image();
+		priority5 = new Image();
+				
+		priority1.src = './images/ico_priority_1.gif';
+		priority2.src = './images/ico_priority_2.gif';
+		priority3.src = './images/ico_priority_3.gif';
+		priority4.src = './images/ico_priority_4.gif';
+		priority5.src = './images/ico_priority_5.gif';
+				
+		attach11 = new Image();
+		attach11.src = './images/ico_attach_11.gif';
+
+		notesico = new Image();
+		notesico.src = './images/ico_11x_notes.gif';
+		
+		phonenoteico = new Image();
+		phonenoteico.src = './images/ico_11x_voip.gif';
+		
+		notesattico = new Image();
+		notesattico.src = './images/ico_attach_11.gif';
+		
+		transico = new Image();
+		transico.src = 'images/ico_transparent.gif';

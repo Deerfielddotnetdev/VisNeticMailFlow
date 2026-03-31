@@ -1,0 +1,171 @@
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	respool(huh)
+//	[	Desc:	used to make adjustments to the form data and then submit the form!
+//	[ 	Param:	huh is used to determine whether I want to respool selected messages or respool based on numdays
+//	[	Page:	deliveryfailures.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function respool(huh)
+	{
+//{			link var to form object
+		form = document.tabularForm;
+//{			if the desired action is to respool the selected messages
+		if (huh=="selected")
+		{
+//{				enable the collection field
+			form.IDCollection.disabled = false;
+//{				create a string var to hold the collection of ID's temporarily
+			collString = "";
+//{				loop through the form fields on the page
+			for (i = 0; i < form.elements.length; i++)
+			{
+//{					if the form field name is not equal to any of these listed, check to see if it is checked
+				if (
+					form.elements[i].name != "Action" &&
+					form.elements[i].name != "numdays" &&
+					form.elements[i].name != "IDCollection" &&
+					form.elements[i].name != "selectall"
+					)
+				{
+//{						if the checkbox is checked, add its id to the collection
+					if (form.elements[i].checked==true)
+					{
+//{							if this is the first time within the loop
+						if (collString=="")
+						{
+							collString = form.elements[i].name.replace("chkbox", "");
+						}
+//{							else if this is not the first time within the loop
+						else
+						{
+							collString = collString.concat(", "+form.elements[i].name.replace("chkbox", ""));
+						}
+					}
+				}
+			}
+//{				set the collection field equal to the value of the collection string var
+			form.IDCollection.value = collString;
+//{				as long as there is actually a value inside the collection field, then there is really data to submit....
+			if (form.IDCollection.value > "")
+			{
+//{					prompt user to ensure that they really do wish to respool the selected messages
+				ans = confirm("Are you sure that want to re-spool the selected messages?");
+				if (ans)
+				{
+//{					if the user's answer was "ok" prepare and submit form
+					for (i = 0; i < form.elements.length; i++)
+					{
+//{							if the form field name is not equal to any of these
+						if (
+							form.elements[i].name != "Action" &&
+							form.elements[i].name != "IDCollection" &&
+							form.elements[i].name != "selectall"
+							)
+						{
+//{								disable it! we don't want to post any more data than necessary!
+							form.elements[i].disabled = true;
+						}
+					}
+//{						make sure the Acton specifies what needs to be done!
+					form.Action.value = "respool_selected";
+//{						and finally submit the form!
+					form.submit();
+				}
+			}
+		}
+//{			else if the desired action is to respool messages older than the # of days specified in numdays
+		else if (huh=="olderthan")
+		{
+//{				capture the desired time frame
+			numdays = parseInt(form.numdays.value);
+//{				if the value is greater than zero, it's a real timeframe!
+			if (numdays > 0)
+			{
+//{					if numdays is greater than 1, say days
+				if (numdays > 1)
+				{
+					ans = confirm("Are you sure that want to re-spool all messages older than "+numdays+" days old?");
+				}
+//{					if numdays is  equal to 1, say day!
+				else
+				{
+					ans = confirm("Are you sure that want to re-spool all messages older than "+numdays+" day old?");
+				}
+//{					if the user said "ok"
+				if (ans)
+				{
+//{						loop through the form elements
+					for (i = 0; i < form.elements.length; i++)
+					{
+//{							if the form field name is not equal to any of these
+						if (
+							form.elements[i].name != "Action" &&
+							form.elements[i].name != "numdays"
+							)
+						{
+//{								disable the field!@
+							form.elements[i].disabled = true;
+						}
+					}
+//{						make sure the form action is specified for the processor!
+					form.Action.value = "respool_olderthan";
+//{						submit the form!  WHAT ELSE IS THERE!?
+					form.submit();
+				}
+			}
+		}
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	selectall(well)
+//	[	Desc:	used to check or uncheck all checkboxes on the page, based on selectall checkbox
+//	[ 	Param:	well = "true" || "false", whether selectall is checked!
+//	[	Page:	deliveryfailures.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function selectAll(well)
+	{
+//{		simplify my form reference
+		form = document.tabularForm;
+//{		if the selectall checkbox is indeed checked...
+		if (well)
+		{
+//{			loop through the collection of form elements
+			for (i = 0; i < form.elements.length; i++)
+			{
+//{				ignore these fields, they are not the checkboxes we want to modify!
+				if (
+					form.elements[i].name != "Action" &&
+					form.elements[i].name != "IDCollection" && 
+					form.elements[i].name != "numdays" && 
+					form.elements[i].name != "selectall"
+					)
+				{
+//{					otherwise, check that checkbox!
+					form.elements[i].checked = true;
+				}
+			}
+		}
+//{		if the selectall checkbox has been unchecked...
+		else
+		{
+//{			loop though the form elements
+			for (i = 0; i < form.elements.length; i++)
+			{
+//{				again ignoring these elements as they are not the ones we wish to modify
+				if (
+					form.elements[i].name != "Action" &&
+					form.elements[i].name != "IDCollection" && 
+					form.elements[i].name != "numdays" && 
+					form.elements[i].name != "selectall"
+					)
+				{
+//{					otherwise, uncheck this checkbox
+					form.elements[i].checked = false;
+				}
+			}
+		}
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#

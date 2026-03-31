@@ -1,0 +1,73 @@
+// $Header: /root/WWWROOT/javascript/liststdrespcategories.jmf,v 1.2 2005/11/29 20:47:21 markm Exp $
+var firstLevelShown = 1;
+var lastItem = null;
+			
+function onCategoriesClick()
+{
+	if(firstLevelShown)
+	{
+		document.getElementById("firstLevel").style.display = "none";
+		document.getElementById("imgTreeRootExpand").src = "./images/plus.gif";
+		document.getElementById("imgTreeRootExpand").alt = "Expand Categories";
+		firstLevelShown = 0;
+	}
+	else
+	{
+		document.getElementById("firstLevel").style.display = "block";
+		document.getElementById("imgTreeRootExpand").src = "./images/minus.gif";
+		document.getElementById("imgTreeRootExpand").alt = "Collapse Categories";
+		firstLevelShown = 1;
+	}
+}
+			
+function onItemClick(id)
+{
+	var theId = parseInt(id);
+	var textID = theId + "ItemText";
+		
+	// Is lastItem set
+	if(lastItem)
+	{
+		// Yes.  Is it already set to the item that was clicked
+		if(lastItem != document.getElementById(textID))
+		{
+			// No.  So unbold it
+			lastItem.className = "TreeParentText";
+						
+			lastItem = document.getElementById(textID);
+					
+			lastItem.className = "TreeParentTextClicked";
+		}
+	}
+	else
+	{
+		// No.  Set lastItem
+		lastItem = document.getElementById(textID);
+					
+		lastItem.className = "TreeParentTextClicked";
+	}
+	
+	if(theId == -3)
+	{
+		document.getElementById("-3Item").style.display = "block";
+	}
+	else
+	{
+		document.getElementById("-3Item").style.display = "none";
+		parent.frames.menu.tabularForm.selectId.value = theId;
+		
+		parent.frames.frameRightTop.location = "stdresponselist.ems?id=" + theId;
+		parent.frames.frameRightBottom.location = "stdresponse.ems?id=0&categoryid=" + theId;
+	}
+	
+	if(theId < 2)
+	{
+		parent.frames.menu.document.getElementById("btnRename").style.display = "none";
+		parent.frames.menu.document.getElementById("btnDelete").style.display = "none";
+	}
+	else
+	{
+		parent.frames.menu.document.getElementById("btnRename").style.display = "block";
+		parent.frames.menu.document.getElementById("btnDelete").style.display = "block";
+	}
+}

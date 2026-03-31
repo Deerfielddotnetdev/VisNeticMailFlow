@@ -1,0 +1,91 @@
+function docOnMouseOver(id)
+{
+	var obj = document.getElementById(id);
+	
+	if(obj)
+		if(obj.disabled == false)
+			obj.className = "newbuttondef newbuttonmouseover";
+}
+
+function docOnMouseOut(id)
+{
+	var obj = document.getElementById(id);
+	
+	if(obj)
+		if(obj.disabled == false)
+		{
+			obj.className = "newbuttondef newbutton";
+		}
+}
+
+function docOnMouseDown(id)
+{
+	var obj = document.getElementById(id);
+	
+	if(obj)
+		if (obj.disabled == false)
+		{
+			obj.className = "newbuttondef newbuttonmousedown";
+		}
+}
+
+function docOnMouseUp(id)
+{
+	var obj = document.getElementById(id);
+	
+	if(obj)
+		if (obj.disabled == false)
+			obj.className = "newbuttondef newbuttonmouseover";
+}
+	
+function docUpdateDisable(id)
+{
+	var obj = document.getElementById(id);
+	var filter = "";
+
+	if(obj)
+	{
+		if (obj.disabled == false)
+		{
+			obj.className = "newbuttondef newbutton";
+		}
+		else
+		{
+			obj.className = "newbuttondef newbuttondisabled";
+			filter = "alpha(opacity=30)gray()";
+		}
+		
+		for (var i = 0; i < obj.children.length; ++i)
+		{
+			if (obj.children[i].tagName == "IMG")
+				obj.children[i].style.filter = filter;
+		}
+	}
+}
+
+function docInit(buttons)
+{
+	if(gloListControl.ActiveRows.length == 0)
+	{
+		for(var i = 0; i < buttons.length; ++i)
+		{
+			var obj = document.getElementById(buttons[i]);
+			
+			if(obj)
+				obj.disabled = 1;
+		}
+	}	
+	else
+	{
+		for(var i = 0; i < buttons.length; ++i)
+		{
+			var obj = document.getElementById(buttons[i]);
+			
+			if(obj)
+				obj.disabled = 0;
+		}
+	}
+		
+	for(var i = 0; i < ButtonsToCheck.length; ++i)
+		docUpdateDisable(buttons[i]);
+}

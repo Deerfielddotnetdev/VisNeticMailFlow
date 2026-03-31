@@ -1,0 +1,114 @@
+var evtHandle;
+var initClientX;
+function resizehandle_hot(event)
+{
+	var target= event.target || event.srcElement;
+	if (bResize) return;
+
+	try{
+		target.style.cursor= "col-resize";}
+	catch(e){
+		target.style.cursor= "e-resize";}
+}
+
+function resizehandle_activate(event)
+{
+	var target= event.target || event.srcElement;
+
+	evtHandle = target;
+	evtParent = target.parentNode;
+	
+	labelWidth = evtParent.children[0].offsetWidth + 5;//5 comes from 3px padding and 2 1px borders!
+
+	for (i = 0; i < ListHeaderRow.children.length; i++)
+	{	if (ListHeaderRow.children[i].innerHTML == evtParent.innerHTML)	ColumnIndex = i;	}
+
+	if (window.addEventListener)
+	{
+  	window.addEventListener("mousemove",resizehandle_move,true);
+		window.addEventListener("mouseup",resizehandle_release,true);
+  }
+  else
+  {
+  	evtHandle.setCapture();
+  }
+	
+	initClientX = event.clientX;
+	bChangedCursor = false;
+	bResize = true;
+}
+
+function resizehandle_move(event)
+{
+	if (!bResize) return;
+	if (initClientX == event.clientX) return;
+	
+	TDcellWidth = event.clientX + ListDivider.scrollLeft - ListHeaderRow.children[ColumnIndex].offsetLeft;
+
+	if ( TDcellWidth < (labelWidth ) )
+	{
+		TDcellWidth = labelWidth;
+		
+		if ( !bChangedCursor)
+		{
+			try {
+				evtHandle.style.cursor= "not-allowed";
+				bChangedCursor = true;
+				}
+			catch (e) {}
+		}
+	}
+	else
+	{
+		TDcellWidth = Math.max( TDcellWidth, labelWidth  );
+
+		if ( bChangedCursor )
+		{
+			try{evtHandle.style.cursor= "col-resize";}
+			catch(e){evtHandle.style.cursor= "e-resize";}
+
+			bChangedCursor = false;
+		}
+	}
+
+	// resize the column
+	ListHeaderRow.children[ColumnIndex].style.width = TDcellWidth;
+	ListTableBot.rows[0].children[ColumnIndex].style.width = TDcellWidth + "px";
+	
+	// resizing columns could cause the data div to scroll
+	// make sure that the headers still line up
+	// ListTableTop.offsetLeft = -ListDivider.scrollLeft;
+}
+function resizehandle_release(event)
+{
+	if (bChangedCursor)
+	{
+		try{evtHandle.style.cursor= "col-resize";}
+		catch(e){evtHandle.style.cursor= "e-resize";}
+
+		bChangedCursor = false;
+	}
+	
+	if (window.removeEventListener)
+	{
+  	window.removeEventListener("mousemove",resizehandle_move,true);
+		window.removeEventListener("mouseup",resizehandle_release,true);
+  }
+  else
+  {
+  	evtHandle.releaseCapture();
+  }
+  
+//	evtHandle.style.left = (evtHandle.parentElement.offsetLeft + evtHandle.parentElement.offsetWidth - 7);
+	var handleCount = rszHandle.length? rszHandle.length : 1;
+	for (var e = 0; e < handleCount; e++)
+	{
+		var thisHandle = (handleCount>1)?rszHandle[e] : rszHandle;
+		thisHandle.style.left = thisHandle.parentNode.offsetLeft + thisHandle.parentNode.offsetWidth - 7;
+	}
+	bResize = false;
+	evtHandle = null;
+	storeColumnWidths();
+	
+	bResizedCols = true;
+}

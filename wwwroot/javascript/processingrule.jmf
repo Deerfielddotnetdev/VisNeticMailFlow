@@ -1,0 +1,114 @@
+	var MatchID = 1;
+	
+	function addMatchText()
+	{
+		var NewRowID = parseInt(MatchTextTable.rows.length);
+		var NewRow = MatchTextTable.insertRow(-1);
+		NewRow.id = MatchID;
+		var strX = "<table width='100%;' border='0' cellspacing='0' cellpadding='0'><tr><td style='padding-right:5px;width:30%;'>Text in the Message:</td><td style='width:70%;' align='left'><select name='MatchLocation"+MatchID+"'>";
+		if (document.all.hiMatLocatID.length)
+		{
+			for (i = 0; i < document.all.hiMatLocatID.length; i++)
+			{
+				strX = strX + "<option value='"+document.all.hiMatLocatID[i].value+"'>"+document.all.hiMatLocatName[i].value+"</option>";
+			}
+		}
+		else if (tabularForm.hiMatLocatID)
+		{
+			strX = strX + "<option value='"+tabularForm.hiMatLocatID.value+"'>"+tabularForm.hiMatLocatName.value+"</option>";
+		}
+		strX = strX + "</select></td></tr><tr><td style='padding-right:5px;padding-top:3px;width:30%;vertical-align:top;'>Use Regular Expression (RegEx):</td><td style='width:70%;' align='left'><input type='Checkbox' name='IsRegEx"+MatchID+"'>";
+		strX = strX + "</input></td></tr><tr><td style='padding-right:5px;padding-top:3px;width:30%;vertical-align:top;'>Matches:</td><td style='width:70%;' align='left'><textarea style='width:350px;height:45px;' name='MatchText"+MatchID+"'></textarea>";
+		strX = strX + "</td></tr><tr><td style='padding-right:5px;width:30%;'>&#160;</td><td style='width:70%;' align='left'><input type='button' rowIndex='"+NewRowID+"' name='MatchDelButton' class='childControlBtn' value='Delete' onclick='delMatchText();'/></td></tr></table>";
+		var NewCell = NewRow.insertCell(-1);
+		NewCell.setAttribute("align", "left");
+		NewCell.setAttribute("height", "150");
+		NewCell.innerHTML = strX;
+		MatchID++;
+		document.tabularForm.MatchTextMaxID.value = MatchID;
+	}
+	
+	function delMatchText()
+	{
+		selectedIndex = parseInt(event.srcElement.rowIndex);
+		if (document.all.MatchTextTable.rows.length == 1)
+		{
+			MatchTextTable.deleteRow(selectedIndex);
+		}
+		else if (document.all.MatchTextTable.rows.length == 2)
+		{
+			MatchTextTable.deleteRow(selectedIndex);
+			tabularForm.MatchDelButton.rowIndex = "0";
+		}
+		else if (document.all.MatchTextTable.rows.length > 2)
+		{
+			MatchTextTable.deleteRow(selectedIndex);
+			for (i = 0; i < document.all.MatchTextTable.rows.length; i++)
+			{document.all.MatchDelButton[i].rowIndex = parseInt(i);}
+		}
+	}
+
+	function adjustDoc()
+	{
+		if (MatchID==1)
+		{
+			if (parseInt(document.tabularForm.MatchTextMaxID.value) > 1)
+			MatchID = parseInt(document.tabularForm.MatchTextMaxID.value);
+		}
+		if (document.all.MatchTextTable.rows.length == 1)
+		{
+			tabularForm.MatchDelButton.rowIndex = "0";
+		}
+		else if (document.all.MatchTextTable.rows.length > 1)
+		{
+			for (i = 0; i < document.all.MatchTextTable.rows.length; i++)
+			{
+				document.all.MatchDelButton[i].rowIndex = parseInt(i);
+			}
+		}
+	}
+
+	function adjustForm()
+	{
+	var submitform = true;
+					
+		if (document.all.MatchTextTable.rows.length >= 1)
+		{
+			MatchTextList = "";
+			for (i = 0; i < document.all.MatchTextTable.rows.length; i++)
+			{
+				thisID = document.all.MatchTextTable.rows[i].id;
+				if (MatchTextList=="")
+				{	MatchTextList = thisID;	}
+				else
+				{	MatchTextList = MatchTextList.concat(", "+thisID);	}
+			}
+			document.tabularForm.MatchTextCollection.value = MatchTextList;
+		}
+
+		
+		if (submitform)
+		{
+			var postResults = glo_buildFormPost('tabularForm');
+			if (eval(postResults[0])==true)
+			{
+				glo_setOpenerLocation();
+				glo_doClose();
+			}
+		}
+	}
+
+	function resetCheck()
+	{
+		var ans = confirm("Are you sure you want to reset the hit count?");
+		if (ans)
+		{
+			//hitCountForm.submit();
+			var postResults = glo_buildFormPost('hitCountForm');
+			if (eval(postResults[0])==true)
+			{
+				glo_setOpenerLocation();
+				docHitCountTxt.innerText = "0";
+			}
+		}
+	}

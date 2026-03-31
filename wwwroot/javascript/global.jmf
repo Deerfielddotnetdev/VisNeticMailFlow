@@ -1,0 +1,2442 @@
+if( window.attachEvent )
+{
+  window.attachEvent('onload', winOnLoad);
+  window.attachEvent('onbeforeunload', winOnBeforeUnload);
+  window.attachEvent('onunload', winOnUnload);
+}
+else
+{
+	window.onload = winOnLoad;
+	window.onbeforeunload = winOnBeforeUnload;
+	window.onunload = winOnUnload;	
+}
+
+document.oncontextmenu = docOnContextMenu;
+document.onclick = docOnClick;
+document.ondblclick = docOnDblClick;
+document.onkeyup = docOnKeyUp;
+document.onselectstart = docOnSelectStart;
+document.onkeydown = docOnKeyDown;
+
+var agentBrowser = glo_whichBrowser();
+var agentOs = glo_whichOs();
+var ieVer = glo_ieVer();	
+
+var XMLHttpFactories = [
+    function () {return new XMLHttpRequest()},
+    function () {return new ActiveXObject("Msxml2.XMLHTTP")},
+    function () {return new ActiveXObject("Msxml3.XMLHTTP")},
+    function () {return new ActiveXObject("Microsoft.XMLHTTP")}
+];
+
+var cursorPos;
+var resSel = true;
+var saveSelection, restoreSelection;
+if (window.getSelection) {
+    // IE 9 and non-IE
+    saveSelection = function() {
+        var sel = window.getSelection(), ranges = [];
+        if (sel.rangeCount) {
+            for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+                ranges.push(sel.getRangeAt(i));
+            }
+        }
+        return ranges;
+    };
+
+    restoreSelection = function(savedSelection) {
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        for (var i = 0, len = savedSelection.length; i < len; ++i) {
+            sel.addRange(savedSelection[i]);
+        }
+    };
+} else if (document.selection && document.selection.createRange) {
+    // IE <= 8
+    saveSelection = function() {
+        var sel = document.selection;
+        return (sel.type != "None") ? sel.createRange() : null;
+    };
+
+    restoreSelection = function(savedSelection) {
+        if (savedSelection) {
+            savedSelection.select();
+        }
+    };
+}
+
+if(!String.prototype.trim){
+  String.prototype.trim = function(){
+    return this.replace(/^\s+|\s+$/g,'');    
+  };
+}
+
+//	#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@
+//	Default Variables
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	Used within functions to determine whether it is a loading or real-time execution
+var docPageLoading = true;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	these are the various class names used for the rows!
+//	declare them here because both global.jmf & listControllerRows.jmf uses these!
+var rowOnClass = "rowOn";
+var rowOffClass = "rowOff";
+var cellOnClass = "cellOn";
+var cellOffClass = "cellOff";
+var trowOnClass = "ticketOn";
+var trowOnClassUnread = "ticketOnUnRead";
+var trowOffClass = "ticketOff";
+var trowOffUnreadClass = "ticketOffUnRead";
+var tcellOnClass = "ticketCellOn";
+var tcellOffClass = "ticketCellOff";
+var gServerName = "";
+var gUseHttps = 0;
+var helpcount=0;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	The File Name contained within this pages location string!
+var docName = getDocumentName(document.location);
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	A static list of known message composition files that can be requested, all use newmessage.ems though!
+var gloMsgCompFileList = "newmessage.ems,forwardmessage.ems,sendagain.ems,senddraft.ems,replytomessage.ems,replytoall.ems";
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	A quick way to determine whether or not we are inside a message composition window!
+var docIsMsgCompWindow = (gloMsgCompFileList.indexOf(docName) != -1) ? true : false;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	A quick way to determine whether or not we are inside a modal window!
+// var docInsideModal = ((parent.frames.length==1 && parent.document.getElementById("icontain"))||(parent.frames.length==4 && parent.frames.sendto)||(parent.frames.length==3 && parent.frames.search)||(window.dialogArguments && parent.document.all.icontain)||(parent.frames.srtop)||(parent.frames.length==4 && parent.frames.menu))? true:false;
+var docInsideModal = ((window.dialogArguments)||(parent.window.dialogArguments)||(parent.parent.window.dialogArguments))? true:false;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	A quick way to determine whether or not we are inside the very top document!
+var docInsideMain = (top.location==document.location)? true : false;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	A static list of files that trigger loading status!
+var gloStatusFileList = "ticketlist.ems,mytickets.ems,ticketsearchresults.ems,outbox.ems,drafts.ems,approvals.ems,sentitems.ems";
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	A quick way to determine whether or not we set loading status!
+var docDoStatus = (gloStatusFileList.indexOf(docName) != -1) ? true : false;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	A static list of files that generate tickets!
+var gloTicketFileList = "ticketlist.ems,mytickets.ems,ticketsearchresults.ems";
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	A quick way to determine whether or not we are in a ticket list!
+var docInTicketList = (gloTicketFileList.indexOf(docName) != -1) ? true : false;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	A static list of known files to ignore with glo_checkEcho()!
+var gloChkEchoFileList = "ticketnotes.ems,contactnotes.ems,contact.ems,schedulereport.ems,editautomessage.ems,editautoresponse.ems,ticketproperties.ems,routingrule.ems,editagent.ems,outboundapproval.ems,contactsearch.ems,editcontactgroup.ems,editsignaturepref.ems,editstdresponse.ems,editstdrespcategory.ems,searchstandardresponse.ems";
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	A quick way to determine whether or not we are inside a checkEcho document!
+var docIsChkEcho = (gloChkEchoFileList.indexOf(docName) != -1) ? true : false;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	A static list of tested browsers!
+var gloTestedBrowsers = "Internet Explorer,Chrome,Safari,Firefox";
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	A quick way to determine whether or not we are a tested browser!
+var isTestedBrowser = (gloTestedBrowsers.indexOf(agentBrowser) != -1) ? true : false;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@	
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+//	<XML>
+if(glo_whichBrowser() == "Safari" || glo_whichBrowser() == "Chrome" || glo_whichBrowser() == "Firefox")
+{
+	if (document.implementation.hasFeature("XPath", "3.0"))
+	{
+    if ( typeof XMLDocument == "undefined" )
+    {
+      XMLDocument = Document;
+    }
+    XMLDocument.prototype.selectNodes = function(cXPathString, xNode)
+    {
+      if ( !xNode ) { xNode = this; }
+      var oNSResolver = this.createNSResolver(this.documentElement);
+      var aItems = this.evaluate(cXPathString, xNode, oNSResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+      var aResult = [];
+      for ( var i = 0; i < aItems.snapshotLength; i++)
+      {
+          aResult[i] =  aItems.snapshotItem(i);
+      }
+      return aResult;
+    }
+    XMLDocument.prototype.selectSingleNode = function(cXPathString, xNode)
+    {
+      if( !xNode ) { xNode = this; }
+      var xItems = this.selectNodes(cXPathString, xNode);
+      if ( xItems.length > 0 ) { return xItems[0]; }
+      else { return null; }
+    }
+ 
+    Element.prototype.selectNodes = function(cXPathString)
+    {
+      if (this.ownerDocument.selectNodes)
+      {
+      	return this.ownerDocument.selectNodes(cXPathString, this);
+      }
+      else
+      {
+       	throw "For XML Elements Only";
+      }
+    }
+ 
+    Element.prototype.selectSingleNode = function(cXPathString)
+    {
+      if (this.ownerDocument.selectSingleNode)
+      {
+      	return this.ownerDocument.selectSingleNode(cXPathString, this);
+      }
+      else
+      {
+      	throw "For XML Elements Only";
+      }
+    }
+    
+    if(XMLDocument !== Document)
+    {
+			Document.prototype.selectNodes = XMLDocument.prototype.selectNodes;
+			Document.prototype.selectSingleNode = XMLDocument.prototype.selectSingleNode;
+    }
+	}
+}
+else if (glo_whichBrowser() == "Firefox")
+{
+	Element.prototype.selectNodes = function(sXPath)
+	{
+		var oEvaluator = new XPathEvaluator();
+		var oResult = oEvaluator.evaluate(sXPath, this, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+		var aNodes = new Array();
+		if (oResult != null)
+		{
+			var oElement = oResult.iterateNext();
+			while(oElement)
+			{
+				aNodes.push(oElement);
+				oElement = oResult.iterateNext();
+			}
+		}
+		return aNodes;
+	}
+
+	Element.prototype.selectSingleNode = function(sXPath)
+	{
+		var oEvaluator = new XPathEvaluator();
+		var oResult = oEvaluator.evaluate(sXPath, this, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+		if (oResult != null)
+		{
+			return oResult.singleNodeValue;
+		}
+		else
+		{
+			return null;
+		}              
+	}
+}
+//	#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@	
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+//	<EVENT HANDLERS>	
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	docOnContextMenu()
+//	Desc:	use this function to attach to the document.oncontextmenu event!
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function docOnContextMenu() {
+	//	WARNING!
+	//	FOLLOWING LINE MUST BE UNCOMMENTED BEFORE BUILDING!
+	//	return (((document.selection && document.selection.type=='Text')|| docIsMsgCompWindow || docName == "ticketnotes.ems") ? true:false);
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	docOnClick()
+//	Desc:	use this function to attach to the document.onclick event!
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function docOnClick(e)
+	{
+		if (docIsMsgCompWindow==false)
+		{
+			glo_initMenuButtons();
+		}
+		else
+		{
+			var targ;
+			if (!e)
+			{
+				if ( typeof event != 'undefined' )
+				{
+					e=event;
+				}
+				else if ( typeof window.event != 'undefined' )
+				{
+					e = window.event;
+				}
+			}
+			if (e.target)
+			{
+				targ = e.target;
+			}
+			else if (e.srcElement)
+			{
+				targ = e.srcElement;
+			}
+			if (targ.nodeType == 3)
+			{
+				targ = targ.parentNode;
+			}
+			if ( targ.id == "messagepartition" || targ.parentElement.id == "messagepartition" )
+			{
+				cursorPos = saveSelection();
+			}				
+		}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	docOnDblClick()
+//	Desc:	use this function to attach to the document.ondblclick event!
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function docOnDblClick() {
+		//for contact search results, when a click occurs we must run this function inside the menu frame!
+///			if (docName=="contactsearchresults.ems")with(parent.frames)
+//			{
+//				if (menu && menu.glo_initMenuButtons)
+//					menu.glo_initMenuButtons();
+//			}
+		//if this is not a message comp window... then re-run the init!
+//			else
+		if (docIsMsgCompWindow==false)
+		{
+			glo_initMenuButtons();
+		}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	docOnKeyUp()
+//	Desc:	use this function to attach to the document.onkeyup event!
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function docOnKeyUp() {
+		//if this is not a message comp window... then re-run the init!
+		if (docIsMsgCompWindow==false)
+		{
+			//run this to enable/disable menuButtons on the fly!
+			glo_initMenuButtons();
+		}
+		else
+		{
+			var e;
+			var targ;
+			if (!e)
+			if ( typeof event != 'undefined' )
+			{
+				e=event;
+			}
+			else if ( typeof window.event != 'undefined' )
+			{
+				e = window.event;
+			}
+			if (e.target)
+			{
+				targ = e.target;
+			}
+			else if (e.srcElement)
+			{
+				targ = e.srcElement;
+			}
+			if (targ.nodeType == 3)
+			{
+				targ = targ.parentNode;
+			}
+			if ( targ.id == "messagepartition" || targ.parentElement.id == "messagepartition" )
+			{
+				cursorPos = saveSelection();
+			}				
+		}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	docOnSelectStart()
+//	Desc:	use this function to attach to the document.onselectstart event!
+//	Note:	by adding ( allowSelect="true" ) to an element you can allow a user to select its text!
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function docOnSelectStart()
+	{
+		var elem = window.event.srcElement;
+		if (elem.tagName=="INPUT"||elem.tagName=="TEXTAREA" || docName=="sqlqueryresults.ems"){return true;}
+		else
+		{
+			var allowSelect = false;
+			while (elem.tagName!="BODY")
+			{
+				if (elem.attributes)
+				{
+					if (elem.getAttribute("allowSelect"))
+					{
+						allowSelect = true;
+						break;
+					} else {
+						elem = elem.parentElement;
+						if (elem == null)
+							break;	
+					}
+				}
+				else
+				{
+					elem = elem.parentElement;
+					if (elem == null)
+							break;							
+				}
+			}
+			return allowSelect;
+		}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	docOnKeyDown()
+//	Desc:	use this function to attach to the window.onkeydown event!
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function docOnKeyDown()
+	{
+		if ( docInsideModal )
+		{
+			return glo_checkEcho();
+		}
+		else if ( docName == "searchstandardresponse.ems" || docName == "editstdrespcategory.ems" || docName == "editstdresponse.ems" )
+		{
+			return glo_checkEcho();
+		}
+		else
+		{
+			return true;
+		}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	winOnBeforeUnload()
+//	Desc:	use this function to attach to the window.onbeforeunload event!
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function winOnBeforeUnload(e)
+	{
+		if (window.docCheckIsDirty)
+		{
+			var chkResult = docCheckIsDirty();
+			if (chkResult!=false)
+			{
+				if ( typeof window.event != 'undefined' )
+				{
+					window.event.returnValue = chkResult;
+				}
+				else
+				{
+					if(e != 'undefined')
+					{
+						e.returnValue = chkResult;
+					}
+				}
+			}
+		}
+		
+		if ( docDoStatus )
+		{
+			if ( this.parent.parent.theMainContain )
+			{
+			     this.parent.parent.docSetLoading(false);
+			}
+		}			
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	winOnUnload()
+//	Desc:	use this function to attach to the window.onunload event!
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function winOnUnload()
+	{
+		if(document.body)
+		{
+			if (document.body.getAttribute('callOnUnLoad'))
+			{eval(document.body.getAttribute('callOnUnLoad'));}
+		}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	winOnLoad()
+//	Desc:	use this function to attach to the window.onload event!
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function winOnLoad()
+	{
+		//window.offscreenBuffering = true;
+		window.defaultStatus = "MailFlow";
+		
+		//	# #	RUN THESE TASKS BEFORE ANYTHING ELSE!
+		if (document.body.getAttribute('callBeforeOnLoad'))
+		{eval(document.body.getAttribute('callBeforeOnLoad'));}
+		//	#X#	RUN THESE TASKS BEFORE ANYTHING ELSE!
+
+		// # # PROGRESS BAR INITIALIZATION
+		if (document.getElementById("slidecontainer")) {
+			progress = new ProgressBar();
+			progress.start();
+		}
+		// #X# PROGRESS BAR INITIALIZATION
+
+		//	# #	RUN THESE ADDITIONAL TASKS
+		if (document.body.getAttribute('callOnLoad'))
+		{eval(document.body.getAttribute('callOnLoad'));}
+		//	#X#	RUN THESE ADDITIONAL TASKS
+		
+		//	# #	LIST ROW INITIALIZATION
+		glo_initListRows();
+		//	#X#	LIST ROW INITIALIZATION
+
+		//	# #	MENU BUTTON INITIALIZATION
+		glo_initMenuButtons();
+		//	#X#	MENU BUTTON INITIALIZATION	
+		
+		if (document.getElementById("rszHandle")){
+			
+			var rszHandle;
+			try
+			{
+				rszHandle = document.getElementsByClassName("rszHandle");
+			}
+			catch(e)
+			{
+				rszHandle = document.getElementsByName("rszHandle");
+			}
+			
+			var handleCount = rszHandle.length ? rszHandle.length : 1;
+			
+			for(var e = 0; e < handleCount; ++e){
+				
+				var thisHandle = (handleCount > 1) ? rszHandle[e] : rszHandle[0];
+				thisHandle.style.left = thisHandle.parentNode.offsetLeft + thisHandle.parentNode.offsetWidth - 7;
+			}
+		}
+		
+		if ( docName == "main.ems" )
+		{
+			if (document.cookie && getCookieCount("main_cols") > 0)
+			{
+				var rowWidths = getCookieNum("main_cols", getCookieCount("main_cols"));
+				if(document.getElementById("complainer").cols != "0,100%")
+				{
+					document.getElementById("complainer").cols = rowWidths.replace(".",",");
+				}
+			}
+		}
+
+		if ( docInsideModal && docName!="blank.htm" || docIsMsgCompWindow )
+		{
+			glo_ksa_KeepSessionAlive();
+		}
+		
+		if ( this.parent.parent.theMainContain )
+		{
+		     this.parent.parent.docSetLoading(true);
+		}
+		
+		docPageLoading = false;
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""		
+
+//	</EVENT HANDLERS>
+//	+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+
+//	#################################################################################################
+//	#################################################################################################
+//	#################################################################################################
+
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+//	<CUSTOM FUNCTIONS>	
+function glo_doReload(elm,url)
+{
+	var xmlhttp = glo_createXMLhttpObject();
+	var thehref;
+	var doTickets = false;
+	if(typeof url != 'undefined')
+	{
+		thehref = url;
+		if(docInTicketList)
+		{
+			doTickets = true;
+		}
+	}
+	else
+	{
+		thehref = window.location.href;
+	}
+	xmlhttp.onreadystatechange=function()
+  {
+    if (xmlhttp.readyState==4 && xmlhttp.status==200)
+    {
+      var doc;
+      var holder = document.getElementById(elm);
+      if(document.implementation.createHTMLDocument)
+      {
+      	doc = document.implementation.createHTMLDocument("temp");
+      	doc.documentElement.innerHTML = xmlhttp.responseText;
+      	holder.innerHTML = doc.getElementById(elm).innerHTML;
+      }
+      else
+      {
+      	doc = document.createElement('div');
+				doc.innerHTML = xmlhttp.responseText;
+				var div = doc.getElementsByTagName('div');
+				for (var i = 0, len = div.length; i < len; i++)
+				{
+				   if (div[i].id == elm)
+				   {
+				      holder.innerHTML = div[i].innerHTML;
+				   }
+				}
+      }
+      if(adjustColSpan)
+      	adjustColSpan();
+
+      docInitListCols();
+      if(doTickets)
+      {
+      	createTickets();
+      }
+      try{closesplit();}catch(e){}
+      glo_initResize();
+      gloListControl.resetAllRows();
+      glo_initMenuButtons();
+    }
+  }
+  xmlhttp.open("GET",thehref,true);
+  if(xmlhttp.overrideMimeType){ xmlhttp.overrideMimeType('text/xml'); }
+  xmlhttp.send();
+}	
+
+function glo_HtmlEncode(s)
+{
+  var el = document.createElement("div");
+  if(typeof el.textContent != "undefined")
+  {
+  	el.textContent = s;
+  }
+  else
+  {
+  	el.innerText = s;
+  }	
+  s = el.innerHTML;
+  return s;
+}
+
+function glo_HtmlDecode(s)
+{
+  var el = document.createElement("div");
+  el.innerHTML = s;
+  if(typeof el.textContent != "undefined")
+  {
+  	s = el.textContent;
+  }
+  else
+  {
+  	s = el.innerText;
+  }  
+  return s;
+}
+
+function glo_decodeListCell()
+{
+	var listCellCount=0;
+	var arrTD = new Array();  
+  arrTD = document.getElementsByTagName("TD");
+  var theCells = new Array();
+  for (var t = 0; t < arrTD.length; t++)
+  {  
+      if ( arrTD.item(t).getAttribute("id") == "listCell" )
+      {
+      	theCells.push(arrTD.item(t));
+      }
+  }
+	listCellCount = (theCells.length)? theCells.length : 1;
+	for (y = 0; y < listCellCount; y++)
+	{
+		
+		if(theCells[y].getAttribute("name") == "subject" || theCells[y].getAttribute("name") == "contact")
+		{
+			theCells[y].title = glo_HtmlDecode(theCells[y].title);
+			//theCells[y].innerHTML = glo_HtmlDecode(theCells[y].innerHTML);
+		}
+	}
+}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	getDocumentName(location)
+//	Param:	location = typically document.location is passed into this variable!
+//	Desc:	determines the name of the file that this script is nested within, ex: 'messagesource.ems'
+//	Note:	
+//	Pages:	All
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function getDocumentName(location)
+	{
+		var curLocation = new String(location);
+		var ext = (curLocation.indexOf(".ems")==-1) ? ".htm" : ".ems";
+		var sEnd = curLocation.indexOf(ext)+4;
+		var sBeg = curLocation.lastIndexOf("/")+1;
+		return curLocation.substring(sBeg,sEnd);
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Event:	glo_getNodeList()
+//	Desc:	returns the nodes for the given object
+//	Note:	
+//	Pages:	All
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_getNodeList(elem)
+	{
+		var l=new Array(elem),c=1,ret=new Array();
+		for(var r=0;r<c;r++)
+		{
+	    for(var z=0;z<l[r].childNodes.length;z++)
+	    {
+				ret.push(l[r].childNodes[z]);
+	      if(l[r].childNodes[z].childNodes[0])
+	      {
+	      	l.push(l[r].childNodes[z]);c++;
+	      }           
+	    }
+	  }		
+		return ret;
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Event:	glo_getXMLDoc()
+//	Desc:	returns the XML document!
+//	Note:	
+//	Pages:	All
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_getXMLDoc()
+	{
+		var XMLObject = document.getElementById("docXML");
+		var xmlDoc = null;
+		if (XMLObject)
+		{
+			if (document.implementation && document.implementation.createDocument)
+			{           
+		  	if(ieVer > 9)
+		  	{
+		  		var sTemp = XMLObject.innerHTML.toString();
+          sTemp = sTemp.replace(/(\r\n|\n|\r)/gm,"");
+          //sTemp = sTemp.replace(/"/g, "'");
+          sTemp = sTemp.replace(/--\>/g, "\>");
+          sTemp = sTemp.replace(/!--/g, "!");
+          sTemp = sTemp.replace(/&gt;/g, "\>"); 
+          var xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+				  xmlDoc.async="false";
+				  xmlDoc.loadXML(sTemp);
+				}
+				else
+				{
+					xmlDoc=XMLObject;
+				}
+			}
+		}
+		else
+		{
+			return null;
+		}
+		return xmlDoc
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Event:	glo_getXML()
+//	Desc:	returns the requested xml nested inside the document!
+//	Note:	
+//	Pages:	All
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_getXML(sXML)
+	{
+		if (sXML)
+		{
+			var XMLObject = document.getElementById("docXML");
+			if (XMLObject)
+			{
+				if (document.implementation && document.implementation.createDocument)
+				{           
+			  	if(ieVer > 9)
+			  	{
+			  		var sTemp = document.getElementById("docXML").innerHTML.toString();
+            sTemp = sTemp.replace(/(\r\n|\n|\r)/gm,"");
+            //sTemp = sTemp.replace(/"/g, "'");
+            sTemp = sTemp.replace(/--\>/g, "\>");
+            sTemp = sTemp.replace(/!--/g, "!");
+            sTemp = sTemp.replace(/&gt;/g, "\>"); 
+            var xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+					  xmlDoc.async="false";
+					  xmlDoc.loadXML(sTemp);
+					}
+					else
+					{
+						var xmlDoc=XMLObject;
+					}
+				} 
+		    var Node = xmlDoc.selectSingleNode(sXML);
+				if ( Node )
+				{
+					return Node;
+				}
+				else
+				{
+					return null;
+		    }	    
+			} else { return null }
+		} else { return null }
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Event:	glo_initListRows()
+//	Desc:	looks to designate a listRow element as active, only if a selectId value is present!
+//	Note:	
+//	Pages:	All
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_initListRows()
+	{
+		if (document.tabularForm && document.tabularForm.selectId && document.tabularForm.selectId.value)
+		
+		if (document.getElementById("listRow"))
+		{
+			var listRowCount = (listRow.length)? listRow.length : 1;
+			
+			var selectIdArr = document.tabularForm.selectId.value.split(",");
+			
+			for (var g = 0; g < selectIdArr.length; g++)
+			{
+				for (var i = 0; i < listRowCount; i++)
+				{
+					var thisListRow = (listRowCount>1)? listRow[i] : listRow;
+					
+					if (thisListRow.getAttribute("glc_form_tabularForm_selectId")==selectIdArr[g])
+					{
+						//determine the current class for the row
+						thisRowClass = (thisListRow.glc_rowtype=="ticket") ? ((thisListRow.hasunread == '1') || (thisListRow.hasunreadnotes == '1')) ? trowOnClassUnread : trowOnClass : rowOnClass;
+						//from the row class, we use the corresponding cell class
+						//thisCellClass = (thisRowClass==trowOnClass)? tcellOnClass : cellOnClass;
+						//set the class for the row
+						thisListRow.className = thisRowClass;
+						//loop through the row's cells assigning their new class
+						//for (x = 0; x < thisListRow.children.length; x++){thisListRow.children[x].className = thisCellClass}
+						//add the current row's index to the ActiveRows array!
+						gloListControl.ActiveRows[gloListControl.ActiveRows.length] = i;
+						//if this row is actually a ticket row, then we will have to expand the ticket as well!
+						if(selectIdArr.length==1 && (thisRowClass == trowOnClass || thisRowClass == trowOnClassUnread))
+						{
+							thisListRow.children[0].children[0].children[0].click()
+						}
+					}
+				}
+			}
+		}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Event:	glo_initMenuButtons()
+//	Desc:	initializes all the menuButtons on a page, and evalutes their xrequire attribute if necessary!
+//	Note:	
+//	Pages:	All
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_initMenuButtons()
+	{
+		var toolButton;
+		var toolButtonDis
+		var toolButtonCount=0;
+		try
+		{
+			toolButton = document.getElementsByClassName("toolBar");
+			toolButtonDis = document.getElementsByClassName("toolBarDis");
+		}
+		catch(e)
+		{
+			toolButton = document.getElementsByName("toolButton");
+			toolButtonDis = "";
+		}
+		if (toolButton || toolButtonDis)
+		{
+			var theButtons = new Array();				
+			
+			for (x = 0; x < toolButton.length; x++)
+			{
+				theButtons.push(toolButton[x]);
+			}
+			for (x = 0; x < toolButtonDis.length; x++)
+			{
+				theButtons.push(toolButtonDis[x]);
+			}					
+			toolButtonCount = (theButtons.length)? theButtons.length : 1;
+			for (y = 0; y < toolButtonCount; y++)
+			{
+				var this_hasCheck;
+				var this_checkResult;
+				var this_onCurrently;
+				var this_disabled = false;
+				var this_filter;
+				var this_opacity;			
+				var thisButton = (toolButtonCount>1)? theButtons[y] : theButtons;
+				if ( typeof thisButton != "undefined" && typeof thisButton.nodeName != "undefined")
+				{
+					if ( thisButton.nodeName.toLowerCase() == "div" )
+					{
+						try
+						{
+							this_hasCheck = (thisButton.getAttribute("xrequire")!=null)? true : false;
+							this_checkResult = eval(thisButton.getAttribute("xrequire"))? true : false;					
+						}
+						catch(e)
+						{
+							this_hasCheck = false;
+							this_checkResult = false;
+						}
+						
+						if ( thisButton.disabled )
+						{
+							this_onCurrently = false;
+						}
+						else
+						{
+							this_onCurrently = true;
+						}									
+						
+						if (docPageLoading || (this_hasCheck && (this_checkResult!=this_onCurrently)))
+						{
+							if (!this_hasCheck || this_checkResult)
+							{
+								this_disabled = false;
+								this_filter = "";
+								this_opacity = "1.0";								
+							} else {
+								this_disabled = true;
+								this_filter = "alpha(opacity=30)gray()";
+								this_opacity = "0.3";														
+							}
+							
+							thisButton.disabled = this_disabled;
+							if ( glo_whichBrowser() != "Internet Explorer" )
+							{
+								try
+								{
+									if(thisButton.disabled)
+									{
+										thisButton.className = "toolBarDis";
+									}
+									else
+									{
+										thisButton.className = "toolBar";
+									}							
+								}catch(e){}
+							}
+							
+							try
+							{
+								for (fg = 0; fg < thisButton.children.length; fg++)
+								{
+									if (thisButton.children[fg].tagName == "IMG")
+									{
+										try
+										{
+											thisButton.children[fg].disabled = this_disabled;
+										}
+										catch(e){}
+										try
+										{
+											thisButton.children[fg].style.filter = this_filter;
+										}
+										catch(e){}
+										try
+										{
+											thisButton.children[fg].style.opacity = this_opacity;
+										}
+										catch(e){}
+									}
+									else if (thisButton.children[fg].tagName =="NOBR")
+									{
+										try
+										{
+											thisButton.children[fg].disabled = this_disabled;
+										}
+										catch(e){}
+										try
+										{
+											thisButton.children[fg].style.filter = this_filter;
+										}
+										catch(e){}
+										try
+										{
+											thisButton.children[fg].style.opacity = this_opacity;
+										}
+										catch(e){}
+										for (xs = 0; xs < thisButton.children[fg].children.length; xs++)
+										{
+											if (thisButton.children[fg].children[xs].tagName == "IMG")
+											{
+												try
+												{
+													thisButton.children[fg].children[xs].disabled = this_disabled;
+												}
+												catch(e){}try
+												{
+													thisButton.children[fg].children[xs].style.filter = this_filter;
+												}
+												catch(e){}
+												try
+												{
+													thisButton.children[fg].children[xs].style.opacity = this_opacity;
+												}
+												catch(e){}
+											}
+										}
+									}
+								}
+							}
+							catch(e){}
+						}
+					}
+				}
+			}
+		}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Event:	glo_checkEmailAddress(address)
+//	Param:	address - the email address you want to validate obviously!
+//	Desc:	returns true if address is valid, false is address is invalid
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_checkEmailAddress(address)
+	{
+		if (address.length!=0){
+			if (
+			//	if "@" is not found,
+				address.indexOf("@")==-1 || 
+			//	or if "@" is the first character,
+				address.indexOf("@")==0	 || 
+			//	or if "@" is the last character,
+				address.indexOf("@")==(address.length-1) || 
+			//	or if "." is not found,
+				address.indexOf(".")==-1 || 
+			//	or if "." is the first character,
+				address.indexOf(".")==0	 || 
+			//	or if "." is the last character,
+				address.indexOf(".")==(address.length-1) || 
+			//	or if the emailaddress is less than 5 characters in length
+				address.length < 4
+				)
+			{return false}
+			else
+			{return true}
+		}
+		else {return false}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	opensplit(target)
+//	Param:		target = 
+//	Desc:		opens the split pane!
+//	Note:		
+//	Pages:		All
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function opensplit(target)
+	{
+	
+		try
+		{
+			if (document.cookie && getCookieCount("main_rows") > 0)
+			{
+				var widths = getCookieNum("main_rows", getCookieCount("main_rows"));
+				var rowWidths = widths.replace(".",",");
+				parent.document.getElementById("container").setAttribute("rows", "0,*");
+				parent.document.getElementById("container").setAttribute("rows", rowWidths);
+			}
+			else
+			{
+				parent.document.getElementById("container").setAttribute("rows", "50%,*");
+			}
+			
+			if (parent.document.getElementById("container").rows == "100%,*" || parent.document.getElementById("container").rows == "100%,0%")
+			{
+				parent.document.getElementById("container").setAttribute("rows", "50%,*");
+			}
+						
+			var theSplit = parent.document.getElementById("splitpane");
+			if(theSplit == null)
+			{
+				var theContain = parent.document.getElementById("container");
+				var newFrame;
+				if ( glo_whichBrowser() != "Internet Explorer" )
+				{
+					newFrame = document.createElement("frame");				
+				}
+				else
+				{
+					newFrame = theContain.document.createElement("frame");
+				}
+				newFrame.id = "splitpane";    
+				newFrame.name = "splitpane"; 
+				newFrame.src = "blank.htm";
+				newFrame.scrolling = "no";
+				newFrame.marginwidth= "0";
+				newFrame.marginheight = "0";
+				newFrame.style.cursor = "n-resize";
+				newFrame.style.borderWidth = "0px";
+				newFrame.style.borderStyle = "ridge";
+				newFrame.style.borderTopWidth = "3px";
+				theContain.appendChild(newFrame);
+				theSplit = parent.document.getElementById("splitpane");
+			}
+				
+			if(target)
+			{
+				if(parent.frames[2].location.href)
+				{
+					parent.frames[2].location.href = target;
+				}
+				else
+				{
+					theSplit.location = target;
+				}
+			}
+			else
+			{
+				if(parent.frames[2].location.href)
+				{
+					parent.frames[2].location.href = "blank.htm";
+				}
+				else
+				{
+					theSplit.location = "blank.htm";
+				}
+			}	
+		}
+		catch(e)
+		{
+		}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	dosplit(target)
+//	Param:		target = 
+//	Desc:		opens the split pane!
+//	Note:		
+//	Pages:		All
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function dosplit(target)
+	{
+		try
+		{						
+			if (document.cookie && getCookieCount("main_rows") > 0)
+			{
+				var widths = getCookieNum("main_rows", getCookieCount("main_rows"));
+				var rowWidths = widths.replace(".",",");
+				parent.document.getElementById("container").rows = rowWidths;
+			}
+			else
+			{
+				parent.document.getElementById("container").rows = "30%,*";
+			}
+			
+			if (parent.document.getElementById("container").rows == "100%,*")
+				parent.document.getElementById("container").rows = "30%,*";
+			
+			var theSplit = parent.document.getElementById("splitpane");
+			if(theSplit == null)
+			{
+				var theContain = parent.document.getElementById("container");
+				var newFrame;
+				if ( glo_whichBrowser() != "Internet Explorer" )
+				{
+					newFrame = document.createElement("frame");				
+				}
+				else
+				{
+					newFrame = theContain.document.createElement("frame");
+				}
+				newFrame.id = "splitpane";    
+				newFrame.name = "splitpane"; 
+				newFrame.src = "blank.htm";
+				newFrame.scrolling = "no";
+				newFrame.marginwidth= "0";
+				newFrame.marginheight = "0";
+				newFrame.style.cursor = "n-resize";
+				newFrame.style.borderWidth = "0px";
+				newFrame.style.borderStyle = "ridge";
+				newFrame.style.borderTopWidth = "3px";
+				theContain.appendChild(newFrame);
+				theSplit = parent.document.getElementById("splitpane");
+			}
+				
+			if(target)
+			{
+				if(parent.frames[2].location.href)
+				{
+					parent.frames[2].location.href = target;
+				}
+				else
+				{
+					theSplit.location = target;
+				}
+			}
+			else
+			{
+				if(parent.frames[2].location.href)
+				{
+					parent.frames[2].location.href = "blank.htm";
+				}
+				else
+				{
+					theSplit.location = "blank.htm";
+				}
+			}	
+		}
+		catch(e)
+		{
+		}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	closesplit()
+//	Param:		
+//	Desc:		closes the split pane!
+//	Note:		
+//	Pages:		All
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function closesplit(closeAsWell)
+	{
+		try
+		{
+			if(parent.document.getElementById("container").childNodes)
+			{
+				var theNodes = parent.document.getElementById("container").childNodes;
+				for (var i = 0; i < theNodes.length; i++)
+				{
+					if ( theNodes[i].name == "splitpane" )
+					{
+						theNodes[i].src = "blank.htm";
+					}
+				}					
+			}
+			if (closeAsWell)
+			{
+				var theContain = parent.document.getElementById("container");
+				theContain.rows = '100%,*';
+				var theSplit = parent.document.getElementById("splitpane");
+				theContain.removeChild(theSplit);					
+			}
+		}
+		catch(e)
+		{}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	ProgressBar()
+//	Param:		none.
+//	Desc:		object created for progress bar displays
+//	Note:		Noted for the record.  
+//	Pages:		As needed
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function ProgressBar() {
+		// methods
+		ProgressBar.prototype.slide = slide;
+		ProgressBar.prototype.start = start;
+		ProgressBar.prototype.stop = stop;
+		ProgressBar.prototype.create = create;					
+	
+		// attributes
+		this.updID = null;
+		this.status = 'off';
+	
+		// create the bar
+		ProgressBar.prototype.create();
+	
+		// method definitions
+		function create() {
+			slidecontainer.innerHTML = "<SPAN id='slider' style='POSITION: absolute;'><TABLE id='slideTable' border='0' cellpadding='0' cellspacing='0'><TR><TD class='progressLeft' style='WIDTH: 40px;BACKGROUND-COLOR: black'></TD><TD class='progressRight' style='WIDTH: 40px'></TD></TR></TABLE></SPAN>";
+			slider.style.left = -slider.offsetWidth;
+		}
+		function start() {
+			slider.style.left = -slider.offsetWidth;
+			this.updID = setInterval('ProgressBar.prototype.slide()', 150);
+			this.status = 'on';
+		}
+		function stop() {
+			if (this.updID != null) {
+				clearInterval(this.updID);
+				this.updID;
+				this.status='off';
+			}
+		}
+		function slide() {
+			if (slider.offsetLeft > slidecontainer.offsetWidth) {
+				slider.style.left = -slider.offsetWidth;
+			} else {
+				slider.style.left = parseInt(slider.offsetLeft) + 3;
+			}
+		}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	glo_disableForm(enabled, formFields)
+//	Param:		enabled = true||false, example: tabularForm.IsActive.checked;
+//	Param:		formFields = Array(); an array of formfields you wish to enable/disable!
+//	Desc:		when constructing the array use the full path "document.tabularForm.YourFieldHere"
+//	Note:		checkboxes will be disabled rather than set to readOnly!
+//	Pages:		
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_disableForm(xf_enabled, formFields)
+	{
+		for (i = 0; i < formFields.length; i++)
+		{
+			var ff = formFields[i];
+			
+			if (ff.tagName=="SELECT")
+			{
+				ff.disabled = ((xf_enabled)?false:true);
+				ff.style.backgroundColor = ((xf_enabled)?"#FFFFFF":"#d3d3d3");
+			}
+			else if (ff.tagName=="BUTTON" ||ff.type=="checkbox"||ff.type=="radio"||ff.type=="button")
+			{
+				if (ff.type=="button" && ff.className.indexOf("childControlBtn")!=-1)
+				{
+					ff.className = (xf_enabled)? "childControlBtn" : "childControlBtnDis";
+				}
+				ff.disabled = ((xf_enabled)?false:true);
+				if (ff.type=="button")
+				{
+					if (xf_enabled)
+					{
+						ff.style.filter = "";
+						ff.style.opacity = "1.0";
+					}
+					else
+					{
+						ff.style.filter = "alpha(opacity=30)gray()";
+						ff.style.opacity = "0.3";
+					}
+				}
+			}
+			else
+			{
+				ff.readOnly = ((xf_enabled)?false:true);
+				ff.style.backgroundColor = ((xf_enabled)?"#FFFFFF":"#d3d3d3");
+				ff.style.color = ((xf_enabled)?"#000000":"#808080");
+			}
+		}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	buildFormPost(formName)
+//	Param:		formName = string, example : "tabularForm"
+//	Desc:		Everything you need to package and submit your form xml style!!!
+//	Note:		
+//	Pages:		
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_buildFormPost(formName, formUrl, displayXML, useThisForm)
+	{
+		var SaveComplete = false;
+		var resultingXML = null;
+		var xmlhttp = glo_createXMLhttpObject();
+		
+		if (!xmlhttp) return;
+
+		var form = useThisForm ? useThisForm : eval('document.'+formName+'.elements');
+		var urls = document.location.search.replace('?','');
+		var postUrl = (formUrl)? formUrl : docName + '?postXML=1&' + urls;
+		var xmlString = '<root>\n<Form Name="'+formName+'" Document="'+docName+'" UrlVars="'+urls+'">\n';
+		
+		for (i=0; i < form.length; i++) with (form[i])
+		{
+			if ( form[i].type )
+			{
+				var addField = ((type=="radio")?((!checked)?false:true):true);
+				if (name!="" && addField==true)
+					xmlString+= ('<'+name+' Type="' +type+'"><![CDATA['+((type=="checkbox")?((checked)?1:0):value)+']]></'+name+'>\n');
+			}
+		}
+
+		xmlString += '</Form>\n</root>';
+		if (displayXML) 
+			alert("Sending XML:\n\n"+xmlString);
+
+		try
+		{
+			xmlhttp.open('POST', postUrl, false);
+			if(xmlhttp.overrideMimeType){ xmlhttp.overrideMimeType('text/xml'); }
+			xmlhttp.send(xmlString);
+		}
+		catch(e)
+		{
+			alert("Error processing request: The MailFlow server could not be contacted.");
+			var finalResult = new Array();
+			finalResult[0] = false;
+			return finalResult;
+		}
+		
+		if ( xmlhttp.responseXML  )
+		{
+			var resultingXML ;
+			if(CheckBrowser())
+			{
+				resultingXML = xmlhttp.responseXML.xml;
+			}				
+	
+			if ( displayXML ) 
+				alert("Returning XML:\n\n" + resultingXML);					
+
+			if (document.implementation.hasFeature("XPath", "3.0"))
+			{
+				if ( xmlhttp.responseXML.selectSingleNode('//complete') )
+				{
+					var compString = xmlhttp.responseXML.selectSingleNode('//complete').textContent;
+					SaveComplete = (compString=="true"||compString=="false")? eval(compString) : compString;
+					
+					if (xmlhttp.responseXML.selectSingleNode('//moreinfo'))
+						alert(xmlhttp.responseXML.selectSingleNode('//moreinfo').textContent);
+				}
+				if ( !SaveComplete && xmlhttp.responseXML.selectSingleNode('//error'))
+				{
+					if (xmlhttp.responseXML.selectSingleNode('//error').textContent.length != 0)
+					{
+						var theError = xmlhttp.responseXML.selectSingleNode('//error').textContent;
+						alert(theError);							
+					}
+					if (xmlhttp.responseXML.selectSingleNode('//formfield'))
+					{
+						if (xmlhttp.responseXML.selectSingleNode('//formfield').textContent.length != 0)
+						{
+							try 
+							{
+								eval('document.'+formName+'.'+xmlhttp.responseXML.selectSingleNode("//formfield").textContent).focus();
+								eval('document.'+formName+'.'+xmlhttp.responseXML.selectSingleNode("//formfield").textContent).select();
+							} 
+							catch(e) {}
+						}
+					}	
+				}
+			}
+			else
+			{
+				if (xmlhttp.responseXML.selectSingleNode("/root/postresults/complete"))
+				{
+					var compString = xmlhttp.responseXML.selectSingleNode("/root/postresults/complete").text;
+					SaveComplete = (compString=="true"||compString=="false")? eval(compString) : compString;
+					
+					if (xmlhttp.responseXML.selectSingleNode("root/postresults/moreInfo"))
+						alert(xmlhttp.responseXML.selectSingleNode("root/postresults/moreInfo").text);
+				}
+
+				if ( !SaveComplete && xmlhttp.responseXML.selectSingleNode("root/postresults/error"))
+				{
+					if (xmlhttp.responseXML.selectSingleNode("root/postresults/error").text.length != 0)
+						eval( "alert('" + xmlhttp.responseXML.selectSingleNode("root/postresults/error").text + "');" );
+				
+					if (xmlhttp.responseXML.selectSingleNode("root/postresults/formfield"))
+					{
+						if (xmlhttp.responseXML.selectSingleNode("root/postresults/formfield").text.length != 0)
+						{
+							try 
+							{
+								eval('document.'+formName+'.'+xmlhttp.responseXML.selectSingleNode("root/postresults/formfield").text).focus();
+								eval('document.'+formName+'.'+xmlhttp.responseXML.selectSingleNode("root/postresults/formfield").text).select();
+							} 
+							catch(e) {}
+						}
+					}	
+				}
+			}
+		}
+		else
+		{
+			alert("Error processing request: The MailFlow server returned an invalid response.");
+		}
+		
+		var finalResult = new Array();
+		finalResult[0] = SaveComplete;
+		if(CheckBrowser())
+		{
+			finalResult[1] = resultingXML;			
+		}
+		else
+		{
+			finalResult[1] = xmlhttp.responseText;
+		}
+		finalResult[2] = xmlhttp.responseXML;
+		return finalResult;
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	glo_createXMLhttpObject()
+//	Desc:		used to create an instance of the XML HTTP object
+//	Note:		function serves as a error handling wrapper!
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_createXMLhttpObject()
+	{
+		var xmlhttp = false;
+    for (var i=0;i<XMLHttpFactories.length;i++)
+    {
+        try
+        {
+            xmlhttp = XMLHttpFactories[i]();
+        }
+        catch (e)
+        {
+            continue;
+        }
+        break;
+    }
+    return xmlhttp;
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function(s): setCookie, ClearCookie, getCookieCount, getCookieNum
+//	Param:		
+//	Desc:		Use these to interact with the cookies!
+//	Note:		who knew cookies could be so fun!
+//	Pages:		
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	//	Rather than having to continue to update these functions in multiple locations,
+	//	I'll just include them, thanks!
+	document.writeln('<script type="text\/javascript" src=".\/javascript\/cookie.jmf"><\/script>');
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	glo_launchModalWindow()
+//	Param:		xurl, xwidth, xheight, xsizeable, xstatus, xscroll, xdata
+//	Desc:		use this function to pop a window!
+//	Note:		
+//	Pages:		
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_launchModalWindow(xurl, xwidth, xheight, xsizeable, xstatus, xscroll, xdata)
+	{
+		if (!xdata) xdata = window.self;
+				
+		if (glo_isMobile())
+		{
+			return glo_launchNewWindow(xurl, xwidth, xheight, xsizeable, xstatus, xscroll, xdata);
+		}
+		else if (typeof window != "undefined" && (typeof window.showModalDialog == "function" || typeof window.showModalDialog == "object"))
+		{
+			if (!xstatus) xstatus = 'no';
+			if (!xscroll) xscroll = 'no';
+			if (!xsizeable) xsizeable = 'yes';
+		
+			xurl += (xurl.indexOf("?") == -1) ? "?" : "&";
+			xurl += "ck_agentid=" + glo_getCkAgentId();
+	
+			winprops = 	"dialogHeight:"+xheight+"px;dialogWidth:"+xwidth+"px;dialogTop:px;dialogLeft:px;"+
+						"edge:Raised;center:Yes;resizable:"+xsizeable+";status:"+xstatus+";scroll:"+xscroll+";";
+			return window.showModalDialog(xurl,xdata,winprops);
+		}
+		else
+		{
+			var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+	    var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+			var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+	    var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+			var newWindowWidth   = (xwidth) ? xwidth : (screen.availWidth * .75);
+			var newWindowHeight  = (xheight) ? xheight : (screen.availHeight * .75);		
+	    var left = (screen.width/2)-(newWindowWidth/2);
+	    var top = (screen.height/2)-(newWindowHeight/2);
+	    var newWindowAttribs = "width="+newWindowWidth+",height="+newWindowHeight+",top=" + top + ",left=" + left + ",status="+ xstatus +",resizable="+ xsizeable +",menubar=no,toolbar=no";
+			xurl += (xurl.indexOf("?") == -1) ? "?" : "&";
+			xurl += "ck_agentid=" + glo_getCkAgentId();
+			xurl = CreateServerLocation(xurl);
+			window.dialogArguments = xdata;
+			return newwin = window.open(xurl,"",newWindowAttribs);
+			if (window.focus){newwin.focus();}
+		}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	glo_launchModelessWindow()
+//	Param:		xurl, xwidth, xheight, xsizeable, xstatus, xscroll, xdata
+//	Desc:		use this function to pop a window!
+//	Note:		
+//	Pages:		
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_launchModelessWindow(xurl, xwidth, xheight, xsizeable, xstatus, xscroll, xdata)
+	{
+		if (!xdata) xdata = window;
+		if (!xstatus) xstatus = 'no';
+		if (!xscroll) xscroll = 'no';
+		if (!xsizeable) xsizeable = 'yes';
+
+		xurl += (xurl.indexOf("?") == -1) ? "?" : "&";
+		xurl += "ck_agentid=" + glo_getCkAgentId();
+
+		winprops = 	"dialogHeight:"+xheight+"px;dialogWidth:"+xwidth+"px;dialogTop:px;dialogLeft:px;"+
+					"edge:Raised;center:Yes;resizable:"+xsizeable+";status:"+xstatus+";scroll:"+xscroll+";";
+
+		
+
+		if(window.showModelessDialog)
+		{
+			var result = window.showModelessDialog(xurl,xdata,winprops);
+			return result;
+		}
+		else
+		{
+			var xleft=((screen.width/2)-(xwidth/2)) +"px";
+			var modalWin = window.open(xurl,"","height="+xheight+"px,width="+xwidth+"px,left="+xleft+",top=150px,resizable"+xsizeable+
+			"status="+xstatus+"scrollbars="+xscroll+"location=no");
+			window.onfocus = function() {
+				if(modalWin && !modalWin.closed)
+					modalWin.focus();
+			}
+			window.paramspassed = xdata;
+			return window.paramspassed ;
+		}
+		
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	glo_launchNewWindow()
+//	Param:		url, width, height
+//	Desc:		use this function to pop a new window for any purpose!
+//	Note:		
+//	Pages:		
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_launchNewWindow(newUrl, newWidth, newHeight)
+	{
+		var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+    var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+		var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+    var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+		var newWindowWidth   = (newWidth) ? newWidth : (screen.availWidth * .75);
+		var newWindowHeight  = (newHeight) ? newHeight : (screen.availHeight * .75);		
+    var left = (screen.width/2)-(newWindowWidth/2);
+    var top = (screen.height/2)-(newWindowHeight/2);
+    var newWindowAttribs = "width="+newWindowWidth+",height="+newWindowHeight+",top=" + top + ",left=" + left + ",status=no,resizable=yes,menubar=no,toolbar=no";
+		newUrl += (newUrl.indexOf("?") == -1) ? "?" : "&";
+		newUrl += "ck_agentid=" + glo_getCkAgentId();
+		newUrl = CreateServerLocation(newUrl);
+		return newwin = self.open(newUrl,"",newWindowAttribs);
+		if (window.focus){newwin.focus();}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	glo_launchMsgCompWindow()
+//	Param:		wHiChPaGe, cOnTaCtId, tIcKeTbOxViEw, tIcKeTbOxId, tIcKeTiD, mEsSaGeId, mEsSaGeTyPe
+//	Desc:		use this function to pop a message composition window!
+//	Note:		
+//	Pages:		
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_launchMsgCompWindow(wHiChPaGe, cOnTaCtId, tIcKeTbOxViEw, tIcKeTbOxId, tIcKeTiD, mEsSaGeId, mEsSaGeTyPe, aRcHiVeId)
+	{
+		if(glo_whichOs() == "iOS")
+		{
+			var mSgCoMpUrL = (wHiChPaGe)? (wHiChPaGe) : ("newmessage.ems");
+			mSgCoMpUrL += "?os=ios";
+			mSgCoMpUrL += (cOnTaCtId)? ("&contactid="+cOnTaCtId) : ("");
+			mSgCoMpUrL += (tIcKeTbOxViEw)? ("&ticketboxview="+tIcKeTbOxViEw) : ("");
+			mSgCoMpUrL += (tIcKeTbOxId)? ("&ticketboxid="+tIcKeTbOxId) : ("");
+			mSgCoMpUrL += (tIcKeTiD)? ("&ticketid="+tIcKeTiD) : ("");
+			mSgCoMpUrL += (mEsSaGeId)? ("&msg="+mEsSaGeId) : ("");
+			mSgCoMpUrL += (mEsSaGeTyPe)? ("&type="+mEsSaGeTyPe) : ("");
+			mSgCoMpUrL += (aRcHiVeId)? ("&archiveId="+aRcHiVeId) : ("");
+			var newWindowWidth  =  600;
+			var newWindowHeight =  400;
+		}
+		else
+		{
+			var mSgCoMpUrL = "nmsgframe.ems?file=";
+			mSgCoMpUrL += (wHiChPaGe)? (wHiChPaGe) : ("newmessage.ems");
+			mSgCoMpUrL += (cOnTaCtId)? ("&contactid="+cOnTaCtId) : ("");
+			mSgCoMpUrL += (tIcKeTbOxViEw)? ("&ticketboxview="+tIcKeTbOxViEw) : ("");
+			mSgCoMpUrL += (tIcKeTbOxId)? ("&ticketboxid="+tIcKeTbOxId) : ("");
+			mSgCoMpUrL += (tIcKeTiD)? ("&ticketid="+tIcKeTiD) : ("");
+			mSgCoMpUrL += (mEsSaGeId)? ("&msg="+mEsSaGeId) : ("");
+			mSgCoMpUrL += (mEsSaGeTyPe)? ("&type="+mEsSaGeTyPe) : ("");
+			mSgCoMpUrL += (aRcHiVeId)? ("&archiveId="+aRcHiVeId) : ("");
+		
+			var newWindowWidth  =  null;
+			var newWindowHeight =  null;
+	
+			if (document.cookie && getCookieCount("nmsgframe") > 0)
+			{
+				var widths = getCookieNum("nmsgframe", getCookieCount("nmsgframe"));
+				var windims = widths.split(".");
+				newWindowWidth = windims[0] ? windims[0] : 600;
+				newWindowHeight = windims[1] ? windims[1] : 400;
+			}
+		}			
+		glo_launchNewWindow(mSgCoMpUrL, newWindowWidth, newWindowHeight);
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	glo_launchViewMessage()
+//	Param:		queryString
+//	Desc:		use this function to pop a view message window!
+//	Note:		
+//	Pages:		
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_launchViewMessage(queryString)
+	{
+		var newWindowUrl = './vmsgframe.ems?file=viewmsg.ems&' +queryString;
+
+		var newWindowWidth  =  null;
+		var newWindowHeight =  null;
+
+		if (document.cookie && getCookieCount("vmsgframe") > 0)
+		{
+			var widths = getCookieNum("vmsgframe", getCookieCount("vmsgframe"));
+			var windims = widths.split(".");
+			newWindowWidth = windims[0]? windims[0] : null;
+			newWindowHeight = windims[1]? windims[1] : null;
+		}
+
+		glo_launchNewWindow(newWindowUrl, newWindowWidth, newWindowHeight);
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	glo_launchExternalWindow()
+//	Param:		url, width, height
+//	Desc:		use this function to pop a new window for any purpose!
+//	Note:		
+//	Pages:		
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_launchExternalWindow(newUrl, newWidth, newHeight)
+	{
+		var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+    var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+		var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+    var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+		var newWindowWidth   = (newWidth) ? newWidth : (screen.availWidth * .75);
+		var newWindowHeight  = (newHeight) ? newHeight : (screen.availHeight * .75);		
+    var left = (screen.width/2)-(newWindowWidth/2);
+    var top = (screen.height/2)-(newWindowHeight/2);
+    var newWindowAttribs = "width="+newWindowWidth+",height="+newWindowHeight+",top=" + top + ",left=" + left + ",status=no,resizable=yes,menubar=no,toolbar=no";
+		return newwin = self.open(newUrl,"",newWindowAttribs);
+		if (window.focus){newwin.focus();}
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	glo_getCkAgentId()
+//	Desc:		used to pass up the current user Id with any request pointing at a new window
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function glo_getCkAgentId() 
+	{
+		try
+		{
+			var XMLObject = document.getElementById("docXML");
+		
+			if ( XMLObject )
+			{
+				if (document.implementation.hasFeature("XPath", "3.0"))
+				{
+					var Node = glo_getXML('//root/user/id');
+					
+					if ( Node )
+							return Node.textContent;
+				}
+				else
+				{
+					var Node = XMLObject.selectSingleNode("/root/user/id");
+						
+					if ( Node )
+						return Node.text;
+				}
+			}
+		}
+		catch(e)
+		{
+			return 0;
+		}
+		
+		return 0;
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	openHelp()
+//	Param:		page
+//	Desc:		use this function to launch a help window!
+//	Pages:		
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function openHelp(page)
+	{
+		helpcount++;
+		var url = "help.ems?righthelp="+page;
+		var helpWindow = window.open(url,"helpWin","");
+		if(helpcount>1 && helpWindow)
+			helpWindow.document.location.reload();
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	glo_openSrWindow()
+//	Param:		pageFrom
+//	Desc:		use this function to launch the std response browser!
+//	Note:		
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_openSrWindow(pageFrom)
+	{
+		if(document.cookie && getCookieCount("stdresWinDims") > 0)
+		{
+			var vals = getCookieNum("stdresWinDims", getCookieCount("stdresWinDims"));
+			var dims = vals.split(".");
+			var modalWidth = dims[0];
+			var modalHeight = dims[1];
+		}
+		else
+		{
+			var modalHeight = screen.availHeight * .7;
+			var modalWidth = screen.availWidth * .5;
+
+			if(modalHeight < 600)
+			{
+				modalHeight = 600;
+			}
+			if (modalWidth < 900)
+			{
+				modalWidth = 900;
+			}
+		}
+		var sharedObject = {};
+    sharedObject.windowObj = window;
+    sharedObject.pageFrom = pageFrom;			
+		
+		glo_launchModalWindow("standardresponses.ems", modalWidth, modalHeight, 'yes', 'no', 'no', sharedObject);			
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	glo_remUrlVar(location, B)
+//	Desc:		used to remove a url var (B) and its' value from a location string (location)
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_remUrlVar(location, B)
+	{
+		if (!location||!B) return false;
+		var search = new String(location);
+		var ss = 0;
+		while(search.indexOf(B)!=-1)
+		{
+			search = glo_cutUrl(search,B);
+			ss++;
+		}
+		return search;
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//	Function:	glo_cutUrl(location, B)
+//	Desc:		used by glo_remUrlVar to remove a url var (B) and its' value from a location string (location)
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+	function glo_cutUrl(location, B)
+	{
+		var start = new String(location);
+		//	grab everything leading up until the string is found!
+		var lefStr = start.substring(0,start.indexOf(B)-1);
+		//	grab from the point found to the end of the remaining string.
+		var remStr = start.substring(start.indexOf(B),start.length);
+		if (remStr.indexOf("&")!=-1)
+			nexStr = remStr.substring(remStr.indexOf("&"),remStr.length);
+		else
+			nexStr = "";
+		return (lefStr+nexStr);
+	}
+//	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+/*---------------------------------------------------------------------------\                     
+||  Comments:	These functions allow a new window to keep the agent's 
+||				session alive, even if the main interface window is closed.
+\*--------------------------------------------------------------------------*/
+var glo_ksa_xmlhttp = null;
+var glo_ksa_RequestTID = null;
+var glo_ksa_TimeoutTID = null;
+
+function glo_ksa_KeepSessionAlive()
+{
+	glo_ksa_SetTimer();
+}
+
+function glo_ksa_Timeout()
+{
+	if ( glo_ksa_xmlhttp )
+	{
+		// cancel the XMLHTTP request
+		glo_ksa_xmlhttp.abort();
+
+		// we are done with the XMLHTTP object for now
+		glo_ksa_xmlhttp = null;
+	}
+
+	glo_ksa_SetTimer()
+}
+
+function glo_ksa_SetTimer(reset)
+{
+	var pollinterval = 300000; //60 * 5 * 1000;
+	var timeoutinterval = 60000; //60 * 1000;
+
+	if( glo_ksa_RequestTID != null ) { clearInterval(glo_ksa_RequestTID); glo_ksa_RequestTID = null; }
+	if( glo_ksa_TimeoutTID != null ) { clearInterval(glo_ksa_TimeoutTID); glo_ksa_TimeoutTID = null; }
+
+	if (!reset)
+	{
+		glo_ksa_RequestTID = setInterval('glo_ksa_SendKeepAlive()', pollinterval);	
+	}
+	else
+	{
+		glo_ksa_TimeoutTID = setInterval('glo_ksa_Timeout()', timeoutinterval );
+	}
+}
+
+function glo_ksa_SendKeepAlive()
+{
+	// create the XML HTTP object
+	glo_ksa_xmlhttp = glo_createXMLhttpObject();
+
+	if ( glo_ksa_xmlhttp )
+	{
+		// disable the update timer and set the time-out timer
+		glo_ksa_SetTimer(true);
+
+		// request the session tickler page with a unique URL variable
+		// to prevent possiable caching issues
+		var TimeStamp = new Date();
+		glo_ksa_xmlhttp.open('GET', 'sessiontickler.ems?time=' + TimeStamp.getTime(), true);
+		if(glo_ksa_xmlhttp.overrideMimeType){ glo_ksa_xmlhttp.overrideMimeType('text/xml'); }
+		glo_ksa_xmlhttp.onreadystatechange = function ()
+		{
+			if (glo_ksa_xmlhttp.readyState == 4)
+			{
+				try
+				{
+					var isAlive = glo_ksa_xmlhttp.responseXML.selectSingleNode("/root/Session/@Alive").value;
+					
+					if( isAlive == 0 )
+						alert( 'Session Timed Out');
+				
+				}
+				catch(e) {}
+
+				// we are done with the XMLHTTP object
+				glo_ksa_xmlhttp = null;
+
+				// set the timer for the next update
+				glo_ksa_SetTimer();
+			}
+		};
+
+		glo_ksa_xmlhttp.send();
+	}
+}
+
+/*---------------------------------------------------------------------------\                     
+||  Comments: Remove leading and trailing whitespace from a string	              
+\*--------------------------------------------------------------------------*/
+function glo_trimWhitespace(string) 
+{	
+	var newString  = '';
+	
+	if (string && string!="")
+	{
+		var xstring  = '';
+		beginningFound = false;
+		
+		// copy characters over to a new string
+		// retain whitespace characters if they are between other characters
+		for (var i = 0; i < string.length; i++) {
+			
+			// copy non-whitespace characters
+			if (string.charAt(i) != ' ' && string.charCodeAt(i) != 9) {
+				
+				// if the temporary string contains some whitespace characters, copy them first
+				if (xstring != '') {
+					newString += xstring;
+					xstring = '';
+				}
+				newString += string.charAt(i);
+				if (beginningFound == false) beginningFound = true;
+			}
+			
+			// hold whitespace characters in a temporary string if they follow a non-whitespace character
+			else if (beginningFound == true) xstring += string.charAt(i);
+		}
+	}
+	return newString;
+}
+
+function CreateServerLocation(pageLocation)
+{
+	var retString = "";
+	
+	if(gServerName.length)
+		if(gUseHttps != 0)
+			retString = "https://" + gServerName + "/" + pageLocation;
+		else
+			retString = "http://" + gServerName + "/" + pageLocation;
+	else
+		retString = pageLocation;
+	
+	return retString;
+}
+
+function OnListDividerScroll(id)
+{
+	document.getElementById("ListTableTop").style.pixelLeft = -document.getElementById(id).scrollLeft;
+}
+
+function ValidateTextBox(evt)
+{
+	evt = (evt) ? evt : window.event;
+	var charCode = (evt.which) ? evt.which : evt.keyCode;
+	if(charCode > 31 && (charCode < 48 || charCode > 57))
+	{
+		status = "This text box accepts numbers only.";
+		return false;
+	}
+	status = ""
+	return true;
+}
+
+function ValidateVersionTextBox(evt)
+{
+	evt = (evt) ? evt : window.event;
+	var charCode = (evt.which) ? evt.which : evt.keyCode;
+	if(charCode > 31 && (charCode < 46 || charCode > 57) || charCode == 47)
+	{
+		status = "This text box only accepts numbers and periods.";
+		return false;
+	}
+	status = ""
+	return true;
+}
+
+function loadXMLString(txt)
+{
+var xmlDoc;
+	if (window.DOMParser)
+	  {
+	  
+	  //-----------------------------
+
+								  (function(DOMParser) {  
+							"use strict";  
+							var DOMParser_proto = DOMParser.prototype  
+							  , real_parseFromString = DOMParser_proto.parseFromString;
+
+							// Firefox/Opera/IE throw errors on unsupported types  
+							try {  
+								// WebKit returns null on unsupported types  
+								if ((new DOMParser).parseFromString("", "text/html")) {  
+									// text/html parsing is natively supported  
+									return;  
+								}  
+							} catch (ex) {}  
+
+							DOMParser_proto.parseFromString = function(markup, type) {  
+								if (/^\s*text\/html\s*(?:;|$)/i.test(type)) {  
+									var doc = document.implementation.createHTMLDocument("")
+									  , doc_elt = doc.documentElement
+									  , first_elt;
+
+									doc_elt.innerHTML = markup;
+									first_elt = doc_elt.firstElementChild;
+
+									if (doc_elt.childElementCount === 1
+										&& first_elt.localName.toLowerCase() === "html") {  
+										doc.replaceChild(first_elt, doc_elt);  
+									}  
+
+									return doc;  
+								} else {  
+									return real_parseFromString.apply(this, arguments);  
+								}  
+							};  
+						}(DOMParser));
+
+		//---------------------------------------------------
+
+		parser=new DOMParser();
+	    xmlDoc=parser.parseFromString(txt,"text/html");
+	
+	  }
+	else // Internet Explorer
+	  {
+	  xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+	  xmlDoc.async=false;
+	  xmlDoc.loadXML(txt);
+	  }
+	return xmlDoc;
+}
+
+function CheckBrowser()
+{
+	var browserName=navigator.appName; 
+	if (browserName=="Microsoft Internet Explorer")
+		return true;
+	else
+		return false;
+	
+}
+
+function glo_whichBrowser()
+{
+	if ( agentBrowser && agentBrowser != "" )
+	{
+		return agentBrowser;
+	}
+	else
+	{
+		var agt=navigator.userAgent.toLowerCase();
+		if (agt.indexOf("chrome") != -1) return 'Chrome';
+		if (agt.indexOf("opera") != -1) return 'Opera';
+		if (agt.indexOf("staroffice") != -1) return 'Star Office';
+		if (agt.indexOf("webtv") != -1) return 'WebTV';
+		if (agt.indexOf("beonex") != -1) return 'Beonex';
+		if (agt.indexOf("chimera") != -1) return 'Chimera';
+		if (agt.indexOf("netpositive") != -1) return 'NetPositive';
+		if (agt.indexOf("phoenix") != -1) return 'Phoenix';
+		if (agt.indexOf("firefox") != -1) return 'Firefox';
+		if (agt.indexOf("safari") != -1) return 'Safari';
+		if (agt.indexOf("skipstone") != -1) return 'SkipStone';
+		if (agt.indexOf("msie") != -1) return 'Internet Explorer';
+		if (agt.indexOf("netscape") != -1) return 'Netscape';
+		if (agt.indexOf("mozilla/5.0") != -1) return 'Mozilla';
+		if (agt.indexOf('\/') != -1) {
+		if (agt.substr(0,agt.indexOf('\/')) != 'mozilla') {
+		return navigator.userAgent.substr(0,agt.indexOf('\/'));}
+		else return 'Netscape';} else if (agt.indexOf(' ') != -1)
+		return navigator.userAgent.substr(0,agt.indexOf(' '));
+		else return navigator.userAgent;
+	}
+}
+
+function glo_whichOs()
+{
+	if ( agentOs && agentOs != "" )
+	{
+		return agentOs;
+	}
+	else
+	{
+		var agt=navigator.userAgent.toLowerCase();
+		if (agt.indexOf("ipad") != -1) return 'iOS';
+		if (agt.indexOf("ipod") != -1) return 'iOS';
+		if (agt.indexOf("iphone") != -1) return 'iOS';
+		if (agt.indexOf("android") != -1) return 'Android';
+		if (agt.indexOf("os x") != -1) return 'OSx';
+		if (agt.indexOf("mac") != -1) return 'Mac';
+		if (agt.indexOf("windows") != -1) return 'Win';
+		
+		return navigator.userAgent;
+	}
+}
+
+function glo_isMobile()
+{
+	return glo_whichOs().match(/iOS|Android/i) ? true : false;
+}
+
+function glo_ieVer()
+{
+	if ( ieVer && ieVer != "" )
+	{
+		return ieVer;
+	}
+	else
+	{
+    var N= navigator.appName, ua= navigator.userAgent, tem;
+    var M= ua.match(/(msie)\/?\s*(\.?\d+(\.\d+)*)/i);
+    if(M && (tem= ua.match(/version\/([\.\d]+)/i))!= null) M[2]= tem[1];
+    M= M? [M[1], M[2]]: [N, navigator.appVersion, '-?'];
+    return M[1];
+  }
+}
+
+function getListRows()
+{
+	var arrTR = new Array();  
+  arrTR = document.getElementsByTagName("TR");
+  var listRows = new Array();
+  for (var t = 0; t < arrTR.length; t++)
+  {  
+      if ( document.getElementsByTagName("TR").item(t).getAttribute("id") == "listRow" )
+      {
+      	listRows[listRows.length] = document.getElementsByTagName("TR").item(t);
+      }
+  }
+  return listRows;
+}
+
+function fireEvent(element,event)
+{
+   if (document.createEvent) {
+       var evt = document.createEvent("HTMLEvents");
+       evt.initEvent(event, true, true ); 
+       return !element.dispatchEvent(evt);
+   } else {
+       var evt = document.createEventObject();
+       return element.fireEvent('on'+event,evt)
+   }
+}
+
+function glo_setOpenerLocation()
+{
+	if ( window.opener != null )
+	{
+		window.opener.location.href = window.opener.location.href;
+	}
+	else if ( window.parent.opener != null )
+	{
+		window.parent.opener.location.href = window.parent.opener.location.href;
+	}
+	else if (window.dialogArguments)
+	{
+     window.dialogArguments.document.location.href = window.dialogArguments.document.location.href;
+	}
+  else if (window.parent.dialogArguments != null)
+  {
+  	window.parent.dialogArguments.document.location.href = window.parent.document.dialogArguments.location.href;	          	          	
+  }
+}	
+
+function glo_isBtnDisabled(e)
+{
+	try
+	{
+		var targ;
+		if (!e)
+		{
+			if ( typeof event != 'undefined' )
+			{
+				e=event;
+			}
+			else if ( typeof window.event != 'undefined' )
+			{
+				e = window.event;
+			}
+		}
+		if (e.target)
+		{
+			targ = e.target;
+		}
+		else if (e.srcElement)
+		{
+			targ = e.srcElement;
+		}
+		if (targ.nodeType == 3)
+		{
+			targ = targ.parentNode;
+		}
+		
+		while (targ.nodeName.toLowerCase() != "div")
+		{
+			targ = targ.parentNode;
+		}
+		return targ.disabled;
+	}
+	catch(e){return false;}			
+}
+
+function glo_checkEcho()
+{
+	if (glo_whichBrowser() == "Safari" && glo_whichOs() == "Win" && docIsChkEcho)
+	{
+		var code;
+    if (!e) var e = window.event;
+    if (e.keyCode) code = e.keyCode;
+    else if (e.which) code = e.which;  
+
+    if ((code==null) || (code==0) || (code==8) || 
+	    (code==9) || (code==13) || (code==27) )
+	  {
+	   	return true;
+	  }    
+    return false;
+	}
+	else
+	{
+		return true;
+	}	
+}
+
+function glo_doClose()
+{
+	if(!window.close())
+	{
+		parent.close();
+	}
+}	
+
+function glo_escSigns(sString)
+{
+	sString = sString.replace(/\</g,"&lt;");
+	sString = sString.replace(/\>/g,"&gt;");
+	return sString;
+}
+
+function glo_fixSrBody()
+{
+	if ( document.getElementById("srbody") )
+	{
+		var theBody = document.getElementById("srbody").innerHTML;
+		theBody = theBody.replace( /&lt;/g, '<' );
+		theBody = theBody.replace( /&gt;/g, '>' );		
+		document.getElementById("srbody").innerHTML = theBody;
+	}
+}
+
+function glo_fixSrEditBody()
+{
+	if ( document.sigdoc.getAttribute("body").length > 0 )
+	{
+		var el = document.createElement("div");
+    el.innerHTML = document.sigdoc.getAttribute("body");      
+		var theText = el.innerHTML;
+		theText = theText.replace( /\r\n/g, '<BR/>' );
+		theText = theText.replace( /\n/g, '<BR/>' );
+		document.sigdoc.setAttribute("body", theText);				           
+	}
+}
+
+function glo_resetColumns()
+{
+	var theDoc = docName;
+	if (docName == "ticketlist.ems")
+	{
+		theDoc = ticketboxview;
+	}
+	ClearCookie(theDoc);
+}
+
+function glo_fixSig(sig)
+{
+	sig = sig.replace(/<br--\s*[\/]?>/gi, "<br>");
+	sig = sig.replace(/<div--\s*[\/]?>/gi, "<div>");
+	return sig;
+}
+
+function glo_elementsById(id)
+{
+  var c = 0, i = 0, j = 0, k = 0;
+  var nodes=[], storage = arguments.callee.storage;
+  var elements = document.getElementsByTagName('*'), len = elements.length;
+
+  if (storage &&
+      storage.nodes &&
+      storage.length == length &&
+      storage.first == elements[0] &&
+      storage.last == elements[length-1]) {
+      k = $id;
+      while (storage.nodes[k]) {
+          nodes[nodes.length] = storage.nodes[k];
+          k = id + '*' + (++i);
+      }
+  } else {
+      storage = { };
+      storage.nodes = { };
+      storage.length = 0;
+      storage.first = elements[0];
+      storage.last = elements[elements.length - 1];
+      while (elements.length > i) {
+          c = elements[i];
+          if ((k = c.id) == id) {
+              nodes[nodes.length] = c;
+              if (storage.nodes[k]) {
+                 k = c.id + '*' + (++j);
+              }
+          }
+          i++;
+          storage.nodes[k] = c;
+          storage.length++;
+      }
+      arguments.callee.storage = storage;
+  }
+  return nodes;
+}
+
+function glo_initResize()
+{
+	if (document.getElementById("rszHandle"))
+	{
+		var rszHandle;
+		try
+		{
+			rszHandle = document.getElementsByClassName("rszHandle");
+		}
+		catch(e)
+		{
+			rszHandle = document.getElementsByName("rszHandle");
+		}
+		
+		var handleCount = rszHandle.length ? rszHandle.length : 1;
+		
+		for(var e = 0; e < handleCount; ++e)
+		{
+			var thisHandle = (handleCount > 1) ? rszHandle[e] : rszHandle[0];
+			thisHandle.style.left = thisHandle.parentNode.offsetLeft + thisHandle.parentNode.offsetWidth - 7;
+		}
+	}
+}
+
+function glo_listFilter()
+{
+	if (document.getElementById('ListTableBot').rows.length)
+	{
+		var nLength = document.getElementById('ListTableBot').rows.length;
+		for (var i=0; i < nLength; i++)
+		{
+			if(document.getElementById('ListTableBot').rows[i].innerText.indexOf(document.tabularForm.txtFilter.value)==-1)
+			{
+				if ( glo_whichBrowser() == "Internet Explorer" )
+				{
+					var nLen = document.getElementById('ListTableBot').rows[i].cells.length;
+					for (var j=0; j < nLen; j++)
+					{
+				     document.getElementById("ListTableBot").rows[i].cells[j].style.filter = "alpha(opacity=20)";
+				  }  
+				}
+				else
+				{
+					document.getElementById('ListTableBot').rows[i].style.opacity = '.2';
+				}
+			}
+			else
+			{
+				if ( glo_whichBrowser() == "Internet Explorer" )
+				{
+					var nLen = document.getElementById('ListTableBot').rows[i].cells.length;
+					for (var j=0; j < nLen; j++)
+					{
+				     document.getElementById('ListTableBot').rows[i].cells[j].style.filter = '';
+				  } 
+				}
+				else
+				{
+					document.getElementById('ListTableBot').rows[i].style.opacity = '1.0';
+				}
+			}
+		}		
+	}
+}

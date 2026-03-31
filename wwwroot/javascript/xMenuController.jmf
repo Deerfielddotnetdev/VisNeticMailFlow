@@ -1,0 +1,418 @@
+var popTimer = 0;//Do not delete this, can be used to hide menu after a delay!
+var activeNow = new Array();
+var xMenuOpen = false;
+
+function xMenuClick(xMenuId)
+{
+	if ( xMenuId == undefined )
+	{
+		if (!event) var event = window.event;
+		var theObject = event.target;
+		xMenuId = theObject.getAttribute("xMenuId");
+	}
+	if (!event && window.event) var event = window.event;
+	if(typeof event != 'undefined')
+	{	
+		if (typeof event.cancelBubble != 'undefined') event.cancelBubble = true;
+		if (event.stopPropagation) event.stopPropagation();
+	}
+	if (xMenuOpen)
+	{
+		xMenuOpen = false;
+		xMenuHideAllSave(0);
+	} else {
+		var docRows = document.getElementsByTagName("TR");
+		for (var I = 0; I < docRows.length; I++)
+		{
+			if (docRows[I].id.indexOf("xMenu")!=-1)
+			{
+				if (docRows[I].getAttribute("xrequire"))
+				{
+					var evalResult = eval(docRows[I].getAttribute("xrequire"));
+					if (evalResult)
+					{
+							if (docRows[I].getAttribute("xonclick"))
+							{
+								docRows[I].setAttribute("onclick", docRows[I].getAttribute("xonclick"));
+								docRows[I].setAttribute("xonclick", null);
+							}
+
+						for (var x = 0; x < docRows[I].children.length; x++)
+						{
+							docRows[I].children[x].disabled = false;
+							if (docRows[I].children[x].children[0] && docRows[I].children[x].children[0].tagName=="IMG")
+							{
+								docRows[I].children[x].children[0].style.filter="";
+								docRows[I].children[x].children[0].style.opacity="1.0";
+							}
+						}
+					}
+					else
+					{
+							if (docRows[I].getAttribute("onclick"))
+							{
+								docRows[I].setAttribute("xonclick", docRows[I].getAttribute("onclick"));
+								docRows[I].setAttribute("onclick", null);
+							}
+						for (var x = 0; x < docRows[I].children.length; x++)
+						{
+							docRows[I].children[x].disabled = true;
+							if (docRows[I].children[x].children[0] && docRows[I].children[x].children[0].tagName=="IMG")
+							{
+								docRows[I].children[x].children[0].style.filter="gray()";
+								docRows[I].children[x].children[0].style.opacity="0.3";
+							}
+						}
+					}
+				}
+			}
+		}
+		xMenuOpen = true;
+		xMenuOver(0,xMenuId);
+	}
+}
+
+function xMenuStyle(id) {
+	if(document.getElementById(id)) {
+		return document.getElementById(id).style;
+	}
+}
+
+function xMenuSwitchClass(xMenuArray, highlight) {
+	// Pass an array and a boolean to specify colour change, true = over colour.
+	for (i = 0; i < xMenuArray.length; i++) {
+		if (xMenuArray[i]) {
+			if (i > 0)
+			{
+				var newClass = highlight ? "xMenuOptionOn" : "xMenuOptionOff";
+				var thisObject = eval('xMenu'+i+'item'+xMenuArray[i]);
+				var hasOnClk = (thisObject.getAttribute("onclick"))?true:false;
+				var hasRequire = (thisObject.getAttribute("xrequire"))?true:false;
+				if (hasRequire && hasOnClk==false)
+				{
+					thisObject.className = "xMenuOptionOff";
+				} else {
+					thisObject.className = newClass;
+				}
+			} else {
+				var newClass = highlight ? "xMenu menuClk" : "xMenu menuOff";
+				var thisObject = eval('xMenu'+i+'item'+xMenuArray[i]);
+				thisObject.className = newClass;
+			}
+		}
+	}
+}
+
+function xMenuOver(xMenuId, xMenuItemId,event) {
+	clearTimeout(popTimer);//Do not delete this, can be used to hide menu after a delay!
+	
+	if (xMenuOpen)
+	{
+		xMenuHideAllSave(xMenuId);
+		activeNow = xMenuBuildTree(xMenuId, xMenuItemId);
+		xMenuSwitchClass(activeNow, true);
+		targetMenu = xMenu[xMenuId][xMenuItemId].target;
+		if (targetMenu > 0)
+		{
+			if (xMenu[xMenuId][xMenuItemId].placeHolder)
+			{
+				if(xMenu[targetMenu][0].ref)
+				{
+					with (xMenu[targetMenu][0].ref)
+					{
+						visibility = "visible";
+						display = "block";
+					}
+				}
+			
+			}
+			else
+			{
+				var elm =  event.target || event.srcElement;
+				
+				while (elm.tagName != "TR")
+					elm = elm.parentNode;
+				
+				var elmParent = elm;
+				
+				while (elmParent.tagName != "DIV")
+					elmParent = elmParent.parentNode;
+					
+				if(xMenu[targetMenu][0].ref)
+				{
+					with(xMenu[targetMenu][0].ref)
+					{
+						visibility = 'visible';
+						display = 'block';
+						if ( glo_whichBrowser() == "Internet Explorer" )
+						{
+							left = elm.offsetLeft + elmParent.offsetLeft + elm.offsetWidth +2+12;
+							top = 38 + elm.offsetTop + elmParent.offsetTop;
+						}
+						else if ( glo_whichBrowser() == "Safari" || glo_whichBrowser() == "Chrome" )
+						{
+							left = elm.offsetLeft + elmParent.offsetLeft + elm.offsetWidth +4;
+							top = 4 + elm.offsetTop + elmParent.offsetTop;
+						}
+				  }
+				}
+			}
+		}
+	}
+	else
+	{
+	var elm =  event.target || event.srcElement;
+		if (elm.tagName=="IMG")
+			elm.parentNode.className = "xMenu menuOn";
+		else
+			elm.className = "xMenu menuOn";
+	}
+}
+
+function xMenuOut(xMenuId, xMenuItemId,event) {
+
+var elm =  event.target || event.srcElement;
+	if (xMenuOpen)
+	{
+		if ((xMenuId == 0) && !xMenu[xMenuId][xMenuItemId].target)
+			xMenuHideAllSave(0);
+		else			//Do not delete this, can be used to hide menu after a delay!
+			popTimer = setTimeout('xMenuHideAllSave(0, true)', 500);		//Do not delete this, can be used to hide menu after a delay!
+	} else {
+		if (elm.tagName=="IMG")
+			elm.parentNode.className = "xMenu menuOff";
+		else
+			elm.className = "xMenu menuOff";
+	}
+}
+
+function xMenuBuildTree(menuNum, itemNum) {
+	// Array index is the menu number. The contents are null (if that menu is not a parent)
+	// or the item number in that menu that is an ancestor (to light it up).
+	itemArray = new Array(xMenu.length);
+	while(1) {
+		itemArray[menuNum] = itemNum;
+		// If we've reached the top of the hierarchy, return.
+		if (menuNum == 0) return itemArray;
+		itemNum = xMenu[menuNum][0].parentItem;
+		menuNum = xMenu[menuNum][0].parentMenu;
+	}
+}
+
+function xMenuHideAllSave(menuNum, reset) {
+	if (reset) xMenuOpen = false;
+	var keepMenus = xMenuBuildTree(menuNum, 1);
+	for (var count = 0; count < xMenu.length; count++)
+		if (!keepMenus[count])
+		{
+			if(xMenu[count][0].ref)
+				xMenu[count][0].ref.visibility = 'hidden';
+		}
+	xMenuSwitchClass(activeNow, false);
+	if (!event && window.event) var event = window.event;
+	if(typeof event != 'undefined')
+	{	
+		if (typeof event.cancelBubble != 'undefined') event.cancelBubble = true;
+		if (event.stopPropagation) event.stopPropagation();
+	}
+}
+
+
+function xMenuObject() {
+	// Parent menu and item numbers, indexed later.
+	this.parentMenu = null;
+	this.parentItem = null;
+	// Reference to the object's style properties (set later).
+	this.ref = null;
+}
+
+//function xMenuItem(text, onclk, target, leftImg, rightImg, placeHolder) {
+function xMenuItem(text, onclk, target, leftImg, rightImg, placeHolder, evaluation, myTitle) {
+	this.text = text;
+	if (onclk>"")
+		this.onclk = "xMenuHideAllSave(0, true);" + onclk;
+	else
+		this.onclk  = null;
+	this.target = target;
+	if (leftImg>"")
+		this.leftImg = leftImg;
+	else
+		this.leftImg = null;
+	if (rightImg>"")
+		this.rightImg = rightImg;
+	else
+		this.rightImg = null;
+	
+	if (placeHolder>"")
+		this.placeHolder = placeHolder;
+	else
+		this.placeHolder = null;
+	
+	if (evaluation>"")
+		this.evaluation = evaluation;
+	else
+		this.evaluation = null;
+		
+	if(myTitle > "")
+		this.myTitle = myTitle;
+	else
+		this.myTitle = null;
+
+	// Reference to the object's style properties (set later).
+	this.ref = null;
+}
+
+function xMenuBuild()
+{
+
+	if (window.xMenu)
+	{
+		var isAttach = 0;
+			
+		for (currItem = 1; currItem < xMenu[0].length; currItem++) with (xMenu[0][currItem]) {
+	
+			if (target > 0) {
+				// Set target's parents to this menu item.
+				xMenu[target][0].parentMenu = 0;
+				xMenu[target][0].parentItem = currItem;
+				if (placeHolder > "")
+				{
+					xMenu[target][0].placeHolder = placeHolder;
+				} else {
+					xMenu[target][0].placeHolder = null;
+				}
+			}
+	
+			var str = "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\"><tr>";
+				str+= "<td id=\"xMenu0item"+currItem+"\" xMenuId=\""+currItem+"\" ";
+				str+= "onclick=\"xMenuClick("+currItem+")\" onmouseover=\"xMenuOver(0,"+currItem+",event)\" ";
+				str+= "onmouseout=\"xMenuOut(0,"+currItem+",event)\" class=\"xMenu menuOff\" unselectable=\"on\"";
+				str+= ">"+text+"</td></tr></table>";
+	
+			if (str.indexOf("ico_attach_32.gif")>=0){isAttach=1;}
+					
+			var newDiv = document.createElement('div');
+				newDiv.unselectable="on";
+				newDiv.innerHTML = str;
+			
+			if (placeHolder > "")
+				document.getElementById(placeHolder).appendChild(newDiv);
+			else
+				document.getElementsByTagName('body').item(0).appendChild(newDiv);
+		}
+	
+		for (currItem = 1; currItem < xMenu[0].length; currItem++) {
+			xMenu[0][currItem].ref = xMenuStyle("xMenu0item"+currItem);
+		}
+	
+		var i = 0;
+		
+		for (currMenu = 1; currMenu < xMenu.length; currMenu++) with (xMenu[currMenu][0])
+		{
+			if (currMenu >= xMenu[0].length)
+			{
+				placeHolder = null;
+			}
+			var str = "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\">";
+			var bCreate = false;
+			for (currItem = 1; currItem < xMenu[currMenu].length; currItem++) with (xMenu[currMenu][currItem])
+			{
+				str+= "<tr id=\"xMenu"+currMenu+"item"+currItem+"\" class=\"xMenuOptionOff\" ";
+				
+				if (onclk!=null) str+= "onclick=\""+onclk+"\"";
+				if (evaluation!=null) str+= "xrequire=\""+evaluation+"\"";
+				
+				str+= "onmouseover=\"xMenuOver("+currMenu+","+currItem+",event)\" onmouseout=\"xMenuOut("+currMenu+","+currItem+",event)\">";
+				str+= "<td unselectable=\"on\" class=\"xMenuOption\" width=\"11\">";
+				
+				if (leftImg!=null)
+					str += leftImg;
+				else
+					str += "&#160;";
+				str+= "</td><td ";
+				
+				if(myTitle)
+					str += "title=\"" + myTitle + "\" ";
+				
+				str += "unselectable=\"on\" class=\"xMenuOption\" nowrap>"+text+"</td>";
+				str+= "<td unselectable=\"on\" class=\"xMenuOption\" width=\"10\" align=\"right\">";
+	
+				if (target > 0)
+				{
+					xMenu[target][0].parentMenu = currMenu;
+					xMenu[target][0].parentItem = currItem;
+					if (rightImg!=null)
+						str+= rightImg+"</td>";
+					else
+						str+= "&#187;</td>";
+				}
+				else
+				{
+					if (rightImg!=null)
+						str+= rightImg+"</td>";
+					else
+						str+= "&#160;</td>";
+				}
+				str+= "</tr>";
+				bCreate = true;
+				i++;
+			}
+			str+= "</table>";	
+	
+			if(bCreate)
+			{
+				var newDiv = document.createElement('div');
+				ref = newDiv.style;
+				with (ref)
+				{
+					position = 'absolute';
+					display = 'none';
+					visibility = 'hidden';
+					border = "2px outset";
+					zIndex = "999";
+					if (i > 10 & isAttach==1)
+					{
+						height = "100px";
+						overflow = "auto";
+					}
+				}
+				newDiv.innerHTML = str;				
+		
+				if (placeHolder != null)
+				{
+					document.getElementById(placeHolder).appendChild(newDiv);
+				}
+				else
+				{
+					document.getElementsByTagName('body').item(0).appendChild(newDiv);
+				}
+				for (currItem = 1; currItem < xMenu[currMenu].length; currItem++)
+				{
+					xMenu[currMenu][currItem].ref = xMenuStyle("xMenu"+currMenu+"item"+currItem);
+				}
+			}
+		}
+	}
+}
+
+function xHideMenuButtonByTitle(buttonArray, buttonTitle)
+{
+	for(var i = 0; i < buttonArray.length; i++)
+	{
+   		if(buttonArray[i].title == buttonTitle)
+   		{
+   			buttonArray[i].style.display = "none";
+   		}
+	}
+}
+
+function xShowMenuButtonByTitle(buttonArray, buttonTitle)
+{
+	for(var i = 0; i < buttonArray.length; i++)
+	{
+   		if(buttonArray[i].title == buttonTitle)
+   		{
+   			buttonArray[i].style.display = "block";
+   		}
+	}
+}

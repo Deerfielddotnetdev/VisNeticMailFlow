@@ -1,0 +1,204 @@
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	testLogin(what)
+//	[	Desc:	used to the login information enclosed within the form
+//	[ 	Param:	what contains a value of either "source" or "destination", which will adjust which parameters are sent to the page
+//	[	Page:	messagedestination.ems; messagesource.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function testLogin(what)
+	{
+		lookAt = "";
+		message = "";
+//{			create a string var to hold the parameters of the modal window!
+		winprops = "dialogHeight: 300px; dialogWidth: 300px; dialogTop: px; dialogLeft: px; edge: Raised; center: Yes; help: No; resizable: No; status: Yes; scroll: No;";
+//{			if we are testing a message source
+		if (what=="source")
+		{
+//{				begin by grabbing the necessary values from the form
+			type = tabularForm.MessageSourceType.options[tabularForm.MessageSourceType.selectedIndex].value;
+			
+			if (tabularForm.ckUseToken.checked==true && nRefreshTokenExists == 0)
+			{
+				alert("You must Save then request a Token for this Message Source\nvia the VisNetic MailFlow Administration Tool.\n\nThe Tool can be found on the VisNetic MailFlow Application Server \"Start Menu\" VisNetic MailFlow Group.\n\nNote: Right click the Tool icon and \"Run as Administrator\".");
+				return;
+			}
+			
+			host = encodeURI(tabularForm.RemoteAddress.value);
+			if (host=="")
+			{
+				message+="	Server Address not specified\n";
+				lookAt = tabularForm.RemoteAddress;
+			}
+			port = encodeURI(tabularForm.RemotePort.value);
+			if (port=="")
+			{
+				message+="	Port not specified\n";
+				if (lookAt=="")	lookAt = tabularForm.RemotePort;
+			}
+			user = encodeURI(tabularForm.AuthUserName.value);
+			if (user=="")
+			{
+				message+="	User Name not specified\n";
+				if (lookAt=="")	lookAt = tabularForm.AuthUserName;
+			}
+			pass = encodeURIComponent(tabularForm.AuthPassword.value);
+			if (pass=="" && tabularForm.ckUseToken.checked==false)
+			{
+				message+="	Password not specified\n";
+				if (lookAt=="")	lookAt = tabularForm.AuthPassword;
+			}
+			else if (tabularForm.ckUseToken.checked==true)
+			{
+				pass = nID;
+			}
+			time = encodeURI(tabularForm.ConnTimeoutSecs.value);
+			if (time=="")
+			{
+				message+="	Connection Timeout not specified\n";
+				if (lookAt=="")	lookAt = tabularForm.ConnTimeoutSecs;
+			}
+			if (tabularForm.IsAPOP.checked==true)	{apop = 1;}	else	{apop = 0;}
+			
+			if (type == 2)
+			{
+				if (tabularForm.IsSSL.checked==true)
+				{
+					if (tabularForm.ckUseToken.checked==true)
+					{
+						ssl = 5;
+					}
+					else
+					{
+						ssl = 3;
+					}
+				}
+				else
+				{
+					ssl = 2;
+				}
+			}
+			else
+			{
+				if (tabularForm.IsSSL.checked==true)
+				{
+					if (tabularForm.ckUseToken.checked==true)
+					{
+						ssl = 4;
+					}
+					else
+					{
+						ssl = 1;
+					}
+				}
+				else
+				{
+					ssl = 0;
+				}
+			}
+			
+			if (message=="")
+			{
+//{				construct a location string with necessary url parameters
+				nextpage = "testlogin.ems?qu=ms&ho="+host+"&pt="+port+"&un="+user+"&pw="+pass+"&ct="+time+"&ap="+apop+"&sl="+ssl;
+//{				open the modal window and begin testing!
+				glo_launchModalWindow(nextpage, 300, 300, 'yes', 'no', 'no');
+			}
+			else
+			{
+				alert("Testing cannot occur due to following reasons:\n"+message);
+				lookAt.focus();
+			}
+		}
+//{			if we are testing a message destination
+		if (what=="destination")
+		{
+//{				if this field is checked then proceed, login test cannot occur without!
+			if (tabularForm.UseSMTPAuth.checked==true)
+			{
+//{					begin by grabbing the necessary values from the form
+				if (tabularForm.ckUseToken.checked==true && nRefreshTokenExists == 0)
+				{
+					alert("You must Save then request a Token for this Message Destination\nvia the VisNetic MailFlow Administration Tool.\n\nThe Tool can be found on the VisNetic MailFlow Application Server \"Start Menu\" VisNetic MailFlow Group.\n\nNote: Right click the Tool icon and \"Run as Administrator\".");
+					return;
+				}
+				
+				host = encodeURI(tabularForm.ServerAddress.value);
+				if (host=="")
+				{
+					message+="	Server Address not specified\n";
+					lookAt = tabularForm.ServerAddress;
+				}
+				port = encodeURI(tabularForm.SMTPPort.value);
+				if (port=="")
+				{
+					message+="	Port not specified\n";
+					if (lookAt=="")	lookAt = tabularForm.SMTPPort;
+				}
+				user = encodeURI(tabularForm.AuthUser.value);
+				if (user=="")
+				{
+					message+="	User Name not specified\n";
+					if (lookAt=="")	lookAt = tabularForm.AuthUser;
+				}
+				pass = encodeURIComponent(tabularForm.AuthPass.value);
+				if (pass=="" && tabularForm.ckUseToken.checked==false)
+				{
+					message+="	Password not specified\n";
+					if (lookAt=="")	lookAt = tabularForm.AuthPassword;
+				}
+				else if (tabularForm.ckUseToken.checked==true)
+				{
+					pass = nID;
+				}
+				time = encodeURI(tabularForm.ConnTimeoutSecs.value);
+				if (time=="")
+				{
+					message+="	Connection Timeout not specified\n";
+					if (lookAt=="")	lookAt = tabularForm.ConnTimeoutSecs;
+				}
+				if (tabularForm.UseSSL.checked==true)
+				{
+					if ( tabularForm.ckUseToken.checked==true )
+					{
+						ssl = 3;
+					}
+					else if ( document.getElementById("sslMode"))
+					{
+						var e = document.getElementById("sslMode");
+						ssl = e.options[e.selectedIndex].value;
+						if(ssl == 1 && tabularForm.ckUseToken.checked==true)
+						{
+							ssl = 3;
+						}
+						else if(ssl == 2 && tabularForm.ckUseToken.checked==true)
+						{
+							ssl = 4;
+						}
+					}
+					else
+					{
+						ssl = 1;
+					}
+				}
+				else
+				{
+					ssl = 0;
+				}		
+				if (message=="")
+				{
+//{						construct a location string with necessary url parameters
+					nextpage = "testlogin.ems?qu=md&ho="+host+"&pt="+port+"&un="+user+"&pw="+pass+"&ct="+time+"&sl="+ssl;
+//{						open the modal window and begin testing!
+					glo_launchModalWindow(nextpage, 300, 300, 'yes', 'no', 'no');
+				}
+				else
+				{
+					alert("Testing cannot occur due to following reasons:\n"+message);
+					lookAt.focus();
+				}
+			}
+			else{	alert("Login information for this destination can only be tested if SMTP Authentication is used!");	}
+		}
+	}// close function testLogin(what)
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+

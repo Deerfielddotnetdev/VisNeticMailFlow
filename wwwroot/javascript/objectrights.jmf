@@ -1,0 +1,481 @@
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Something to consider...
+//	[	ACLTAble will always have at least 3 rows, so document.all.ACLTable.rows.length will always be defined
+//	[	The first three rows are not used so ignore in any for loops by starting your index at 3, (i = 3)...
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@
+//	[	Page Specific Variables
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	[	Name: ACLID
+//	[	Desc: a unique identifier for any dynamically generated custom right specifications
+//	[	Note: value will be reset when page loads if adjustDoc() finds a greater value
+//	[	Page: objectrights.ems
+	var ACLID = 1;
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	[	Name: contract
+//	[	Desc: an image variable used for holding the src of an image
+//	[	Page: accesscontrol.ems
+	contract = new Image();
+	contract.src = './images/minus.gif';
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	[	Name: expand
+//	[	Desc: an image variable used for holding the src of an image
+//	[	Page: accesscontrol.ems
+	expand = new Image();
+	expand.src = './images/plus.gif';
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	switchSelect(xObject)
+//	[	Desc:	used to dynamically switch the contents of a selectBox[x] drop down
+//	[ 	Param:	xObject is the object reference for the "AgentOrGroup[x]" select box that called the function
+//	[	Page:	objectrights.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function switchSelect(xObject)
+	{
+//{		grabs ID for all associated objects from ID in Name
+		thisID = parseInt(xObject.name.replace('AgentOrGroup',''));
+//{		grabs value of AgentOrGroup field, (Agent || Group)
+		thisVal = xObject.value;
+//{		grabs selectBox object for transformation
+		objSelectBox = document.getElementById('selectBox'+thisID);
+//{		rename this selectBox according to the data it will contain, of course maintain the same ID
+		if (thisVal=="Group") { objSelectBox.name = "Group"+thisID; }
+		if (thisVal=="Agent") { objSelectBox.name = "Agent"+thisID; }
+//{		remove all options from the selectBox
+		objSelectBox.options.length = 0;
+//{		if Agent is selected, add all available agent options to selectBox
+		if (thisVal=="Agent")
+		{
+			if (document.tabularForm.hiAgentName)
+//{			if there is more than one hidden Agent Field,
+			if (document.all.hiAgentName.length)
+			{
+//{				loop through them, adding them as options to the select box
+				for (i = 0; i < document.all.hiAgentName.length; i++)
+				{
+					newOption = new Option();
+					newOption.text = document.all.hiAgentName[i].value;
+					newOption.value = document.all.hiAgentID[i].value;
+					objSelectBox.options[objSelectBox.options.length] = newOption;
+				}
+			}
+//{			if there is only one hidden agent Field,
+			else if (tabularForm.hiAgentName)
+			{
+//{				add it as an option to the select box!
+				newOption = new Option();
+				newOption.text = tabularForm.hiAgentName.value;
+				newOption.value = tabularForm.hiAgentID.value;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+			}
+		}//^ if (thisVal=="Agent")
+//{		if Group is selected, add all group options to selectBox
+		if (thisVal=="Group")
+		{
+			if (document.tabularForm.hiGroupName)
+//{			if there is more than one hidden group field,
+			if (document.all.hiGroupName.length)
+			{
+//{				loop through them, adding them as options to the select box
+				for (i = 0; i < document.all.hiGroupName.length; i++)
+				{
+					newOption = new Option();
+					newOption.text = document.all.hiGroupName[i].value;
+					newOption.value = document.all.hiGroupID[i].value;
+					objSelectBox.options[objSelectBox.options.length] = newOption;
+				}
+			}
+//{			if there is only one hidden Group field,
+			else if (tabularForm.hiGroupName)
+			{
+//{				add it as an option to the select box!
+				newOption = new Option();
+				newOption.text = tabularForm.hiGroupName.value;
+				newOption.value = tabularForm.hiGroupID.value;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+			}
+		}//^if (thisVal=="Group")
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	disablePage(switcher)
+//	[	Desc:	used to dynamically enable/disable various form elements on the page
+//	[ 	Param:	switcher is the current value of "tabularForm.UseDefaultRights" (0 || 1)
+//	[	Page:	objectrights.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function disablePage(switcher)
+	{
+		var otid = parseInt(document.tabularForm.ObjectTypeID.value);
+		if (switcher == 1)
+		{
+			for(var x=0; x < 6; x++)
+			{
+				if (otid == x)
+				{
+					if (document.getElementById("defaultRights"+x))
+					{
+						document.getElementById("defaultRights"+x).style.display = "block";
+					}
+				} else {
+					if (document.getElementById("defaultRights"+x))
+					{
+						document.getElementById("defaultRights"+x).style.display = "none";
+					}
+				}
+			}
+			customRights.style.display = 'none';
+		}
+		else
+		{
+			for(var x=0; x < 6; x++)
+			{
+				if (document.getElementById("defaultRights"+x))
+				{
+					document.getElementById("defaultRights"+x).style.display = "none";
+				}
+			}
+//			defaultRights.style.display = 'none';
+			customRights.style.display = 'block';
+		}
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	delRight()
+//	[	Desc:	used to remove a custom right specification from the page
+//	[ 	Param:	None.
+//	[	Page:	objectrights.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function delRight()
+	{
+//{		retrieves the rowIndex which was stored in the delete button that called this function
+		selectedIndex = parseInt(event.srcElement.rowIndex);
+//{		if ACLTable.rows.length = 4, there is currently only one custom right specification,
+		if (document.all.ACLTable.rows.length == 4)
+		{
+//{			delete it, and do not adjust row Indexes!
+			ACLTable.deleteRow(selectedIndex);
+		}
+//{		if ACLTable.rows.length = 5, there is currently two custom right specifications,
+		else if (document.all.ACLTable.rows.length == 5)
+		{
+//{			delete the selected custom right specification,
+			ACLTable.deleteRow(selectedIndex);
+//{			and adjust rowIndex!
+			tabularForm.DelButton.rowIndex = "3";
+		}
+//{		if ACLTable.rows.length > 5, there are three or more custom right specifications,
+		else if (document.all.ACLTable.rows.length > 5)
+		{
+//{			delete the selected,
+			ACLTable.deleteRow(selectedIndex);
+//{			and adjust all other rowIndex's!
+//{			(please see "Something to Consider" above more more info)
+			var x = 0;
+			for (i = 3; i < document.all.ACLTable.rows.length; i++)
+			{
+				document.all.DelButton[x].rowIndex = i;
+				x++;
+			}
+		}
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	addRight()
+//	[	Desc:	used to add a custom right specification to the page
+//	[ 	Param:	None.
+//	[	Page:	objectrights.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function addRight()
+	{
+//{		Grab current length of ACLTable as length is also value of a new row
+		var NewRowID = parseInt(document.all.ACLTable.rows.length);
+//{		Insert a new row in the ACLTable at the bottom
+		var NewRow = ACLTable.insertRow(-1);
+//{		set NewRow's ID = page specific unique identifier
+		NewRow.id = ACLID;
+
+//{		Below:	HTML Content Preparation for NewCell [ ]
+		var strX = "<select onchange='switchSelect(this)' name='AgentOrGroup"+ACLID+"'>";
+		strX = strX + "<option value='Agent'>Agent</option><option value='Group' selected='true'>Group</option></select>";
+		strX = strX + "<select id='selectBox"+ACLID+"' name='Group"+ACLID+"'>";
+//{		if there is more than one hidden group fields,
+		if (document.tabularForm.hiGroupName)
+		if (document.all.hiGroupName.length)
+		{
+//{			loop through them, adding them as options to the select box!
+			for (i = 0; i < document.all.hiGroupID.length; i++)
+			{strX = strX + "<option value='"+document.all.hiGroupID[i].value+"'>"+document.all.hiGroupName[i].value+"</option>";}
+		}
+//{		if there is only one hidden group field,
+		else if (tabularForm.hiGroupName)
+		{
+//{			add it as an option to the select box!
+			strX = strX + "<option value='"+tabularForm.hiGroupID.value+"'>"+tabularForm.hiGroupName.value+"</option>";
+		}
+		strX = strX + "</select>";
+//{		Above:	HTML Content Preparation for NewCell [X]
+
+//{		Create a new cell!
+		var NewCell = NewRow.insertCell(-1);
+//{		Adjust its position slightly!
+		NewCell.setAttribute("style", "padding-right:10px;");
+//{		Insert dynamically produced HTML content
+		NewCell.innerHTML = strX;
+
+//{		Create another cell!
+		var NewCell = NewRow.insertCell(-1);
+//{		Reposition slightly!
+		NewCell.setAttribute("align", "center");
+//{		Insert content!
+		NewCell.innerHTML = "<input type='radio' value='0' name='AccessLevel"+ACLID+"' checked='true'>";
+
+		var NewCell = NewRow.insertCell(-1);
+		NewCell.setAttribute("align", "center");
+		NewCell.innerHTML = "<input type='radio' value='4' name='AccessLevel"+ACLID+"'>";
+
+		var NewCell = NewRow.insertCell(-1);
+		NewCell.setAttribute("align", "center");
+		NewCell.innerHTML = "<input type='Button' name='DelButton' class='childControlBtn' value='Remove' onclick='delRight();' rowIndex='"+NewRowID+"'>";
+
+//{		Increment the page specific unique identifier!!!
+		ACLID++;
+//{		Run the window resize function in global.js to make sure that everything appears properly!
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	adjustDoc()
+//	[	Desc:	used to adjust value of ACLID if necessary, and reassign the rowIndex attribute once the page has loaded completely!
+//	[ 	Param:	None.
+//	[	Page:	objectrights.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function adjustDoc()
+	{
+//{		if ACLID is already one, let's check to see if it should be greater,
+		if (ACLID==1)
+		{
+//{			if the MaxID value is greater than one,
+			if (parseInt(document.tabularForm.AccessControlMaxID.value) > 1)
+			{
+//{				then that is what ACLID shoudl be set to
+				ACLID = parseInt(document.tabularForm.AccessControlMaxID.value);
+			}
+		}
+//{		if there is only one custom right specification after the page has loaded,
+		if (document.all.ACLTable.rows.length==4)
+		{
+//{			reassign it's rowIndex!
+			tabularForm.DelButton.rowIndex = "3";
+		}
+//{		if there is more than one custom right specification after the page has loaded,
+		if (document.all.ACLTable.rows.length > 4)
+		{
+//{			loop through them, reassigning their rowIndex!
+			var x = 0;
+			for (i = 3; i < document.all.ACLTable.rows.length; i++)
+			{
+				document.all.DelButton[x].rowIndex = i;
+				x++;
+			}
+		}
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	adjustForm()
+//	[	Desc:	used to fill collection field with ID's before submitting the form!
+//	[ 	Param:	None.
+//	[	Page:	objectrights.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function adjustForm()
+	{
+//{		Create a var to hold the comma dellimited list of ID's
+		var ACLColl = "";
+//{		if there is 4 rows, there is one custom right specification
+		if (document.all.ACLTable.rows.length == 4)
+		{
+//{			grab it's ID!
+			thisID = document.all.ACLTable.rows[3].id;
+//{			fill collection var with value!
+			ACLColl = thisID;
+		}
+//{		if there is more than 4 rows, there is more than one custom right specification
+		else if (document.all.ACLTable.rows.length > 4)
+		{
+//{			loop through them, adding their ID to the collection var!
+			for (i = 3; i < document.all.ACLTable.rows.length; i++)
+			{
+//{				captures the ID of the current row
+				thisID = document.all.ACLTable.rows[i].id;
+//{				if this is the first time in the loop
+				if (ACLColl=="")
+				{	ACLColl = thisID;	}
+//{				if this is not the first time in the loop
+				else
+				{	ACLColl = ACLColl.concat(", "+thisID);	}
+			}
+		}
+//{		set collection field = to the value of the collection var
+		document.tabularForm.ACLCollection.value = ACLColl;
+//{		submit the form already!
+		//document.tabularForm.submit();
+		docSubmit();
+	}
+	function docSubmit()
+	{
+		var postResults = glo_buildFormPost('tabularForm');
+		var proceed = postResults[0];
+		if (proceed)
+		{
+			glo_setOpenerLocation();
+			glo_doClose();
+		}
+
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	showDACL()
+//	[	Desc:	used to show/hide the additional rights information for a particular ACL
+//	[ 	Other:	this function is used separatley from showCACL, because Default ACL(s) and Custom ACL(s) could have overlapping ID'!
+//	[	Page:	accesscontrol.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function showDACL(id)
+	{
+//{		grabs the image object that is being clicked
+		imgObj = document.getElementById('dimg'+id);
+//{		grabs the associated div object from the id
+		divObj = document.getElementById('dacl'+id);
+//{		grabs the associated btn from the id
+		btnObj = document.getElementById('dbtnacl'+id);
+//{		if the additional info is currently hidden,
+		if (imgObj.src == expand.src)
+		{
+//{			then display it now!
+			divObj.style.display = 'block';
+//{			then display it now!
+			btnObj.style.display = 'block';
+//{			adjust the image source for next possible user interaction!
+			imgObj.src = contract.src;
+		}
+//{		if the additional info is currently displayed,
+		else
+		{
+//{			then hide it! quickly! before they see it!
+			divObj.style.display = 'none';
+//{			then hide it! quickly! before they see it!
+			btnObj.style.display = 'none';
+//{			adjust the image source for next possible user interaction!
+			imgObj.src = expand.src;
+		}
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	showCACL()
+//	[	Desc:	used to show/hide the additional rights information for a particular ACL
+//	[ 	Other:	this function is used separatley from showDACL, because Default ACL(s) and Custom ACL(s) could have overlapping ID'!
+//	[	Page:	accesscontrol.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function showCACL(id)
+	{
+//{		grabs the image object that is being clicked
+		imgObj = document.getElementById('cimg'+id);
+//{		grabs the associated div object from the id
+		divObj = document.getElementById('cacl'+id);
+//{		grabs the associated btn from the id
+		btnObj = document.getElementById('cbtnacl'+id);
+//{		if the additional info is currently hidden,
+		if (imgObj.src == expand.src)
+		{
+//{			then display it now!
+			divObj.style.display = 'block';
+//{			then display it now!
+			btnObj.style.display = 'block';
+//{			adjust the image source for next possible user interaction!
+			imgObj.src = contract.src;
+		}
+//{		if the additional info is currently displayed,
+		else
+		{
+//{			then hide it! quickly! before they see it!
+			divObj.style.display = 'none';
+//{			then hide it! quickly! before they see it!
+			btnObj.style.display = 'none';
+//{			adjust the image source for next possible user interaction!
+			imgObj.src = expand.src;
+		}
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	switchOptions()
+//	[	Desc:	used to dynamically recreate the options of a dependant select box
+//	[ 	Other:	the values come from a collection of hidden form fields that is generated when the page loads!
+//	[	Page:	accesscontrol.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function switchOptions()
+	{
+//{		grabs the actual ObjectTypeID from the form!
+		curSelection = tabularForm.ObjectTypeID.value;
+//{		grabs the dependant select box as an object!
+		objSelectBox = document.getElementById('otherbox');
+//{		remove all options from the dependant select box!
+		objSelectBox.options.length = 0;
+//{		create a string variable to house the field name
+		var fieldName = "";
+//{		if the selected value is for Agent
+		if (curSelection==1)//Agent
+		{fieldName = "Agent"}
+//{		if the selected value is for Ticket Box
+		if (curSelection==2)
+		{fieldName = "TicketBox"}
+//{		if the selected value is for Group
+		if (curSelection==4)
+		{fieldName = "Group"}
+//{		if the selected value is for Ticket category
+		if (curSelection==6)
+		{fieldName = "TicketCategory"}
+		if (eval("document.tabularForm.hi"+fieldName+"Name"))
+		{
+	//{		if there is a collection of the required hidden fields,
+			if (eval("document.all.hi"+fieldName+"Name.length"))
+			{
+	//{			loop through them, adding them as options to the select box!
+				for (i = 0; i < eval("document.all.hi"+fieldName+"Name.length"); i++)
+				{
+					newOption = new Option();
+					newOption.text = eval("document.all.hi"+fieldName+"Name["+i+"].value");
+					newOption.value = eval("document.all.hi"+fieldName+"ID["+i+"].value");
+					objSelectBox.options[objSelectBox.options.length] = newOption;
+				}
+			}
+	//{		if there is only one required hidden field, 
+			else
+			{
+	//{			add it as an option to the select box!
+				newOption = new Option();
+				newOption.text = eval("tabularForm.hi"+fieldName+"Name.value");
+				newOption.value = eval("tabularForm.hi"+fieldName+"ID.value");
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+			}
+		}
+		disablePage((document.tabularForm.UseDefaultRights[0].checked?1:0));
+	}
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+

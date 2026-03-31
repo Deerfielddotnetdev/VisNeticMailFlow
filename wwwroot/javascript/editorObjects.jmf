@@ -1,0 +1,1082 @@
+var verifyStyle = 'false';
+
+function Editor() {
+/* **** EDITOR PROPERTIES **** */ 
+	this.isFocused = false;
+	this.curPos;
+	this.bookMark;
+	this.quotemsg;
+	this.id = 'messagepartition';
+	this.focused = 0;
+	this.type = document.messagedoc.getAttribute('action');
+	this.body;
+	this.bodytemp = document.messagedoc.getAttribute('action');
+	this.quotedchar = document.messagedoc.getAttribute('quote');
+	this.didPaste = false;
+	this.spellChecked = false;
+	this.colorSetInProgress = false;	// blocks color validation, causes endless loop
+	this.fontsize = 1;
+	this.fontname = 0;
+	verifyStyle = 'false'; 
+	
+	// methods
+	Editor.prototype.init = init;
+	Editor.prototype.setFormat = setFormat;
+	Editor.prototype.trapCursor = trapCursor;
+	Editor.prototype.setFocus = setFocus;
+	Editor.prototype.pipefilter = pipefilter;
+	Editor.prototype.getdocType = getdocType;
+	Editor.prototype.setBookmark = setBookmark;
+	Editor.prototype.setBodyTemp = setBodyTemp;
+	Editor.prototype.setBodyHTML = setBodyHTML;
+	Editor.prototype.checkfocus = checkfocus;
+	Editor.prototype.pasteContent = pasteContent;
+	Editor.prototype.fontproperties = fontproperties;	
+	Editor.prototype.convertToHTMLText = convertToHTMLText;
+	Editor.prototype.convertToText = convertToText;
+	Editor.prototype.attachFocusEvents = attachFocusEvents;
+	Editor.prototype.detachFocusEvents = detachFocusEvents;
+	Editor.prototype.createHyperLink = createHyperLink;
+	Editor.prototype.insertImage = insertImage;				
+	
+	Editor.prototype.getColors = getColors;
+	Editor.prototype.getStyle = getStyle;
+	Editor.prototype.setStyle = setStyle;
+	Editor.prototype.setRange = setRange;
+	Editor.prototype.resetStyles = resetStyles;
+	//Editor.prototype.keyStyleCheck = keyStyleCheck;
+
+
+/* **** EDITOR METHOD DEFINITIONS **** */
+
+
+function checkfocus() {
+	if(this.isFocused == false) {
+		messagepartition.focus();
+	}
+}
+
+function setFormat(html)
+{
+	this.useHTML = html;
+	if(html == 0)
+	{
+		if(messagepartition.innerText)
+		{
+			messagepartition.innerText = messagepartition.innerText; 
+		}
+		else
+		{
+			messagepartition.textContent = messagepartition.textContent; 
+		}
+	}
+}
+
+function convertToText()
+{
+	tempHTML = setBodyTemp();
+	
+	// replace certain html elements with breaks
+	tempHTML = tempHTML.replace(/<BR>/gi,'\r');
+	tempHTML = tempHTML.replace(/<P>/gi,'\r\r');
+	tempHTML = tempHTML.replace(/<\/TR>/g,'\r');
+	
+	tempHTML = tempHTML.replace(/<\/TD>/g,' ');
+	//tempHTML = tempHTML.replace
+	
+	
+	/*var anchorMatch = /(.*)(<A href=\")(.*)(\">)(.*)(<\/a>)(.*)/gi;
+	while(tempHTML.match(anchorMatch)){
+		tempHTML = tempHTML.replace(anchorMatch,'$1$3$7');
+	}*/
+	
+	//tempHTML = tempHTML.replace(s/<a href=\"(.*)\">(.*)<\/a>/gi,'$3');
+
+	/*var tagMatch = /(.*)(<)(.*)(>)(.*)/gi;
+	while(tempHTML.match(tagMatch)){
+		tempHTML = tempHTML.replace(tagMatch,'$1$5');
+	}*/
+	
+	// replace HTML tags.  
+	var re = /<(.|\n)+?>/gi;
+	tempHTML = tempHTML.replace(re, '');
+	
+	// remove the problem chars http://.com/?what=1&what=2
+	
+	tempHTML = tempHTML.replace(/\”/g,'\"');
+	tempHTML = tempHTML.replace(/\“/g,'\"');
+	tempHTML = tempHTML.replace(/—/g,'-');
+	tempHTML = tempHTML.replace(/‘/g,'\'');
+	tempHTML = tempHTML.replace(/’/g,'\'');
+	tempHTML = tempHTML.replace(/(&nbsp;)/g,' ');
+	tempHTML = tempHTML.replace(/(&amp;)/g,'&');
+	tempHTML = tempHTML.replace(/&gt;/g,'>');
+	tempHTML = tempHTML.replace(/&lt;/g,'<');
+	
+	return tempHTML;				
+		
+}
+
+function convertToHTMLText() {
+	
+	tempHTML = setBodyTemp();
+	
+	tempHTML = tempHTML.replace(/<BR>/gi,'|br|');
+	tempHTML = tempHTML.replace(/<P>/gi,'|p|');
+	tempHTML = tempHTML.replace(/<\/P>/gi,'');
+	tempHTML = tempHTML.replace(/<\/TR>/gi,'|tr|');
+	tempHTML = tempHTML.replace(/<\/TD>/gi,'|td|');
+	tempHTML = tempHTML.replace(/(.*)(<A href=\")(.*)(\">)(.*)(<\/a>)(.*)/gi,'$3');
+	// reset the display 
+	
+	setBodyHTML(tempHTML);
+
+	// get the body as text
+	bodytemp = setBodyTemp('text');
+	
+	tempHTML = tempHTML.replace(/\”/g,'\"');
+	tempHTML = tempHTML.replace(/\“/g,'\"');
+	tempHTML = tempHTML.replace(/—/g,'-');
+	tempHTML = tempHTML.replace(/‘/g,'\'');
+	tempHTML = tempHTML.replace(/’/g,'\'');
+						
+	// replace temp formatting with the real stuff
+	bodytemp = bodytemp.replace(/\|br\|/gi,"<BR/>");  
+	bodytemp = bodytemp.replace(/\|p\|/gi,"<P>");
+	bodytemp = bodytemp.replace(/\|tr\|/gi,"<BR/>");
+	bodytemp = bodytemp.replace(/\|td\|/gi," ");
+	
+	return bodytemp;
+
+}
+
+// for text mode obtain the plain text format
+// from the clipboard
+function OnPaste() 
+{
+	if ( getdocType() == 0 )
+	{
+		if (window.clipboardData)
+		{ 
+			event.returnValue = false;
+			var nText = window.clipboardData.getData("TEXT");
+			if (nText!=null)
+			{
+				resSel = false;
+				pasteContent(window.clipboardData.getData("TEXT"), true);
+			}
+		}		
+	}    
+}
+
+function pasteContent(text, bEscape ) 
+{
+	if(this.isFocused == false || typeof this.isFocused == "undefined")
+		messagepartition.focus();
+	
+	if ( cursorPos && resSel)
+	{
+		restoreSelection(cursorPos);
+	}
+	
+	resSel = true;
+	
+	if ( bEscape )
+	{
+		// escape < and > as we don't want
+		// html tags to be rendered
+		text = text.replace( /</g, '&lt;' );
+		text = text.replace( />/g, '&gt;' );
+
+		// replace new lines with <BR>
+		text = text.replace( /\r\n/g, '<BR/>' );
+		text = text.replace( /\n/g, '<BR/>' );
+	}
+	else
+	{
+		text = text.replace( /&lt;/g, '<' );
+		text = text.replace( /&gt;/g, '>' );
+	}
+	
+	// insert the text at the current selection					
+	if (window.getSelection)
+	{  
+  	var sel, range;
+  	sel = window.getSelection();
+    if (sel.getRangeAt && sel.rangeCount) {
+        range = sel.getRangeAt(0);
+        range.deleteContents();
+        var el = document.createElement("div");
+        el.innerHTML = text;
+        if ( document.getElementById("optText").checked && glo_whichBrowser() == "Firefox" )
+				{
+					var theText = el.innerText;					
+					theText = theText.replace( /\r\n/g, '<BR/>' );
+					theText = theText.replace( /\n/g, '<BR/>' );
+					el.innerHTML = theText;
+				}		           
+        range.insertNode(el);
+    }
+  } 
+  else
+ 	{
+ 		this.curPos = document.selection.createRange();
+		this.curPos.pasteHTML(text);
+ 	}
+}
+
+function setBodyTemp(format) {
+	// sets the body temp property.  default is html.
+	if (format != 'html' && format != 'text') {
+		this.bodytemp = messagepartition.innerHTML;
+	} else {
+		if (format == 'text') {
+			this.bodytemp = messagepartition.innerText;
+		} else {
+			this.bodytemp = messagepartition.innerHTML;
+		}
+	}
+	return this.bodytemp;
+}
+
+function fontproperties(){
+	// determine if anything has changed.  if so, apply it.
+	if(this.color != document.messagedoc.getAttribute('fontcolor')) {
+		this.color = document.messagedoc.getAttribute('fontcolor');
+		document.execCommand("ForeColor", false, this.color);
+	}
+	}
+
+function setBodyHTML(bodyhtml) {
+	messagepartition.innerHTML = bodyhtml;
+	setBodyTemp();
+}
+
+function setBookmark() {
+	this.bookMark = curPos.getBookmark();
+	return this.bookMark;
+}
+
+function getdocType() {
+	// method to get the type of document.
+	if (document.message.useHTML[0]) {
+		var doctype = (document.message.useHTML[0].checked) ? 1 : 0;
+	} else {
+		var doctype = document.message.useHTML.value;
+	}
+	this.useHTML = doctype;
+	return doctype;
+}
+
+function ctrlfilter() {
+	// applies formatting on ctrl-format operations
+	if (window.event.ctrlKey == true && 
+		(event.keyCode == 66 || event.keyCode == 73 || event.keyCode == 85)) {	
+		getStyle(1);
+		resetStyles(); 
+		// can't get this to work for some reason.
+		//alert(event.keyCode);
+		//return false;
+	}	
+}
+
+function pipefilter(e)
+{
+	if (!e){e = window.event;}
+	if(e.keyCode != 9 && e.keyCode != 13 && e.ctrlKey == false)
+	{
+		return true;
+	}
+	else
+	{
+		// local variables  
+		var para =  "<P/>";
+		var breakchr =  "<br/>";
+		var divopen = "<DIV id=replyquoted>";
+		var divclose = "</DIV>";
+		var unquoteopen = "<DIV id=replyunquoted>";
+		var unquoteclose = "</DIV>";
+		var breakstring = "<.>";
+		var breakstringesc = "&lt;.&gt;";
+		var legacyopen = "";
+		var legacyclose = "";
+		var curPos = this.curPos;
+		var returnval = true;
+		
+		this.curPos = document.selection.createRange();
+	
+		if(e.keyCode == 9)
+		{
+			// tab
+			curPos = this.curPos;
+			curPos.text = '\x20\x20\x20\x20\x20';
+			curPos.select();
+			returnval = false;
+		}
+		else if (e.ctrlKey == true && (e.keyCode == 66 || e.keyCode == 73 || e.keyCode == 85))
+		{	
+			return false;
+		}
+		else if (e.keyCode ==  13)
+		{	
+			getStyle(1);
+			if(e.shiftKey == true || e.ctrlKey == true)
+			{
+				breaktype = para;
+			}
+			else
+			{
+				breaktype = breakchr;
+			}						
+			
+			curPos = this.curPos;
+			
+			returnval = false;
+			useHTML = getdocType();
+			
+			if (useHTML == 1)
+			{
+				var breakpoint = false;
+				
+				curElement = curPos.parentElement();
+				/* 	the following code will iterate up the DOM to find all of the offset parents,
+					then recreate them with opening and closing tags.
+					this little bit of code was a bit insane, and caused many headaches, yet
+					makes it worth the price of admission. */
+				
+				while(breakpoint == false)
+				{
+					thisId = curElement.getAttribute('id');
+					breakpoint = ((thisId == 'messagepartition') || (thisId == 'replyquoted') || 
+					(thisId == 'replyunquoted')) ? true : false;
+				
+					if(breakpoint == false)
+					{
+						legacyopen = legacyopen + "<" + curElement.tagName + " ";
+						legacyclose = legacyclose + "</" + curElement.tagName + "> ";
+						
+						// iterate over the attribs and recreate.
+					    var oAttribs = curElement.attributes;
+						if (oAttribs.length)
+						{
+							for (var i = 0; i < oAttribs.length; i++)
+							{
+						        var oAttrib = oAttribs[i];
+								if (oAttrib.specified)
+								{
+						            legacyopen = legacyopen + oAttrib.nodeName + '=' + oAttrib.nodeValue +' '; 
+								}	
+						  }
+						}
+						legacyopen = legacyopen + "style=" + curElement.cssText + ">&nbsp;";
+						curElement = curElement.parentElement;
+					}
+				}
+				
+				if (curElement.id == 'replyquoted')
+				{
+					curPos.text = breakstring;
+					tempHTML = setBodyTemp();
+					
+					// move the content to temp (can't edit in html area).
+					// find the breakpoint in temp
+					var breakpoint = tempHTML.indexOf(breakstring);  
+					
+					// insert the div breaks and legacy open and close tags
+					
+					tempHTML = tempHTML.replace(breakstringesc, 			
+						divclose+legacyclose+unquoteopen+breaktype+breakstringesc+
+						"<BR/><BR/>"+unquoteclose+divopen+legacyopen);  
+					setBodyHTML(tempHTML);  // reset the body
+					
+				}
+				else
+				{
+					curPos.pasteHTML(curPos.htmlText + breaktype + ' ');
+					curPos.text = breakstring;
+				}
+				
+			}
+			else
+			{
+				curPos.pasteHTML(curPos.htmlText + breaktype + ' ');
+				curPos.text = breakstring;
+			}
+			// handle the break insertion
+				
+			var range = document.body.createTextRange();  	
+			range.findText(breakstring);	
+			range.select();									
+			range.text = '';
+			range.select();
+			//resetStyles();
+		} 
+		return returnval;
+	}
+}
+
+function setFocus(i) {
+	// setter for the focused property
+	if(window.event.type == 'focus') {	
+		this.focused = 1;
+	} else {
+		this.focused = 0;
+	}
+}
+	
+function attachFocusEvents()
+{
+	if ( messagepartition.addEventListener )
+	{
+   	messagepartition.addEventListener('onfocus', setFocus, false);
+		messagepartition.addEventListener('onblur', setFocus, false);	
+  }
+  else if ( messagepartition.attachEvent )
+  {
+  	messagepartition.attachEvent('onfocus', setFocus);
+		messagepartition.attachEvent('onblur', setFocus);	
+  }				
+}
+
+
+function detachFocusEvents()
+{
+	if ( messagepartition.removeEventListener )
+	{
+   	messagepartition.removeEventListener('onfocus', setFocus, false);
+		messagepartition.removeEventListener('onblur', setFocus, false);	
+  }
+  else if ( messagepartition.detachEvent )
+  {
+  	messagepartition.detachEvent('onfocus', setFocus);
+		messagepartition.detachEvent('onblur', setFocus);		
+  }				
+}
+
+function getColors()
+{
+	glo_launchModalWindow('./colorselect.ems', 500, 150, 'yes', 'no', 'no');
+	setStyle('fontcolor');
+}				
+
+function resetStyles()
+{
+	for(i = 0; i < styleElements.children.length; i++)
+	{
+		if(styleElements.children(i).id.length > 0) {
+			val = eval('val'+styleElements.children(i).id);
+			if(val == true) {
+				setStyle(styleElements.children(i).id);
+			}
+		}
+	}
+	
+	document.getElementById("fontsize").children(valfontsize).selected = true;
+	setStyle('fontsize');
+	
+	document.getElementById("fontname").children(valfontname).selected = true;
+	setStyle('fontname');
+	
+	document.execCommand('ForeColor', false,
+	document.getElementById("colorPicker").getAttribute("currentColor"));
+}
+
+function q(str) {
+  return (/\s/g).test(str) 
+    ? str.replace(/^"?(.*?)"?$/, function(str, value) {
+        value = value.replace(/'/g, "");
+        return value;
+      })
+    : str;
+}
+function getStyle(basic) {
+		// loops through the style junkage and determines what should be pressed.
+		messagepartition.focus();
+		var selrng;
+		if (window.getSelection)
+		{ 
+        window.getSelection();
+    } 
+    else
+    {
+      if (document.selection.type == 'None')
+      {
+          selrng = document.selection.createRange();
+      }
+    }	
+		
+		// set basic styles
+		for(i = 0; i < styleElements.children.length; i++)
+		{
+			if(styleElements.children[i].id.length > 0)
+			{
+				if(selrng && selrng.queryCommandValue)
+				{
+					val = selrng.queryCommandValue(styleElements.children[i].id);
+				}
+				else
+				{
+					try
+					{
+						val = document.queryCommandValue(styleElements.children[i].id);
+					}
+					catch(e)
+					{
+						val=false;
+					}
+				}
+				
+				if(val==""){val=false;}
+				if(val=="left" || val=="center" || val=="right")
+				{
+					if(val=="left") 
+					{
+						if(styleElements.children[i].id == "justifyleft")
+						{
+							val=true;
+						}
+						else
+						{
+							val=false;
+						}
+					}
+					if(val=="center") 
+					{
+						if(styleElements.children[i].id == "justifycenter")
+						{
+							val=true;
+						}
+						else
+						{
+							val=false;
+						}
+					}
+					if(val=="right") 
+					{
+						if(styleElements.children[i].id == "justifyright")
+						{
+							val=true;
+						}
+						else
+						{
+							val=false;
+						}
+					}
+				}
+			
+				if(styleElements.children[i].id != 'copy' && styleElements.children[i].id != 'cut' &&
+				styleElements.children[i].id != 'paste' && styleElements.children[i].id != 'indent'
+				&& styleElements.children[i].id != 'outdent' )
+				{
+					if(val == true)
+					{
+						styleElements.children[i].className = 'editorbutton editorbuttonon';
+					}
+					else
+					{
+						styleElements.children[i].className = 'editorbutton editorbuttonoff';
+					}					
+				}
+				attrib = 'val'+styleElements.children[i].id + '=' + val;
+				eval(attrib);
+			}
+		}
+		
+		// setup the default justification 
+		if(selrng && selrng.queryCommandValue)
+		{
+			if(selrng.queryCommandValue('justifyleft') == false && 
+			selrng.queryCommandValue('justifycenter') == false && 
+			selrng.queryCommandValue('justifyright') == false) {
+				document.getElementById('justifyleft').className = 'editorbutton editorbuttonon';
+			}
+		}
+		else
+		{
+			if(document.queryCommandValue('justifyleft') == false && 
+			document.queryCommandValue('justifycenter') == false && 
+			document.queryCommandValue('justifyright') == false) {
+				document.getElementById('justifyleft').className = 'editorbutton editorbuttonon';
+			}
+		}
+		// do more than the basics
+		if(getStyle.arguments[0] != 1) {
+			// set font styles
+			var curfontname;
+			if(selrng && selrng.queryCommandValue)
+			{
+				curfontname = selrng.queryCommandValue('fontname');
+			}
+			else
+			{
+				curfontname = document.queryCommandValue('fontname');
+			}
+			for(i = 0; i < document.getElementById("fontname").children.length; i++) {
+				if(document.getElementById("fontname").children[i].text.toLowerCase() == curfontname.toLowerCase()) {
+					document.getElementById("fontname").children[i].selected = true;
+				}
+			}
+			if(selrng && selrng.queryCommandValue)
+			{
+				curfontsize = selrng.queryCommandValue('fontsize');
+			}
+			else
+			{
+				curfontsize = document.queryCommandValue('fontsize');
+			}
+			if(curfontsize == null) {
+				curfontsize=2;
+			}
+			for(i = 0; i < document.getElementById("fontsize").children.length; i++) {
+				if(document.getElementById("fontsize").children[i].value == curfontsize) {
+					document.getElementById("fontsize").children[i].selected = true;
+				}
+			}
+			
+			valfontsize = document.getElementById("fontsize").selectedIndex;
+			//alert('val: ' + valfontsize);
+			valfontname = document.getElementById("fontname").selectedIndex;
+		}
+		this.colorSetInProgress = false;
+	}
+
+
+	function setRange()
+	{
+		messagepartition.focus();
+		
+		if (window.getSelection)
+		{ 
+        window.getSelection();
+    } 
+    else
+    {
+      if (document.selection.type == 'None')
+      {
+          document.selection.createRange();
+      }
+    }	
+	}
+	
+	function colorToHex(color)
+	{
+	  if (color.substr(0, 1) === '#')
+	  {
+	  	return color;
+	  }
+	  var digits = /(.*?)rgb\((\d+), (\d+), (\d+)\)/.exec(color);
+	  
+	  var red = parseInt(digits[2]);
+	  var green = parseInt(digits[3]);
+	  var blue = parseInt(digits[4]);
+	  
+	  var rgb = blue | (green << 8) | (red << 16);
+	  var retVal = digits[1] + '#' + rgb.toString(16);
+	  if (retVal.length != 7)
+	  {
+	  	while ( retVal.length != 7 )
+	  	{
+	  		retVal = retVal + "0";
+	  	}
+	  }
+	  return retVal;
+	}
+
+	function setStyle(s)
+	{
+		setRange();
+		
+		if(s == 'fontsize')
+		{
+			oFontSize = document.getElementById("fontsize");
+			didwork = document.execCommand('FontSize', false, oFontSize[oFontSize.selectedIndex].value);
+		
+		}
+		else if (s == 'fontname')
+		{
+			oFontName = document.getElementById("fontname");
+			document.execCommand('FontName', false, oFontName[oFontName.selectedIndex].value);
+		}
+		else if (s == 'fontcolor')
+		{
+			if(htmledit.colorSetInProgress == false)
+			{
+				var theColor = document.getElementById("colorPicker").getAttribute("currentColor");
+				if (theColor.substr(0, 1) != '#')
+		    {
+		    	theColor = colorToHex(theColor);
+		    }
+				document.execCommand('foreColor', false, theColor);	
+			}
+		}
+		else if (s == 'highlight')
+		{
+			document.execCommand('backColor', false, '#FFFF00');
+		}
+		else if (s == 'clear')
+		{
+			document.execCommand('removeFormat', false, null);
+		}
+		else
+		{
+			// standard format options
+			document.execCommand(s);
+			if(s != 'copy' && s != 'cut' && s != 'paste' && s != 'indent' && s != 'outdent')
+			{
+				if (s == 'justifyright' || s == 'justifyleft' || s == 'justifycenter' )
+				{
+					if(s != 'justifyleft')
+						document.getElementById('justifyleft').className = 'editorbutton editorbuttonoff';
+					if(s != 'justifyright')
+						document.getElementById('justifyright').className = 'editorbutton editorbuttonoff';
+					if(s != 'justifycenter')
+						document.getElementById('justifycenter').className = 'editorbutton editorbuttonoff';
+				}
+												
+				if(document.queryCommandValue(s) == true)
+				{
+					document.getElementById(s).className = 'editorbutton editorbuttonon';
+				}
+				else
+				{
+					document.getElementById(s).className = 'editorbutton editorbuttonoff';
+				}
+			}
+		}
+		
+		valfontsize = document.getElementById("fontsize").selectedIndex;
+		valfontname = document.getElementById("fontname").selectedIndex;
+	}
+	
+function createHyperLink(e)
+{
+	setRange();
+	if(e.target)
+	{ 
+		var a = window.getSelection().getRangeAt(0);
+		var b = a.toString();
+		var c = (b=="")?true:false;
+		var z = document.createElement("span");
+		var l2 = prompt("Enter URL:", "http://");
+		if(c){b=l2;}
+		b = b.link(l2);
+		z.innerHTML=b;
+		a.deleteContents();
+		a.insertNode(z);
+	}
+	else
+	{ 
+		document.execCommand("CreateLink",true); 
+	}					
+}
+
+function insertImage(s,c)
+{
+	imgTag = "./download.ems?cid=" + c;
+	var inlineImg = document.createElement('img');
+	inlineImg.src= imgTag;
+	inlineImg.border = '0';
+	messagepartition.focus();						
+
+	if (window.getSelection)
+	{  
+  	var selection = window.getSelection();
+    if (selection.rangeCount > 0)
+    {
+    	var range = selection.getRangeAt(0);
+      range.insertNode(inlineImg);
+    }
+  }
+  else
+  { 
+  	var textRange = document.selection.createRange();
+    textRange.collapse(true);
+    textRange.pasteHTML(inlineImg.outerHTML);           
+  }  
+}
+
+function init() {
+	// *********************** OBJECT INIT *********************************
+	
+	// object creation
+	oEdit = document.createElement('div');
+	oEdit.id = this.id;
+	oEdit.setAttribute('contentEditable', true);	
+	oEdit.setAttribute('allowSelect', true);
+	oEdit.setAttribute('id', 'messagepartition');
+	
+	// style definitions
+	oEdit.style.height = "100%";
+	oEdit.style.paddingLeft = '4 px';
+	oEdit.style.paddingRight = '4 px';
+	oEdit.style.overflowY = 'auto';
+	
+	var sigopen = "<DIV id=vissignature>";
+	var sigclose = "</DIV>";
+	
+	valfontsize = document.getElementById("fontsize").selectedIndex;
+	valfontname = document.getElementById("fontname").selectedIndex;
+	
+	this.useHTML = document.messagedoc.getAttribute('html');
+	this.quotemsg = document.messagedoc.getAttribute('quotemsg');
+	verifyStyle = 'false';
+	
+	if(this.useHTML == 0)
+	{
+		htmlUI(false);
+	} 
+	else
+	{
+		htmlUI(true);
+	}
+	// create it.
+	editregion.appendChild(oEdit);
+	
+	// events
+	if ( oEdit.addEventListener )
+	{
+    oEdit.onkeyup = ctrlfilter;
+		oEdit.onkeydown = enterKeyPressHandler;
+		oEdit.onclick = trapCursor;
+		oEdit.onselect = trapCursor;
+		oEdit.onfocus = trapCursor;
+		oEdit.onkeyup = resetSpellCheck;
+		oEdit.onclick = getStyle;
+		oEdit.onpaste = OnPaste;		
+  }
+  else if ( oEdit.attachEvent )
+  {
+  	oEdit.attachEvent('onkeyup', ctrlfilter);
+		oEdit.attachEvent('onkeydown', enterKeyPressHandler);
+		oEdit.attachEvent('onclick', trapCursor);
+		oEdit.attachEvent('onselect', trapCursor);
+		oEdit.attachEvent('onfocus', trapCursor);
+		oEdit.attachEvent('onkeyup', resetSpellCheck);
+		oEdit.attachEvent('onclick', getStyle);
+		oEdit.attachEvent('onpaste', OnPaste);		
+  }
+
+	htmledit.attachFocusEvents();
+	
+	// init body temp to original
+	if(this.quotemsg == 1)
+	{
+		this.bodytemp = document.messagedoc.getAttribute('body');		
+	}
+	else
+	{
+		this.bodytemp = '';
+	}
+	
+	if ( glo_whichBrowser() != "Internet Explorer" )
+	{
+		if (this.bodytemp.length == 0)
+					this.bodytemp = '<br>';
+	}
+	
+	// reset doctype
+	getdocType();
+	
+	// setup the body
+	if (this.bodytemp.length > 0 && (this.type != 'New' && this.type != 'SendAgain' && this.type != 'SendDraft')) {
+		// forward, reply and all others
+		if (this.type != 'Forward') {
+			focusto = messagepartition;
+		} else {
+			focusto = document.message.to;
+		}
+		
+		if (this.useHTML == 1 && this.quotemsg == 1) {	
+		
+			// html replies, forwards, etc
+			var openbodystart = this.bodytemp.indexOf('<body');
+			var openbodyend = this.bodytemp.indexOf('>',openbodystart);
+			var insertStartPoint = openbodystart + (openbodyend-openbodystart)+1;
+			
+			if (openbodystart != -1) {
+				// document contains a body tag, modify as needed
+				var header = this.bodytemp.substring(0,insertStartPoint) + '<div id=replyquoted>';
+				var closebodystart = this.bodytemp.lastIndexOf('</body');
+				var closebodyend = this.bodytemp.indexOf('>', closebodystart);
+				var insertEndPoint = closebodystart;
+				var content = this.bodytemp.substring(insertStartPoint,insertEndPoint);
+				var footer = '</div>' + this.bodytemp.substring(insertEndPoint, this.bodytemp.length);
+				this.bodytemp = "<BR/><BR/>" + header + content + footer;	
+			} else {
+				// document does not contain a body tag, modify as needed 
+				this.bodytemp = '<BR/><BR/> <div id=replyquoted>' + this.bodytemp + '</div>';
+			}
+
+			// look for and remove any <form> tags							
+			var openformstart = this.bodytemp.indexOf('<form');
+			var openformend = this.bodytemp.indexOf('>',openformstart) + 1;
+			while (openformstart != -1) {
+				var formSubstring = this.bodytemp.substring(openformstart,openformend);
+				this.bodytemp = this.bodytemp.replace(formSubstring,' ');
+				openformstart = this.bodytemp.indexOf('<form');
+				openformend = this.bodytemp.indexOf('>',openformstart) + 1;								
+			}
+
+			this.bodytemp = this.bodytemp.replace(/<\/form>/gi,' ');
+			
+		} else if (this.quotemsg == 1) {
+			// non-html reply, preface
+			this.bodytemp = this.bodytemp.replace(/\r?\n/g, "\r");
+			this.bodytemp = '<BR/><BR/>' +  this.bodytemp.replace(/^/gm,this.quotedchar);
+		}	
+		
+	}  else if (this.bodytemp.length == 0 && this.type == 'SendAgain') {
+		// send again
+		focusto = document.message.to;
+
+	} else if (this.bodytemp.length == 0 && this.type == 'SendDraft') {
+		// open saved draft message
+		focusto = document.message.to;
+	
+	} else {
+		// new message
+		if (this.bodytemp.length > 0) {
+			focusto = document.message.to;	
+		}
+		focusto = document.message.to;
+	}
+	
+	// standard stuff for all messages
+	try
+	{
+		messagepartition.innerHTML = this.bodytemp;
+	}
+	catch(e)
+	{
+		alert("Cannot insert reply-to message.  DOM method innerHTML threw exception" + e);
+	}
+	
+	if(this.type != 'SendDraft')
+	{
+		insertSig(document.message.signature.value,null,true);
+	}
+	//messagepartition.fireEvent('onclick');  // init the font stuff.  
+	focusto.focus();
+}		
+
+function enterKeyPressHandler(evt) {
+    var sel, range, br, addedBr = false;
+    evt = evt || window.event;
+    var charCode = evt.which || evt.keyCode;
+    if (charCode == 13) {
+        if (typeof window.getSelection != "undefined") {
+            sel = window.getSelection();
+            if (sel.getRangeAt && sel.rangeCount) {
+                range = sel.getRangeAt(0);
+                range.deleteContents();
+                br = document.createElement("br");
+                range.insertNode(br);
+                range.setEndAfter(br);
+                range.setStartAfter(br);
+                sel.removeAllRanges();
+                sel.addRange(range);
+                addedBr = true;
+            }
+        } else if (typeof document.selection != "undefined") {
+            sel = document.selection;
+            if (sel.createRange) {
+                range = sel.createRange();
+                range.pasteHTML("<br>");
+                range.select();
+                addedBr = true;
+            }
+        }
+
+        // If successful, prevent the browser's default handling of the keypress
+        if (addedBr) {
+            return false;            
+        }
+    }
+}
+function trapCursor()
+{				
+	messagepartition.focus();
+		
+	if (window.getSelection)
+	{ 
+      this.curPos = window.getSelection();
+  } 
+  else
+  {
+    if (document.selection.type == 'None')
+    {
+        this.curPos = document.selection.createRange();	
+    }
+  }    
+}
+
+function resetSpellCheck() {
+	window.htmledit.spellChecked = false;
+}
+
+}
+			
+function History() {
+	
+	this.historyCollection = new Array();	// collection of history events
+	this.truncateLimit = 10;				// max number of history items to maintain.
+	this.cursorPosition;
+	
+	History.prototype.init = init;				// initializes a new History
+	History.prototype.goto = goto;				// moves the history cursor
+	History.prototype.truncate = truncate; 		// truncates history based on truncate limit
+	History.prototype.displayHistory = displayHistory;	// Recreates the history segment, displays
+	History.prototype.HistoryObj = HistoryObj;	// Object for history segments
+	
+	
+	function init() {
+		this.HistoryCollection = new Array();
+		this.cursorPosition = this.historyCollection.length;
+	}
+	
+	function goto(int) {
+		this.cursorPosition = this.cursorPosition + int;
+	}
+	
+	function truncate() { }
+	
+	function displayHistory() { }
+	
+	/* HISTORY OBJECT OBJECT 
+		Contains information about an individual history segment
+		*/
+	function HistoryObj() {
+		this.cursorPosition;  	// bookmarked position
+		this.HTML;				// HTML CODE
+		this.index;				// Index of self
+		
+		HistoryObj.prototype.create = create;
+		
+		function create(html,textrng) { }	
+		
+	}
+
+}
+
+function replaceWordChars(text)
+{
+    var s = text;
+    // smart single quotes and apostrophe
+    s = s.replace(/[\u2018\u2019\u201A]/g, "\'");
+    // smart double quotes
+    s = s.replace(/[\u201C\u201D\u201E]/g, "\"");
+    // ellipsis
+    s = s.replace(/\u2026/g, "...");
+    // dashes
+    s = s.replace(/[\u2013\u2014]/g, "-");
+    // circumflex
+    s = s.replace(/\u02C6/g, "^");
+    // open angle bracket
+    s = s.replace(/\u2039/g, "<");
+    // close angle bracket
+    s = s.replace(/\u203A/g, ">");
+    // spaces
+    s = s.replace(/[\u02DC\u00A0]/g, " ");
+    
+    return s;
+}

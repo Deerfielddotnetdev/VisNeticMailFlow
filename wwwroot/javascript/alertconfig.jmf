@@ -1,0 +1,221 @@
+function docSubmitForm()
+{
+	var proceed = true;
+	var bademail = false;
+	
+	for (i = 0; i < document.tabularForm.elements.length; i++)
+	{
+		if (document.tabularForm.elements[i].name.indexOf("EmailAddress")!=-1)
+		{
+			if (document.tabularForm.elements[i].readOnly==false && !glo_checkEmailAddress(document.tabularForm.elements[i].value))
+			{
+				proceed = false;
+				focfield = document.tabularForm.elements[i].name;
+				bademail = true;
+				break;
+			}
+		}
+		if (document.tabularForm.elements[i].name.indexOf("AgentOrGroup")!=-1)
+		{
+			if (document.tabularForm.AlertEvent.value=="12" ||document.tabularForm.AlertEvent.value=="13"  || document.tabularForm.AlertEvent.value=="14")
+			{
+				if (document.tabularForm.AgentOrGroup.value=="Group")
+				{
+					focfield = document.tabularForm.elements[i].name;
+					proceed = false;
+					break;
+				}
+			}
+		}
+	}
+
+	if (proceed)
+	{		
+		//	submit the form already!
+		var postResults = glo_buildFormPost('tabularForm');
+		
+		if (eval(postResults[0])==true)
+		{
+			glo_setOpenerLocation();
+			glo_doClose();
+		}
+	}
+	else 
+	{
+		if(bademail)
+		{
+			alert("An invalid email address was found.  Please verify all addresses.");
+		}
+		else
+		{
+			alert("The Recipient for this type of alert must be an Agent!");
+		}
+		
+		if ( focfield != null)
+			eval("document.tabularForm."+focfield).focus();
+	}
+}
+
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	switchMe(methodbox)
+//	[	Desc:	used to dynamically switch the innerHTML contents of a cell with id "recipient" + an ID
+//	[ 	Param:	methodbox is the object reference for the "AlertMethod[x]" select box that called the function
+//	[	Page:	alertconfig.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function switchMe(methodbox)
+	{
+		//capture the id that will be used to reference all objects
+		//alertID = methodbox.name.replace("AlertMethod", "");
+//{			create a container to hold the new innHTML contents
+		switchString = "";
+//{			if the Alert Method chosen is Internal Email or Instant Message, display the Agent Drop down initially
+		if (methodbox.value=="1")
+		{
+//{				add the AgentOrGroup selectbox, by default select Agent
+			switchString = "<table border='0' cellpadding='0' cellspacing='0' style='width:100%'><tr><td>";
+			switchString+= "<select name='AgentOrGroup' onchange='switchSelect(this)'>";
+			switchString+= "<option value='Agent' selected>Agent</option>";
+			switchString+= "<option value='Group'>Group</option>";
+			switchString+= "</select></td>";
+//{				add the Agent selectbox, as Agent is the selected value
+			switchString+= "<td style='width:100%'><select name='Agent' style='width:100%' id='selectBox'>";
+//{				if there is a collection of Agent Names in the form
+			if (document.all.hiAgentName.length)
+			{
+//{					loop through them
+				for (i = 0; i < document.all.hiAgentName.length; i++)
+				{
+//{						add their values as options to the Agent select box
+					switchString = switchString.concat("<option value='"+document.all.hiAgentID[i].value+"'>"+document.all.hiAgentName[i].value+"</option>");
+				}
+			}
+//{				else if there is only one Agent Name in the form
+			else if (tabularForm.hiAgentName)
+			{
+//{					then we would want to add it anyway!
+				switchString = switchString.concat("<option value='"+tabularForm.hiAgentID.value+"'>"+tabularForm.hiAgentName.value+"</option>");
+			}
+			switchString = switchString.concat("</select></td></tr></table>");
+//{				create a reference var for the containter
+			thisContainer = eval("recipient");
+//{				insert newly created innerHTML contents into the container cell
+			thisContainer.innerHTML = switchString;		
+		}
+//{			if the Alert Method chosen is External Email, display a text box for the insertion of an Email Address
+		else if (methodbox.value=="2")
+		{
+			switchString = "<input type='text' value='' style='width:100%' maxlength='255' name='EmailAddress'>";
+			thisContainer = eval("recipient");
+			thisContainer.innerHTML = switchString;
+		}
+	}// close function switchMe(methodbox)
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+//	[	Name:	switchSelect(xObject)
+//	[	Desc:	used to dynamically switch the contents of a selectBox[x] drop down
+//	[ 	Param:	xObject is the object reference for the "AgentOrGroup[x]" select box that called the function
+//	[	Page:	alertconfig.ems
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function switchSelect(xObject)
+	{
+//{		grabs ID for all associated objects from ID in Name
+		//thisID = parseInt(xObject.name.replace('AgentOrGroup',''));
+//{		grabs value of AgentOrGroup field, (Agent || Group)
+		thisVal = xObject.value;
+//{		grabs selectBox object for transformation
+		objSelectBox = document.getElementById('selectBox');
+//{		rename this selectBox according to the data it will contain, of course maintain the same ID
+		if (thisVal=="Group") { objSelectBox.name = "Group"; }
+		if (thisVal=="Agent") { objSelectBox.name = "Agent"; }
+//{		remove all options from the selectBox
+		objSelectBox.options.length = 0;
+//{		if Agent is selected, add all available agent options to selectBox
+		if (thisVal=="Agent")
+		{
+//{			if there is more than one hidden Agent Field,
+			if (document.all.hiAgentName.length)
+			{
+//{				loop through them, adding them as options to the select box
+				for (i = 0; i < document.all.hiAgentName.length; i++)
+				{
+					newOption = new Option();
+					newOption.text = document.all.hiAgentName[i].value;
+					newOption.value = document.all.hiAgentID[i].value;
+					objSelectBox.options[objSelectBox.options.length] = newOption;
+				}
+			}
+//{			if there is only one hidden agent Field,
+			else if (tabularForm.hiAgentName)
+			{
+//{				add it as an option to the select box!
+				newOption = new Option();
+				newOption.text = tabularForm.hiAgentName.value;
+				newOption.value = tabularForm.hiAgentID.value;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+			}
+		}//^ if (thisVal=="Agent")
+//{		if Group is selected, add all group options to selectBox
+		if (thisVal=="Group")
+		{
+//{			if there is more than one hidden group field,
+			if (document.all.hiGroupName.length)
+			{
+//{				loop through them, adding them as options to the select box
+				for (i = 0; i < document.all.hiGroupName.length; i++)
+				{
+					newOption = new Option();
+					newOption.text = document.all.hiGroupName[i].value;
+					newOption.value = document.all.hiGroupID[i].value;
+					objSelectBox.options[objSelectBox.options.length] = newOption;
+				}
+			}
+//{			if there is only one hidden Group field,
+			else if (tabularForm.hiGroupName)
+			{
+//{				add it as an option to the select box!
+				newOption = new Option();
+				newOption.text = tabularForm.hiGroupName.value;
+				newOption.value = tabularForm.hiGroupID.value;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+			}
+		}//^if (thisVal=="Group")
+	}// close function switchSelect(xObject)
+//	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	@#@#@#@#@#@#@#@#@#@#@#@#@#@#@@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
+
+
+
+function switchAlert(AlertEventBox)
+{
+	thisEventID = AlertEventBox.value;
+//	thisReferID = AlertEventBox.name.replace('AlertEvent','');
+	
+	NeedsTicketBox = false;
+	for (i = 0; i < document.tabularForm.hiAlertEventID.length; i++)
+	{
+		if (document.tabularForm.hiAlertEventID[i].value==thisEventID && document.tabularForm.hiAlertEventShowTicketBox[i].value=="1")
+		{
+			NeedsTicketBox = true;
+		}
+	}
+	var ff = new Array();
+		ff[0] = tabularForm.TicketBox;
+	glo_disableForm(NeedsTicketBox,ff);
+	
+	/*
+	myForBox = document.tabularForm.TicketBox;
+	if (NeedsTicketBox)
+	{
+		myForBox.disabled = false;
+		myForBox.style.backgroundColor = "white"
+	}
+	else
+	{
+		myForBox.disabled = true;
+		myForBox.style.backgroundColor = "#d3d3d3";
+	}
+	*/
+}

@@ -1,0 +1,1166 @@
+// $Header: /root/WWWROOT/javascript/ticketmsgobjects.jmf,v 1.2 2005/11/29 20:47:21 markm Exp $
+function Ticket(ticketid) {
+	// ============= TICKET OBJECT =============
+	
+	// Ticket Properties
+	this.ticketid = 0; 				// this ticketid
+	this.rowId = arguments[0];		// reference to the rowid
+	this.contact = 0;				// contact
+	this.subject = '';				
+	this.date = '';
+	this.isdeleted = 0;			
+	this.lockedby = 0;				// locked by agentid
+	this.statename = '';			
+	this.priorityname = '';
+	this.msgcount = 0;				// number of messages TOTAL
+	this.unreadmsgcount = 0;
+	this.notecount = 0;				// 0 = no notes, obviously.
+	this.requiresUpdate = false; // future use
+	this.maxrows = 5;				// max number of message rows to be displayed
+	this.maxnotesrows = 5;			// max number of notes rows to be displayed
+	this.currentView = defaultMsgView;	// current view type
+	this.threadedMsg = new Array();	// array of threaded msg objects
+	this.sequenceMsg = new Array();	// array of sequence msg objects
+	this.notes = new Array();		// array of note objects
+	this.notesxml = new Array();					// xml for notes
+	this.unreadnotecount = 0;
+	this.totalnotecount = 0;
+	this.notesLimitExceeded=0;		// are the notes longer than what is allowable?
+	this.treeHTML = '';				// html for the tree, no longer used, but stored.
+	this.HTMLObject;				// html Object for this ticket
+	this.whatsSelected;				// object relating to the currently selected message
+	this.threadedRootLength=0;		// number of root messages in the thread view
+	this.sequenceRootLength=0;		// number of root messages in the sequence view
+	this.sysnotes = new Array();	// system note array container thingy
+	
+	// ============== Ticket Methods ===============
+	Ticket.prototype.createThreadedView = createThreadedView;	// creates the threaded msg structure
+	Ticket.prototype.createSequenceView = createSequenceView;	// creates the sequence msg structure
+	Ticket.prototype.createNotesView = createNotesView;	// creates the notes structure
+	Ticket.prototype.getmessages = getmessages;			// queries for messages / notes xml
+	Ticket.prototype.init = init;						// initializes the ticket object
+	Ticket.prototype.createRow = createRow;				// creates a new message row
+	Ticket.prototype.updateRow = updateRow;				// updates a row / message attributes (not implemented)
+	Ticket.prototype.defaultOpen = defaultOpen;			// handles the default open event
+	Ticket.prototype.createTree = createTree;			// creates a message tree
+	Ticket.prototype.changeView = changeView;			// changes the view type
+	Ticket.prototype.getThreadedMsg = getThreadedMsg;	// nothing
+	Ticket.prototype.getSequenceMsg = getSequenceMsg;	// nothing
+	Ticket.prototype.setMaxRows = setMaxRows;			// sets the maxrows attribute for messages
+	Ticket.prototype.setMaxNotesRows = setMaxNotesRows;		// sets the maxrows attribute for notes
+	Ticket.prototype.forceUpdate = forceUpdate;			// forces an update of xml data
+	Ticket.prototype.setSelection = setSelection;		// sets object relating to the currently selected message
+	Ticket.prototype.selectSelection = selectSelection;	// selects a message, simulates click
+	Ticket.prototype.getSystemNotes = getSystemNotes;	// gets System notes, generates XML
+	Ticket.prototype.createSystemNotesView = createSystemNotesView;	// gets System notes, generates XML
+	Ticket.prototype.SystemNote = SystemNote;			// System note object
+	Ticket.prototype.openSysNotes = openSysNotes;		// System note display or hide
+
+	function selectSelection() {
+		if(this.whatsSelected instanceof Message) {
+			fireEvent(this.whatsSelected.msgRow,"click");			
+		}
+	}
+	
+	function setSelection(object) {
+		this.whatsSelected = object;
+	}
+	
+	function setMaxRows(number) {
+		
+		if(number == undefined)
+		{
+			this.maxrows = 999;
+		}
+		else
+		{
+			this.maxrows = number;
+		}
+		Tickets[this.rowId].forceUpdate('messages');
+	}	
+
+	function openSysNotes(e)
+	{
+		if (!e)
+	    e = window.event;
+	    
+		if (e.stopPropagation)
+		{
+			e.stopPropagation();
+		}	
+	  else
+	  {
+	  	e.cancelBubble = true;
+	  }
+		
+		noterow = eval('sysnotes'+this.ticketid);
+		oImg = eval('document.sysnoteindicator'+this.ticketid);
+		if(noterow.style.display == 'none') {
+			Tickets[this.rowId].createSystemNotesView();
+			noterow.style.display = 'block';
+			oImg.src = contractico.src;
+		} else {
+			noterow.style.display = 'none';
+			oImg.src = expandico.src;
+		}
+	}
+
+	function setMaxNotesRows(xnumber) 
+	{
+		if( xnumber == undefined ) 
+		{
+			this.maxnotesrows = 999;
+		} 
+		else 
+		{
+			this.maxnotesrows = xnumber;
+		}
+		
+		this.notesLimitExceeded = 0;
+		Tickets[this.rowId].forceUpdate('notes');
+	}	
+	
+	function forceUpdate(ofWhat)
+	{
+		this.requiresUpdate = true;
+		this.unreadmsgcount = 0;
+		
+		if (ofWhat == 'messages')
+		{
+			containerObj = eval('messagearea' + Tickets[this.rowId].ticketid);
+			this.threadedMsg = new Array();
+			this.sequenceMsg = new Array();
+			Tickets[this.rowId].defaultOpen();
+			
+			gloListControl.updateHasRead(this.rowId, this.msgcount, this.unreadmsgcount);
+		}
+		else if (ofWhat == 'sysnotes')
+		{
+			Tickets[this.rowId].createSystemNotesView();
+		}
+		else
+		{
+			nullDoc = Tickets[this.rowId].getmessages('notes');
+			Tickets[this.rowId].createNotesView();
+		}
+		
+	}
+	
+	function setDefault(view) {
+		this.currentView = view;
+	}
+	
+	function getThreadedMsg(dim) {
+		
+	}
+
+	function getSequenceMsg(dim) {
+		
+	}
+	
+	function changeView(view)
+	{
+		// view is threaded or sequence
+
+		this.currentView = view;
+		if(view == 'sequence') {
+			threadRow = eval('threadedMsgs'+Tickets[this.rowId].ticketid);
+			threadRow.style.display = 'none';
+			seqRow = eval('sequenceMsgs'+Tickets[this.rowId].ticketid);
+			seqRow.style.display = 'block';
+			Tickets[this.rowId].defaultOpen();
+			if (this.whatsSelected)
+			{
+				prevSelection = this.whatsSelected.messageId;
+				for(i=0; i < Tickets[this.rowId].sequenceMsg.length; i++) {
+					if(Tickets[this.rowId].sequenceMsg[i].messageId == prevSelection) {
+						Tickets[this.rowId].sequenceMsg[i].msgRow.className="branch branchOn";
+					}
+				}
+			}
+			
+		} else if (view == 'threaded') {
+			threadRow = eval('threadedMsgs'+Tickets[this.rowId].ticketid);
+			threadRow.style.display = 'block';
+			seqRow = eval('sequenceMsgs'+Tickets[this.rowId].ticketid);
+			seqRow.style.display = 'none';
+			Tickets[this.rowId].defaultOpen();
+			if (this.whatsSelected)
+			{
+				prevSelection = this.whatsSelected.messageId;
+				for(i=0; i < Tickets[this.rowId].threadedMsg.length; i++) {
+					if(Tickets[this.rowId].threadedMsg[i].messageId == prevSelection) {
+						Tickets[this.rowId].threadedMsg[i].msgRow.className="branch branchOn";
+					}
+				}
+			}
+		}
+	}
+				
+	function defaultOpen()
+	{
+		// handles the initial opening of a ticket.
+		if(this.currentView == 'sequence' && this.sequenceMsg.length == 0)
+		{
+			Tickets[this.rowId].createSequenceView();
+			if(this.msgcount > 0)
+			{
+				treeObj = 'sequenceTree' + this.ticketid;
+				if(document.getElementById(treeObj) != null)
+				{
+					if(glo_whichBrowser()=='Firefox')
+					{
+						var theDivs = glo_elementsById(treeObj);
+						initObjTree(theDivs);
+					}
+					else
+					{
+						initObjTree(eval(treeObj));
+					}
+					// sequence, select FIRST message
+					if (!this.whatsSelected)
+						this.whatsSelected = Tickets[this.rowId].sequenceMsg[0];
+				}
+			}
+		}
+		else if (this.currentView == 'threaded' && this.threadedMsg.length == 0)
+		{
+			Tickets[this.rowId].createThreadedView();
+			if(this.msgcount > 0)
+			{
+				treeObj = 'threadTree' + this.ticketid;
+				if(document.getElementById(treeObj) != null)
+				{
+					if(glo_whichBrowser()=='Firefox')
+					{
+						var theDivs = glo_elementsById(treeObj);
+						initObjTree(theDivs);
+					}
+					else
+					{
+						initObjTree(eval(treeObj));
+					}
+					
+					// threaded, select LAST message 
+					if (!this.whatsSelected)
+						this.whatsSelected = Tickets[this.rowId].threadedMsg[Tickets[this.rowId].threadedMsg.length-1];
+				}
+			}
+		}
+		if(this.notecount > this.notes.length)
+		{
+			Tickets[this.rowId].createNotesView();
+		}
+		
+		// default events to perform upon inital open.
+		this.requiresUpdate == false;
+		selectSelection();	
+	}
+
+	function createThreadedView()
+	{
+		seqRow = eval('threadedMsgs'+Tickets[this.rowId].ticketid);
+		seqRow.innerHTML = '';
+		xmlmessages = Tickets[this.rowId].getmessages(true);
+		if (xmlmessages)
+		{
+			filterStmt = "/root/Ticket/Message";
+			
+			Tickets[this.rowId].createTree(xmlmessages,filterStmt,'threaded');
+			if(xmlmessages)
+			{
+				var isMore = xmlmessages.selectNodes('/root/Ticket/More');
+			
+				if(isMore.length > 0)
+				{
+					var seqRow = eval('threadedMsgs'+Tickets[this.rowId].ticketid);
+					var expandMe = document.createElement('a');
+					expandMe.style.paddingLeft = '15px';
+					expandMe.href = '#';
+					expandMe.setAttribute('rowId', this.rowId);
+					expandMe.onclick = function(){Tickets[window.event.srcElement.getAttribute('rowId')].setMaxRows();return false;};	
+					var expanchor = seqRow.appendChild(expandMe);
+					expanchor.innerText = '[Show all messages]';
+				}	
+			}
+		}
+	}
+	
+	function createSequenceView()
+	{
+		seqRow = eval('sequenceMsgs'+Tickets[this.rowId].ticketid);
+		seqRow.innerHTML = '';
+		xmlmessages = Tickets[this.rowId].getmessages(false);
+		if (xmlmessages)
+		{
+			filterStmt = "/root/Ticket/Message";
+			
+			Tickets[this.rowId].createTree(xmlmessages,filterStmt,'sequence');
+			var isMore = xmlmessages.selectNodes('/root/Ticket/More');
+			
+			if(isMore.length > 0)
+			{
+				seqRow = eval('sequenceMsgs'+Tickets[this.rowId].ticketid);
+				expandMe = document.createElement('a');
+				expandMe.style.paddingLeft = '15px';
+				expandMe.href = '#';
+				expandMe.setAttribute('rowId', this.rowId);
+				expandMe.onclick = function(){Tickets[window.event.srcElement.getAttribute('rowId')].setMaxRows();return false;};	
+				expanchor = seqRow.appendChild(expandMe);
+				expanchor.innerText = '[Show all messages]';
+			}
+		}
+	}
+	
+	if (document.implementation.hasFeature("XPath", "3.0")) {
+	    if ( typeof XMLDocument == "undefined" ) {
+	        XMLDocument = Document;
+	    }
+	    XMLDocument.prototype.selectNodes = function(cXPathString, xNode) {
+	        if ( !xNode ) { xNode = this; }
+	        var oNSResolver = this.createNSResolver(this.documentElement);
+	        var aItems = this.evaluate(cXPathString, xNode, oNSResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	        var aResult = [];
+	        for ( var i = 0; i < aItems.snapshotLength; i++) {
+	            aResult[i] =  aItems.snapshotItem(i);
+	        }
+	        return aResult;
+	    }
+	    XMLDocument.prototype.selectSingleNode = function(cXPathString, xNode) {
+	        if( !xNode ) { xNode = this; }
+	        var xItems = this.selectNodes(cXPathString, xNode);
+	        if ( xItems.length > 0 ) { return xItems[0]; }
+	        else { return null; }
+	    }
+	 
+	    Element.prototype.selectNodes = function(cXPathString) {
+	        if (this.ownerDocument.selectNodes) {
+	            return this.ownerDocument.selectNodes(cXPathString, this);
+	        } else { throw "For XML Elements Only"; }
+	    }
+	 
+	    Element.prototype.selectSingleNode = function(cXPathString) {
+	        if (this.ownerDocument.selectSingleNode) {
+	            return this.ownerDocument.selectSingleNode(cXPathString, this);
+	        } else { throw "For XML Elements Only"; }
+	    }
+	    
+	    if(XMLDocument !== Document) {
+					Document.prototype.selectNodes = XMLDocument.prototype.selectNodes;
+					Document.prototype.selectSingleNode = XMLDocument.prototype.selectSingleNode;
+    	}
+	}
+	
+	function createTree(xml,filter,type,parent)
+	{
+		var xmlmessages;
+		var nNumMsgs=0;
+		if(window.xmlmessages)
+		{
+			xmlmessages = xml.selectNodes(filter);
+			nNumMsgs = xmlmessages.length;		
+			
+			// iterate through this level
+			if(nNumMsgs == 0)
+			{
+				if(type == 'threaded')
+				{
+					var seqRow = eval('threadedMsgs'+Tickets[this.rowId].ticketid);
+				}
+				else
+				{
+					var seqRow = eval('sequenceMsgs'+Tickets[this.rowId].ticketid);
+				}
+				
+				seqRow.innerHTML = '<i>&#160;No messages found for this ticket</i>';
+				seqRow.style.display='block';
+			}
+			else
+			{
+
+				var limiter = (this.maxrows < nNumMsgs) ? this.maxrows : nNumMsgs;
+				
+				for(var i=0; i < limiter; i++)
+				{
+					// create a new Message Object, add to array
+					if(type == 'threaded')
+					{
+						this.threadedMsg[this.threadedMsg.length] = new Message;
+						var pos = this.threadedMsg.length-1;
+						var thisMsg = this.threadedMsg[pos];
+						var treeObj = 'threadTree' + this.ticketid;
+					}
+					else
+					{
+						this.sequenceMsg[this.sequenceMsg.length] = new Message;
+						var pos = this.sequenceMsg.length-1;
+						var thisMsg = this.sequenceMsg[pos];
+						var treeObj = 'sequenceTree' + this.ticketid;
+					}
+					
+					if (xml.evaluate)
+					{ 
+						thisMsg.msginit(xmlmessages[i],pos);
+					}
+					else
+					{
+						thisMsg.msginit(xmlmessages.item(i),pos);
+					}
+
+					if (parent != undefined)
+					{
+						thisMsg.setParent(parent);
+						parent.addChild(thisMsg);
+						var seqRow = parent.msgContainer;
+					}
+					else
+					{
+						// insertion area
+						if(type == 'threaded')
+						{
+							var seqRow = eval('threadedMsgs'+Tickets[this.rowId].ticketid);
+							this.threadedRootLength = nNumMsgs;
+						}
+						else
+						{
+							var seqRow = eval('sequenceMsgs'+Tickets[this.rowId].ticketid);
+							this.sequenceRootLength = nNumMsgs;
+						}
+					}
+					// Div container
+					var oDiv = document.createElement('div');
+					oDiv.style.position='static'; 
+					oDiv.style.display='block'; 
+					oDiv.style.marginLeft="10px";
+					if(parent != undefined) 
+						oDiv.style.borderLeft="1px dotted gray";
+						
+					if(thisMsg.beenread == 0 && thisMsg.inbound == 1)
+					{
+						oDiv.style.fontWeight = 'bold';
+						this.unreadmsgcount++;
+					}
+					else
+						oDiv.style.fontWeight = 'normal';	
+					oDiv.id = 'container' + thisMsg.msgId;
+					var oContainer = seqRow.appendChild(oDiv);
+					thisMsg.setContainer(oContainer);
+										
+					var oContent = document.createElement('div');
+					oContent.setAttribute('treeId',thisMsg.msgId);
+					oContent.id = treeObj;
+					if(thisMsg.inbound == 1 && thisMsg.usecutoff == 0)
+						oContent.oncontextmenu = new Function("testClick(self);init2(); return false");
+					if(thisMsg.inbound == 1 && thisMsg.usecutoff == 1)
+						oContent.oncontextmenu = new Function("testClick(self);init6(); return false");
+					if(thisMsg.inbound == 0 && thisMsg.outboundtype == 1 && thisMsg.isdraft == 0)
+						oContent.oncontextmenu = new Function("testClick(self);init4(); return false");
+					if(thisMsg.inbound == 0 && thisMsg.outboundtype == 1 && thisMsg.isdraft == 1)
+						oContent.oncontextmenu = new Function("testClick(self);init5(); return false");
+					if(thisMsg.inbound == 0 && thisMsg.outboundtype == 3)
+						oContent.oncontextmenu = new Function("testClick(self);init3(); return false");
+					oContent.msgDim = thisMsg.msgId;
+					oContent.setAttribute("ticketDim",this.rowId);
+					oContent.type = type;
+					oContent.className = "branch branchOff";
+					var oMsgRow = oContainer.appendChild(oContent);
+					thisMsg.setmsgRow(oMsgRow);
+					
+				//	replacement for DOM code above!
+					var strHTML = "<img src=\""+((thisMsg.hasChildren == true)?contractico.src:dotico.src)+"\" width=\"11\" height=\"11\" border=\"0\" hspace=\"1\" ";
+					if (thisMsg.hasChildren == true) {
+						strHTML+="onclick=\"toggleElm()\"";
+					}
+						strHTML+=">";
+					//oMsgRow.innerHTML+=strHTML;
+					
+					// inbound / outbound image
+/*					var inoutImg = document.createElement('img');
+					inoutImg.src = (thisMsg.inbound == 1) ? inboundico.src : ( (thisMsg.isdraft==1)? draftico.src : outboundico.src);
+					inoutImg.width = '15';
+					inoutImg.height = '15';
+					inoutImg.border = '0';
+					inoutImg.hspace='1';
+					oMsgRow.appendChild(inoutImg);
+*/
+					strHTML += "<img src=\""+((thisMsg.inbound == 1) ? inboundico.src : ( (thisMsg.isdraft==1)? draftico.src : outboundico.src))+"\" width=\"15\" height=\"15\" border=\"0\" hspace=\"1\">";
+//					oMsgRow.innerHTML+=strHTML;
+					if(thisMsg.priority >=6)
+					{
+						thisMsg.priority=3;
+					}
+					// priority image
+/*					var priorityImg = document.createElement('img');
+					priorityImg.src = eval('priority' + thisMsg.priority).src;
+					priorityImg.width = '15';
+					priorityImg.height = '15';
+					priorityImg.border = '0';
+					priorityImg.hspace='1';
+					oMsgRow.appendChild(priorityImg);
+*/					
+					strHTML += "<img src=\""+(eval('priority' + thisMsg.priority).src)+"\" width=\"15\" height=\"15\" border=\"0\" hspace=\"1\">";
+//					oMsgRow.innerHTML+=strHTML;
+
+
+					// attach image
+					if(thisMsg.attachcount > 0){
+						/*
+						var attachImg = document.createElement('img');
+						attachImg.src= attach11.src;
+						attachImg.width = '15';
+						attachImg.height = '15';
+						attachImg.border = '0';
+						attachImg.hspace='1';
+						oMsgRow.appendChild(attachImg);
+						*/
+						strHTML += "<img src=\""+(attach11.src)+"\" width=\"15\" height=\"15\" border=\"0\" hspace=\"1\">";
+					}
+//					oMsgRow.innerHTML+=strHTML;
+					
+
+					//var subject = document.createTextNode(thisMsg.subject+'\x20\x20\x20\x20\x20\x20');
+					//var fromdata = document.createTextNode(thisMsg.displayFrom);
+					//var date = document.createTextNode(thisMsg.date+'\x20\x20\x20\x20\x20\x20');
+					
+					if (thisMsg.contactId > 0) {
+						/*
+						oHistoryA = document.createElement('a');
+						oHistoryA.href = '#';
+						oHistoryA.setAttribute('rowId', this.rowId);
+						oHistoryA.setAttribute('contactId', thisMsg.contactId);
+						if ( oHistoryA.addEventListener )
+						{
+				      oHistoryA.addEventListener('onclick',function myFuncDueceDuece() { conFunc('history',window.event.srcElement.parentElement.getAttribute('contactId')); window.event.cancelBubble=true;}, false);
+				    }
+				    else if ( oHistoryA.attachEvent )
+				    {
+				    	oHistoryA.attachEvent('onclick',function myFuncDueceDuece() { conFunc('history',window.event.srcElement.parentElement.getAttribute('contactId')); window.event.cancelBubble=true;});
+				    }
+						oHistoryimg = document.createElement('img');
+						oHistoryimg.alt = 'View Contact History';
+						oHistoryimg.src= historyico.src;//'./images/ico_15x_history.gif';
+						oHistoryimg.width = '15';
+						oHistoryimg.height = '15';
+						oHistoryimg.border = '0';
+						oHistoryimg.hspace = '1';
+						oHistoryA.appendChild(oHistoryimg);
+						*/
+						var oHistHTML = "<a href=\"#\" rowId=\""+this.rowId+"\" contactId=\""+thisMsg.contactId+"\" onclick=\"conFunc('history',window.event.srcElement.parentElement.getAttribute('contactId')); window.event.cancelBubble=true;\">";
+						oHistHTML+="<img src=\""+(historyico.src)+"\" width=\"15\" height=\"15\" border=\"0\" hspace=\"1\"></a>";
+					}
+					
+//					oMsgRow.appendChild(subject);
+					strHTML+=thisMsg.subject+"\x20\x20\x20\x20\x20\x20";
+					
+					if (thisMsg.contactId != 0) {
+						/*
+						oMsgRow.appendChild(oHistoryA);
+						oMsgRow.appendChild(document.createTextNode( '\x20-\x20' ) );
+						oMsgRow.appendChild(fromdata);
+						oMsgRow.appendChild(document.createTextNode( '\x20-\x20' ) );
+						*/
+						strHTML+=oHistHTML+"\x20-\x20"+thisMsg.displayFrom+"\x20-\x20";
+					} else {
+						strHTML+=thisMsg.displayFrom+"\x20-\x20";
+						/*
+						oMsgRow.appendChild(fromdata);
+						oMsgRow.appendChild(document.createTextNode( '\x20-\x20' ) );
+						*/
+					}
+
+					//oMsgRow.appendChild(date);
+					strHTML+=thisMsg.date+"\x20\x20\x20\x20\x20\x20";
+					//if (thisMsg.inbound == 1){
+					//	strHTML += " - ID: " + thisMsg.messageId;
+					//}
+					//else{
+					//	strHTML += " - ID: " + thisMsg.messageId;
+					//}					
+					oMsgRow.innerHTML+=strHTML;
+
+					// find the children
+					if (xml.evaluate)
+					{
+						if(xmlmessages[i].childNodes.length > 0)
+						{
+							var theNodes = xmlmessages[i].childNodes;
+							for(var x=0; x < theNodes.length; x++)
+							{
+								var child = theNodes[x];
+								if ( child.attributes )
+								{
+									var theID = child.getAttribute("ID");
+									if ( theID > 0 )
+									{
+										var filterStmt = "//Message[@ID = " + child.attributes.getNamedItem("ID").value;
+										var filterStmt = filterStmt + " and @Inbound = " + child.attributes.getNamedItem("Inbound").value +"]"; 
+										var nextParent = thisMsg;
+										Tickets[this.rowId].createTree(xml,filterStmt,type,nextParent);										
+									}	
+								}
+							}
+						}
+					}
+					else
+					{
+						if(xmlmessages.item(i).childNodes.length > 0)
+						{
+							for(var x=0; x < xmlmessages.item(i).childNodes.length; x++)
+							{
+								// get the id of the child message, set up the filter
+								
+								var child = xmlmessages.item(i).childNodes.item(x);	
+								var filterStmt = "//Message[@ID = " + child.attributes.getNamedItem("ID").value;
+								var filterStmt = filterStmt + " and @Inbound = " + child.attributes.getNamedItem("Inbound").value +"]"; 
+								// plant a recursive tree 
+								
+								var nextParent = thisMsg;
+								Tickets[this.rowId].createTree(xml,filterStmt,type,nextParent);
+							}
+						}
+					}					
+					seqRow.style.display='block';
+				}
+			}
+		}
+	}
+
+	function init()
+	{
+		if(document.getElementsByName("TicketObject").length)
+		{
+			this.HTMLObject = document.getElementsByName("TicketObject")[this.rowId];
+		}
+		else
+		{
+			this.HTMLObject = document.TicketObject;
+		}
+		
+		this.ticketid = this.HTMLObject.getAttribute('ticketid');
+		this.contact = this.HTMLObject.getAttribute('contact');
+		this.subject = this.HTMLObject.getAttribute('subject');
+		this.priority = 0;
+		this.state = 0;
+		if(this.subject.length == 0) {
+			this.subject = '[No Subject]';
+		}
+		
+		this.isdeleted = (this.HTMLObject.getAttribute('isdeleted')) ? this.HTMLObject.getAttribute('isdeleted') : 0;
+		
+		this.date = this.HTMLObject.getAttribute('date');
+		this.lockedby = this.HTMLObject.getAttribute('lockedby');
+		this.statename = this.HTMLObject.getAttribute('statename');
+		this.priorityname = this.HTMLObject.getAttribute('priorityname');
+		this.msgcount = this.HTMLObject.getAttribute('msgcount');
+		this.notecount = this.HTMLObject.getAttribute('notecount');
+		this.requiresUpdate = 0;
+		this.htmlContainer = this.HTMLObject
+	}
+	
+	/*---------------------------------------------------------------------------\                     
+	||  Comments:	Request the ticket history and notes from the server as XML
+	\*--------------------------------------------------------------------------*/
+	function getmessages(threaded) 
+	{	
+		
+		if(sFileName == 'ticketsearchresults.ems')
+		{
+			if(this.isdeleted)
+			{
+				var getURL = "./tickethistory.ems?OutputXML=1&ID=" + this.ticketid + "&MaxNoteThreads=" + 
+						 this.maxnotesrows + "&IsDeleted=" + this.isdeleted + "&MaxMsgThreads=" + this.maxrows + 
+						 "&Threaded=" + (threaded ? "1" : "0");
+			}
+			else
+			{
+				var getURL = "./tickethistory.ems?OutputXML=1&ID=" + this.ticketid + "&MaxNoteThreads=" + 
+						 this.maxnotesrows + "&MaxMsgThreads=" + this.maxrows + 
+						 "&Threaded=" + (threaded ? "1" : "0");
+			}
+		}
+		else
+		{
+			var getURL = "./tickethistory.ems?OutputXML=1&ID=" + this.ticketid + "&MaxNoteThreads=" + 
+					 this.maxnotesrows + "&MaxMsgThreads=" + this.maxrows + 
+					 "&Threaded=" + (threaded ? "1" : "0");
+		}
+
+		//alert(getURL);
+
+		try
+		{
+			xmlhttp.open('GET', getURL, false);
+			if(xmlhttp.overrideMimeType){ xmlhttp.overrideMimeType('text/xml'); }
+  		xmlhttp.send();
+			
+			if (xmlhttp.responseXML && xmlhttp.status == 200) 
+			{
+				oDoc = xmlhttp.responseXML;
+				if (xmlhttp.responseXML.evaluate)
+				{   
+			    this.notesxml = oDoc.selectNodes("/root/TicketNotes/TicketNote");
+			    var xPathRes = xmlhttp.responseXML.evaluate("//TicketNotes", xmlhttp.responseXML, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+					var tNote = xPathRes.iterateNext ();
+			    while (tNote)
+			    {	
+			    	this.totalnotecount = tNote.getAttribute ("notecount");
+		        this.unreadnotecount = tNote.getAttribute ("unreadnotecount");
+			      tNote = xPathRes.iterateNext ()
+		    	}
+		    	xPathRes = xmlhttp.responseXML.evaluate("//TicketNotes/More", xmlhttp.responseXML, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+		      var isMore = xPathRes.iterateNext ();
+			    while (isMore)
+			    {
+			    	var sTemp = isMore.getAttribute ("Description");
+		        if ( sTemp == "More notes are avaliable" )
+		        		this.notesLimitExceeded = true;				    	
+		                		
+			      isMore = xPathRes.iterateNext ()
+		    	}
+		    }
+		    else
+		    {
+		    	this.notesxml = oDoc.selectNodes("/root/TicketNotes/TicketNote");
+					this.totalnotecount = oDoc.selectSingleNode("/root/TicketNotes/@notecount");
+					this.unreadnotecount = oDoc.selectSingleNode("/root/TicketNotes/@unreadnotecount");
+					if ( oDoc.selectSingleNode("/root/TicketNotes/More") )
+						this.notesLimitExceeded = true;
+		    }
+		    return oDoc;
+			}
+			else 
+			{
+				return null;
+				alert("Error processing request: The MailFlow Server returned an invalid response.");
+			}	 
+		} 
+		catch(e) 
+		{
+			return null;
+			alert("An error occurred connecting to the server.\nThe server is either offline, or you have been disconnected from the Internet.");	
+		}	
+	}
+		
+	function updateRow() {
+		
+	}
+	
+	function createRow() {
+		// see archived function in source safe for this code.
+		// if we want to dynamically add or remove ticket rows, this code should be replaced.
+	}
+	
+	
+	function createHistoryView() {
+		historyContainer = eval('tickethistory' + Tickets[this.rowId].ticketid);
+		historyContainer.innerHTML = '';
+		historyTree = 'historyTree' + Tickets[this.rowId].ticketid;
+	}
+	
+	function createNotesView() {
+    try {
+        notesContainer = eval('notes' + Tickets[this.rowId].ticketid);
+        notesContainer.innerHTML = '';
+        notesTree = 'notesTree' + Tickets[this.rowId].ticketid;
+        notesTree.innerHTML = '';
+        if (this.notesxml.length) {
+            for (i = 0; i < this.notesxml.length; i++) {
+                try {
+	                this.notes[this.notes.length] = new Note();
+	                if (xmlhttp.responseXML.evaluate) {
+	                    this.notes[this.notes.length - 1].init(this.notesxml[i]);
+	                } else {
+	                    this.notes[this.notes.length - 1].init(this.notesxml.item(i));
+	                }
+	                notesDiv = document.createElement('div');
+	                if (this.notes[this.notes.length - 1].beenread == 0) {
+	                    notesDiv.style.fontWeight = 'bold';
+	                } else {
+	                    notesDiv.style.fontWeight = 'normal';
+	                }
+	                notesDiv.setAttribute('treeId', this.notes[this.notes.length - 1].noteId);
+	                notesDiv.setAttribute('ticketId', this.ticketid);
+	                notesDiv.setAttribute('ticketDim', this.rowId);
+	                notesDiv.id = notesTree;
+	                notesDiv.className = 'branch';
+	                noteRow = notesContainer.appendChild(notesDiv);
+	                this.notes[this.notes.length - 1].NoteContainer = notesDiv;
+	                notesImg = document.createElement('img');
+	                if (this.notes[this.notes.length - 1].isvoipnote == 0) {
+	                    notesImg.src = notesico.src;
+	                } else {
+	                    notesImg.src = phonenoteico.src;
+	                }
+	                notesImg.hspace = '2';
+	                notesImg.alt = 'NoteID: ' + this.notes[this.notes.length - 1].noteId;
+	                noteRow.appendChild(notesImg);
+	                notesAttImg = document.createElement('img');
+	                if (this.notes[this.notes.length - 1].numAttach > 0) {
+	                    notesAttImg.src = notesattico.src;
+	                } else {
+	                    notesAttImg.src = transico.src;
+	                }
+	                notesAttImg.hspace = '2';
+	                notesAttImg.width = '11';
+	                notesAttImg.height = '11';
+	                notesAttImg.alt = 'Note Attachments: ' + this.notes[this.notes.length - 1].numAttach;
+	                noteRow.appendChild(notesAttImg);
+	                if (typeof this.notes[this.notes.length - 1].Preview == 'undefined') {
+	                    noteSub = document.createTextNode('\x20\x20');
+	                } else {
+	                    noteSub = document.createTextNode(this.notes[this.notes.length - 1].Preview + '\x20\x20');
+	                }
+	                noteDateCreated = document.createTextNode(this.notes[this.notes.length - 1].DateCreated + '\x20');
+	                noteByWho = document.createTextNode('\x20\x20\x20\x20\x20Note by ' + this.notes[this.notes.length - 1].Agent + '\x20-\x20');
+	                noteRow.appendChild(noteSub);
+	                noteRow.appendChild(noteByWho);
+	                noteRow.appendChild(noteDateCreated);
+	               } catch (e) {
+										console.error(e);
+								 }
+            }
+        }
+        var thisNewNotesIconSrc = (this.notesxml.length > 0) ? "./images/ico_11x_notes.gif" : "./images/ico_transparent.gif";
+        var elm;
+        if (typeof event != 'undefined') {
+            elm = event.srcElement;
+        } else if (typeof window.event != 'undefined') {
+            elm = window.event.target;
+        }
+        if (typeof elm != 'undefined' && elm.name == "hasNotes") {
+            elm.innerText = this.totalnotecount;
+        } else {
+            var listRow = getListRows();
+            if (listRow[this.rowId].childNodes.length > 0) {
+                for (var x = 0; x < listRow[this.rowId].childNodes.length; x++) {
+                    var child = listRow[this.rowId].childNodes.item(x);
+                    if (child.name == "notesect") {
+                        if (child.childNodes.length > 0) {
+                            var z = child.getElementsByTagName("span");
+                            if (z.length == 1) {
+                                z[0].innerText = this.totalnotecount.value;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (typeof this.totalnotecount.value != 'undefined') {
+            gloListControl.updateHasReadNotes(this.rowId, this.totalnotecount.value, this.unreadnotecount.value);
+        } else {
+            gloListControl.updateHasReadNotes(this.rowId, this.totalnotecount, this.unreadnotecount);
+        }
+        if (this.notesLimitExceeded != 0) {
+            expandMe = document.createElement('a');
+            expandMe.style.paddingLeft = '15px';
+            expandMe.href = '#';
+            expandMe.setAttribute('rowId', this.rowId);
+            expandMe.onclick = function() {
+                Tickets[window.event.srcElement.getAttribute("rowId")].setMaxNotesRows();
+                return false;
+            };
+            expanchor = notesContainer.appendChild(expandMe);
+            expanchor.innerText = 'More notes are available, click to show all';
+        }
+        if (document.getElementById(notesTree)) {
+            if (glo_whichBrowser() == 'Firefox') {
+                var theDivs = glo_elementsById(notesTree);
+                initObjTree(theDivs);
+            } else {
+                initObjTree(eval(notesTree));
+            }
+        }
+    } catch (e) {
+        alert('An error occurred while creating the Ticket Notes view.');
+    }
+	}
+}
+
+
+function Note() {
+	// object for user notes
+	this.noteId = 0;
+	this.beenread = 1;
+	this.isvoipnote = 0;
+	this.numAttach = 0;
+	this.DateCreated;
+	this.AgentName;
+	this.Preview;
+	this.NoteContainer;	
+	
+	Note.prototype.init = init;
+	
+	function init(xml) {
+		this.noteId = xml.attributes.getNamedItem("TicketNoteID").value;
+		this.DateCreated = xml.attributes.getNamedItem("DateCreated").value;
+		this.Agent = xml.attributes.getNamedItem("Agent").value;
+		this.beenread = xml.attributes.getNamedItem("beenread").value;
+		this.isvoipnote = xml.attributes.getNamedItem("IsVoipNote").value;
+		this.numAttach = xml.attributes.getNamedItem("NumAttach").value;
+		if ( xml.childNodes.item(0).text )
+		{
+			this.Preview = xml.childNodes.item(0).text;			
+		}
+		else if (xml.childNodes.item(1) && xml.childNodes.item(1).textContent)
+		{
+			this.Preview = xml.childNodes.item(1).textContent;	
+		}
+	}	
+}
+
+function SystemNote() 
+{
+	// object for system type notes
+	this.dateCreated;
+	this.detail;
+	this.type;
+	this.msgid;			
+	this.inbound;
+	this.archiveid = 0;
+	this.msgread;						
+	SystemNote.prototype.init = init;
+	
+	function init(xml) 
+	{
+		if (xml.attributes.getNamedItem("ID"))
+			this.type = xml.attributes.getNamedItem("ID").value;
+		
+		if (xml.attributes.getNamedItem("When"))
+			this.dateCreated = xml.attributes.getNamedItem("When").value;
+
+		if (xml.attributes.getNamedItem("MsgID"))
+			this.msgid = xml.attributes.getNamedItem("MsgID").value;
+
+		if (xml.attributes.getNamedItem("IsInbound"))
+			this.inbound = xml.attributes.getNamedItem("IsInbound").value ==  1 ? 'inbound' : 'outbound';
+		
+		if (xml.attributes.getNamedItem("ArchiveID"))
+			this.archiveid = xml.attributes.getNamedItem("ArchiveID").value;
+			
+		if (xml.attributes.getNamedItem("wasread"))
+			this.msgread = xml.attributes.getNamedItem("wasread").value == 1 ? 'read' : 'unread';
+		
+		if (xml.childNodes.item(0))
+		{
+			if (xmlhttp.responseXML.evaluate)
+			{ 
+				this.detail = xml.childNodes.item(0).textContent;
+			}
+			else
+			{
+				this.detail = xml.childNodes.item(0).text;
+			}
+		}
+	}
+}
+
+function createSystemNotesView()
+{
+	sysnotexml = Tickets[this.rowId].getSystemNotes();
+	
+	sysnotescontainer = eval('sysnotes'+Tickets[this.rowId].ticketid);
+	sysnotesTree = 'sysnotesTree' + Tickets[this.rowId].ticketid;
+	if(window.sysnotexml != undefined)
+	{
+		if(sysnotexml.length > 0)
+		{
+			sysnotescontainer.innerHTML = '';
+			// loop through and create a sysnote object for each system note.
+
+			var sysHTML = "";
+
+			for(i=0;i < sysnotexml.length;i++)
+			{
+				this.sysnotes[this.sysnotes.length] = new SystemNote();
+				if (xmlhttp.responseXML.evaluate)
+				{ 
+					this.sysnotes[this.sysnotes.length-1].init(sysnotexml[i]);
+				}
+				else
+				{
+					this.sysnotes[this.sysnotes.length-1].init(sysnotexml.item(i));
+				}
+				
+				sysHTML += "<div ";
+
+				if(this.sysnotes[this.sysnotes.length-1].type == 8 || this.sysnotes[this.sysnotes.length-1].type == 5 || this.sysnotes[this.sysnotes.length-1].type == 15 || this.sysnotes[this.sysnotes.length-1].type == 16 || this.sysnotes[this.sysnotes.length-1].type == 17 || this.sysnotes[this.sysnotes.length-1].type == 19 ) 
+				{
+					sysHTML+= "id=\""+sysnotesTree+"\" class=\"branch\" msgid=\""+this.sysnotes[this.sysnotes.length-1].msgid+"\" ";
+					sysHTML+= "inbound=\""+this.sysnotes[this.sysnotes.length-1].inbound+"\" archiveid=\""+this.sysnotes[this.sysnotes.length-1].archiveid+"\" style=\"cursor:hand\">";
+				}
+				else
+				{
+					sysHTML+= "id=\"sysnotesTree\" class=\"branch\" onclick=\"window.event.cancelBubble = true;return false;\" style=\"cursor:default\">";
+				}
+								
+				// Icons for System Notes ( or Ticket History )				
+				var thisSysImgSrc = "";	
+				if (this.sysnotes[this.sysnotes.length-1].inbound == 'inbound' && this.sysnotes[this.sysnotes.length-1].type == 5)
+				{
+					thisSysImgSrc = "./images/sys_5_inbound.gif";
+				}
+				else if (this.sysnotes[this.sysnotes.length-1].inbound == 'outbound' && this.sysnotes[this.sysnotes.length-1].type == 5)
+				{
+					thisSysImgSrc = "./images/sys_5_outbound.gif";
+				}
+				else if (this.sysnotes[this.sysnotes.length-1].msgread == 'read' && this.sysnotes[this.sysnotes.length-1].type == 9)
+				{
+					thisSysImgSrc = "./images/sys_9_read.gif";
+				}
+				else if (this.sysnotes[this.sysnotes.length-1].msgread == 'unread' && this.sysnotes[this.sysnotes.length-1].type == 9)
+				{
+					thisSysImgSrc = "./images/sys_9_unread.gif";
+				}
+				else 
+				{
+					thisSysImgSrc = "./images/sys_"+ this.sysnotes[this.sysnotes.length-1].type +".gif";
+				}
+			
+				sysHTML+= "<img src=\""+thisSysImgSrc+"\" hspace=\"2\" border=\"0\">";
+				sysHTML+= this.sysnotes[this.sysnotes.length-1].dateCreated + "\x20-\x20";
+				sysHTML+= this.sysnotes[this.sysnotes.length-1].detail;
+				sysHTML+="</div>";
+				
+			}
+			
+			sysnotescontainer.innerHTML+= sysHTML;
+			
+			if(document.getElementById(sysnotesTree))
+			{
+				if(glo_whichBrowser()=='Firefox')
+				{
+					var theDivs = glo_elementsById(sysnotesTree);
+					initObjTree(theDivs);
+				}
+				else
+				{
+					initObjTree(eval(sysnotesTree));
+				}
+			}
+		}
+	}
+}
+
+function getSystemNotes() {
+	// gets the system notes
+	getURL = './ticketactions.ems?OutputXML=1&ID='+Tickets[this.rowId].ticketid;
+	
+	// send it
+	try{
+		xmlhttp.open('GET', getURL, false);
+		if(xmlhttp.overrideMimeType){ xmlhttp.overrideMimeType('text/xml'); }
+		xmlhttp.send();
+		httpstatus = xmlhttp.status;
+		
+		if (httpstatus == 200) {
+			oDoc = xmlhttp.responseXML.documentElement;
+			notesFilter = "/root/TicketHistory/Action";
+			this.systemnotesxml = oDoc.selectNodes(notesFilter);
+			return this.systemnotesxml;
+		} else {
+			alert(httpstatus);
+		} 
+	} catch(e) {
+		alert('An error occurred connecting to the server.\nThe server is either offline, or you have been disconnected from the Internet.');	
+	}
+}		
+
+function Message(){
+	// MESSAGE OBJECT 
+	this.messageId = 0;			// message id
+	this.inbound = 0;			// in or out
+	this.beenread = 0;			// message read/unread status
+	this.usecutoff = 0;			// message read/unread cutoff date
+	this.contactId = 0;			// id of this contact
+	this.subject = ''; 			// subject
+	this.msgId = 0; 			// reference to object's array position 
+	this.date = 0;				// date
+	this.priority = 0;			// message priority
+	this.priorityname = 0; 		// message priority name
+	this.attachcount = 0;		// number of attachments
+	this.hasChildren = 0;		// does it have children?
+	this.parentMsg;				// parent message object
+	this.msgContainer;			// object reference to the container of the object in the doc
+	this.msgRow;				// object reference to the message row (used for click events)
+	this.objChildren = new Array(); // array of children
+	this.displayFrom;
+	
+	
+	// Message methods
+	Message.prototype.msginit = msginit;
+	Message.prototype.setParent = setParent;
+	Message.prototype.setContainer = setContainer;
+	Message.prototype.addChild = addChild;
+	Message.prototype.setmsgRow = setmsgRow;
+	
+	function setmsgRow(obj) {
+		this.msgRow = obj;
+	}
+	
+	function addChild(obj) {
+		this.objChildren[this.objChildren.length] = obj;
+	}
+	
+	function msginit(xml,thisDim) {
+		// object init
+		agentName = '';
+		senderName = '';
+		
+		if(xml.attributes.getNamedItem("ContactID")) {
+			this.contactId = xml.attributes.getNamedItem("ContactID").value;	// contact id
+		} else {
+			this.contactId = 0;
+		}
+
+		this.messageId = xml.attributes.getNamedItem("ID").value;			// message id
+		this.inbound = xml.attributes.getNamedItem("Inbound").value;		// in or out
+		this.beenread = xml.attributes.getNamedItem("beenread").value;		// been read
+		this.outboundtype = xml.attributes.getNamedItem("OutboundType").value;
+		this.isdraft = xml.attributes.getNamedItem("IsDraft").value;
+		if(xml.attributes.getNamedItem("usecuttoffdate")) {
+			this.usecutoff = xml.attributes.getNamedItem("usecuttoffdate").value;
+		} else {
+			this.usecutoff = 0;
+		}
+		if( xml.attributes.getNamedItem("Subject").value.length == 0 )
+		{
+			this.subject = '[No Subject]';
+		}
+		else
+		{
+			eval( "this.subject = '" + xml.attributes.getNamedItem("Subject").value + "'"); // subject
+		}
+		this.msgId = thisDim; 													// reference to object's array position 
+		this.date = xml.attributes.getNamedItem("Date").value;								// date
+		this.priority = xml.attributes.getNamedItem("Priority").value;						// message priority
+		this.priorityname = xml.attributes.getNamedItem("PriorityName").value; 			// message priority name
+		this.attachcount = xml.attributes.getNamedItem("AttachCount").value;				// number of attachments
+		this.hasChildren = (xml.childNodes.length > 0) ? true : false;		// children?  yah?  no?
+		
+		if(this.inbound == 0)
+		{
+			agentName = (this.isdraft==1) ? "Draft by " : "Sent by ";
+			if (xml.attributes.getNamedItem("AgentName")) {
+				agentName += (xml.attributes.getNamedItem("AgentName").value.length == 0)? "Unknown" : xml.attributes.getNamedItem("AgentName").value;
+			} else {
+				agentName += "Unknown";
+			}			
+		}
+		else
+		{
+			// setup the inbound gig 
+			senderName = (xml.attributes.getNamedItem("EmailAddr").value.length != 0) 
+				? 'from ' + xml.attributes.getNamedItem("EmailAddr").value : 'Message from Unknown';			
+		}
+		this.displayFrom = (this.inbound == 0) ? agentName : senderName;
+	}	
+	
+	function setParent(parentMessageObject) {
+		this.parentMsg = parentMessageObject;
+	}
+	
+	function setContainer(htmlobjectContainer) {
+		this.msgContainer = htmlobjectContainer;
+	}
+}
+

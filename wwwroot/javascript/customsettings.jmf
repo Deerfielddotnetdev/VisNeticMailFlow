@@ -1,0 +1,451 @@
+var InfoID = 1;
+var EmailID = 1;
+function onSaveClick()
+{
+	if(glo_isBtnDisabled()){return false;}
+	var isChecked = (document.frmCustomSettings.chkCutoffDate.checked) ? 1 : 0;
+	var sDBTimeout = document.frmCustomSettings.txtDBTimeout.value;
+	var nDBTimeout = parseInt(sDBTimeout);
+	var continueProcess = true;
+	
+	if(isChecked)
+	{
+		if(!objCreateTicklerDate.Update(true))
+		{
+			continueProcess = false;
+		}
+	}
+	
+	if(continueProcess)
+	{
+		if (document.all.BypassTable.rows.length)
+		{
+			var nLength = document.all.BypassTable.rows.length;
+			var BypassList = "";
+			for (var i=0; i < nLength; i++)
+			{
+				thisID = document.all.BypassTable.rows[i].id;
+				if (BypassList=="")
+				{	BypassList = thisID;	}
+				else
+				{	BypassList = BypassList.concat(", "+thisID);	}
+			}
+			document.frmCustomSettings.BypassIdCollection.value = BypassList;
+		}
+		if (document.all.EmailTable.rows.length)
+		{
+			var nLength = document.all.EmailTable.rows.length;
+			var EmailList = "";
+			for (var i=0; i < nLength; i++)
+			{
+				thisID = document.all.EmailTable.rows[i].id;
+				if (EmailList=="")
+				{	EmailList = thisID;	}
+				else
+				{	EmailList = EmailList.concat(", "+thisID);	}
+			}
+			document.frmCustomSettings.EmailIdCollection.value = EmailList;
+		}
+		if (document.all.AutoEmailTable.rows.length)
+		{
+			var nLength = document.all.AutoEmailTable.rows.length;
+			var EmailList = "";
+			for (var i=0; i < nLength; i++)
+			{
+				thisID = document.all.AutoEmailTable.rows[i].id;
+				if (EmailList=="")
+				{	EmailList = thisID;	}
+				else
+				{	EmailList = EmailList.concat(", "+thisID);	}
+			}
+			document.frmCustomSettings.AutoEmailIdCollection.value = EmailList;
+		}
+		var postResults = glo_buildFormPost('frmCustomSettings');
+		var proceed = postResults[0];
+		if (proceed==true)
+		{
+			var newLoc = "customsettings.ems?tab=" + activeTab.id;
+			document.location = newLoc;
+			bSaveEnable = 0;			
+		}
+	}
+}
+			
+function addExc()
+{
+	var continueProcess = true;
+	if (document.frmCustomSettings.ExcDesc.value=="")
+  {
+    alert("You must set a description for this Office Hours Exception!");
+    document.frmCustomSettings.ExcDesc.focus();
+    continueProcess = false;
+  }	
+	
+	if(!objExcDate.Update(true))
+	{
+		continueProcess = false;
+	}
+	if(continueProcess)
+	{
+		document.frmCustomSettings.action.value = "addexc";
+		var postResults = glo_buildFormPost('frmCustomSettings');
+		var proceed = postResults[0];
+		if (proceed==true)
+		{
+			var newLoc = "customsettings.ems?tab=" + activeTab.id;
+			document.location = newLoc;
+		}
+	}
+}
+
+function delExc(id)
+{
+	if (id > 7)
+	{
+		usrResponse = confirm('Are you sure you want to delete this Office Hours Exception?');
+		if (usrResponse)
+		{
+			document.frmCustomSettings.action.value = "delexc";
+			document.frmCustomSettings.ooExcIDtoDel.value = id;
+			var postResults = glo_buildFormPost('frmCustomSettings');
+			var proceed = postResults[0];
+			if (proceed==true)
+			{
+				var newLoc = "customsettings.ems?tab=" + activeTab.id;
+				document.location = newLoc;			
+			}
+		}
+	}
+}			
+function switchSelect(xObject)
+{
+	thisID = parseInt(xObject.name.replace('AgentOrGroup',''));
+	thisVal = xObject.value;
+	objSelectBox = document.getElementById('selectBox'+thisID);
+	if (thisVal=="Group") { objSelectBox.name = "Group"+thisID; }
+	if (thisVal=="Agent") { objSelectBox.name = "Agent"+thisID; }
+	objSelectBox.options.length = 0;
+	if (thisVal=="Agent")
+	{
+		if (document.all.hiAgentName.length)
+		{
+			newOption = new Option();
+			newOption.text = 'None';
+			newOption.value = 0;
+			objSelectBox.options[objSelectBox.options.length] = newOption;
+			for (i = 0; i < document.all.hiAgentName.length; i++)
+			{
+				newOption = new Option();
+				newOption.text = document.all.hiAgentName[i].value;
+				newOption.value = document.all.hiAgentID[i].value;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+			}
+		}
+		else if (frmCustomSettings.hiAgentName)
+		{
+			newOption = new Option();
+			newOption.text = 'None';
+			newOption.value = 0;
+			newOption = new Option();
+			newOption.text = frmCustomSettings.hiAgentName.value;
+			newOption.value = frmCustomSettings.hiAgentID.value;
+			objSelectBox.options[objSelectBox.options.length] = newOption;
+		}
+	}
+	if (thisVal=="Group")
+	{
+		if (document.all.hiGroupName.length)
+		{
+			newOption = new Option();
+			newOption.text = 'None';
+			newOption.value = 0;
+			objSelectBox.options[objSelectBox.options.length] = newOption;
+			for (i = 0; i < document.all.hiGroupName.length; i++)
+			{
+				newOption = new Option();
+				newOption.text = document.all.hiGroupName[i].value;
+				newOption.value = document.all.hiGroupID[i].value;
+				objSelectBox.options[objSelectBox.options.length] = newOption;
+			}
+		}
+		else if (frmCustomSettings.hiGroupName)
+		{
+			newOption = new Option();
+			newOption.text = 'None';
+			newOption.value = 0;
+			objSelectBox.options[objSelectBox.options.length] = newOption;				
+			newOption = new Option();
+			newOption.text = frmCustomSettings.hiGroupName.value;
+			newOption.value = frmCustomSettings.hiGroupID.value;
+			objSelectBox.options[objSelectBox.options.length] = newOption;
+		}
+	}
+}
+
+function adjustDoc()
+{
+	if (InfoID==1)
+	{
+		if (parseInt(document.frmCustomSettings.BypassMaxID.value) > 1)
+		{
+			InfoID = parseInt(document.frmCustomSettings.BypassMaxID.value)+1;
+		}
+	}
+	if (document.all.BypassTable.rows.length)
+	{
+		if (document.all.BypassTable.rows.length == 1)
+		{
+			frmCustomSettings.MatchDelButton.rowIndex = "0";
+		}
+		else if (document.all.BypassTable.rows.length > 1)
+		{
+			for (i = 0; i < document.all.BypassTable.rows.length; i++)
+			{
+				document.all.MatchDelButton[i].rowIndex = parseInt(i);
+			}
+		}
+	}
+	if (EmailID==1)
+	{
+		if (parseInt(document.frmCustomSettings.EmailMaxID.value) > 1)
+		{
+			EmailID = parseInt(document.frmCustomSettings.EmailMaxID.value)+1;
+		}
+	}
+	
+	if (document.getElementById("EmailTable"))
+	{
+		if (document.all.EmailTable.rows.length)
+		{
+			if (document.all.EmailTable.rows.length == 1)
+			{
+				frmCustomSettings.EmailDelButton.rowIndex = "0";
+			}
+			else if (document.all.EmailTable.rows.length > 1)
+			{
+				for (i = 0; i < document.all.EmailTable.rows.length; i++)
+				{
+					document.all.EmailDelButton[i].rowIndex = parseInt(i);
+				}
+			}
+		}
+	}
+	if (document.getElementById("AutoEmailTable"))
+	{
+		if (document.all.AutoEmailTable.rows.length)
+		{
+			if (document.all.AutoEmailTable.rows.length == 1)
+			{
+				frmCustomSettings.AutoEmailDelButton.rowIndex = "0";
+			}
+			else if (document.all.AutoEmailTable.rows.length > 1)
+			{
+				for (i = 0; i < document.all.AutoEmailTable.rows.length; i++)
+				{
+					document.all.AutoEmailDelButton[i].rowIndex = parseInt(i);
+				}
+			}
+		}
+	}
+}
+
+function addOption()
+{
+	var NewRowID = parseInt(document.all.BypassTable.rows.length);
+	var NewRow = document.all.BypassTable.insertRow(-1);
+	NewRow.id = InfoID;
+	var strX = "<select id='BypassType"+InfoID+"'name='BypassType"+InfoID+"'>";
+	if (document.all.hiBId.length)
+	{
+		for (i = 0; i < document.all.hiBId.length; i++)
+		{
+			strX = strX + "<option value='"+document.all.hiBId[i].value+"'>"+document.all.hiBName[i].value+"</option>";
+		}
+	}
+	else if (frmCustomSettings.hiBId)
+	{
+		strX = strX + "<option value='"+frmCustomSettings.hiBId.value+"'>"+frmCustomSettings.hiBName.value+"</option>";
+	}
+	strX = strX + "</select>";
+	var NewCell = NewRow.insertCell(-1);
+	NewCell.setAttribute("align", "right");
+	NewCell.innerHTML = strX;
+	strX = "<input type='text' maxlength='255' onkeydown='onTimeOutKeyDown();' size='45' id='Bypass"+InfoID+"' name='Bypass"+InfoID+"'>";
+	NewCell = NewRow.insertCell(-1);
+	NewCell.innerHTML = strX;
+	strX = "<input type='button' class='childControlBtn' rowIndex='"+NewRowID+"' id='MatchDelButton"+InfoID+"' name='MatchDelButton' value='Remove' onclick='delOption();'>";
+	NewCell = NewRow.insertCell(-1);
+	NewCell.innerHTML = strX;
+	InfoID++;
+	document.frmCustomSettings.BypassMaxID.value = InfoID;
+	if (document.all.BypassTable.rows.length)
+	{
+		if (document.all.BypassTable.rows.length == 1)
+		{
+			frmCustomSettings.MatchDelButton.rowIndex = "0";
+		}
+		else if (document.all.BypassTable.rows.length > 1)
+		{
+			for (i = 0; i < document.all.BypassTable.rows.length; i++)
+			{
+				document.all.MatchDelButton[i].rowIndex = parseInt(i);
+			}
+		}
+	}
+	updateSaveButton();
+}
+
+function delOption()
+{
+	selectedIndex = parseInt(event.srcElement.rowIndex);
+	if (document.all.BypassTable.rows.length == 1)
+	{
+		BypassTable.deleteRow(selectedIndex);
+	}
+	else if (document.all.BypassTable.rows.length == 2)
+	{
+		BypassTable.deleteRow(selectedIndex);
+		frmCustomSettings.MatchDelButton.rowIndex = "0";
+	}
+	else if (document.all.BypassTable.rows.length > 2)
+	{
+		BypassTable.deleteRow(selectedIndex);
+		for (i = 0; i < document.all.BypassTable.rows.length; i++)
+		{document.all.MatchDelButton[i].rowIndex = parseInt(i);}
+	}
+	updateSaveButton();
+}
+
+function addEmail()
+{
+	var NewRowID = parseInt(document.all.EmailTable.rows.length);
+	var NewRow = document.all.EmailTable.insertRow(-1);
+	NewRow.id = EmailID;
+	var strX = "<select id='EmailType"+EmailID+"'name='EmailType"+EmailID+"'>";
+	if (document.all.hiEId.length)
+	{
+		for (i = 0; i < document.all.hiEId.length; i++)
+		{
+			strX = strX + "<option value='"+document.all.hiEId[i].value+"'>"+document.all.hiEName[i].value+"</option>";
+		}
+	}
+	else if (frmCustomSettings.hiEId)
+	{
+		strX = strX + "<option value='"+frmCustomSettings.hiEId.value+"'>"+frmCustomSettings.hiEName.value+"</option>";
+	}
+	strX = strX + "</select>";
+	var NewCell = NewRow.insertCell(-1);
+	NewCell.setAttribute("align", "right");
+	NewCell.innerHTML = strX;
+	strX = "<input type='text' maxlength='255' onkeydown='onTimeOutKeyDown();' size='45' id='Email"+EmailID+"' name='Email"+EmailID+"'>";
+	NewCell = NewRow.insertCell(-1);
+	NewCell.innerHTML = strX;
+	strX = "<input type='button' class='childControlBtn' rowIndex='"+NewRowID+"' id='EmailDelButton"+EmailID+"' name='EmailDelButton' value='Remove' onclick='delEmail();'>";
+	NewCell = NewRow.insertCell(-1);
+	NewCell.innerHTML = strX;
+	EmailID++;
+	document.frmCustomSettings.EmailMaxID.value = EmailID;
+	if (document.all.EmailTable.rows.length)
+	{
+		if (document.all.EmailTable.rows.length == 1)
+		{
+			frmCustomSettings.EmailDelButton.rowIndex = "0";
+		}
+		else if (document.all.EmailTable.rows.length > 1)
+		{
+			for (i = 0; i < document.all.EmailTable.rows.length; i++)
+			{
+				document.all.EmailDelButton[i].rowIndex = parseInt(i);
+			}
+		}
+	}
+	updateSaveButton();
+}
+
+function delEmail()
+{
+	selectedIndex = parseInt(event.srcElement.rowIndex);
+	if (document.all.EmailTable.rows.length == 1)
+	{
+		EmailTable.deleteRow(selectedIndex);
+	}
+	else if (document.all.EmailTable.rows.length == 2)
+	{
+		EmailTable.deleteRow(selectedIndex);
+		frmCustomSettings.EmailDelButton.rowIndex = "0";
+	}
+	else if (document.all.EmailTable.rows.length > 2)
+	{
+		EmailTable.deleteRow(selectedIndex);
+		for (i = 0; i < document.all.EmailTable.rows.length; i++)
+		{document.all.EmailDelButton[i].rowIndex = parseInt(i);}
+	}
+	updateSaveButton();
+}
+
+function addAutoEmail()
+{
+	var NewRowID = parseInt(document.all.AutoEmailTable.rows.length);
+	var NewRow = document.all.AutoEmailTable.insertRow(-1);
+	NewRow.id = EmailID;
+	var strX = "<select id='AutoEmailType"+EmailID+"'name='AutoEmailType"+EmailID+"'>";
+	if (document.all.hiAEId.length)
+	{
+		for (i = 0; i < document.all.hiAEId.length; i++)
+		{
+			strX = strX + "<option value='"+document.all.hiAEId[i].value+"'>"+document.all.hiAEName[i].value+"</option>";
+		}
+	}
+	else if (frmCustomSettings.hiAEId)
+	{
+		strX = strX + "<option value='"+frmCustomSettings.hiAEId.value+"'>"+frmCustomSettings.hiAEName.value+"</option>";
+	}
+	strX = strX + "</select>";
+	var NewCell = NewRow.insertCell(-1);
+	NewCell.setAttribute("align", "right");
+	NewCell.innerHTML = strX;
+	strX = "<input type='text' maxlength='255' onkeydown='onTimeOutKeyDown();' size='45' id='AutoEmail"+EmailID+"' name='AutoEmail"+EmailID+"'>";
+	NewCell = NewRow.insertCell(-1);
+	NewCell.innerHTML = strX;
+	strX = "<input type='button' class='childControlBtn' rowIndex='"+NewRowID+"' id='AutoEmailDelButton"+EmailID+"' name='AutoEmailDelButton' value='Remove' onclick='delAutoEmail();'>";
+	NewCell = NewRow.insertCell(-1);
+	NewCell.innerHTML = strX;
+	EmailID++;
+	document.frmCustomSettings.EmailMaxID.value = EmailID;
+	if (document.all.AutoEmailTable.rows.length)
+	{
+		if (document.all.AutoEmailTable.rows.length == 1)
+		{
+			frmCustomSettings.AutoEmailDelButton.rowIndex = "0";
+		}
+		else if (document.all.AutoEmailTable.rows.length > 1)
+		{
+			for (i = 0; i < document.all.AutoEmailTable.rows.length; i++)
+			{
+				document.all.AutoEmailDelButton[i].rowIndex = parseInt(i);
+			}
+		}
+	}
+	updateSaveButton();
+}
+
+function delAutoEmail()
+{
+	selectedIndex = parseInt(event.srcElement.rowIndex);
+	if (document.all.AutoEmailTable.rows.length == 1)
+	{
+		AutoEmailTable.deleteRow(selectedIndex);
+	}
+	else if (document.all.AutoEmailTable.rows.length == 2)
+	{
+		AutoEmailTable.deleteRow(selectedIndex);
+		frmCustomSettings.AutoEmailDelButton.rowIndex = "0";
+	}
+	else if (document.all.AutoEmailTable.rows.length > 2)
+	{
+		AutoEmailTable.deleteRow(selectedIndex);
+		for (i = 0; i < document.all.AutoEmailTable.rows.length; i++)
+		{document.all.AutoEmailDelButton[i].rowIndex = parseInt(i);}
+	}
+	updateSaveButton();
+}

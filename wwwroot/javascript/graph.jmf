@@ -1,0 +1,72 @@
+/***************************************************************************\
+||             
+||  $Header: /root/WWWROOT/javascript/graph.jmf,v 1.1 2005/04/18 19:28:40 markm Exp $
+||
+||                                         
+||  COMMENTS:   SVG Graph Support Functions
+||              
+\\*************************************************************************/
+
+function checkSVGViewer() 
+{
+	try
+	{
+		new ActiveXObject("Adobe.SVGCtl");
+	}
+	catch(e)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+function checkAndGetSVGViewer( bPrompt ) 
+{
+	if(!checkSVGViewer())
+	{ 
+		if ( bPrompt  && glo_whichBrowser() == "Internet Explorer" )
+		{
+			var winprops = "dialogHeight:230px;dialogWidth:625px;dialogTop:px;dialogLeft:px;" +
+					       "edge:Raised;center:Yes;help:No;resizable:no;status:no;scroll:no;";
+
+			window.showModalDialog("./download_svg.ems",window,winprops);
+		}
+		
+		return false;
+	}
+
+	return true;
+}
+
+
+function CreateGraph(height,width,bPrint)
+{
+	if (checkAndGetSVGViewer(!bPrint))
+	{
+		var embed = document.createElement("embed");
+		embed.src = "chart.svgz";
+		embed.wmode = "transparent";
+		embed.height = height;
+		embed.width  = width;
+	}
+	else
+	{
+		var embed = document.createElement("span");
+		embed.style.padding = 5;
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			embed.appendChild(document.createTextNode("Graph requires installation of Adobe SVG viewer"));
+		}
+		else
+		{
+			embed.appendChild(document.createTextNode("Graphs are only supported in Internet Explorer"));
+		}		
+	
+		if ( bPrint )
+			PrintReport();
+	}
+	
+	document.getElementById("graph_frame").appendChild(embed);
+}
+
