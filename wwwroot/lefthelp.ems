@@ -1,0 +1,677 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	<title></title>
+	<link rel="stylesheet" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/treetoggle.jmf"></script>
+	<script type="text/javascript" language="javascript">
+	var curSelObj = null;	
+	function UpdateNonAdminLink(id,t1,t2)
+	{
+		if(curSelObj)
+		{
+			curSelObj.className = "leftmenuNoHiLight";
+			curSelObj = document.getElementById(id);
+			curSelObj.className = "leftmenuHiLight";
+		}
+		else
+		{
+			curSelObj = document.getElementById(id);
+			curSelObj.className = "leftmenuHiLight";
+		}
+		if(t1 != null &amp;&amp; t1 != "")
+			openTree(t1);
+			
+		if(t2 != null &amp;&amp; t2 != "")
+			openTree(t2);
+	}
+		
+	function OpenGuide( sURL )
+	{
+		glo_launchNewWindow( sURL );
+	}	
+	
+	function setRightPane(sUrl)
+	{	
+		parent.setRightHelp("help/" + sUrl);		
+	}	
+		
+	</script>
+	</head>
+
+	<body style="overflow:auto;">
+	<table id="docMasterTable" style="height:100%;width:100%;table-layout:fixed;" border="1" cellpadding="0" cellspacing="0">		
+		<tr>
+			<td style="width:100%;height:100%;vertical-align:top;">
+			<table style="width:100%;padding:3px 0px 3px 5px;" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td style="width:100%;padding-left:5px;padding-top:3px;padding-bottom:3px;">
+					<div class="mainbranch">
+						<div class="branch" style="padding-bottom:3px;padding-top:3px;">
+							<nobr>
+								<a class="adminMenu" href="#" onclick="setRightPane('intro.htm');">
+								<span class="leftmenuNoHiLight" id="spanIntroduction" onclick="UpdateNonAdminLink(id);" style="font-weight:bold;padding-left:4px;">Introduction</span>
+								</a>
+							</nobr>
+						</div>
+						
+						<div id="div_ov">
+							<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_ov');" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td width="11" valign="top">
+										<img id="img_ov" src="./images/plus.gif" width="11" height="11" border="0"/>
+									</td>
+									<td class="adminbranch" valign="top">
+										<nobr><span style="font-weight:bold;">Overview</span></nobr>
+									</td>
+								</tr>
+							</table>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('overview/ticketboxes.htm');"><span class="leftmenuNoHiLight" level1="_ov" id="spanOVTicketBoxes" onclick="UpdateNonAdminLink(id);">TicketBoxes</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('overview/Ticket_Categories.htm');"><span class="leftmenuNoHiLight" level1="_ov" id="spanOVTicketCat" onclick="UpdateNonAdminLink(id);">Ticket Categories</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('overview/Tickets.htm');"><span class="leftmenuNoHiLight" level1="_ov" id="spanOVTickets" onclick="UpdateNonAdminLink(id);">Tickets</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('overview/Messages.htm');"><span class="leftmenuNoHiLight" level1="_ov" id="spanOVMessages" onclick="UpdateNonAdminLink(id);">Messages</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('overview/Ownership.htm');"><span class="leftmenuNoHiLight" level1="_ov" id="spanOVOwnership" onclick="UpdateNonAdminLink(id);">Ownership</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;" >
+								<a class="adminMenu" href="#" onclick="setRightPane('overview/Ticket_Notes.htm');"><span class="leftmenuNoHiLight" level1="_ov" id="spanOVTicketNotes" onclick="UpdateNonAdminLink(id);">Ticket Notes</span></a>
+							</div>
+						</div>
+			
+						<div id="div_ms">
+							<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_ms');" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td width="11" valign="top">				
+										<img id="img_ms" src="./images/plus.gif" width="11" height="11" border="0"/>
+									</td>
+									<td class="adminbranch" valign="top">
+										<nobr><span style="font-weight:bold;">My Shortcuts</span></nobr>
+									</td>
+								</tr>
+							</table>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/My_Tickets.htm');"><span class="leftmenuNoHiLight" level1="_ms" id="spanMSmytickets" onclick="UpdateNonAdminLink(id);">My Tickets</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Outbox.htm');"><span class="leftmenuNoHiLight" level1="_ms" id="spanMSoutbox" onclick="UpdateNonAdminLink(id);">Outbox</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Sent_Items.htm');"><span class="leftmenuNoHiLight" level1="_ms" id="spanMSsent" onclick="UpdateNonAdminLink(id);">Sent Items</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Drafts.htm');"><span class="leftmenuNoHiLight" level1="_ms" id="spanMSdrafts" onclick="UpdateNonAdminLink(id);">Drafts</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Alerts.htm');"><span class="leftmenuNoHiLight" level1="_ms" id="spanMSalerts" onclick="UpdateNonAdminLink(id);">Alerts</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Approval_Queue.htm');"><span class="leftmenuNoHiLight" level1="_ms" id="spanMSapprove" onclick="UpdateNonAdminLink(id);">Approval Queue</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Notes.htm');"><span class="leftmenuNoHiLight" level1="_ms" id="spanMSnotes" onclick="UpdateNonAdminLink(id);">My Notes</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Public_Ticketboxes_Shortcut.htm');"><span class="leftmenuNoHiLight" level1="_ms" id="spanMSticketboxes" onclick="UpdateNonAdminLink(id);">TicketBoxes</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Agent_Views.htm');"><span class="leftmenuNoHiLight" level1="_ms" id="spanMSav" onclick="UpdateNonAdminLink(id);">Agent Views</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Ticket_Search.htm');"><span class="leftmenuNoHiLight" level1="_ms" id="spanMSsearch" onclick="UpdateNonAdminLink(id);">Ticket Search</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Ticket_Links.htm');"><span class="leftmenuNoHiLight" level1="_ms" id="spanMSlinks" onclick="UpdateNonAdminLink(id);">Ticket Links</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Logout.htm');"><span class="leftmenuNoHiLight" level1="_ms" id="spanMSlogout" onclick="UpdateNonAdminLink(id);">Logout</span></a>
+							</div>
+							<div id="div_pref" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_pref');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_pref" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Preferences</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Preferences/General.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_pref" id="spanPREFgeneral" onclick="UpdateNonAdminLink(id);">General</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Preferences/Public_Ticketboxes.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_pref" id="spanPREFtb" onclick="UpdateNonAdminLink(id);">TicketBoxes</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Preferences/Agent_Views_Shortcut.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_pref" id="spanPREFav" onclick="UpdateNonAdminLink(id);">Agent Views</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Preferences/Signatures.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_pref" id="spanPREFsig" onclick="UpdateNonAdminLink(id);">Signatures</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Preferences/My_Dictionary.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_pref" id="spanPREFdict" onclick="UpdateNonAdminLink(id);">My Dictionary</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Preferences/My_Folders.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_pref" id="spanPREFfolders" onclick="UpdateNonAdminLink(id);">My Folders</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Preferences/My_Alerts.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_pref" id="spanPREFalerts" onclick="UpdateNonAdminLink(id);">My Alerts</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Preferences/My_Contacts.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_pref" id="spanPREFcontacts" onclick="UpdateNonAdminLink(id);">My Contacts</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Preferences/My_ContactGroups.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_pref" id="spanPREFcg" onclick="UpdateNonAdminLink(id);">My Contact Groups</span></a>
+								</div>
+							</div>
+							<div id="div_sr" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_sr');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_sr" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Standard Responses</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Standard_Responses/Introduction.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_sr" id="spanSRintro" onclick="UpdateNonAdminLink(id);">Introduction</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Standard_Responses/Creating_a_Category.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_sr" id="spanSRcat" onclick="UpdateNonAdminLink(id);">Managing Categories</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Standard_Responses/Creating_a_Standard_Response.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_sr" id="spanSRsr" onclick="UpdateNonAdminLink(id);">Creating a Standard Response</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Standard_Responses/Using_Standard_Responses.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_sr" id="spanSRusing" onclick="UpdateNonAdminLink(id);">Using Standard Responses</span></a>
+								</div>
+							</div>
+							<div id="div_co" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_co');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">				
+											<img id="img_co" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Contacts</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Contacts/Contacts.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_co" id="spanCOcontacts" onclick="UpdateNonAdminLink(id);">About Contacts</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Contacts/Contact_Search.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_co" id="spanCOsearch" onclick="UpdateNonAdminLink(id);">Contact Search</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Contacts/Creating_Contacts.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_co" id="spanCOcreate" onclick="UpdateNonAdminLink(id);">Creating Contacts</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Contacts/Editing_Contacts.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_co" id="spanCOedit" onclick="UpdateNonAdminLink(id);">Editing Contacts</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Contacts/Merging_Contacts.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_co" id="spanCOmerge" onclick="UpdateNonAdminLink(id);">Merging Contacts</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Contacts/Contact_Notes.htm');"><span class="leftmenuNoHiLight" level1="_ms" level2="_co" id="spanCOnotes" onclick="UpdateNonAdminLink(id);">Contact Notes</span></a>
+								</div>
+							</div>
+						</div>	
+						<div id="div_mc">
+							<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_mc');" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td width="11" valign="top">
+										<img id="img_mc" src="./images/plus.gif" width="11" height="11" border="0"/>
+									</td>
+									<td class="adminbranch" valign="top">
+										<nobr><span style="font-weight:bold;">Message Composition</span></nobr>
+									</td>
+								</tr>
+							</table>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Message_Composition/Compose_Message.htm');"><span class="leftmenuNoHiLight" level1="_mc" id="spanMCcompose" onclick="UpdateNonAdminLink(id);">Composing an Email Message</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Message_Composition/Ticket_with_Note.htm');"><span class="leftmenuNoHiLight" level1="_mc" id="spanMCnote" onclick="UpdateNonAdminLink(id);">Ticket with Note</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Message_Composition/Message_Attachments.htm');"><span class="leftmenuNoHiLight" level1="_mc" id="spanMCatt" onclick="UpdateNonAdminLink(id);">Message Attachments</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Message_Composition/Standard_Responses.htm');"><span class="leftmenuNoHiLight" level1="_mc" id="spanMCsr" onclick="UpdateNonAdminLink(id);">Standard Responses</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('My_Shortcuts/Message_Composition/Spell_Checking.htm');"><span class="leftmenuNoHiLight" level1="_mc" id="spanMCspell" onclick="UpdateNonAdminLink(id);">Spell Checking</span></a>
+							</div>							
+						</div>			
+						
+						<div id="div_rep">
+							<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_rep');" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td width="11" valign="top">
+										<img id="img_rep" src="./images/plus.gif" width="11" height="11" border="0"/>
+									</td>
+									<td class="adminbranch" valign="top">
+										<nobr><span style="font-weight:bold;">Reporting</span></nobr>
+									</td>
+								</tr>
+							</table>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/introduction.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPintro" onclick="UpdateNonAdminLink(id);">Introduction</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/Agent_Audit.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPaa" onclick="UpdateNonAdminLink(id);">Agent Audit</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/Inbound_Message.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPim" onclick="UpdateNonAdminLink(id);">Inbound Messages</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/Outbound_Message.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPom" onclick="UpdateNonAdminLink(id);">Outbound Messages</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/Open_Ticket_Totals.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPota" onclick="UpdateNonAdminLink(id);">Open Ticket Age</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/Open_Tickets.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPot" onclick="UpdateNonAdminLink(id);">Open Tickets</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/Ticket_Activity.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPta" onclick="UpdateNonAdminLink(id);">Ticket Activity</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/Ticket_Distribution.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPtd" onclick="UpdateNonAdminLink(id);">Ticket Distribution</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/std_usage.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPsru" onclick="UpdateNonAdminLink(id);">Standard Response Usage</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/Avg_Response_Time.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPart" onclick="UpdateNonAdminLink(id);">Avg Response Time</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/Avg_Time_to_Resolve.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPatr" onclick="UpdateNonAdminLink(id);">Avg Time to Resolve</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/Busiest_Time.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPbt" onclick="UpdateNonAdminLink(id);">Busiest Time</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/History_Reports.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPhr" onclick="UpdateNonAdminLink(id);">History Reports</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/Scheduled_Reports.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPsr" onclick="UpdateNonAdminLink(id);">Scheduled Reports</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/Ticket_Count_Summary.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPtcs" onclick="UpdateNonAdminLink(id);">Ticket Count Summary</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('reporting/TicketBox_Details.htm');"><span class="leftmenuNoHiLight" level1="_rep" id="spanREPtbdtbd" onclick="UpdateNonAdminLink(id);">TicketBox Details</span></a>
+							</div>
+						</div>
+							
+						<div id="div_ad">
+							<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_ad');" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td width="11" valign="top">
+										<img id="img_ad" src="./images/plus.gif" width="11" height="11" border="0"/>
+									</td>
+									<td class="adminbranch" valign="top">
+										<nobr><span style="font-weight:bold;">Administration</span></nobr>
+									</td>
+								</tr>
+							</table>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('Administration/Introduction.htm');"><span class="leftmenuNoHiLight" level1="_ad" id="spanADintro" onclick="UpdateNonAdminLink(id);">Introduction</span></a>
+							</div>
+							<div id="div_adac" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_adac');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">
+											<img id="img_adac" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Agent Configuration</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Agent_Configuration/Agents.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adac" id="spanADACagents" onclick="UpdateNonAdminLink(id);">Agents</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Agent_Configuration/Groups.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adac" id="spanADACgroups" onclick="UpdateNonAdminLink(id);">Groups</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Agent_Configuration/Signatures.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adac" id="spanSADACsigs" onclick="UpdateNonAdminLink(id);">Signatures</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Agent_Configuration/Active_Sessions.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adac" id="spanADACas" onclick="UpdateNonAdminLink(id);">Active Sessions</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Agent_Configuration/Agent_Audit.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adac" id="spanADACaa" onclick="UpdateNonAdminLink(id);">Agent Audit</span></a>
+								</div>
+							</div>
+							<div id="div_adal" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_adal');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">
+											<img id="img_adal" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Alerting</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Alerting/Integrated_Alerts.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adal" id="spanADALia" onclick="UpdateNonAdminLink(id);">Integrated Alerts</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Alerting/Age_Alerts.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adal" id="spanADALal" onclick="UpdateNonAdminLink(id);">Age Alerts</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Alerting/Watermark_Alerts.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adal" id="spanADALwl" onclick="UpdateNonAdminLink(id);">Watermark Alerts</span></a>
+								</div>
+							</div>
+							<div id="div_adc" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_adc');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">
+											<img id="img_adc" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Contacts</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Contacts/Contact_Properties.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adc" id="spanADCprops" onclick="UpdateNonAdminLink(id);">Contact Properties</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Contacts/Contact_Groups.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adc" id="spanADCgroups" onclick="UpdateNonAdminLink(id);">Contact Groups</span></a>
+								</div>
+							</div>
+							<div id="div_adm" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_adm');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">
+											<img id="img_adm" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Maintenance</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/DataBase_Maintenance/Database_Maintenance.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adm" id="spanADMdbm" onclick="UpdateNonAdminLink(id);">Database Maintenance</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/DataBase_Maintenance/Deleted_Items.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adm" id="spanADMd" onclick="UpdateNonAdminLink(id);">Deleted Items</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/DataBase_Maintenance/Backups.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adm" id="spanADMb" onclick="UpdateNonAdminLink(id);">Backups</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/DataBase_Maintenance/Archives.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adm" id="spanADMar" onclick="UpdateNonAdminLink(id);">Archives</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/DataBase_Maintenance/SqlQuery.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adm" id="spanADSql" onclick="UpdateNonAdminLink(id);">SQL Query</span></a>
+								</div>
+							</div>
+							<div id="div_adgc" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_adgc');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">
+											<img id="img_adgc" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">General Configuration</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/General_Configuration/Settings.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adgc" id="spanADGCs" onclick="UpdateNonAdminLink(id);">Settings</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/General_Configuration/BulkSettings.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adgc" id="spanADGCbs" onclick="UpdateNonAdminLink(id);">Bulk Settings</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/General_Configuration/System_Email_Address.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adgc" id="spanADGCemail" onclick="UpdateNonAdminLink(id);">System Email Address</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/General_Configuration/Product_Registration.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adgc" id="spanADGCr" onclick="UpdateNonAdminLink(id);">Registration</span></a>
+								</div>
+							</div>
+							<div id="div_adl" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_adl');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">
+											<img id="img_adl" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Logging</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Logging/View_Logs.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adl" id="spanADLv" onclick="UpdateNonAdminLink(id);">View Logs</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Logging/Logging_Options.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adl" id="spanADLo" onclick="UpdateNonAdminLink(id);">Logging Options</span></a>
+								</div>
+							</div>
+							<div id="div_adsrv" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_adsrv');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">
+											<img id="img_adsrv" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">MailFlow Servers</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/MailFlow_Servers/Servers.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adsrv" id="spanADSs" onclick="UpdateNonAdminLink(id);">Servers</span></a>
+								</div>
+							</div>
+							<div id="div_admh" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_admh');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">
+											<img id="img_admh" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Message Handling</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Message_Handling/Message_Sources.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_admh" id="spanADMHms" onclick="UpdateNonAdminLink(id);">Message Sources</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Message_Handling/Message_Destinations.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_admh" id="spanADMHmd" onclick="UpdateNonAdminLink(id);">Message Destinations</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Message_Handling/Default_Routing_Rule.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_admh" id="spanADMHdrr" onclick="UpdateNonAdminLink(id);">Default Routing Rule</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Message_Handling/Routing_Rules.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_admh" id="spanADMHcrr" onclick="UpdateNonAdminLink(id);">Custom Routing Rules</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Message_Handling/Processing_Rules.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_admh" id="spanADMHpr" onclick="UpdateNonAdminLink(id);">Processing Rules</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Hidden/Outbound_Message_Approval.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_admh" id="spanADMHma" onclick="UpdateNonAdminLink(id);">Outbound Message Approval</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Hidden/Msg_Handling/inbound_outbound_orphans_and_queues.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_admh" id="spanADMHoq" onclick="UpdateNonAdminLink(id);">Orphans and Queues</span></a>
+								</div>
+							</div>
+							<div id="div_adrep" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_adrep');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">
+											<img id="img_adrep" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Reporting</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Reporting/System_Configuration.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adrep" id="spanADRsc" onclick="UpdateNonAdminLink(id);">System Configuration</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Reporting/Scheduled_Reports.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adrep" id="spanADRsr" onclick="UpdateNonAdminLink(id);">Scheduled Reports</span></a>
+								</div>
+							</div>
+							<div id="div_adst" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_adst');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">
+											<img id="img_adst" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Scheduled Tasks</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Scheduled_Tasks/Auto_Messages.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adst" id="spanADam" onclick="UpdateNonAdminLink(id);">Auto Messages</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Scheduled_Tasks/Auto_Responses.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adst" id="spanADar" onclick="UpdateNonAdminLink(id);">Auto Responses</span></a>
+								</div>
+							</div>
+							<div id="div_adsec" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_adsec');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">
+											<img id="img_adsec" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Security</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Security/Access_Control.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adsec" id="spanADSECac" onclick="UpdateNonAdminLink(id);">Access Control</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Security/IP_Access_Restrictions.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adsec" id="spanADSECar" onclick="UpdateNonAdminLink(id);">Access Restrictions</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Security/Other_Restrictions.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adsec" id="spanADSECor" onclick="UpdateNonAdminLink(id);">Other Restrictions</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Security/Effective_Rights.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adsec" id="spanADSECer" onclick="UpdateNonAdminLink(id);">Effective Rights</span></a>
+								</div>
+							</div>
+							<div id="div_adsc" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_adsc');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">
+											<img id="img_adsc" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Spell Checking</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Spell_Checking/Global_Dictionary.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adsc" id="spanADSCgd" onclick="UpdateNonAdminLink(id);">Global Dictionary</span></a>
+								</div>
+							</div>
+							<div id="div_adtbc" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_adtbc');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">
+											<img id="img_adtbc" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">TicketBoxes</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/TicketBox_Configuration/TicketBoxes.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adtbc" id="spanADTBCtb" onclick="UpdateNonAdminLink(id);">TicketBoxes</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/TicketBox_Configuration/TicketBox_Headers.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adtbc" id="spanADTBCh" onclick="UpdateNonAdminLink(id);">TicketBox Headers</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/TicketBox_Configuration/TicketBox_Footers.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adtbc" id="spanADTBCf" onclick="UpdateNonAdminLink(id);">TicketBox Footers</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/TicketBox_Configuration/TicketBox_Owners.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adtbc" id="spanADTBCo" onclick="UpdateNonAdminLink(id);">TicketBox Owners</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/TicketBox_Configuration/Bulk_Actions.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adtbc" id="spanADTBCba" onclick="UpdateNonAdminLink(id);">Bulk Actions</span></a>
+								</div>
+							</div>
+							<div id="div_adt" style="display:none;">
+								<table style="margin-left:23px;margin-bottom:3px;" onclick="toggleTree('_adt');" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="11" valign="top">
+											<img id="img_adt" src="./images/plus.gif" width="11" height="11" border="0"/>
+										</td>
+										<td class="adminbranch" valign="top">
+											<nobr><span style="font-weight:bold;">Tickets</span></nobr>
+										</td>
+									</tr>
+								</table>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Tickets/Unlock_Ticket.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adt" id="spanADTu" onclick="UpdateNonAdminLink(id);">Locked Tickets</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Tickets/Ticket_Categories.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adt" id="spanADTc" onclick="UpdateNonAdminLink(id);">Ticket Categories</span></a>
+								</div>
+								<div wrap="off" style="display:none; margin-left:38px;margin-bottom:3px;">
+									<a class="adminMenu" href="#" onclick="setRightPane('Administration/Tickets/Ticket_Fields.htm');"><span class="leftmenuNoHiLight" level1="_ad" level2="_adt" id="spanADTf" onclick="UpdateNonAdminLink(id);">Custom Ticket Fields</span></a>
+								</div>
+							</div>
+						</div>
+							
+						<div id="div_ks">
+							<table style="margin-left:8px;margin-bottom:3px;" onclick="toggleTree('_ks');" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td width="11" valign="top">
+										<img id="img_ks" src="./images/plus.gif" width="11" height="11" border="0"/>
+									</td>
+									<td class="adminbranch" valign="top">
+										<nobr><span style="font-weight:bold;">Keyboard Shortcuts</span></nobr>
+									</td>
+								</tr>
+							</table>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('Keyboard_Shortcuts/Message_Composition.htm');"><span class="leftmenuNoHiLight" level1="_ks" id="spanKSmc" onclick="UpdateNonAdminLink(id);">Message Composition</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('Keyboard_Shortcuts/Message_Lists.htm');"><span class="leftmenuNoHiLight" level1="_ks" id="spanKSml" onclick="UpdateNonAdminLink(id);">Message Lists</span></a>
+							</div>
+							<div wrap="off" style="display:none; margin-left:23px;margin-bottom:3px;">
+								<a class="adminMenu" href="#" onclick="setRightPane('Keyboard_Shortcuts/Ticket_Lists.htm');"><span class="leftmenuNoHiLight" level1="_ks" id="spanKStl" onclick="UpdateNonAdminLink(id);">Ticket Lists</span></a>
+							</div>
+						</div>
+						
+					</div>
+					</td>
+				</tr>
+			</table>
+			</td>
+		</tr>		
+	</table>
+	</body>
+	</html>
+</xsl:template>
+</xsl:stylesheet>

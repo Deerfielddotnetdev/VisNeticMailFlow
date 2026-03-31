@@ -1,0 +1,314 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+<html>
+<head>
+
+<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"></SCRIPT>
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/contactgroups.jmf"></SCRIPT>
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+	function CheckKey()
+	{
+		if (event.keyCode == 13)
+		{
+			startSearch();
+		}
+	}
+</SCRIPT>
+<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+</head>
+
+<body callOnLoad="updateOptions();">
+<form name="tabularForm" method="post" action="editcontactgroup.ems">
+<input type="hidden" name="AgentID" value="{root/ContactGroup/@AgentID}"/>
+<input type="hidden" name="ID" value="{root/ContactGroup/@ID}"/>
+<input type="hidden" name="Action">
+<xsl:attribute name="value">
+<xsl:if test="root/ContactGroup/@ID = '0'">insert</xsl:if>
+<xsl:if test="root/ContactGroup/@ID &gt; '0'">update</xsl:if>
+</xsl:attribute>
+</input>
+
+<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td style="width:100%;">
+			<xsl:call-template name="default_titlebar">
+				<xsl:with-param name="title_text">
+				<xsl:value-of select="root/DOCUMENT/TITLE"/>
+				</xsl:with-param>
+			</xsl:call-template>
+			<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td style="height:32px;" class="menubarx" nowrap="true">
+						<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+							<tr>
+								<td height="100%">
+									<div class="toolBar" id="toolButton" name="toolButton"
+									 xrequire="(tabularForm.groupName.value!=''&amp;&amp;tabularForm.groupName.value.indexOf(' ')!=0)"
+									 title="Save Configuration" onclick="Save();"
+									>
+									<xsl:if test="/root/Group/@ID = 1">
+									<xsl:attribute name="xrequire">false</xsl:attribute>
+									</xsl:if>
+									<nobr>
+									<img src="images/ico_save.gif" width="24" height="22" border="0" valign="bottom"/>
+									Save
+									</nobr>
+			  						</div>
+								</td>
+								<td height="100%">
+									<div class="toolBar" id="toolButton" name="toolButton"
+									 xrequire="(true)"
+									 title="Cancel Changes" onclick="glo_doClose();">
+									<nobr>
+									<img src="images/ico_cancel.gif" width="24" height="22" border="0" valign="bottom"/>
+									Cancel
+									</nobr>
+			  						</div>
+								</td>
+								<td height="100%">
+									<div class="toolBar" id="toolButton" name="toolButton"
+									 xrequire="(true)"
+									 title="Show Help">
+									 <xsl:attribute name="onclick">
+									 <xsl:choose>
+									 <xsl:when test="/root/DOCUMENT/URLPARAMETERS/AGENTID='0'">
+									 openHelp('Administration/Contacts/Contact_Groups.htm');
+									 </xsl:when>
+									 <xsl:otherwise>
+									 openHelp('My_Shortcuts/Preferences/My_ContactGroups.htm');
+									 </xsl:otherwise>
+									 </xsl:choose>
+									 </xsl:attribute> 
+									<nobr>
+									<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom"/>
+									Help
+									</nobr>
+			  						</div>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+
+		</td>
+	</tr>
+	<tr>
+		<td style="width:100%;vertical-align:top;">
+			<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0"><tr><td>
+			<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td>
+					<nobr>Group Name:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</nobr>
+					</td>
+					<td>
+					<input type="text" name="groupName" value="{root/ContactGroup/@Name}" style="width:100%" />
+					<script language="javascript">
+						document.tabularForm.groupName.focus();
+					</script>
+					</td>
+					<td><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+				</tr>
+				<xsl:if test="root/ContactGroup/@AgentID = '0' and root/ContactGroup/@ID = '0'">
+				<tr>
+					<td>
+					<nobr>Owner:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</nobr>
+					</td>
+					<td>
+						<select name="ownerid" style="width:100%">
+							<option value="0">
+								<xsl:if test="root/ContactGroup/@OwnerID = '0'">
+									<xsl:attribute name="selected">true</xsl:attribute>
+								</xsl:if>
+								Global
+							</option>
+						<xsl:for-each select="root/AgentNames/Agent">
+						<xsl:choose>
+							<xsl:when test="@ID = /root/ContactGroup/@OwnerID">
+								<option value="{@ID}" selected="true"><xsl:value-of select="@Name"/></option>
+							</xsl:when>
+							<xsl:otherwise>
+								<option value="{@ID}"><xsl:value-of select="@Name"/></option>
+							</xsl:otherwise>
+						</xsl:choose>
+						</xsl:for-each>
+						</select>
+					</td>
+					<td><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+				</tr>
+				</xsl:if>
+				<tr>
+					<td colspan="3"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+				</tr>
+				<tr>
+					<td><nobr>Email Address:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</nobr></td>
+					<td style="width:100%;">
+						<input style="width:100%;" maxlength="250" type="text" name="contact_email" value="{root/Parameters/@Email}" />
+					</td>
+					<td>
+						<nobr>
+						<input type="radio" name="contact_email_exact" value="0"> 
+							<xsl:if test="root/Parameters/@Exact = '0'"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+						</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Contains
+						<input type="radio" name="contact_email_exact" value="1">
+							<xsl:if test="root/Parameters/@Exact = '1'"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+						</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Exact
+						</nobr>
+					</td>
+				</tr>
+				<tr>
+					<td align="left">	
+						<nobr>Max Results:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</nobr>
+					</td>
+					<td>
+						<nobr>
+							<input type="text" name="maxlines" maxlength="3" size="3" value="{root/Parameters/@MaxRecs}"/>
+							<input type="button" class="childControlBtn" name="searchbutton" value="Search for Contact" onClick="startSearch();"/>
+						  <xsl:if test="not(root/ContactGroup/@AgentID = '0')">
+						  <input type="radio" name="chkdoglobal" value="0"> 
+								<xsl:if test="root/Parameters/@DoGlobal = '0'"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+							</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;MyContacts
+							<input type="radio" name="chkdoglobal" value="1">
+								<xsl:if test="root/Parameters/@DoGlobal = '1'"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+							</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Global Contacts
+							</xsl:if>
+						</nobr>
+					</td>
+					<td><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+				</tr>
+			</table>
+		</td></tr></table>
+		
+		</td>
+	</tr>
+	<tr>
+		<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+		<div style="width:100%;height:100%;overflow:auto;">
+			<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0"><tr><td>
+			
+			<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+			<input type="hidden" name="ContactIDCollection" value="" />
+			<input type="hidden" name="ContactID" value="{/root/DOCUMENT/URLPARAMETERS/CONTACTID}" />
+				<tr>
+					<td colspan="3"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+				</tr>
+				<tr>
+					<td width="40%">
+						<table width="100%" border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<td class="subheader">Available Contacts</td>
+							</tr>
+							<tr>
+								<td class="menuColor menubarx">
+									<table style="height:24px;" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td height="100%">
+												<div class="toolBar" id="toolButton" name="toolButton"
+												 xrequire="(true)"
+												 title="Select all available Contacts" onclick="docSelectAllContacts();">
+												<nobr>
+												Select All<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+												</nobr>
+						  						</div>
+												<script>function docSelectAllContacts() {selectall(document.tabularForm.ContactList);}</script>
+											</td>
+											<td height="100%">
+												<div class="toolBar" id="toolButton" name="toolButton"
+												 xrequire="(true)"
+												 title="Add selected Contacts to Group" onclick="docAddOptionsGroup()">
+												<nobr>
+												Add Selected<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+												</nobr>
+						  						</div>
+												<script>function docAddOptionsGroup() {AddOptions(document.tabularForm.ContactList, document.tabularForm.GroupMembers, false);}</script>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<select name="ContactList" size="19" style="width:100%" multiple="true">
+									<xsl:for-each select="root/MyContacts/Contact">
+									<option value="{@ID}"><xsl:value-of select="@Name"/></option>
+									</xsl:for-each>
+									</select>
+								</td>
+							</tr>
+						</table>
+					</td>
+					<td width="20%">
+						<table align="center" width="80%" border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<td align="center"><input title="Add Selected Contacts" onclick="AddOptions(document.tabularForm.ContactList, document.tabularForm.GroupMembers, false);" style="width:30px;" type="button" value="--&gt;" class="adultControlBtn"/></td>
+							</tr>
+							<tr>
+								<td><br/></td>
+							</tr>
+							<tr>
+								<td align="center"><input title="Remove Selected Contacts" onclick="AddOptions(document.tabularForm.GroupMembers, document.tabularForm.ContactList, false);" style="width:30px;" type="button" value="&lt;--" class="adultControlBtn"/></td>
+							</tr>
+						</table>
+					</td>
+					<td width="40%">
+						<table width="100%" border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<td class="subheader">Contacts in Group</td>
+							</tr>
+							<tr>
+								<td class="menuColor menubarx">
+									<table style="height:24px;" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td height="100%">
+												<div class="toolBar" id="toolButton" name="toolButton"
+												 xrequire="(true)"
+												 title="Select all Group members" onclick="docSelectAllMembers();">
+												<nobr>
+												Select All<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+												</nobr>
+						  						</div>
+												<script>function docSelectAllMembers() {selectall(document.tabularForm.GroupMembers);}</script>
+											</td>
+											<td height="100%">
+												<div class="toolBar" id="toolButton" name="toolButton"
+												 xrequire="(true)"
+												 title="Remove selected members from this Group" onclick="docAddOptionsContacts()">
+												<nobr>
+												Remove Selected<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+												</nobr>
+						  						</div>
+												<script>function docAddOptionsContacts() {AddOptions(document.tabularForm.GroupMembers, document.tabularForm.ContactList, false);}</script>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+
+							<tr>
+								<td>
+									<select name="GroupMembers" size="19" style="width:100%" multiple="true">
+									<xsl:for-each select="root/ContactGroup/Contact">
+									<option value="{@ID}"><xsl:value-of select="@Name"/></option>
+									</xsl:for-each>
+									</select>
+								</td>
+							</tr>								
+						</table>
+					</td>
+				</tr>
+			</table>
+			
+			</td></tr></table>
+		</div>
+		</td>
+	</tr>
+</table>
+</form>
+</body>
+</html>
+</xsl:template>
+</xsl:stylesheet>

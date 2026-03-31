@@ -1,0 +1,180 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+
+	
+
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script> 
+	<script language="javascript">
+		
+	function docSubmitForm() {
+		if(document.ticketBoxFooter.Description.value == ""){
+			alert("Please enter a Footer Description before saving");
+		} else if(document.ticketBoxFooter.footerText.value == ""){
+			alert("Please enter Footer Text before saving");
+		} else {
+			//document.ticketBoxFooter.submit();
+			var postResults = glo_buildFormPost('ticketBoxFooter');
+			if (eval(postResults[0])==true)
+			{
+				glo_setOpenerLocation();
+				glo_doClose();
+			}
+		}
+	}
+				
+			function preview(){
+				document.all.prevFooterText.innerText = document.ticketBoxFooter.footerText.value;
+			}
+			
+			function loadMe(){
+				preview();
+			}
+			
+			
+			
+	</script>
+	</head>
+
+<body callOnLoad="loadMe();">
+<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td style="width:100%">
+	
+	<xsl:call-template name="default_titlebar">
+		<xsl:with-param name="title_text">
+		<xsl:value-of select="root/DOCUMENT/TITLE"/>
+		</xsl:with-param>
+	</xsl:call-template>
+
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td style="height:32px" class="menubarx" nowrap="true">
+				<table style="height:100%" align="left" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td height="100%">					
+							<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+							 title="Save Footer" onclick="docSubmitForm()"
+							  >
+								<nobr>
+									<img src="images/ico_save.gif" width="24" height="22" border="0"/>
+									Save
+								</nobr>
+							  </div>
+						</td>
+						<td height="100%">					
+							<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+							 title="Cancel" onclick="glo_doClose()"
+							  >
+								<nobr>
+									<img src="images/ico_cancel.gif" width="24" height="22" border="0"/>
+									Cancel
+								</nobr>
+							  </div>
+						</td>
+						<td height="100%">					
+							<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+							 title="Show Help" onclick="openHelp('Administration/Hidden/TicketBoxes/Create_Edit_a_TicketBox_Footer.htm')"
+							  >
+								<nobr>
+									<img src="images/ico_help.gif" width="24" height="22" border="0"/>
+									Help
+								</nobr>
+							  </div>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</td>
+</tr>
+
+<tr>
+<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+<div style="width:100%;height:100%;overflow:auto">
+	<table style="width:100%;height:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;height:100%;padding:10px;vertical-align:top;">
+				<table style="width:100%;" border="0" cellspacing="0" cellpadding="0">
+					<form name="ticketBoxFooter" method="post" action="">
+						<input type="hidden" name="Action" value="" />	
+						<input type="hidden" name="ID" value="{root/TicketBoxFooter/@ID}"/>
+						<tr>
+							<td style="padding-top:5px;padding-bottom:5px;">
+								Footer Description :
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input style="width:500px" name="Description" type="text" maxlength="63">
+									<xsl:attribute name="value">
+										<xsl:value-of select="root/TicketBoxFooter/@Description" />
+									</xsl:attribute>
+								</input>
+								<script language="javascript">
+									document.ticketBoxFooter.Description.focus();
+								</script>
+							</td>
+						</tr>
+						<tr>
+							<td style="padding-top:5px;padding-bottom:5px;">
+								Footer Text :
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<textarea style="width:500px" rows="6" name="footerText" onKeyUp="preview()" >
+									<xsl:value-of select="root/TicketBoxFooter" />
+								</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td style="padding-top:10px;">
+								Footer Preview :
+							</td>
+						</tr>
+						<tr>
+
+							<td style="padding-top:5px;padding-bottom:5px;">
+								<TABLE CLASS="subheader" WIDTH="500px" BORDER="0" CELLSPACING="0" CELLPADDING="0">
+									<TR>
+										<TD>Sample Message</TD> 
+									</TR>
+								</TABLE>
+								<div style="width:500px;height:200px;overflow:auto;background:white;">	
+									<table width="100%">
+										<tr>	
+											<td width="100%" height="100%" class="smallFont" style="padding:10px; border-width:1; background:white;">
+												<span class="smallFont" id="prevHeaderText"></span>
+												This is a sample message body.
+												<br/><br/>
+												It is used to show you how the footer will look so you can format it properly.  Make sure to pay close attention to where line breaks occur.
+												<span style="color:#FF0000;" id="prevFooterText"></span>
+											</td>
+										</tr>
+									</table>
+								</div>
+							</td>
+						</tr>
+					</form>
+				</table>
+			</td>
+		</tr>
+	</table>
+</div>
+</td>
+</tr>
+</table>
+	
+</body>
+</html>
+
+</xsl:template>
+</xsl:stylesheet>

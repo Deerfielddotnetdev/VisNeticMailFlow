@@ -1,0 +1,142 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	
+
+	<title>
+	<!-- <xsl:value-of select="root/DOCUMENT/TITLE"/> -->
+	Groups
+	</title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontrollerrows.jmf"></script>
+	<script language="javascript">
+	function docNewItem() {
+		glo_launchModalWindow("modalframe.ems?file=editgroup.ems?ID=0",550,510);
+	}			
+	function docModItem() {
+		if(glo_isBtnDisabled()){return false;}
+		glo_launchModalWindow("modalframe.ems?file=editgroup.ems?ID="+tabularForm.selectId.value,550,510);
+	}
+	function docDelItem() {
+		if(glo_isBtnDisabled()){return false;}
+		if (confirm("Are you sure you want to permanently delete this Group?"))
+		{
+			var postResults = glo_buildFormPost('tabularForm');
+			if (eval(postResults[0])==true)
+			{
+				document.location.reload();
+			}
+		}
+	}
+	</script> 
+	</head>
+
+	<body>
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="selectId" value="" />
+	<input type="hidden" name="Action" value="delete" />
+
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<!-- <xsl:value-of select="root/DOCUMENT/TITLE"/> -->
+					Groups
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="true"
+										 title="Create new Group" onclick="docNewItem();">
+										<nobr>
+										<img src="images/ico_new.gif" width="24" height="22" border="0" valign="bottom"/>
+										New
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(gloListControl.ActiveRows.length!=0)"
+										 title="Modify the selected Group" onclick="docModItem();">
+										<nobr>
+										<img src="images/ico_edit.gif" width="24" height="22" border="0" valign="bottom"/>
+										Edit
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(gloListControl.ActiveRows.length!=0 &amp;&amp; tabularForm.selectId.value!='2' &amp;&amp; tabularForm.selectId.value!='1')"
+										 title="Delete the selected Group" onclick="docDelItem();">
+										<nobr>
+										<img src="images/ico_delete.gif" width="24" height="22" border="0" valign="bottom"/>
+										Delete
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Show Help" onclick="openHelp('Administration/Agent_Configuration/Groups.htm');">
+										<nobr>
+										<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom"/>
+										Help
+										</nobr>
+				  						</div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto;" class="listBack">
+
+				
+				<table id="ListTableBot" style="width:100%;" allowMultiple="false" border="0" cellspacing="0" cellpadding="0">
+				<xsl:for-each select="root/Groups/Group">
+					<tr ID="listRow" onclick="gloListControl.listRowClick()" ondblclick="gloListControl.keepActiveRow();docModItem();" tabRowId="{position()-1}" glc_rowtype="ticket" class="ticketOff" glc_form_tabularForm_selectId="{@ID}">
+						<td id="listCell" colspan="4" class="ticketCellOff">
+						<nobr>
+						<img onclick="gloListControl.listRowExpImgClick();window.event.cancelBubble=true;" id="listRowExpImg{position()-1}" src="./images/plus.gif" width="11" height="11" border="0"/>
+						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="@Name"/>
+						</nobr>
+						<xsl:if test="@isEscGroup = 1">
+						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;[Escalation Group]
+						</xsl:if>
+						</td>
+					</tr>
+					<tr style="">
+						<td id="listRowCanvas{position()-1}" colspan="4" style="display:none;padding:10px;border:1px inset;">
+						<xsl:value-of select="@Members"/>
+						</td>
+					</tr>
+				</xsl:for-each>
+				</table>
+
+
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

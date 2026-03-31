@@ -1,0 +1,38 @@
+<HTML>
+	<HEAD> 
+		<TITLE>VisNetic MailFlow</TITLE>
+		<SCRIPT language = "JavaScript">
+		<!--
+			function redirect()
+			{	
+				var targetURL = new String(document.location);
+						
+				// prevent redirect loops
+				if ( targetURL.indexOf("redirect") != -1 )
+				{
+					alert("Unable to redirect to start page");
+					return;
+				}
+				
+				// truncate the string at the last backslash and
+				// append the filename
+				var nPos = targetURL.lastIndexOf("/");
+				targetURL = targetURL.substr(0,nPos+1) + "login.ems?redirect=true";
+				
+				// redirect the browser
+				window.location = targetURL;
+			}
+		-->
+		</SCRIPT>
+		<link rel="STYLESHEET" type="text/css" href="./stylesheets/standard.css"></link>
+	</HEAD>
+	
+	<BODY bgColor=#dcdcdc onload="redirect()">
+		<noscript>
+			<center><p>It appears that your browser is not enabled to run javascripts.<BR>
+		                   This might cause problems when running MailFlow.</p>
+		                <a href="login.ems">Login to MailFlow</a>
+		        </center>
+		</noscript>
+	</BODY>
+</HTML>

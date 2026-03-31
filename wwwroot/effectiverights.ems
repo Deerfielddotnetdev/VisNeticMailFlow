@@ -1,0 +1,407 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+<html>
+<head>
+
+	
+
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"></SCRIPT>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	
+	<script LANGUAGE="javascript">
+	function Submit()
+	{
+		tabularForm.Action.value = 'show';
+		tabularForm.submit();
+	}
+	
+	function CheckForm()
+	{
+		var nObjectID=0;
+		for (var i=0; i &lt; document.tabularForm.ObjectID.length; i++)
+	   	{
+	   		if (document.tabularForm.ObjectID[i].checked)
+	      		{
+	      			nObjectID = document.tabularForm.ObjectID[i].value;
+	      		}	      		
+	   	}
+		
+		document.getElementById('AgentOID').disabled = true;
+		document.getElementById('GroupOID').disabled = true;
+		document.getElementById('TicketBoxID').disabled = true;
+		document.getElementById('TicketCategoryID').disabled = true;
+		document.getElementById('SRCategoryID').disabled = true;
+		
+		if (nObjectID == 0)
+		{
+			document.getElementById('AgentOID').disabled = false;
+		}
+		else if (nObjectID == 1)
+		{
+			document.getElementById('GroupOID').disabled = false;
+		}
+		else if (nObjectID == 2)
+		{
+			document.getElementById('TicketBoxID').disabled = false;
+		}
+		else if (nObjectID == 3)
+		{
+			document.getElementById('TicketCategoryID').disabled = false;
+		}
+		else if (nObjectID == 7)
+		{
+			document.getElementById('SRCategoryID').disabled = false;
+		}	
+	}	
+	</script>
+	</head>
+
+<body>
+<form name="tabularForm" method="get" action="">
+<input type="hidden" name="Action" value="" />
+<input type="hidden" name="AgentGroup" value="0" />
+<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+	<tr> 
+		<td style="width:100%;"> 
+		
+			<xsl:call-template name="default_titlebar">
+				<xsl:with-param name="title_text">
+				<xsl:value-of select="root/DOCUMENT/TITLE"/>
+				</xsl:with-param>
+			</xsl:call-template>
+		
+			<table width="100%" align="center" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td style="height:32px" class="menubarx" nowrap="true">
+						<table style="height:100%" align="left" border="0" cellpadding="0" cellspacing="0">
+							<tr>
+								<td height="100%">					
+									<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										title="Print Report" onclick="Submit()"
+										 >
+										<nobr>
+											<img src="images/ico_magnify.gif" width="24" height="22" border="0"/>
+											Get Rights
+										</nobr>
+									</div>
+								</td>
+								<td height="100%">					
+									<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+									title="Show Help" onclick="openHelp('Administration/Security/Effective_Rights.htm')"
+									 >
+										<nobr>
+											<img src="images/ico_help.gif" width="24" height="22" border="0"/>
+											Help
+										</nobr>
+									</div>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+	<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+	<div style="width:100%;height:100%;overflow:auto">
+	<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+	<td>
+	<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+	<td style="padding-left:10px;padding-right:10px;">
+		<table width="100%" cellspacing="0">
+			<tr><td height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			<tr>
+				<td width="100%" class="subSectionHeader" align="left">
+					For Agent
+				</td>
+			</tr>
+			<tr>
+				<td width="100%" class="subSectionWrapper" align="left">
+					<table width="100%" cellpadding="0" cellspacing="0">
+						<tr>
+							<td width="20%" style="padding-left:10px;padding-top:5px;">
+								Agent:							
+							</td>
+							<td width="80%" align="left" style="padding-top:5px;">
+								<select name="AgentID">
+									<xsl:for-each select="/root/AgentNames/Agent">
+									<xsl:choose>
+										<xsl:when test="@ID = /root/EffectiveRights/@AgentID">
+										<option>
+											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+											<xsl:attribute name="selected">true</xsl:attribute>
+											<xsl:value-of select="@Name"/>
+										</option>
+										</xsl:when>
+										<xsl:otherwise>
+										<option>
+											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+											<xsl:value-of select="@Name"/>
+										</option>
+										</xsl:otherwise>
+									</xsl:choose>
+									</xsl:for-each>
+								</select>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			<tr>
+				<td width="100%" class="subSectionHeader" align="left">
+					To Object
+				</td>
+			</tr>
+			<tr>
+				<td width="100%" class="subSectionWrapper" align="left">
+					<table width="100%" cellpadding="0" cellspacing="0">
+						<tr>
+							<td width="20%" style="padding-left:10px;padding-top:5px;">
+								<input type="Radio" name="ObjectID" value="0" onClick="CheckForm()">
+								<xsl:if test="root/EffectiveRights/@ObjectID = '0'">
+									<xsl:attribute name="CHECKED">true</xsl:attribute>
+								</xsl:if>
+								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Agent:
+							</td>
+							<td width="80%" align="left" style="padding-top:5px;">
+								<select name="AgentOID">
+									<xsl:for-each select="/root/AgentNames/Agent">
+									<xsl:choose>
+										<xsl:when test="@ID = /root/EffectiveRights/@AgentOID">
+										<option>
+											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+											<xsl:attribute name="selected">true</xsl:attribute>
+											<xsl:value-of select="@Name"/>
+										</option>
+										</xsl:when>
+										<xsl:otherwise>
+										<option>
+											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+											<xsl:value-of select="@Name"/>
+										</option>
+										</xsl:otherwise>
+									</xsl:choose>
+									</xsl:for-each>
+								</select>																
+							</td>
+						</tr>
+						<tr>
+							<td width="20%" style="padding-left:10px;padding-top:5px;">
+								<input type="Radio" name="ObjectID" value="1" onClick="CheckForm()">
+								<xsl:if test="root/EffectiveRights/@ObjectID = '1'">
+									<xsl:attribute name="CHECKED">true</xsl:attribute>
+								</xsl:if>
+								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Group:
+							</td>
+							<td width="80%" align="left" style="padding-top:5px;">
+								<select name="GroupOID">
+									<xsl:for-each select="/root/GroupNames/Group">
+									<xsl:choose>
+										<xsl:when test="@ID = /root/EffectiveRights/@GroupOID">
+										<option>
+											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+											<xsl:attribute name="selected">true</xsl:attribute>
+											<xsl:value-of select="@Name"/>
+										</option>
+										</xsl:when>
+										<xsl:otherwise>
+										<option>
+											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+											<xsl:value-of select="@Name"/>
+										</option>
+										</xsl:otherwise>
+									</xsl:choose>
+									</xsl:for-each>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td width="20%" style="padding-left:10px;padding-top:5px;">
+								<input type="Radio" name="ObjectID" value="2" onClick="CheckForm()">
+								<xsl:if test="root/EffectiveRights/@ObjectID = '2'">
+									<xsl:attribute name="CHECKED">true</xsl:attribute>
+								</xsl:if>
+								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;TicketBox:
+							</td>
+							<td width="80%" align="left" style="padding-top:5px;">
+								<select name="TicketBoxID">
+									<xsl:for-each select="/root/TicketBoxNames/TicketBox">
+									<xsl:choose>
+										<xsl:when test="@ID = /root/EffectiveRights/@TicketBoxID">
+										<option>
+											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+											<xsl:attribute name="selected">true</xsl:attribute>
+											<xsl:value-of select="@Name"/>
+										</option>
+										</xsl:when>
+										<xsl:otherwise>
+										<option>
+											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+											<xsl:value-of select="@Name"/>
+										</option>
+										</xsl:otherwise>
+									</xsl:choose>
+									</xsl:for-each>
+								</select>																
+							</td>
+						</tr>
+						<tr>
+							<td width="20%" style="padding-left:10px;padding-top:5px;">
+								<input type="Radio" name="ObjectID" value="3" onClick="CheckForm()">
+								<xsl:if test="root/EffectiveRights/@ObjectID = '3'">
+									<xsl:attribute name="CHECKED">true</xsl:attribute>
+								</xsl:if>
+								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Ticket Category:
+							</td>
+							<td width="80%" align="left" style="padding-top:5px;">
+								<select name="TicketCategoryID">
+									<xsl:for-each select="/root/TicketCategoryNames/TicketCategory">
+									<xsl:choose>
+										<xsl:when test="@ID = /root/EffectiveRights/@TicketCategoryID">
+										<option>
+											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+											<xsl:attribute name="selected">true</xsl:attribute>
+											<xsl:value-of select="@Description"/>
+										</option>
+										</xsl:when>
+										<xsl:otherwise>
+										<option>
+											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+											<xsl:value-of select="@Description"/>
+										</option>
+										</xsl:otherwise>
+									</xsl:choose>
+									</xsl:for-each>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td width="20%" style="padding-left:10px;padding-top:5px;">
+								<input type="Radio" name="ObjectID" value="4" onClick="CheckForm()">
+								<xsl:if test="root/EffectiveRights/@ObjectID = '4'">
+									<xsl:attribute name="CHECKED">true</xsl:attribute>
+								</xsl:if>
+								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Contacts
+							</td>
+							<td width="80%" align="left" style="padding-top:5px;"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+						</tr>
+						<tr>
+							<td width="20%" style="padding-left:10px;padding-top:5px;">
+								<input type="Radio" name="ObjectID" value="5" onClick="CheckForm()">
+								<xsl:if test="root/EffectiveRights/@ObjectID = '5'">
+									<xsl:attribute name="CHECKED">true</xsl:attribute>
+								</xsl:if>
+								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Scheduled Reports
+							</td>
+							<td width="80%" align="left" style="padding-top:5px;"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+						</tr>
+						<tr>
+							<td width="20%" style="padding-left:10px;padding-top:5px;">
+								<input type="Radio" name="ObjectID" value="6" onClick="CheckForm()">
+								<xsl:if test="root/EffectiveRights/@ObjectID = '6'">
+									<xsl:attribute name="CHECKED">true</xsl:attribute>
+								</xsl:if>
+								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Standard Reports
+							</td>
+							<td width="80%" align="left" style="padding-top:5px;"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+						</tr>
+						<tr>
+							<td width="20%" style="padding-left:10px;padding-top:5px;">
+								<input type="Radio" name="ObjectID" value="7" onClick="CheckForm()">
+								<xsl:if test="root/EffectiveRights/@ObjectID = '7'">
+									<xsl:attribute name="CHECKED">true</xsl:attribute>
+								</xsl:if>
+								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Standard Response Category:
+							</td>
+							<td width="80%" align="left" style="padding-top:5px;">
+								<select name="SRCategoryID">
+									<xsl:for-each select="/root/stdrespcategories/stdrespcategory">
+									<xsl:choose>
+										<xsl:when test="id = /root/EffectiveRights/@SRCategoryID">
+										<option>
+											<xsl:attribute name="value"><xsl:value-of select="id"/></xsl:attribute>
+											<xsl:attribute name="selected">true</xsl:attribute>
+											<xsl:value-of select="name"/>
+										</option>
+										</xsl:when>
+										<xsl:otherwise>
+										<option>
+											<xsl:attribute name="value"><xsl:value-of select="id"/></xsl:attribute>
+											<xsl:value-of select="name"/>
+										</option>
+										</xsl:otherwise>
+									</xsl:choose>
+									</xsl:for-each>
+								</select>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<xsl:if test="root/EffectiveRights/@Level &gt; -1">
+			<tr><td height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+			<tr>
+				<td width="100%" class="subSectionHeader" align="left">
+					Effective Rights
+				</td>
+			</tr>
+			<tr>
+				<td width="100%" class="subSectionWrapper" align="left">
+					
+					<table width="100%" cellpadding="0" cellspacing="0">
+						<tr>
+							<td width="20%" style="padding-left:10px;padding-top:5px;">
+								Right Level:						
+							</td>
+							<td width="80%" align="left" style="padding-top:5px;">
+								<xsl:choose>
+								<xsl:when test="root/EffectiveRights/@Level = '0'">
+									None
+								</xsl:when>
+								<xsl:when test="root/EffectiveRights/@Level = '1'">
+									List
+								</xsl:when>
+								<xsl:when test="root/EffectiveRights/@Level = '2'">
+									Read
+								</xsl:when>
+								<xsl:when test="root/EffectiveRights/@Level = '3'">
+									Edit
+								</xsl:when>
+								<xsl:when test="root/EffectiveRights/@Level = '4'">
+									Delete
+								</xsl:when>								
+								</xsl:choose>																										
+							</td>							
+						</tr>						
+					</table>					
+				</td>
+			</tr>
+			</xsl:if>			
+		</table>
+	</td>
+	</tr>
+	</table>
+	</td>
+	</tr>
+	</table>
+	</div>
+	</td>
+	</tr>
+</table>
+</form>
+<script LANGUAGE="javascript">
+	CheckForm();
+</script>	
+</body>
+</html>
+
+</xsl:template>
+</xsl:stylesheet>

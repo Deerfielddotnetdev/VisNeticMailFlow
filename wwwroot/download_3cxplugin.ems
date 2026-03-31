@@ -1,0 +1,85 @@
+    <xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:template match="/">
+
+	<head>
+		<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+		<script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"/>
+		<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+
+		<style>
+			a:visited{color:black;}
+			a{color:black;}
+		</style>
+
+		<script LANGUAGE="javascript">
+
+			function DownloadLocal()
+			{
+				document.tabularForm.target = "DLFrame";
+				document.tabularForm.submit();
+				document.tabularForm.target = "";
+			}
+			
+			
+			function DownloadDeerfield()
+			{
+				window.open("http://ftp.deerfield.com/pub/current/3cxplug.exe");
+			}
+
+			function Close()
+			{
+				glo_doClose();
+			}
+
+		</script> 
+	</head>
+
+	<body style="background-color:#FFFFFF !important">
+
+	<form name="tabularForm" method="get" action="">
+		<input type="hidden" name="Download" value="1"/>
+	</form>
+
+	<table style="width:100%;padding:10px;" border="0" cellpadding="0" cellspacing="0">
+				
+		<xsl:if test="/root/PLUG/@Exists=1">
+		<tr>
+			<td>
+				<a href="#" onclick="DownloadLocal()" border="0">
+				<img src="images/ico_download.gif" width="24" height="22" border="0"/></a><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+
+				<a href="#" onclick="DownloadLocal()" >
+				Click here</a><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;to download the 3CX MailFlow plug-in update from the MailFlow server.
+			</td>
+		</tr>
+		</xsl:if>
+
+		<tr>
+			<td>
+				<a href="#" onclick="DownloadDeerfield()" border="0">
+				<img src="images/ico_download.gif" width="24" height="22" border="0"/></a><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+				
+				<a href="#" onclick="DownloadDeerfield()">
+				Click here</a><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;to download the 3CX MailFlow plug-in update.
+			</td>
+		</tr>
+
+		<xsl:if test="not(/root/PLUG/@Exists=1)">
+			<tr style="height:50"><td><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+		</xsl:if>
+
+		<tr>
+			<td align="center">
+				<input type="button" value="Close" onclick="Close()"/>
+			</td>
+		</tr>
+
+	</table>
+
+	<iframe src="download_blank.htm" name="DLFrame" style="display:none"/>
+
+	</body>
+
+</xsl:template>
+</xsl:stylesheet>

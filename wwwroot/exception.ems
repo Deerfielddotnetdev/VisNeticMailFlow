@@ -1,0 +1,94 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN"  />
+<xsl:template match="/">
+
+	<html>
+	<head>
+	<xsl:choose>
+	<xsl:when test="/root/DOCUMENT/FILENAME = 'ticketsearchresults.ems'">
+		<title>Ticket Search Timeout!</title> 
+	</xsl:when>
+	<xsl:otherwise>
+		<title>VisNetic MailFlow Error!</title> 
+	</xsl:otherwise>
+	</xsl:choose>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script> 
+	<link rel="stylesheet" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript">
+	<xsl:if test="/root/user/isadmin = 1">
+	function showMaint()
+	{
+		glo_launchModalWindow('dbmaintenanceresults.ems', 350, 110, 'no', 'no', 'no');		
+	}
+	function redefineSearch()
+	{
+		var newLoc = "ticketsearch.ems";
+		newLoc = newLoc + document.location.search;
+		newLoc = newLoc.replace("Action=search","Action=redefinesearch");
+		document.location = newLoc;
+	}	
+	</xsl:if>
+	</script>
+	</head>
+
+	<body callonload="">
+
+		<div style="height:100%;vertical-align:middle;">
+		<table style="height:100%;width:100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td style="height:100%;vertical-align:middle;" align="center">
+					<table width="90%" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td class="errorHeader" style="padding:8px;font-size:larger;">
+								<!--<img src="images/error.gif"  width="32" height="32" border="0"/>-->
+								<xsl:value-of select="root/error/title"/>
+							</td>
+						</tr>
+						<tr>
+							<td class="errorMessage" style="padding:8px;">
+								<div style="cursor:text;" allowSelect="true"><xsl:value-of select="root/error/."/></div>
+							</td>
+						</tr>
+						<xsl:choose>
+						<xsl:when test="/root/DOCUMENT/FILENAME = 'ticketsearchresults.ems'">
+							<tr>
+								<td style="padding:8px;">
+									<input id="reload" type="button" class="childControlBtn" value="Redefine Search" onclick="redefineSearch();"/>
+								</td>
+							</tr>
+						</xsl:when>
+						<xsl:otherwise>
+							<tr>
+								<td style="padding:8px;">
+									<input id="reload" type="button" class="childControlBtn" value="Refresh Interface" onclick="top.location.reload();"/>
+								</td>
+							</tr>
+							<xsl:if test="/root/user/isadmin = '1' and contains(root/error/., 'database maintenance')">
+							<tr>
+								<td style="padding:8px;">
+									<input id="view" type="button" class="childControlBtn" value="View Status" onclick="showMaint();"/>
+								</td>
+							</tr>
+							</xsl:if>
+						</xsl:otherwise>
+						</xsl:choose>
+						
+					</table>
+				</td>
+			</tr>
+		</table>
+		</div>
+		<script>
+			if (docIsMsgCompWindow || docInsideModal)
+			{
+				reload.style.display = "none";
+				//backup.style.display = "none";
+			}
+		</script>
+
+	</body>
+
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

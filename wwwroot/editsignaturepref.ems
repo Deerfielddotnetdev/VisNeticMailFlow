@@ -1,0 +1,509 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+<html>
+<head>
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<link rel="stylesheet" type="text/css" href="{root/user/stylesheetname}"></link>						
+	<script language="javascript" type="text/javascript" src="./javascript/global.jmf"></script>
+	<script language="javascript" type="text/javascript" src="./javascript/signatures.jmf"></script>
+	<script lamguage="javascript" type="text/javascript">
+	var htmledit;	
+	
+	function docSubmitForm()
+	{
+		<xsl:choose>
+		<xsl:when test="/root/user/access/prefsig='4'">		
+		document.tabularForm.signatureText.value = messagepartition.innerHTML;
+		
+		var postResults = glo_buildFormPost('tabularForm');
+		var proceed = postResults[0];
+		
+		if (proceed==true)
+		{
+			glo_setOpenerLocation();
+			glo_doClose();
+		}
+		</xsl:when>
+		<xsl:otherwise>
+			alert("You do not have permission to modify this signature!");
+		</xsl:otherwise>
+		</xsl:choose>	
+	}	
+	function createEditor() 
+	{
+		htmledit = new Editor();
+		htmledit.init();		
+		htmlformat.style.display = 'block';
+		htmledit.setFormat(1);
+		htmlUI(true);		
+	}
+	function htmlUI(bool) {
+		if(bool == true) {
+			htmlformat.style.display = 'block';
+			htmledit.setFormat(1);
+		} else {
+			htmlformat.style.display = 'none';
+		}
+	}
+		
+	function pinger()
+	{
+		var xhttp = glo_createXMLhttpObject();
+		var pct=0;
+		var uploadid = document.tabularForm.uploadID.value;
+		var url = 'uploadprogress.ems?OutputXML=1&amp;docancel=0&amp;id=' + uploadid;
+		xhttp.open('GET', url, false);
+		if(xhttp.overrideMimeType){ xhttp.overrideMimeType('text/xml'); }
+		xhttp.send();
+		if (xhttp.responseXML)
+		{
+			if (document.implementation.hasFeature("XPath", "3.0"))
+			{
+				if ( xhttp.responseXML.selectSingleNode("//root/Upload/@Percent"))
+				{
+					if (xhttp.responseXML.selectSingleNode('//root/Upload/@Percent').textContent.length != 0)
+					{
+						pct = xhttp.responseXML.selectSingleNode('//root/Upload/@Percent').textContent;
+						if (pct == (-1))
+						{
+							window.clearInterval(pingIntervalID);
+							document.tabularForm.uploadID.value = '0';
+							htmledit.insertImage(document.tabularForm.lastFile.value,document.tabularForm.lastCID.value);
+							document.tabularForm.lastFile.value = '';
+							document.tabularForm.doInsImage.value = 0;
+						}				
+					}
+				}
+			}
+			else
+			{
+	    	if (xhttp.responseXML.selectSingleNode("/root/Upload/@Percent"))
+				{
+					pct = xhttp.responseXML.selectSingleNode("/root/Upload/@Percent").value;
+					if (pct == (-1))
+					{
+						window.clearInterval(pingIntervalID);
+						document.tabularForm.uploadID.value = '0';
+						htmledit.insertImage(document.tabularForm.lastFile.value,document.tabularForm.lastCID.value);
+						document.tabularForm.lastFile.value = '';
+						document.tabularForm.doInsImage.value = 0;
+					}
+				}
+	    }
+		}
+	}
+	
+	function docInitPinger()
+	{
+		pingIntervalID = window.setInterval('pinger()', 500);
+	}
+		
+	function upFile()
+	{
+		document.tabularForm.lastCID.value = genID();
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			document.tabularForm.doInsImage.value = "0";
+			window.frames["attframe"].document.forms["tabularForm"].elements["uploadFile"].click();
+			if(document.tabularForm.lastFile.value != '' &amp;&amp; document.tabularForm.uploadID.value != '0')
+			{
+				docInitPinger();
+			}
+		}
+		else
+		{
+			document.tabularForm.doInsImage.value = "1";
+			window.frames["attframe"].document.forms["tabularForm"].elements["uploadFile"].click();			
+		}		
+	}
+	function insImage()
+	{
+		if(document.tabularForm.lastFile.value != '' &amp;&amp; document.tabularForm.uploadID.value != '0')
+		{
+			docInitPinger();
+		}
+	} 
+	function randomString(string_length)
+	{
+		var chars = "0123456789ABCDEFGHIJKLMNOPQRSUVWXTZabcdefghiklmnopqrsuvwxyz";
+		var randomstring = '';
+		for (var i=0; i&lt;string_length; i++)
+		{
+			var rnum = Math.floor(Math.random() * chars.length);
+			randomstring += chars.substring(rnum,rnum+1);
+		}
+		return randomstring;
+	}
+	function genID()
+	{
+		var contentID  = randomString(12) +"@";
+		return contentID += randomString(24);
+	}
+		
+	</script>
+	</head>
+
+<body callOnLoad="document.tabularForm.Name.focus();createEditor();">
+
+<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td style="width:100%">
+
+	<xsl:call-template name="default_titlebar">
+		<xsl:with-param name="title_text">
+		<xsl:value-of select="root/DOCUMENT/TITLE"/>
+		</xsl:with-param>
+	</xsl:call-template>
+
+	<table width="100%" align="center" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td style="height:32px" class="menubarx" nowrap="true">
+				<table style="height:100%" align="left" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td height="100%">										
+							<div class="toolBar" id="toolButton" name="toolButton" title="Save" onclick="docSubmitForm();">
+								<xsl:attribute name="xrequire">
+									<xsl:choose>
+										<xsl:when test="/root/DOCUMENT/URLPARAMETERS/NOSAVE">
+											false
+										</xsl:when>
+										<xsl:otherwise>
+											document.tabularForm.TypeID.value != 0 &amp;&amp; document.tabularForm.Name.value != ''
+										</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>
+								<nobr>
+									<img src="images/ico_save.gif" width="24" height="22" border="0" valign="bottom" alt="Save"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;Save<xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp; 
+								</nobr>
+							</div>											
+						</td>
+						<td height="100%">										
+							<div class="toolBar" id="toolButton" name="toolButton"  title="Cancel changes and close" onclick="glo_doClose();">
+								<nobr>
+									<img src="images/ico_cancel.gif" width="24" height="22" border="0" valign="bottom" alt="Cancel changes and close"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;Cancel<xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp; 
+								</nobr>
+							</div>											
+						</td>
+						<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+						<td height="100%">										
+							<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('Administration/Hidden/Usr_Config/Create_Edit_Agent_Signature.htm');">
+								<nobr>
+									<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom" alt="Show Help"/>
+								</nobr>
+							</div>											
+						</td>											
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</td>
+</tr>
+	
+<tr>
+<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+<div align="center" style="width:100%;height:100%;overflow:none">
+
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="ID" value="{root/Signatures/Signature/@ID}"/>
+	<input type="hidden" name="Type" value="{root/Signatures/@Type}"/>
+	<input type="hidden" name="lastFile" value="" />
+	<input type="hidden" name="lastCID" value="" />
+	<input type="hidden" name="doInsImage" value="0" />
+	<input type="hidden" name="uploadID" value="0" />
+	<xsl:if test="root/DOCUMENT/URLPARAMETERS/SELECTID or root/DOCUMENT/URLPARAMETERS/AGENTID" >
+		<input type="hidden" name="TypeID" value="{root/Signatures/@ID}"/>
+	</xsl:if>
+	
+	<table style="width:90%" border="0" cellspacing="0" cellpadding="0">
+		<tr><td><br/></td></tr>
+		<tr>
+			<td> 
+				<xsl:value-of select="root/Signatures/@Type" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Name :
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<xsl:choose>
+					<xsl:when test="root/DOCUMENT/URLPARAMETERS/SELECTID or root/DOCUMENT/URLPARAMETERS/AGENTID" >
+						<input contentEditable="false" style="width:100%" type="text" name="nothing" value="{root/Signatures/@Name}" onkeydown="return false"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:choose>
+							<xsl:when test="root/DOCUMENT/URLPARAMETERS/GROUP">
+							<select name="TypeID" style="width:100%" >
+								<option value="0">Select Group</option>
+								<xsl:for-each select="root/GroupNames/Group">
+								<option value="{@ID}"><xsl:value-of select="@Name" /></option>
+								</xsl:for-each>
+							</select>
+							</xsl:when>
+							<xsl:otherwise>
+							<select name="TypeID"  style="width:100%">
+								<option value="0">Select Agent</option>
+								<xsl:for-each select="root/AgentNames/Agent">
+								<option value="{@ID}"><xsl:value-of select="@Name" /></option>
+								</xsl:for-each>
+							</select>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:otherwise>
+				</xsl:choose>
+			</td>
+		</tr>
+
+		<tr style="padding-top:5px">
+			<td> 
+				Signature Name :
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<input maxlength="63" style="width:100%" type="text" name="Name" value="{root/Signatures/Signature/@Name}" onkeydown="return glo_checkEcho()">
+					<xsl:if test="/root/DOCUMENT/URLPARAMETERS/NOSAVE">
+						<xsl:attribute name="contentEditable">false</xsl:attribute>
+					</xsl:if>					
+				</input>		
+			</td>
+		</tr>
+		
+		<tr style="padding-top:5px">
+			<td> 
+				Signature :
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+				<div style="width:100%;height:250px;overflow:auto;">
+					<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td style="height:100%">
+								<div id="editregion" style="word-wrap:break-word;height:100%;width:100%;cursor:text;background:white;font-family:verdana;" onkeydown="return glo_checkEcho()"></div>
+								<textarea name="signatureText" wrap="hard" style="display:none;width:100%;height:100%" onkeydown="return glo_checkEcho()"></textarea>
+							</td>						
+						</tr>
+						<tr>
+							<td>
+								<div id="htmlformat" style="display:none;">
+								<table border="0" class="menuColor" width="100%" cellpadding="0" cellspacing="0">
+									<tr>
+										<td style="border-top:1px solid #808080;">
+											<table width="100%" border="0" cellspacing="0" cellpadding="0">
+												<tr>
+													<td class="menubarx" style="" nowrap="true">
+														<table border="0" cellspacing="0" cellpadding="0">
+															<tr id="styleElements">
+																<td style="padding-left:4px;">
+																Font Face:
+																<select onchange="htmledit.setStyle('fontname');" id="fontname">
+																<option value="Arial">Arial</option>
+																<option value="Arial Black">Arial Black</option>
+																<option value="Comic Sans MS">Comic Sans MS</option>
+																<option value="Courier New">Courier New</option>
+																<option value="Lucida Console">Lucida Console</option>
+																<option value="Tahoma">Tahoma</option>
+																<option value="Times New Roman">Times New Roman</option>
+																<option selected="true" value="Verdana">Verdana</option>
+																</select>
+																Font Size:
+																<span title="Font Size">
+																<select onchange="htmledit.setStyle('fontsize');" id="fontsize">
+																<option  value="1">xx-small</option>
+																<option selected="true" value="2">x-small</option>
+																<option value="3">small</option>
+																<option value="4">medium</option>
+																<option value="5">large</option>
+																<option value="6">x-large</option>
+																<option value="7">xx-large</option>
+																</select></span>
+																</td>
+																<td class="editorbutton editorbuttonoff" unselectable="on" title="Text Color">
+																	<table unselectable="on" width="90%" id="colorPicker" 
+																		onclick="htmledit.getColors();" currentColor="#000000" 
+																		onpropertychange="htmledit.setStyle('fontcolor');" 
+																		border="0" cellspacing="0" cellpadding="0">
+																		<tr unselectable="on">
+																			<td unselectable="on" title="Text Color">
+																			<img unselectable="true" src="images/ico_colorwheel_2.gif" width="20" height="20" alt="Text Color" border="0"/>
+																			</td>
+																		</tr>
+																	</table>
+																</td>
+						
+																<td height="100%" style="padding:1px 2px 1px 2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+						
+																<td id="bold" title="Bold" class="editorbutton editorbuttonoff">
+																	<img src="images/icon_bold.gif" width="20" height="20" alt="Bold" onClick="htmledit.setStyle('bold');" border="0"/>
+																</td>
+																
+																<td id="italic" title="Italic" onClick="htmledit.setStyle('italic');" class="editorbutton editorbuttonoff">
+																	<img src="images/icon_italic.gif" width="20" height="20" alt="Italic" border="0"/>
+																</td>
+																
+																<td id="underline" title="Underline" onClick="htmledit.setStyle('underline');" class="editorbutton editorbuttonoff">
+																	<img src="images/icon_underline.gif" width="20" height="20" alt="Underline" border="0"/>
+																</td>
+																
+																<td id="createlink" title="Hyperlink" onClick="htmledit.createHyperLink(event);" class="editorbutton editorbuttonoff">
+																	<img src="images/ico_link.gif" width="20" height="20" alt="Hyperlink" border="0"/>
+																</td>
+																
+																<td id="insertimage" title="Image" onClick="upFile();" class="editorbutton editorbuttonoff">
+																	<img src="images/image.gif" width="20" height="20" alt="Image" border="0"/>
+																</td>
+																
+																<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+																
+																<td id="outdent" title="Decrease Indent" onClick="htmledit.setStyle('outdent');" class="editorbutton editorbuttonoff">
+																	<img src="images/icon_outdent.gif" width="20" height="20" alt="Decrease Indent" border="0"/>
+																</td>
+																
+																<td id="indent" title="Increase Indent" onClick="htmledit.setStyle('indent');" class="editorbutton editorbuttonoff">
+																	<img src="images/icon_indent.gif" width="20" height="20" alt="Increase Indent" border="0"/>
+																</td>
+																
+																<td id="justifyleft" title="Align Left" onClick="htmledit.setStyle('justifyleft');" class="editorbutton editorbuttonoff">
+																	<img src="images/icon_left.gif" width="20" height="20" alt="Align Left" border="0"/>
+																</td>
+														
+																<td id="justifycenter" title="Center" onClick="htmledit.setStyle('justifycenter');" class="editorbutton editorbuttonoff">
+																	<img src="images/icon_center.gif" width="20" height="20" alt="Center" border="0"/>
+																</td>
+						
+																<td id="justifyright" title="Align Right" onClick="htmledit.setStyle('justifyright');" class="editorbutton editorbuttonoff">
+																	<img src="images/icon_right.gif" width="20" height="20" alt="Align Right" border="0"/>
+																</td>
+															</tr>
+														</table>										
+													</td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+								</table>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+		<tr style="padding-top:5px">
+			<td>
+				Use this signature as the default for:<br/>
+				<xsl:choose>
+					<xsl:when test="/root/Signatures/Signature/@ObjectTypeID = '2' or not(/root/Signatures)">
+					<table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+					<tr>
+						<td>
+						<select name="TbOrTc" onchange="switchSelect(this)">
+							<option value="Tb" selected="true">Ticket Box</option>							
+							<option value="Tc">Ticket Category</option>							
+						</select>
+						</td>
+						<td style="width:100%">
+						<select id="selectBox" style="width:100%;" name="Tb">
+						<option value="0">
+						<xsl:if test="root/Signatures/Signature/@ActualID = '0'">
+							<xsl:attribute name="selected">true</xsl:attribute>
+						</xsl:if>
+						None
+						</option>
+						<xsl:for-each select="root/TicketBoxNames/TicketBox">						
+						<option	value="{@ID}">
+							<xsl:if test="/root/Signatures/Signature/@ActualID = @ID">
+								<xsl:attribute name="selected">true</xsl:attribute>
+							</xsl:if>
+							<xsl:value-of select = "@Name" />
+						</option>						
+						</xsl:for-each>	
+						</select>
+						</td>
+					</tr>
+					</table>
+					</xsl:when>
+					<xsl:otherwise>
+					<table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+					<tr>
+						<td>
+						<select name="TbOrTc" onchange="switchSelect(this)">
+							<option value="Tb">Ticket Box</option>
+							<option value="Tc" selected="true">Ticket Category</option>
+						</select>
+						</td>
+						<td style="width:100%">
+						<select id="selectBox" style="width:100%;" name="Tc">
+						<option value="0">
+						<xsl:if test="root/Signatures/Signature/@ActualID = '0'">
+							<xsl:attribute name="selected">true</xsl:attribute>
+						</xsl:if>
+						None
+						</option>
+						<xsl:for-each select="root/TicketCategoryNames/TicketCategory">						
+						<option	value="{@ID}">
+							<xsl:if test="/root/Signatures/Signature/@ActualID = @ID">
+								<xsl:attribute name="selected">true</xsl:attribute>
+							</xsl:if>
+							<xsl:value-of select="@Description"/>
+						</option>						
+						</xsl:for-each>	
+						</select>						
+						</td>
+					</tr>
+					</table>
+					</xsl:otherwise>
+				</xsl:choose>
+			</td>
+		</tr>
+	</table>
+	
+	<xsl:for-each select="root/TicketBoxNames/TicketBox">
+	<input type="hidden" name="hiTbID" disabled="true" value="{@ID}"/>
+	<input type="hidden" name="hiTbName" disabled="true" value="{@Name}"/>
+	</xsl:for-each>
+
+	<xsl:for-each select="root/TicketCategoryNames/TicketCategory">	
+	<input type="hidden" name="hiTcID" disabled="true" value="{@ID}"/>
+	<input type="hidden" name="hiTcName" disabled="true" value="{@Description}"/>
+	</xsl:for-each>
+	
+	</form>
+<object 
+	 id="sigdoc"
+	 name="sigdoc" 
+	 style="display:none;" 
+	 width="0" height="0" hspace="0" vspace="0" border="0" 
+	 fontcolor="#000000" fontface="verdana" fontsize="12"
+	 body="{root/Signatures/Signature}"
+	 forcespellcheck="{/root/user/forcespellcheck}"
+	 signaturetop="{/root/user/signaturetopreply}"
+	 action="{/root/Message/@MessageAction}"
+	 quotemsg="{/root/user/quotemsginreply}"
+	 quote="{/root/user/replyquotedprefix}"
+	 HTML="1"
+	>
+	</object>
+</div>
+</td>
+</tr>
+</table>
+<IFRAME
+		 ID="attframe"
+		 name="attframe"
+		 width="0"
+		 height="0"
+		 FRAMEBORDER="0"
+		 SCROLLING="NO"		  				  
+		   src="newmessage_attachments.ems?parent=attframe&amp;message=0"
+		/>
+</body>
+<script type="text/javascript">
+		glo_fixSrEditBody();
+</script>
+</html>
+
+</xsl:template>
+</xsl:stylesheet>

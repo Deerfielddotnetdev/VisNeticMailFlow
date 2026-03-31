@@ -1,0 +1,210 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"/>
+	<script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"></script>
+	<script Type="text/javascript" LANGUAGE="JavaScript">
+		function adjustForm()
+		{
+			<xsl:choose>
+			<xsl:when test="/root/user/access/prefmyal='4'">		
+			var submitform = true;				
+			nAlertMethod = document.tabularForm.AlertMethod.value;
+			if (nAlertMethod == '2')
+			{
+				if (document.tabularForm.EmailAddress.value!="")
+				{
+					if (!glo_checkEmailAddress(document.tabularForm.EmailAddress.value))
+					{
+						alert("If the alert method is set to external email, you must specify a valid Recipient: email address.");
+						document.tabularForm.EmailAddress.focus();
+						submitform = false;
+						return;
+					}
+				}
+				else
+				{
+					alert("If the alert method is set to external email, you must specify a valid Recipient: email address.");
+					document.tabularForm.EmailAddress.focus();
+					submitform = false;
+					return;
+				}				
+			}		
+			if (submitform)
+			{
+				var postResults = glo_buildFormPost('tabularForm');
+				if (eval(postResults[0])==true)
+				{
+					glo_setOpenerLocation();
+					glo_doClose();
+				}
+			}
+			</xsl:when>
+			<xsl:otherwise>
+				alert("You do not have permission to edit this alert!");
+			</xsl:otherwise>
+			</xsl:choose>
+		}
+	
+		function adjDisable()
+		{	
+			var bEnable = (document.tabularForm.AlertMethod.value != 1);
+			var fields = new Array();
+			fields[fields.length] = document.tabularForm.EmailAddress;
+			glo_disableForm(bEnable,fields);			
+		}
+	</script>
+	</head>
+
+	<body onload="adjDisable();">
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="Action">
+	<xsl:if test="root/MyAlert/@ID &gt; '0'"><xsl:attribute name="value">update</xsl:attribute></xsl:if>
+	<xsl:if test="root/MyAlert/@ID = '0'"><xsl:attribute name="value">insert</xsl:attribute></xsl:if>
+	</input>
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton" 
+										 xrequire="true"  
+										 title="Save Alert" onclick="adjustForm()"
+										  >
+											<nobr>
+												<img src="images/ico_save.gif" width="24" height="22" border="0"/>
+												Save
+											</nobr>
+										  </div>
+									</td>
+									<td height="100%">					
+										<div class="toolBar" id="toolButton" name="toolButton" 
+										 xrequire="true"  
+										 title="Cancel" onclick="glo_doClose();"
+										  >
+											<nobr>
+												<img src="images/ico_cancel.gif" width="24" height="22" border="0"/>
+												Cancel
+											</nobr>
+										  </div>
+									</td>
+									<td height="100%">					
+										<div class="toolBar" id="toolButton" name="toolButton" 
+										 xrequire="true"  
+										 title="Show Help" onclick="openHelp('My_Shortcuts/My_Alerts.htm');"
+										  >
+											<nobr>
+												<img src="images/ico_help.gif" width="24" height="22" border="0"/>
+												Help
+											</nobr>
+										  </div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto">
+				<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0"><tr><td>
+				
+				<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td class="subheader">Alert</td>
+					</tr>
+					<tr>
+						<td style="padding-left:10px;padding-right:10px;">
+							<table width="100%" cellspacing="0">
+								<tr><td height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+								<tr>
+									<td width="100%" class="subSectionHeader" align="left">
+										Alert On
+									</td>
+								</tr>
+								<tr>
+									<td width="100%" class="subSectionWrapper" align="left">
+										<table width="100%" cellpadding="0" cellspacing="0">
+											<tr>
+												<td width="15%" style="padding-left:10px;padding-top:5px;vertical-align:top;">Event:</td>
+												<td width="85%" align="left">
+													<select name="AlertEvent" style="width:100%;">
+														<xsl:for-each select="/root/AlertEvents/AlertEvent">
+															<xsl:if test="@ID &gt; '11'">
+															<option value="{@ID}">
+															<xsl:if test="@ID = /root/MyAlert/@AEID"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+															<xsl:value-of select="@Name"/>
+															</option>
+															</xsl:if>										
+														</xsl:for-each>
+													</select>
+												</td>
+											</tr>																	
+										</table>
+									</td>
+								</tr>
+								<tr><td height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+								<tr>
+									<td width="100%" class="subSectionHeader" align="left">
+										Alert To
+									</td>
+								</tr>
+								<tr>
+									<td width="100%" class="subSectionWrapper" align="left">
+									<input type="hidden" name="xEmailAddress" value="{root/MyAlert/@EmailAddress}"/>									
+										<table width="100%" cellpadding="0" cellspacing="0">
+											<tr>
+												<td width="15%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Method:</td>
+												<td width="85%" align="left" style="padding-right:10px;">
+													<select name="AlertMethod" style="width:300px;"  onchange="adjDisable();">
+													<xsl:for-each select="/root/AlertMethods/AlertMethod">
+														<option value="{@ID}">
+														<xsl:if test="@ID = /root/MyAlert/@AMID"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+														<xsl:value-of select="@Name"/>
+														</option>
+													</xsl:for-each>
+													</select>
+												</td>
+											</tr>
+											<tr><td height="5" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+											<tr>
+												<td width="15%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Recipient:</td>
+												<td width="85%" align="left" style="padding-right:10px;" id="recipient">
+													<input type="text" value="{/root/MyAlert/@EmailAddress}" style="width:100%" maxlength="255"  name="EmailAddress" />
+												</td>
+											</tr>												
+										</table>
+									</td>
+								</tr>
+								<tr><td height="10"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>								
+							</table>
+						</td>
+					</tr>					
+				</table>
+			</td></tr></table>
+			</div>
+			</td>
+		</tr>
+	</table>	
+	</form>
+	</body>
+	</html>
+</xsl:template>
+</xsl:stylesheet>

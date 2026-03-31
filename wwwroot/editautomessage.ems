@@ -1,0 +1,510 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"/>
+	<script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"></script>
+	<script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/automessage.jmf"></script>
+	</head>
+
+	<body callOnLoad="docInitDisableForms();">
+	<xsl:if test="not(root/AutoMessage/@ID = '0')">
+		<form name="hitCountForm" method="post" action="">
+		<input type="hidden" name="Action" value="resetHitCount" />
+		<input type="hidden" name="selectId" value="{root/AutoMessage/@ID}"/>
+		</form>
+	</xsl:if>
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="Action">
+	<xsl:if test="root/AutoMessage/@ID &gt; '0'"><xsl:attribute name="value">update</xsl:attribute></xsl:if>
+	<xsl:if test="root/AutoMessage/@ID = '0'"><xsl:attribute name="value">insert</xsl:attribute></xsl:if>
+	</input>
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton" 
+										 xrequire="true"  
+										 title="Save Auto Message" onclick="adjustForm()"
+										  >
+											<nobr>
+												<img src="images/ico_save.gif" width="24" height="22" border="0"/>
+												Save
+											</nobr>
+										  </div>
+									</td>
+									<td height="100%">					
+										<div class="toolBar" id="toolButton" name="toolButton" 
+										 xrequire="true"  
+										 title="Cancel" onclick="glo_doClose();"
+										  >
+											<nobr>
+												<img src="images/ico_cancel.gif" width="24" height="22" border="0"/>
+												Cancel
+											</nobr>
+										  </div>
+									</td>
+									<td height="100%">					
+										<div class="toolBar" id="toolButton" name="toolButton" 
+										 xrequire="true"  
+										 title="Show Help" 
+										 onclick="openHelp('administration/scheduled_tasks/auto_messages.htm')"
+										  >
+											<nobr>
+												<img src="images/ico_help.gif" width="24" height="22" border="0"/>
+												Help
+											</nobr>
+										  </div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto">
+				<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0"><tr><td>
+				
+				<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td class="subheader">Auto Message</td>
+					</tr>
+					<tr>
+						<td style="padding-left:10px;padding-right:10px;">
+							<table width="100%" cellspacing="0">
+								<tr><td height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+								<tr>
+									<td width="100%" class="subSectionHeader" align="left">
+										General Information
+									</td>
+								</tr>
+								<tr>
+									<td width="100%" class="subSectionWrapper" align="left">
+										<table width="100%" cellpadding="0" cellspacing="0">
+											<tr>
+												<td width="15%" style="padding-left:10px;">Description:</td>
+												<td width="85%" align="left">
+													<input style="width:100%" maxlength="125" type="text" name="Description" value="{root/AutoMessage/@Description}"/>
+													<script language="javascript">
+														document.tabularForm.Description.focus();
+													</script>
+												</td>
+											</tr>
+											<tr><td height="5" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+											<tr>
+												<td width="15%" style="padding-left:10px;">Enabled:</td>
+												<td width="85%" align="left">
+													Yes<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+													<input type="Radio" name="IsEnabled" value="1">
+													<xsl:if test="root/AutoMessage/@IsEnabled = '1'">
+														<xsl:attribute name="CHECKED">true</xsl:attribute>
+													</xsl:if>
+													</input>
+													No<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+													<input type="Radio" name="IsEnabled" value="0">
+													<xsl:if test="root/AutoMessage/@IsEnabled = '0'">
+														<xsl:attribute name="CHECKED">true</xsl:attribute>
+													</xsl:if>
+													</input>
+												</td>
+											</tr>
+											<tr><td height="5" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+											<xsl:if test="not(root/AutoMessage/@ID = '0')">
+												<tr>
+													<td width="15%" style="padding-left:10px;">Results:</td>
+													<td width="85%" align="left">
+														<b>Sent:</b><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;[<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<span id="docHitCountTxt"><xsl:value-of select="root/AutoMessage/@HitCount"/></span><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;]<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;[<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<span id="docSentPercentTxt"><xsl:value-of select="root/AutoMessage/@SentPercent"/></span>%<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;]<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+														<b>Not Sent:</b><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;[<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<span id="docFailCountTxt"><xsl:value-of select="root/AutoMessage/@FailCount"/></span><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;]<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+														<b>Total:</b><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;[<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<span id="docTotalCountTxt"><xsl:value-of select="root/AutoMessage/@TotalCount"/></span><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;]<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+														<input type="button" name="ResetHitCount" value="Clear" class="childControlBtn" onclick="resetCheck();"/>
+														
+													</td>
+												</tr><tr><td height="5" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+												<tr>
+													<xsl:variable name="nCreatedBy" select="root/AutoMessage/@CreatedByID" />
+													<td width="15%" style="padding-left:10px;">Created By:</td>
+													<td width="85%" align="left">
+														<xsl:choose>
+															<xsl:when test="/root/AgentNames/Agent/@ID = $nCreatedBy">
+																<xsl:for-each select="/root/AgentNames/Agent">
+																	<xsl:if test="@ID = $nCreatedBy">
+																		<xsl:value-of select="@Name"/>
+																	</xsl:if>
+																</xsl:for-each>
+															</xsl:when>
+															<xsl:otherwise>
+																Unknown
+															</xsl:otherwise>										
+														</xsl:choose>
+														<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/AutoMessage/@DateCreated"/>
+													</td>
+												</tr>
+												<tr><td height="5" colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+												<tr>
+													<td width="15%" style="padding-left:10px;">Last Edited By:</td>
+													<td width="85%" align="left">
+														<xsl:variable name="nEditedBy" select="root/AutoMessage/@EditedByID" />
+														<xsl:choose>
+														<xsl:when test="root/AgentNames/Agent/@ID = $nEditedBy">
+															<xsl:for-each select="/root/AgentNames/Agent">
+																<xsl:if test="@ID = $nEditedBy">
+																	<xsl:value-of select="@Name"/>
+																</xsl:if>
+															</xsl:for-each>
+														</xsl:when>
+														<xsl:otherwise>
+															Unknown
+														</xsl:otherwise>										
+													</xsl:choose>
+													<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/AutoMessage/@DateEdited"/>
+													</td>
+												</tr>
+											</xsl:if>
+										</table>
+									</td>
+								</tr>
+								<tr><td height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+								<tr>
+									<td width="100%" class="subSectionHeader" align="left">
+										Recipient
+									</td>
+								</tr>
+								<tr>
+									<td width="100%" class="subSectionWrapper" align="left">
+										<table width="100%" cellpadding="0" cellspacing="0">
+											<tr>
+												<td width="15%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Send To:</td>
+												<td width="85%" align="left">
+													<table cellpadding="2" cellspacing="2">
+														<tr>
+															<td>
+																<input type="text" name="SendToPercent" style="width:40px" maxlength="3" value="{root/AutoMessage/@SendToPercent}"/>
+																% of Tickets in
+															</td>
+															<td><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+														</tr>
+														<tr>
+															<td>
+																<input type="radio" name="SendToTypeID" value="0" onClick="adjDisable(this)">
+																<xsl:if test="/root/AutoMessage/@SendToTypeID = '0'">
+																	<xsl:attribute name="CHECKED">true</xsl:attribute>
+																</xsl:if>
+																</input>
+																TicketBox
+															</td>
+															<td>
+																<select name="SendToTbID">
+																	<xsl:for-each select="root/TicketBoxNames/TicketBox">
+																	<xsl:choose>
+																		<xsl:when test="@ID = /root/AutoMessage/@SendToID">
+																		<option>
+																			<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			<xsl:value-of select="@Name"/>
+																		</option>
+																		</xsl:when>
+																		<xsl:otherwise>
+																		<option>
+																			<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																			<xsl:value-of select="@Name"/>
+																		</option>
+																		</xsl:otherwise>
+																	</xsl:choose>
+																	</xsl:for-each>
+																</select>
+															</td>
+														</tr>
+														<tr>
+															<td>
+																<input type="radio" name="SendToTypeID" value="1" onClick="adjDisable(this)">
+																<xsl:if test="/root/AutoMessage/@SendToTypeID = '1'">
+																	<xsl:attribute name="CHECKED">true</xsl:attribute>
+																</xsl:if>
+																</input>
+																Ticket Category
+															</td>
+															<td>
+																<select name="SendToTcID">
+																	<xsl:for-each select="root/TicketCategoryNames/TicketCategory">
+																	<xsl:choose>
+																		<xsl:when test="@ID = /root/AutoMessage/@SendToID">
+																		<option>
+																			<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			<xsl:value-of select="@Description"/>
+																		</option>
+																		</xsl:when>
+																		<xsl:otherwise>
+																		<option>
+																			<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																			<xsl:value-of select="@Description"/>
+																		</option>
+																		</xsl:otherwise>
+																	</xsl:choose>
+																	</xsl:for-each>
+																</select>
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>								
+										</table>
+									</td>
+								</tr>
+								<tr><td height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+								<tr>
+									<td width="100%" class="subSectionHeader" align="left">
+										Sending
+									</td>
+								</tr>
+								<tr>
+									<td width="100%" class="subSectionWrapper" align="left">
+									<input type="hidden" name="SrToSendID" value="{root/AutoMessage/@SrToSendID}"></input>
+										<table width="100%" cellpadding="0" cellspacing="0">
+											<tr>
+												<td width="15%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Send Message:</td>
+												<td width="85%" align="left" style="padding-right:10px;">
+													<input type="text" name="WhenToSendVal" style="width:40px" maxlength="3" value="{root/AutoMessage/@WhenToSendVal}"/>
+													
+													<input type="Radio" name="WhenToSendFreq" value="0">
+													<xsl:if test="root/AutoMessage/@WhenToSendFreq = '0'">
+														<xsl:attribute name="CHECKED">true</xsl:attribute>
+													</xsl:if>
+													</input>
+													min(s)
+													<input type="Radio" name="WhenToSendFreq" value="1">
+													<xsl:if test="root/AutoMessage/@WhenToSendFreq = '1'">
+														<xsl:attribute name="CHECKED">true</xsl:attribute>
+													</xsl:if>
+													</input>
+													hr(s)
+													<input type="Radio" name="WhenToSendFreq" value="2">
+													<xsl:if test="root/AutoMessage/@WhenToSendFreq = '2'">
+														<xsl:attribute name="CHECKED">true</xsl:attribute>
+													</xsl:if>
+													</input>
+													day(s)
+												</td>
+											</tr>
+											<tr><td height="10"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+											<tr>
+												<td width="15%" style="padding-left:10px;padding-top:3px;vertical-align:top;">After Ticket Is:</td>
+												<td width="85%" align="left" style="padding-right:10px;">													
+													<input type="Radio" name="WhenToSendTypeID" value="0">
+													<xsl:if test="root/AutoMessage/@WhenToSendTypeID = '0'">
+														<xsl:attribute name="CHECKED">true</xsl:attribute>
+													</xsl:if>
+													</input>
+													Created
+													<input type="Radio" name="WhenToSendTypeID" value="1">
+													<xsl:if test="root/AutoMessage/@WhenToSendTypeID = '1'">
+														<xsl:attribute name="CHECKED">true</xsl:attribute>
+													</xsl:if>
+													</input>
+													Closed
+												</td>
+											</tr>
+											<tr><td height="10"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+											<tr>
+												<td width="15%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Use Standard Response:</td>
+												<td width="85%" align="left" style="padding-right:10px;">
+													<input type="text" readonly="true" contentEditable="false" style="width:100%" name="SrToSend">
+													<script language="javascript">
+														document.tabularForm.SrToSend.value = "<xsl:value-of select="root/AutoMessage/@SrToSend" disable-output-escaping="yes" />";
+													</script>
+
+													</input>
+													<br />
+													<input type="Button" name="AutoReplyResponseBtn" value="Browse..." onclick="glo_openSrWindow('editautomessage.ems');"></input>
+													<br />
+													<br />
+													<input type="Checkbox" name="OmitTracking" value="0" onClick="adjDisable(this)">
+													<xsl:if test="root/AutoMessage/@OmitTracking = '1'"><xsl:attribute name="CHECKED">true</xsl:attribute></xsl:if>
+													</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Omit Ticket Tracking Data
+													
+												</td>
+											</tr>
+											<tr><td height="10"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+											<tr>
+												<td width="15%" style="padding-left:10px;padding-top:3px;vertical-align:top;">From:</td>
+												<td width="85%" align="left" style="padding-right:10px;">
+													<input type="Radio" name="SendFromTypeID" value="0" onClick="adjDisable(this)">
+													<xsl:if test="root/AutoMessage/@SendFromTypeID = '0'"><xsl:attribute name="CHECKED">true</xsl:attribute></xsl:if>
+													</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Utilize the default TicketBox email address
+													<br />
+													<input type="Radio" name="SendFromTypeID" value="1" onClick="adjDisable(this)">
+													<xsl:if test="root/AutoMessage/@SendFromTypeID = '1'"><xsl:attribute name="CHECKED">true</xsl:attribute></xsl:if>
+													</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Utilize the Inbound Message To: address
+													<br />
+													<input type="Radio" name="SendFromTypeID" value="2" onClick="adjDisable(this)">
+													<xsl:if test="root/AutoMessage/@SendFromTypeID = '2'"><xsl:attribute name="CHECKED">true</xsl:attribute></xsl:if>
+													</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Utilize the email address and name below
+													<br />
+													<br />
+													
+													<table cellpadding="2" cellspacing="2" width="100%">
+														<tr>
+															<td style="width:100%">
+																From Email Address:
+																<br />
+																<input style="width:100%" maxlength="125" type="text" name="ReplyToAddress" value="{root/AutoMessage/@ReplyToAddress}"/>
+															</td>
+														</tr>
+														<tr>
+															<td style="width:100%">
+																From Email Name:
+																<br />
+																<input style="width:100%" maxlength="125" type="text" name="ReplyToName" value="{root/AutoMessage/@ReplyToName}"/>
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>	
+										</table>
+									</td>
+								</tr>
+								<tr><td height="10"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+								<tr>
+									<td width="100%" class="subSectionHeader" align="left">
+										Ticket
+									</td>
+								</tr>
+								<tr>
+									<td width="100%" class="subSectionWrapper" align="left">
+										<table width="100%" cellpadding="0" cellspacing="0">
+											<tr>
+												<td width="15%" style="padding-left:10px;padding-top:3px;vertical-align:top;">Ticket:</td>
+												<td width="85%" align="left" style="padding-right:10px;">
+													<input type="Checkbox" name="CreateNewTicket" value="0" onClick="adjDisable(this)">
+													<xsl:if test="root/AutoMessage/@CreateNewTicket = '1'"><xsl:attribute name="CHECKED">true</xsl:attribute></xsl:if>
+													</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Create new Ticket for Message
+													<br />
+													<br />
+													
+													
+													<table cellpadding="2" cellspacing="2" width="100%">
+														<tr>
+															<td>
+																Owner:
+															</td>
+															<td>
+																<select name="OwnerID">
+																	<option>
+																		<xsl:attribute name="value">0</xsl:attribute>
+																		-- None --
+																	</option>
+																	<xsl:for-each select="/root/AgentNames/Agent">
+																	<xsl:choose>
+																		<xsl:when test="@ID = /root/AutoMessage/@OwnerID">
+																		<option>
+																			<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			<xsl:value-of select="@Name"/>
+																		</option>
+																		</xsl:when>
+																		<xsl:otherwise>
+																		<option>
+																			<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																			<xsl:value-of select="@Name"/>
+																		</option>
+																		</xsl:otherwise>
+																	</xsl:choose>
+																	</xsl:for-each>
+																</select>
+															</td>
+														</tr>
+														<tr>
+															<td>
+																TicketBox:
+															</td>
+															<td>
+																<select name="TicketBoxID">
+																	<xsl:for-each select="root/TicketBoxNames/TicketBox">
+																	<xsl:choose>
+																		<xsl:when test="@ID = /root/AutoMessage/@TicketBoxID">
+																		<option>
+																			<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			<xsl:value-of select="@Name"/>
+																		</option>
+																		</xsl:when>
+																		<xsl:otherwise>
+																		<option>
+																			<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																			<xsl:value-of select="@Name"/>
+																		</option>
+																		</xsl:otherwise>
+																	</xsl:choose>
+																	</xsl:for-each>
+																</select>
+															</td>
+														</tr>
+														<tr>
+															<td>
+																Ticket Category:
+															</td>
+															<td>
+																<select name="TicketCategoryID">
+																	<option value="0">Unassigned</option>
+																	<xsl:for-each select="root/TicketCategoryNames/TicketCategory">
+																	<xsl:choose>
+																		<xsl:when test="@ID = /root/AutoMessage/@TicketCategoryID">
+																		<option>
+																			<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																			<xsl:attribute name="selected">true</xsl:attribute>
+																			<xsl:value-of select="@Description"/>
+																		</option>
+																		</xsl:when>
+																		<xsl:otherwise>
+																		<option>
+																			<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																			<xsl:value-of select="@Description"/>
+																		</option>
+																		</xsl:otherwise>
+																	</xsl:choose>
+																	</xsl:for-each>
+																</select>
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>											
+										</table>
+									</td>
+								</tr>
+								<tr><td height="10"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+							</table>
+						</td>
+					</tr>
+					
+				</table>
+			</td></tr></table>
+			</div>
+			</td>
+		</tr>
+	</table>
+	
+	</form>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

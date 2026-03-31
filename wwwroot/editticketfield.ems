@@ -1,0 +1,630 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/ticketfield.jmf"></script>
+	<script type="text/javascript" language="javascript">
+		var nType = <xsl:value-of select="/root/TicketField/@Type"/>;
+		function docAction( dAction ) {
+			var newID = ('<xsl:value-of select="/root/TicketField/@NEWID"/>' == '')? 0 : '<xsl:value-of select="/root/TicketField/@NEWID"/>';
+			var ticketFieldID = ('<xsl:value-of select="/root/TicketField/@ID"/>' == '')? 0 : '<xsl:value-of select="/root/TicketField/@ID"/>';	
+			switch ( dAction )
+			{
+				case "SAVECLOSE" :
+				{
+					var submitform = true;
+					var ticketFieldName = new String(document.tabularForm.Description.value);
+					var srch = /\w/;
+					
+					if (ticketFieldName=="")
+					{
+						submitform = false;
+						alert("You must enter a Name for this Ticket Field before saving.");
+						document.tabularForm.Description.focus();
+					}
+					else if (srch.test(ticketFieldName)==false)
+					{
+						submitform = false;
+						alert("A Ticket Field Name must only contain alphanumeric characters.");
+						document.tabularForm.Description.focus();
+					}
+					
+					var TFList = "";
+					for (i = 0; i &lt; document.all.TicketFields.rows.length; i++)
+					{
+						thisID = document.all.TicketFields.rows[i].id;
+						isRequired=0;
+						isViewed=0;
+						setDefault=0;	
+						if( thisID &gt; 0 )
+						{
+							var elmIsEnabled = eval('tabularForm.IsEnabled'+thisID);
+							var elmIsRequired = eval('tabularForm.IsRequired'+thisID);
+							var elmIsViewed = eval('tabularForm.IsViewed'+thisID);
+							var elmSetDefault = eval('tabularForm.SetDefault'+thisID);
+							var elmDefaultValue = eval('tabularForm.DefaultValue'+thisID);
+							
+							if( elmIsEnabled.checked == true )
+							{
+								if( (elmSetDefault.checked == true &amp;&amp; elmDefaultValue.value != '') || elmSetDefault.checked == false )
+								{
+									if (TFList=="")
+									{
+										TFList = thisID;
+									}
+									else
+									{
+										TFList = TFList.concat(", "+thisID);
+									}
+								}
+								else
+								{
+									submitform = false;
+									alert("If Set Default is checked, you must define a default value for the ticket field!");
+									elmDefaultValue.focus();
+								}
+							}
+						}
+					}
+					if( TFList != "" )
+					{
+						document.tabularForm.TFCollection.value = TFList;
+					}
+					
+					var OptList = "";
+					for (i = 0; i &lt; document.all.OptionTable.rows.length; i++)
+					{
+						thisID = document.all.OptionTable.rows[i].id;
+						if( thisID &gt; 0 )
+						{
+							if (OptList=="")
+							{
+								OptList = thisID;
+							}
+							else
+							{
+								OptList = OptList.concat(", "+thisID);
+							}
+						}
+					}
+					if( OptList != "" )
+					{
+						document.tabularForm.OptCollection.value = OptList;
+					}
+					
+					if ( submitform == true )
+					{
+						var postResults = glo_buildFormPost('tabularForm');
+						var proceed = postResults[0];
+						if (proceed)
+						{
+							glo_setOpenerLocation();
+							top.close();
+						}
+						break;
+					}
+				}
+				case "SAVE" :
+				{
+					var submitform = true;
+					var ticketFieldName = new String(document.tabularForm.Description.value);
+					var srch = /\w/;
+					
+					if (ticketFieldName=="")
+					{
+						submitform = false;
+						alert("You must enter a Name for this Ticket Field before saving.");
+						document.tabularForm.Description.focus();
+					}
+					else if (srch.test(ticketFieldName)==false)
+					{
+						submitform = false;
+						alert("A Ticket Field Name must only contain alphanumeric characters.");
+						document.tabularForm.Description.focus();
+					}
+					
+					var TFList = "";
+					for (i = 0; i &lt; document.all.TicketFields.rows.length; i++)
+					{
+						thisID = document.all.TicketFields.rows[i].id;
+						isRequired=0;
+						isViewed=0;
+						setDefault=0;	
+						if( thisID &gt; 0 )
+						{
+							var elmIsEnabled = eval('tabularForm.IsEnabled'+thisID);
+							var elmIsRequired = eval('tabularForm.IsRequired'+thisID);
+							var elmIsViewed = eval('tabularForm.IsViewed'+thisID);
+							var elmSetDefault = eval('tabularForm.SetDefault'+thisID);
+							var elmDefaultValue = eval('tabularForm.DefaultValue'+thisID);
+							
+							if( elmIsEnabled.checked == true )
+							{
+								if( (elmSetDefault.checked == true &amp;&amp; elmDefaultValue.value != '') || elmSetDefault.checked == false )
+								{
+									if (TFList=="")
+									{
+										TFList = thisID;
+									}
+									else
+									{
+										TFList = TFList.concat(", "+thisID);
+									}
+								}
+								else
+								{
+									submitform = false;
+									alert("If Set Default is checked, you must define a default value for the ticket field!");
+									elmDefaultValue.focus();
+								}
+							}
+						}
+					}
+					if( TFList != "" )
+					{
+						document.tabularForm.TFCollection.value = TFList;
+					}
+					
+					var OptList = "";
+					for (i = 0; i &lt; document.all.OptionTable.rows.length; i++)
+					{
+						thisID = document.all.OptionTable.rows[i].id;
+						if( thisID &gt; 0 )
+						{
+							if (OptList=="")
+							{
+								OptList = thisID;
+							}
+							else
+							{
+								OptList = OptList.concat(", "+thisID);
+							}
+						}
+					}
+					if( OptList != "" )
+					{
+						document.tabularForm.OptCollection.value = OptList;
+					}
+					
+					if ( submitform == true )
+					{
+						var postResults = glo_buildFormPost('tabularForm');
+						var proceed = postResults[0];
+						if (proceed)
+						{
+							if(ticketFieldID == 0)
+							{
+								var urlStr = './modalframe.ems?file=editticketfield.ems&amp;id='+newID;
+								glo_setOpenerLocation();
+							}
+							else
+							{
+								var urlStr = './modalframe.ems?file=editticketfield.ems&amp;id='+ticketFieldID;
+							}
+							document.location = urlStr;
+						}
+						break;
+					}
+				}
+				default:
+				{
+				}
+			}
+		}
+		function disableTicketFields()
+		{
+			for (i = 0; i &lt; document.all.TicketFields.rows.length; i++)
+			{
+				thisID = document.all.TicketFields.rows[i].id;
+				if( thisID &gt; 0 )
+				{ 
+					var elmIsEnabled = eval('tabularForm.IsEnabled'+thisID);
+					var elmIsRequired = eval('tabularForm.IsRequired'+thisID);
+					var elmIsViewed = eval('tabularForm.IsViewed'+thisID);
+					var elmSetDefault = eval('tabularForm.SetDefault'+thisID);
+					var elmDefaultValue = eval('tabularForm.DefaultValue'+thisID);
+					
+					if( elmIsEnabled.checked == true )
+					{
+						elmIsRequired.disabled =  false;
+						elmIsViewed.disabled =  false;
+						elmSetDefault.disabled =  false;
+						elmDefaultValue.disabled =  false;
+						elmDefaultValue.style.backgroundColor = "white";
+					}
+					else
+					{
+						elmIsRequired.disabled =  true;
+						elmIsViewed.disabled =  true;
+						elmSetDefault.disabled =  true;
+						elmDefaultValue.disabled =  true;
+						elmDefaultValue.style.backgroundColor = "#d3d3d3";
+					}
+				}
+			}
+		}
+	</script>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	</head>
+	
+	<body callBeforeOnLoad="" callonload="disableTicketFields();tabularForm.Description.focus();adjustDoc();">
+	<form name="tabularForm" method="post" action="" onsubmit="docAction('SAVE');">
+	<input type="hidden" name="old_Description" value="{/root/TicketField/@Description}" />
+	<input type="hidden" name="old_Type" value="{/root/TicketField/@Type}" />
+	<input type="hidden" name="ID" value="{/root/TicketField/@ID}" />
+	<input type="hidden" name="TFCollection" value="" />
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="true"
+										 title="Save Ticket Field" onclick="docAction('SAVE');">
+										<nobr>
+										<img src="images/ico_save.gif" width="24" height="22" border="0" valign="bottom"/>
+										Save
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="true"
+										 title="Save Ticket Field &amp; Close" onclick="docAction('SAVECLOSE');">
+										<nobr>
+										<img src="images/ico_save.gif" width="24" height="22" border="0" valign="bottom"/>
+										Save &amp; Close
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Cancel" onclick="glo_setOpenerLocation();top.close();"
+										  >
+											<nobr>
+												<img src="images/ico_cancel.gif" width="24" height="22" border="0"/>
+												Cancel
+											</nobr>
+										  </div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Show Help" onclick="openHelp('Administration/Tickets/Ticket_Fields.htm');">
+										<nobr>
+										<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom"/>
+										Help
+										</nobr>
+				  						</div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+				<div style="width:100%;height:100%;overflow:auto">
+					<table style="width:100%;padding:10px;" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td style="width:100%;overflow:hidden;vertical-align:top;">
+						    <table style="width:100%;" border="0" cellspacing="0" cellpadding="0">
+						        <tr>
+						            <td>
+						                <table width="100%;" border="0" cellspacing="0" cellpadding="0">
+							                <tr>
+								                <td style="width:70px;text-align:left;">
+								                    Ticket Field Name:
+								                </td>
+								                <td style="width:80%;text-align:left;">
+								                    <input type="text" maxlength="50" value="{/root/TicketField/@Description}" style="width:100%;" name="Description"/>					                
+								                </td>
+							                </tr>
+						                </table>
+						            </td>
+						        </tr>
+						        <tr>
+						            <td style="padding-top:5px;">
+						                <table width="100%;" border="0" cellspacing="0" cellpadding="0">
+							                <tr>
+								                <td style="width:70px;text-align:left;">
+								                    Ticket Field Type:
+								                </td>
+								                <td style="width:80%;text-align:left;">
+								                    <select name="TicketFieldTypeID" onchange="adjustDoc()">
+																			<option>
+																				<xsl:attribute name="value">1</xsl:attribute>
+																				<xsl:if test="/root/TicketField/@Type = '1'">
+																				<xsl:attribute name="selected">true</xsl:attribute>
+																				</xsl:if>
+																				Text
+																			</option>
+																			<option>
+																				<xsl:attribute name="value">2</xsl:attribute>
+																				<xsl:if test="/root/TicketField/@Type = '2'">
+																				<xsl:attribute name="selected">true</xsl:attribute>
+																				</xsl:if>
+																				CheckBox
+																			</option>
+																			<option>
+																				<xsl:attribute name="value">3</xsl:attribute>
+																				<xsl:if test="/root/TicketField/@Type = '3'">
+																				<xsl:attribute name="selected">true</xsl:attribute>
+																				</xsl:if>
+																				Select
+																			</option>
+																		</select>
+								                </td>
+							                </tr>
+						                </table>
+						            </td>
+						        </tr>
+						        <tr id="optionTR">
+						        	<td>
+						        		<table>
+									        <tr>
+									            <td style="padding-top:5px;">
+									                <table width="100%;" border="0" cellspacing="0" cellpadding="0">
+										                <tr>
+											                <td style="width:70px;text-align:left;">
+											                    <nobr>Select Box Options:</nobr>
+											                </td>
+											                <td style="width:80%;text-align:left;padding-left:5px;">
+											                    <input class="headerControlBtn" type="button" value="Add" onclick="addOption()"/>
+											                </td>
+										                </tr>
+									                </table>
+									            </td>
+									        </tr>
+									        <tr>
+										        <td style="width:100%;vertical-align:top;text-align:left;padding-top:5px;">
+															<input type="Hidden" name="OptionMaxID" value="{root/TicketField/@MaxOptionID}"/>
+															<input type="Hidden" name="OptCollection" value=""/>
+															<table cellspacing="0" cellpadding="0" id="OptionTable" border="1" style="background-color: #FFFFFF;">
+																<tr id="0" style="border:none;background-color:{/root/user/menubackcolor};font-size:9pt; font-weight: bold;">
+																	<td style="text-align:left;width:56px;">
+																		<input type="Hidden" rowIndex="0" name="ActionDelButton"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																	</td>
+																	<td style="width:310px;text-align:left;padding-left: 2px;">Value</td>
+																	<td style="width:40px;text-align:left;padding-left: 2px;">Order</td>
+																</tr>
+															<xsl:for-each select="root/Options/Option">
+																<xsl:variable name="oid" select="@OptionID"/>
+																<xsl:variable name="oval" select="@OptionValue"/>
+																<xsl:variable name="oord" select="@OptionOrder"/>
+																<tr id="{$oid}">
+																	<td style="width:56px;text-align:left;padding-left: 2px;">
+																		<input type="button" rowIndex="0" name="ActionDelButton" class="childControlBtn" value="Remove" onclick="delOption();"/>
+																	</td>
+																	<td style="width:310px;text-align:left;padding-left: 2px;">
+																		<input type="text" name="{concat('OptionVal', $oid)}" value="{$oval}" style='width:310px' maxlength='50'/>
+																	</td>
+																	<td style="width:40px;text-align:left;padding-left: 2px;">
+																		<input type="text" name="{concat('OptionOrder', $oid)}" value="{$oord}" style='width:40px' maxlength='2'/>
+																	</td>
+																</tr>
+															</xsl:for-each>
+															</table>
+														</td>
+													</tr>
+												</table>
+											</td>
+										</tr>
+						     </table>
+							</td>
+						</tr>
+						<tr>
+					    <td>
+					      <table border="0" cellspacing="0" cellpadding="0">
+									<tr>
+										<td colspan="3" style="height:10px;padding-top:10px;padding-bottom:5px;">TicketBox Assignment:</td>
+									</tr>
+									<tr style="padding-top:5px;">
+										<td width="100%" align="left" colspan="3">
+											<table width="550px" border="0" cellspacing="0" cellpadding="0">
+												<tr>
+													<td>
+														<table cellspacing="0" cellpadding="0" id="TicketFields" border="1" style="background-color: #FFFFFF;">
+															<tr id="0" style="border:none;background-color:{/root/user/menubackcolor};font-size:9pt; font-weight: bold;">
+																<td width="16px" align="left" style="padding-left: 5px;"><span title="Is enabled for this TicketBox">IE</span></td>
+																<td width="200px" align="left" style="padding-left: 2px;"><nobr><span title="The TicketBox Name">TicketBox Name</span></nobr></td>
+																<td width="16px" align="left" style="padding-left: 5px;"><span title="Is a required field">IR</span></td>
+																<td width="16px" align="left" style="padding-left: 5px;"><span title="Is listed in Ticket List Views">IV</span></td>
+																<td width="16px" align="left" style="padding-left: 5px;"><span title="Set the defined default value when Ticket is created">SD</span></td>
+																<td align="left" style="padding-left: 2px;"><span title="The default value to set when Ticket is created">Default Value</span></td>													  
+															</tr>
+														<xsl:for-each select="root/TicketBoxNames/TicketBox">
+														<xsl:variable name="TICKETBOXID" select="@ID"/>
+														<xsl:variable name="TICKETBOXNAME" select="@Name"/>
+															<tr id="{$TICKETBOXID}">
+																<td width="25" align="left">
+																  <input type="checkbox" name="IsEnabled{$TICKETBOXID}" onclick="disableTicketFields()">	
+																  	<xsl:choose>
+																  		<xsl:when test="/root/TicketFieldTicketBoxes/TicketFieldTicketBox/@TBID = $TICKETBOXID">
+																  			<xsl:for-each select="/root/TicketFieldTicketBoxes/TicketFieldTicketBox">
+																  				<xsl:if test="@TBID = $TICKETBOXID">
+																  					<xsl:attribute name="checked">true</xsl:attribute>
+																  				</xsl:if>
+																  			</xsl:for-each>
+																  		</xsl:when>									  		
+																  	</xsl:choose>									  								  
+																  </input>
+																</td> 
+											 				 	<td width="200px" align="left" style="padding-left: 2px;"><span style="font-size:9pt; font-weight: normal;"><xsl:value-of select="$TICKETBOXNAME"/></span></td>
+															 	<td width="25" align="left">
+																  <input type="checkbox" name="IsRequired{$TICKETBOXID}">	
+																  	<xsl:choose>
+																  		<xsl:when test="/root/TicketFieldTicketBoxes/TicketFieldTicketBox/@TBID = $TICKETBOXID">
+																  			<xsl:for-each select="/root/TicketFieldTicketBoxes/TicketFieldTicketBox">
+																  				<xsl:if test="@TBID = $TICKETBOXID">
+																  					<xsl:if test="@IsRequired = '1'">
+																  						<xsl:attribute name="checked">true</xsl:attribute>
+																  					</xsl:if>
+																  				</xsl:if>
+																  			</xsl:for-each>
+																  		</xsl:when>									  		
+																  	</xsl:choose>									  										  								  
+																  </input>
+																</td> 
+											 				 	<td width="25" align="left">
+																  <input type="checkbox" name="IsViewed{$TICKETBOXID}">	
+																  	<xsl:choose>
+																  		<xsl:when test="/root/TicketFieldTicketBoxes/TicketFieldTicketBox/@TBID = $TICKETBOXID">
+																  			<xsl:for-each select="/root/TicketFieldTicketBoxes/TicketFieldTicketBox">
+																  				<xsl:if test="@TBID = $TICKETBOXID">
+																  					<xsl:if test="@IsViewed= '1'">
+																  						<xsl:attribute name="checked">true</xsl:attribute>
+																  					</xsl:if>
+																  				</xsl:if>
+																  			</xsl:for-each>
+																  		</xsl:when>									  		
+																  	</xsl:choose>									  										  								  
+																  </input>
+																</td> 
+											 				 	<td width="25" align="left">
+																  <input type="checkbox" name="SetDefault{$TICKETBOXID}">	
+																  	<xsl:choose>
+																  		<xsl:when test="/root/TicketFieldTicketBoxes/TicketFieldTicketBox/@TBID = $TICKETBOXID">
+																  			<xsl:for-each select="/root/TicketFieldTicketBoxes/TicketFieldTicketBox">
+																  				<xsl:if test="@TBID = $TICKETBOXID">
+																  					<xsl:if test="@SetDefault = '1'">
+																  						<xsl:attribute name="checked">true</xsl:attribute>
+																  					</xsl:if>
+																  				</xsl:if>
+																  			</xsl:for-each>
+																  		</xsl:when>
+																  	</xsl:choose>
+																  </input>
+																</td> 
+																<td style="padding-left:2px;text-align:left;">
+																	<xsl:choose>
+																  <xsl:when test="/root/TicketField/@Type = '1' or /root/TicketField/@ID = '0'">
+																  <input type="text" maxlength="255" name="DefaultValue{$TICKETBOXID}" id="DefaultValue{$TICKETBOXID}">	
+																  	<xsl:choose>
+																  		<xsl:when test="/root/TicketFieldTicketBoxes/TicketFieldTicketBox/@TBID = $TICKETBOXID">
+																  			<xsl:for-each select="/root/TicketFieldTicketBoxes/TicketFieldTicketBox">
+																  				<xsl:if test="@TBID = $TICKETBOXID">
+																  					<xsl:attribute name="value"><xsl:value-of select="@DefaultValue"/></xsl:attribute>
+																  				</xsl:if>
+																  			</xsl:for-each>
+																  		</xsl:when>
+																  	</xsl:choose>
+																  </input>
+																  </xsl:when>
+																  <xsl:when test="/root/TicketField/@Type = '2'">
+																  <input type="checkbox" name="DefaultValue{$TICKETBOXID}" id="DefaultValue{$TICKETBOXID}">
+																  	<xsl:choose>
+																  		<xsl:when test="/root/TicketFieldTicketBoxes/TicketFieldTicketBox/@TBID = $TICKETBOXID">
+																  			<xsl:for-each select="/root/TicketFieldTicketBoxes/TicketFieldTicketBox">
+																  				<xsl:if test="@TBID = $TICKETBOXID">
+																  					<xsl:if test="@DefaultValue = '1'">
+																  						<xsl:attribute name="checked">true</xsl:attribute>
+																  					</xsl:if>
+																  				</xsl:if>
+																  			</xsl:for-each>
+																  		</xsl:when>
+																  	</xsl:choose>
+																  </input>
+																  </xsl:when>
+																  <xsl:otherwise>
+																  <select name="DefaultValue{$TICKETBOXID}" id="DefaultValue{$TICKETBOXID}">
+																		<option value="0"></option>
+																		<xsl:for-each select="/root/Options/Option">
+																		<xsl:variable name="OPTID" select="@OptionID"/>
+																		<option>
+																			<xsl:choose>
+																  		<xsl:when test="/root/TicketFieldTicketBoxes/TicketFieldTicketBox/@TBID = $TICKETBOXID">
+																  			<xsl:for-each select="/root/TicketFieldTicketBoxes/TicketFieldTicketBox">
+																  				<xsl:variable name="DEFVAL" select="@DefaultValue"/>
+																  				<xsl:if test="@TBID = $TICKETBOXID">
+																  					<xsl:if test="$DEFVAL = $OPTID">
+																  						<xsl:attribute name="selected">true</xsl:attribute>
+																  					</xsl:if>
+																  				</xsl:if>
+																  			</xsl:for-each>
+																  		</xsl:when>
+																  	</xsl:choose>
+																  		<xsl:attribute name="value"><xsl:value-of select="@OptionID"/></xsl:attribute>
+																			<xsl:value-of select="@OptionValue"/>
+																		</option>
+																		</xsl:for-each>
+																	</select>
+																  </xsl:otherwise>
+																  </xsl:choose>
+																</td>
+											  				</tr>
+														</xsl:for-each>
+														</table>
+													</td>
+													<td height="10px"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+									<tr style="padding-top:5px;">
+										<td align="left">
+											IE:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</td>
+										<td align="left">
+											Is enabled for this TicketBox
+										</td>
+									</tr>
+									<tr style="padding-top:5px;">
+										<td align="left">
+											IR:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</td>
+										<td align="left">
+											Is a required field (must be populated before reply can be sent)
+										</td>
+									</tr>
+									<tr style="padding-top:5px;">
+										<td align="left">
+											IV:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</td>
+										<td align="left">
+											Is listed in Ticket List Views (must be enabled via Column selector)
+										</td>
+									</tr>
+									<tr style="padding-top:5px;">
+										<td align="left">
+											SD:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</td>
+										<td align="left">
+											Set the defined default value when Ticket is created
+										</td>
+									</tr>
+									<tr style="padding-top:5px;">
+										<td align="left" colspan="2">
+											Note: Save Ticket Field before setting Default Values
+										</td>
+									</tr>
+								</table>
+					    </td>
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+</xsl:template>
+</xsl:stylesheet>

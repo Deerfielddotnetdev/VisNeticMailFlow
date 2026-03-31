@@ -1,0 +1,92 @@
+    <xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:template match="/">
+
+	<head>
+		<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+		<script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"/>
+		<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+
+		<style>
+			a:visited{color:black;}
+			a{color:black;}
+		</style>
+
+		<script LANGUAGE="javascript">
+
+			function DownloadLocal()
+			{
+				document.tabularForm.target = "DLFrame";
+				document.tabularForm.submit();
+				document.tabularForm.target = "";
+			}
+
+			function DownloadAdobe()
+			{
+				window.open("http://www.adobe.com/svg/viewer/install/");
+			}
+
+			function Close()
+			{
+				glo_doClose();
+			}
+
+		</script> 
+	</head>
+
+	<body style="background-color:#FFFFFF !important">
+
+	<form name="tabularForm" method="get" action="">
+		<input type="hidden" name="Download" value="1"/>
+	</form>
+
+	<table style="width:100%;padding:10px;" border="0" cellpadding="0" cellspacing="0">
+		
+		<tr>
+			<td>
+				The Adobe SVG Viewer is not installed. The Adobe SVG Viewer is required to display 
+				report graphs.<br/><br/>After downloading and installing the Adobe SVG Viewer click the 
+				View button to re-generate the report.
+			</td>
+		</tr>
+		
+		<xsl:if test="/root/SVG/@Exists=1">
+		<tr>
+			<td>
+				<a href="#" onclick="DownloadLocal()" border="0">
+				<img src="images/svgdownload.gif" width="88" height="31" border="0"/></a><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+
+				<a href="#" onclick="DownloadLocal()" >
+				Click here</a><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;to download the Adobe SVG Viewer plug-in from the MailFlow server.
+			</td>
+		</tr>
+		</xsl:if>
+
+		<tr>
+			<td>
+				<a href="#" onclick="DownloadAdobe()" border="0">
+				<img src="images/svgdownload.gif" width="88" height="31" border="0"/></a><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+				
+				<a href="#" onclick="DownloadAdobe()">
+				Click here</a><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;to download the Adobe SVG Viewer plug-in from Adobe's website.
+			</td>
+		</tr>
+
+		<xsl:if test="not(/root/SVG/@Exists=1)">
+			<tr style="height:50"><td><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+		</xsl:if>
+
+		<tr>
+			<td align="center">
+				<input type="button" value="Close" onclick="Close()"/>
+			</td>
+		</tr>
+
+	</table>
+
+	<iframe src="download_blank.htm" name="DLFrame" style="display:none"/>
+
+	</body>
+
+</xsl:template>
+</xsl:stylesheet>

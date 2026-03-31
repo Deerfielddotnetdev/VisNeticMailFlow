@@ -1,0 +1,616 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>	
+	<title>VisNetic MailFlow</title>
+	
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/standardresponse.jmf"></script>
+	<script language="javascript" type="text/javascript" src="./javascript/signatures.jmf"></script>	
+	<script language="javascript">
+		
+		var fileIndex = 0;
+		function saveInfo(){
+			if(document.tabularForm.subject.value == '') {
+				alert("Please enter a subject for this Standard Response");
+			} else {
+				var fileId = document.getElementsByName('fileID');
+
+				if(fileId.length != 0){
+					if(fileId.length == 1){
+						document.tabularForm.savedattachment.value = document.tabularForm.savedattachment.value + document.tabularForm.fileID.value + ",";
+					} else {
+						for ( var i=0; i &lt; fileId.length; i++) {
+							document.tabularForm.savedattachment.value = document.tabularForm.savedattachment.value + document.tabularForm.fileID[i].value + ",";
+						}
+					}
+				} 
+				document.tabularForm.body.value = messagepartition.innerHTML;
+				document.tabularForm.submit();
+				uploadProgress();
+				
+			}
+		}
+		
+		function sizeCurrent() {			
+			idRows();
+		}
+		
+		function okInfo(){
+			location = "stdresponse.ems?id=<xsl:value-of select="root/StdResponse/@ID" />";
+		}
+		
+		function loadMe() {
+			idRows();
+			document.all.resppart.style.height = parent.document.all.frameRightBottom.height - 60;
+		}
+		
+		function insertFile() {
+			if(event.propertyName=='value') {
+				if (event.srcElement.value != "") {
+				
+					event.srcElement.style.display = 'none';
+					
+					// create the new element and attach events
+					// this must be done this way due to restrictions on the file field type.
+					var oForm = createForm(); 
+					
+					// display elements
+					var attachedForm = 'file' +(fileIndex-1);
+					//alert (attachedForm)
+					filename = event.srcElement.value.substring((event.srcElement.value.lastIndexOf('\\')+1),event.srcElement.value.length);
+					insertIcon = '<img name="' + attachedForm + '" onClick="attachClick(this);" style="cursor: hand;" src="./images/ico_attach_16.gif"  border="0"/>';
+					attachlayer.innerHTML = attachlayer.innerHTML + '<span id="' + attachedForm + '"><a name="' + attachedForm + '" style="font-size:8pt;" onClick="attachClick(this);">' + insertIcon + filename + '</a></span>';
+					
+					// index and resize
+					document.tabularForm.fileindex.value = document.tabularForm.fileindex.value + 'file'+(fileIndex-1)+',';
+				}
+			}
+		}
+		
+		function createForm() {
+			
+			var oForm=document.createElement('input');
+			oForm.type = 'file';
+			oForm.name = 'file'+fileIndex;
+			oForm.style.fontSize = "8pt";
+			oForm.attachEvent('onpropertychange', insertFile);
+			fileForm.appendChild(oForm);
+			fileIndex++;
+		
+			return oForm;
+		}
+		
+		function attachClick(obj) {
+			window.event.cancelBubble = true;
+			glo_launchModalWindow('/opendeleteattach.htm', 200, 200, 'yes', 'no', 'no');
+			if (func.length > 0) {
+				oObj = eval("document.tabularForm."+ obj.name);   	// the form object
+				oDis = eval(obj.name);							// the display object
+				
+				if (func == 'open') {
+					// open the file
+					// NOTE that this does not work in this build.  I left it in for future reference, anyway.
+					window.open(oObj.value);
+				} else {
+					// delete the file?  
+					//oObj.value = '';
+					childDim = 0;
+					// loop, find the matching child
+					while (childDim &lt;= attachlayer.children.length) {
+						if (attachlayer.children(childDim).id == obj.name) {
+							// adjust the form field.
+							document.tabularForm.fileindex.value = document.tabularForm.fileindex.value.replace(attachlayer.children(childDim).id+',', '', document.tabularForm.fileindex.value);
+							//alert(document.message.fileindex.value);
+							// remove the display item
+							attachlayer.removeChild(attachlayer.children(childDim));
+							// remove the upload file, will be synch'ed with display item
+							fileForm.removeChild(fileForm.children(childDim));
+							break;
+						}
+						childDim ++;
+					}
+				}				
+			}
+		}
+
+		function uploadProgress() {
+			if (document.tabularForm.fileindex.value.length != 0) {
+				glo_launchModalWindow('uploadprogress.ems?id=<xsl:value-of select="/root/Upload/@ID"/>', 350, 120, 'no', 'no', 'no');
+			}
+		}
+
+		function OnCancel() {
+			var nSRID = <xsl:value-of select="root/StdResponse/@ID"/>;
+			var nCategoryID = <xsl:value-of select="root/StdResponse/@CategoryID" />;
+			if(nSRID > 0)
+			{
+				document.location = 'stdresponse.ems?ID=<xsl:value-of select="root/StdResponse/@ID"/>&amp;category=' + nCategoryID;
+			}
+			else
+			{
+				document.location = 'stdresponse.ems?ID=0&amp;category=' + nCategoryID;
+			}
+		}
+		
+		function OnChkKeywordClick()
+		{
+			if(document.tabularForm.chkKeywords)
+			{
+				var bEnable = (document.tabularForm.chkKeywords.checked != true) ? false : true;
+				
+				if(!bEnable)
+				{
+					document.getElementById("txtKeywords").disabled = true;
+					document.getElementById("txtKeywords").style.backgroundColor = "#D3D3D3";
+				}
+				else
+				{
+					document.getElementById("txtKeywords").disabled = false;
+					document.getElementById("txtKeywords").style.backgroundColor = "#FFFFFF";
+				}
+			}
+		}
+		function createEditor() 
+		{
+			htmledit = new Editor();
+			htmledit.init();		
+			htmlformat.style.display = 'block';
+			htmledit.setFormat(1);
+			htmlUI(true);		
+		}
+		function htmlUI(bool) {
+			if(bool == true) {
+				htmlformat.style.display = 'block';
+				htmledit.setFormat(1);
+			} else {
+				htmlformat.style.display = 'none';
+			}
+		}
+		
+		function pinger()
+		{
+			var xhttp = glo_createXMLhttpObject();
+			var pct=0;
+			var uploadid = document.tabularForm.uploadID.value;
+			var url = 'uploadprogress.ems?OutputXML=1&amp;docancel=0&amp;id=' + uploadid;
+			xhttp.open('GET', url, false);
+			if(xhttp.overrideMimeType){ xhttp.overrideMimeType('text/xml'); }
+			xhttp.send();
+			if (xhttp.responseXML)
+			{
+				if (document.implementation.hasFeature("XPath", "3.0"))
+				{
+					if ( xhttp.responseXML.selectSingleNode("//root/Upload/@Percent"))
+					{
+						if (xhttp.responseXML.selectSingleNode('//root/Upload/@Percent').textContent.length != 0)
+						{
+							pct = xhttp.responseXML.selectSingleNode('//root/Upload/@Percent').textContent;
+							if (pct == (-1))
+							{
+								window.clearInterval(pingIntervalID);
+								document.tabularForm.uploadID.value = '0';
+								htmledit.insertImage(document.tabularForm.lastFile.value,document.tabularForm.lastCID.value);
+								document.tabularForm.lastFile.value = '';
+								document.tabularForm.doInsImage.value = 0;
+							}				
+						}
+					}
+				}
+				else
+				{
+		    	if (xhttp.responseXML.selectSingleNode("/root/Upload/@Percent"))
+					{
+						pct = xhttp.responseXML.selectSingleNode("/root/Upload/@Percent").value;
+						if (pct == (-1))
+						{
+							window.clearInterval(pingIntervalID);
+							document.tabularForm.uploadID.value = '0';
+							htmledit.insertImage(document.tabularForm.lastFile.value,document.tabularForm.lastCID.value);
+							document.tabularForm.lastFile.value = '';
+							document.tabularForm.doInsImage.value = 0;
+						}
+					}
+		    }
+			}
+		}
+		
+		function docInitPinger()
+		{
+			pingIntervalID = window.setInterval('pinger()', 500);
+		}
+		
+		function upFile()
+		{
+			document.tabularForm.lastCID.value = genID();
+			if ( glo_whichBrowser() == "Internet Explorer" )
+			{
+				document.tabularForm.doInsImage.value = "0";
+				window.frames["attframe"].document.forms["tabularForm"].elements["uploadFile"].click();
+				if(document.tabularForm.lastFile.value != '' &amp;&amp; document.tabularForm.uploadID.value != '0')
+				{
+					docInitPinger();
+				}
+			}
+			else
+			{
+				document.tabularForm.doInsImage.value = "1";
+				window.frames["attframe"].document.forms["tabularForm"].elements["uploadFile"].click();			
+			}		
+		}
+		function insImage()
+		{
+			if(document.tabularForm.lastFile.value != '' &amp;&amp; document.tabularForm.uploadID.value != '0')
+			{
+				docInitPinger();
+			}
+		} 
+		function randomString(string_length)
+		{
+			var chars = "0123456789ABCDEFGHIJKLMNOPQRSUVWXTZabcdefghiklmnopqrsuvwxyz";
+			var randomstring = '';
+			for (var i=0; i&lt;string_length; i++)
+			{
+				var rnum = Math.floor(Math.random() * chars.length);
+				randomstring += chars.substring(rnum,rnum+1);
+			}
+			return randomstring;
+		}
+		function genID()
+		{
+			var contentID  = randomString(12) +"@";
+			return contentID += randomString(24);
+		}
+	</script>
+	
+	</head>
+
+	<body callOnLoad="idRows();createEditor();">
+	<form name="tabularForm" method="post" enctype="multipart/form-data" action="./editstdresponse.ems?UploadID={/root/Upload/@ID}">
+	<input type="hidden" name="ID" value="{root/StdResponse/@ID}" />
+	<input type="hidden" name="Action" value="update" />
+	<input type="hidden" name="fileindex" value=""/>
+	<input type="hidden" name="savedattachment" value=""/>
+	<input type="hidden" name="lastFile" value="" />
+	<input type="hidden" name="lastCID" value="" />
+	<input type="hidden" name="doInsImage" value="0" />
+	<input type="hidden" name="uploadID" value="0" />
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/StdResponse/Subject" disable-output-escaping="yes" />
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">										
+										<div xrequire="(tabularForm.subject.value!=''&amp;&amp;tabularForm.subject.value.indexOf(' ')!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Save Changes" onclick="saveInfo();">
+											<nobr>
+												<img src="images/ico_save.gif" width="24" height="22" border="0" valign="bottom" alt="Save Changes"/>Save<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Discard Changes" onclick="OnCancel();">
+											<nobr>
+											<img src="images/ico_cancel.gif" width="24" height="22" border="0" valign="bottom" alt="Discard Changes"/>Cancel<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('My_Shortcuts/Standard_Responses/Creating_a_Standard_Response.htm', 0);">
+											<nobr>
+											<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom" alt="Show Help"/>Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto;">
+				<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0"><tr><td>
+				
+				<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td class="subheader">
+							<nobr>Subject</nobr>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input type="text" style="width:100%" name="subject"/>
+							<script language="javascript">
+								document.tabularForm.subject.value = "<xsl:value-of select="root/StdResponse/SubjectRaw" disable-output-escaping="yes" />";
+								document.tabularForm.subject.focus();
+							</script>
+						</td>
+					</tr>
+					<tr><td><br/></td></tr>
+					<tr>
+						<td class="subheader">
+							<nobr>Category</nobr>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<xsl:variable name="currentCatId">
+								<xsl:value-of select="root/StdResponse/@CategoryID" />
+							</xsl:variable>
+							<select name="categoryId" class="smallFont">
+								<xsl:choose>
+									<xsl:when test="$currentCatId = '1'">
+										<option selected="true">
+											<xsl:attribute name="value">1</xsl:attribute>
+											Drafts
+										</option>
+									</xsl:when>
+									<xsl:otherwise>
+										<option>
+											<xsl:attribute name="value">1</xsl:attribute>
+											Drafts
+										</option>
+									</xsl:otherwise>
+								</xsl:choose>
+								<xsl:for-each select="root/stdrespcategories/stdrespcategory">
+									<xsl:choose>
+										<xsl:when test="$currentCatId = id">
+											<option selected="true">
+												<xsl:attribute name="value"><xsl:value-of select="id"/></xsl:attribute>
+												<xsl:value-of select="name" disable-output-escaping="yes"/>
+											</option>
+										</xsl:when>
+										<xsl:otherwise>
+											<option>
+												<xsl:attribute name="value"><xsl:value-of select="id"/></xsl:attribute>
+												<xsl:value-of select="name" disable-output-escaping="yes"/>
+											</option>
+										</xsl:otherwise>
+									</xsl:choose>
+								</xsl:for-each>
+							</select>
+						</td>
+					</tr>
+					<tr><td><br/></td></tr>
+					<tr>
+						<td class="subheader">
+							<nobr>Content</nobr>
+						</td>
+					</tr>
+					<tr>
+						<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">						
+							<div style="width:100%;height:400px;overflow:auto;">
+								<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+									<tr>
+										<td style="height:100%">
+											<div id="editregion" style="word-wrap:break-word;height:100%;width:100%;cursor:text;background:white;font-family:verdana;"></div>
+											<textarea name="body" wrap="hard" style="display:none;width:100%;height:100%"></textarea>
+										</td>						
+									</tr>
+									<tr>
+										<td>
+											<div id="htmlformat" style="display:none;">
+											<table border="0" class="menuColor" width="100%" cellpadding="0" cellspacing="0">
+												<tr>
+													<td style="border-top:1px solid #808080;">
+														<table width="100%" border="0" cellspacing="0" cellpadding="0">
+															<tr>
+																<td class="menubarx" style="" nowrap="true">
+																	<table border="0" cellspacing="0" cellpadding="0">
+																		<tr id="styleElements">
+																			<td style="padding-left:4px;">
+																			Font Face:
+																			<select onchange="htmledit.setStyle('fontname');" id="fontname">
+																			<option value="Arial">Arial</option>
+																			<option value="Arial Black">Arial Black</option>
+																			<option value="Comic Sans MS">Comic Sans MS</option>
+																			<option value="Courier New">Courier New</option>
+																			<option value="Lucida Console">Lucida Console</option>
+																			<option value="Tahoma">Tahoma</option>
+																			<option value="Times New Roman">Times New Roman</option>
+																			<option selected="true" value="Verdana">Verdana</option>
+																			</select>
+																			Font Size:
+																			<span title="Font Size">
+																			<select onchange="htmledit.setStyle('fontsize');" id="fontsize">
+																			<option  value="1">xx-small</option>
+																			<option selected="true" value="2">x-small</option>
+																			<option value="3">small</option>
+																			<option value="4">medium</option>
+																			<option value="5">large</option>
+																			<option value="6">x-large</option>
+																			<option value="7">xx-large</option>
+																			</select></span>
+																			</td>
+																			<td class="editorbutton editorbuttonoff" unselectable="on" title="Text Color">
+																				<table unselectable="on" width="90%" id="colorPicker" 
+																					onclick="htmledit.getColors();" currentColor="#000000" 
+																					onpropertychange="htmledit.setStyle('fontcolor');" 
+																					border="0" cellspacing="0" cellpadding="0">
+																					<tr unselectable="on">
+																						<td unselectable="on" title="Text Color">
+																						<img unselectable="true" src="images/ico_colorwheel_2.gif" width="20" height="20" alt="Text Color" border="0"/>
+																						</td>
+																					</tr>
+																				</table>
+																			</td>
+									
+																			<td height="100%" style="padding:1px 2px 1px 2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+									
+																			<td id="bold" title="Bold" class="editorbutton editorbuttonoff">
+																				<img src="images/icon_bold.gif" width="20" height="20" alt="Bold" onClick="htmledit.setStyle('bold');" border="0"/>
+																			</td>
+																			
+																			<td id="italic" title="Italic" onClick="htmledit.setStyle('italic');" class="editorbutton editorbuttonoff">
+																				<img src="images/icon_italic.gif" width="20" height="20" alt="Italic" border="0"/>
+																			</td>
+																			
+																			<td id="underline" title="Underline" onClick="htmledit.setStyle('underline');" class="editorbutton editorbuttonoff">
+																				<img src="images/icon_underline.gif" width="20" height="20" alt="Underline" border="0"/>
+																			</td>
+																			
+																			<td id="createlink" title="Hyperlink" onClick="htmledit.createHyperLink(event);" class="editorbutton editorbuttonoff">
+																				<img src="images/ico_link.gif" width="20" height="20" alt="Hyperlink" border="0"/>
+																			</td>
+																			
+																			<td id="insertimage" title="Image" onClick="upFile();" class="editorbutton editorbuttonoff">
+																				<img src="images/image.gif" width="20" height="20" alt="Image" border="0"/>
+																			</td>
+																			
+																			<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+																			
+																			<td id="outdent" title="Decrease Indent" onClick="htmledit.setStyle('outdent');" class="editorbutton editorbuttonoff">
+																				<img src="images/icon_outdent.gif" width="20" height="20" alt="Decrease Indent" border="0"/>
+																			</td>
+																			
+																			<td id="indent" title="Increase Indent" onClick="htmledit.setStyle('indent');" class="editorbutton editorbuttonoff">
+																				<img src="images/icon_indent.gif" width="20" height="20" alt="Increase Indent" border="0"/>
+																			</td>
+																			
+																			<td id="justifyleft" title="Align Left" onClick="htmledit.setStyle('justifyleft');" class="editorbutton editorbuttonoff">
+																				<img src="images/icon_left.gif" width="20" height="20" alt="Align Left" border="0"/>
+																			</td>
+																	
+																			<td id="justifycenter" title="Center" onClick="htmledit.setStyle('justifycenter');" class="editorbutton editorbuttonoff">
+																				<img src="images/icon_center.gif" width="20" height="20" alt="Center" border="0"/>
+																			</td>
+									
+																			<td id="justifyright" title="Align Right" onClick="htmledit.setStyle('justifyright');" class="editorbutton editorbuttonoff">
+																				<img src="images/icon_right.gif" width="20" height="20" alt="Align Right" border="0"/>
+																			</td>
+																		</tr>
+																	</table>										
+																</td>
+															</tr>
+														</table>
+													</td>
+												</tr>
+											</table>
+											</div>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</td>
+					</tr>
+					<tr><td><br/></td></tr>
+					<tr>
+						<td class="subheader">
+							Attachments
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<table style="margin-top:3px;margin-left:3px;" id="attachTable" BORDER="0" CELLSPACING="0" CELLPADDING="0">
+								
+								<xsl:for-each select="root/Attachment">
+									<tr>
+									<input type="hidden" name="fileID" value="{@ID}"/>
+										<td>
+											<img src="./images/ico_attach_16.gif"  border="0"/> <xsl:value-of select="FileName"/>
+										</td>
+										<td width="10">
+										</td>
+										<td style="padding-left: 10px;">
+											<input class="childControlBtn" type="button" value="Remove" name="button1" onClick="delRow();" rowIndex=""/>
+										</td>
+									</tr>
+								</xsl:for-each>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td> 
+							<input type="button" style="margin-left:0px !important;" class="childControlBtn" value="Add Attachment" onClick="newRows();"/>
+						</td>
+					</tr>
+					
+					<tr><td><br/></td></tr>
+					<tr>
+						<td class="subheader">
+							Notes
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<textarea style="width:100%" cols="85" class="smallFont" name="notes" rows="5"><xsl:value-of select="root/StdResponse/Note" disable-output-escaping="yes" /></textarea>
+						</td>
+					</tr>
+					
+					<tr><td><br/></td></tr>
+					<tr>
+						<td class="subheader">
+							Keywords
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div>
+								<input type="checkbox" name="chkKeywords" onclick="OnChkKeywordClick();">
+								<xsl:if test="root/StdResponse/keyword/usekeywords = '1'">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+								</input>
+								Enable Keyword Search (semicolon delimited) e.g 'Order;Account;MailFlow;'
+							</div>
+							<input id="txtKeywords" maxlength="255" type="text" style="width:100%" name="keywords">
+								<xsl:attribute name="value"><xsl:value-of select="root/StdResponse/keyword/keywords"/></xsl:attribute>
+							</input>
+						</td>
+					</tr>
+				</table>
+
+				</td></tr></table>
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	<object 
+	 id="sigdoc"
+	 name="sigdoc" 
+	 style="display:none;" 
+	 width="0" height="0" hspace="0" vspace="0" border="0" 
+	 fontcolor="#000000" fontface="verdana" fontsize="12"
+	 body="{root/StdResponse/Body}"
+	 forcespellcheck="{/root/user/forcespellcheck}"
+	 signaturetop="{/root/user/signaturetopreply}"
+	 action="{/root/Message/@MessageAction}"
+	 quotemsg="{/root/user/quotemsginreply}"
+	 quote="{/root/user/replyquotedprefix}"
+	 HTML="1"
+	>
+	</object>
+<IFRAME
+		 ID="attframe"
+		 name="attframe"
+		 width="0"
+		 height="0"
+		 FRAMEBORDER="0"
+		 SCROLLING="NO"		  				  
+		   src="newmessage_attachments.ems?parent=attframe&amp;message=0"
+		/>			
+	</body>
+	<script type="text/javascript">
+		OnChkKeywordClick();
+		glo_fixSrEditBody();
+	</script>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

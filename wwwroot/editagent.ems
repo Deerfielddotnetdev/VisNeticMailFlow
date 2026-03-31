@@ -1,0 +1,630 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}" />
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script> 
+	<script type="text/javascript" language="javascript" src="./javascript/editagent.jmf"></script>
+	<script>
+	function docSubmitForm()
+	{
+		var idcollection = "";
+		for (x = 0; x &lt; document.tabularForm.elements.length; x++)
+		{
+			if (document.tabularForm.elements[x].name.indexOf('group')!=-1 &amp;&amp; document.tabularForm.elements[x].name.indexOf('id')==-1)
+			{
+				if (document.tabularForm.elements[x].checked==true)
+				{
+					if (idcollection=="")
+					{
+						idcollection = document.tabularForm.elements[x].name.replace('group','');
+					}
+					else
+					{
+						idcollection = idcollection + ", " + document.tabularForm.elements[x].name.replace('group','');
+					}
+				}
+			}
+		}
+		document.tabularForm.groupidcollection.value = idcollection;
+		if (document.all.AdditionalInfoTable.rows.length)
+		{
+//			create a string variable to contain the list temporarily!
+			AdditionalInfoList = "";
+//			loop through any available rows!
+			for (i = 0; i &lt; document.all.AdditionalInfoTable.rows.length; i++)
+			{
+//				capture the current row's ID!
+				thisID = document.all.AdditionalInfoTable.rows[i].id;
+//				if this is the first time in the loop...
+				if (AdditionalInfoList=="")
+				{	AdditionalInfoList = thisID;	}
+//				if this is not the first time in the loop...
+				else
+				{	AdditionalInfoList = AdditionalInfoList.concat(", "+thisID);	}
+			}
+//			set the collection field's value to the value of the collection string variable!
+			document.tabularForm.PersonalDataIdCollection.value = AdditionalInfoList;
+		}//^ if (document.all.AdditionalInfoTable.rows.length)
+
+		var lookAt = "";
+		var userMsg = "";
+		var checkWhat = tabularForm.username;
+		if (checkWhat.value=="")
+		{
+			lookAt = checkWhat;
+			userMsg += "	A User Name must be provided.\n";
+		}
+		var checkWhat = tabularForm.firstname;
+		if (checkWhat.value.trim()=="")
+		{
+			if (lookAt=="") lookAt = checkWhat;
+			userMsg += "	A Full Name must be provided.\n";
+		}
+		tabularForm.firstname.value = checkWhat.value.trim();
+		 
+		var checkWhat = tabularForm.DefaultEmail;
+
+		if (checkWhat.value!="")
+		{
+			if (glo_checkEmailAddress(checkWhat.value)==false)
+			{
+	//			"this is not a valid email address!!!"
+	//			check to see whether lookAt has already been given a value, and assign it to this field if not!
+				if (lookAt==""){lookAt = checkWhat}
+	//			append this friendly user propmt to the end of the userMsg string!
+				userMsg += "	The Default Email Address provided is invalid.\n";
+			}
+		}
+
+//		if userMsg has not been given a value, then there have been no mistakes!
+		if (userMsg=="")
+		{
+//			"All Clear! Submit the form!"
+//			document.tabularForm.submit();
+			var postResults = glo_buildFormPost('tabularForm');
+			var proceed = postResults[0];
+			if (proceed==true)
+			{
+				glo_setOpenerLocation();				
+				glo_doClose();
+			}
+
+		}
+//		if userMsg has been given a value, someone made a mistake!!!!!!!!!
+		else
+		{
+//			alert the user with a friendly message followed by a list of items that need to be addressed!
+			alert("Your form cannot be processed due to the following reasons:\n"+userMsg);
+//			return focus to the first field where a mistake was found!
+			lookAt.focus();
+		}
+	}
+	</script>
+	</head>
+
+	<body callOnLoad="adjustDoc();">
+	<form action="" method="post" name="tabularForm">
+	<input type="hidden" value="{/root/Agent/@ID}" name="AgentId" />		
+	<input type="hidden" value="update" name="Action" />	
+
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(tabularForm.username.value!=''&amp;&amp;tabularForm.username.value.indexOf(' ')!=0)"
+										 title="Save Changes" onclick="docSubmitForm();">
+										<nobr>
+										<img src="images/ico_save.gif" width="24" height="22" border="0" valign="bottom"/>
+										Save<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Cancel and return to Agents" onclick="parent.close();">
+										<nobr>
+										<img src="images/ico_cancel.gif" width="24" height="22" border="0" valign="bottom"/>
+										Cancel<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Access Control" onclick="glo_launchModalWindow('./modalframe.ems?file=accessrights.ems&amp;ObjectTypeID=1&amp;ID={/root/Agent/@ID}&amp;docshowtitle=1',500,400);"
+										>
+											<xsl:if test="not(/root/Agent/@ID &gt; 0)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+										<nobr>
+										<img src="images/ico_accesscontrol.gif" width="24" height="22" border="0" valign="bottom"/>
+										Access Control<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="IP Access" onclick="glo_launchModalWindow('./modalframe.ems?file=ipranges.ems&amp;close=1&amp;agentID={/root/Agent/@ID}&amp;docshowtitle=1',500,400);"
+										>
+											<xsl:if test="not(/root/Agent/@ID &gt; 0)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+										<nobr>
+										<img src="images/ico_ipaccess.gif" width="24" height="22" border="0" valign="bottom"/>
+										IP Access<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Preferences" onclick="glo_launchModalWindow('./modalframe.ems?file=apreferences.ems&amp;selectid={/root/Agent/@ID}&amp;docshowtitle=1',500,550);"
+										>
+											<xsl:if test="not(/root/Agent/@ID &gt; 0)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+										<nobr>
+										<img src="images/ico_newagent.gif" width="24" height="22" border="0" valign="bottom"/>
+										Preferences<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Show Help" onclick="openHelp('Administration/Hidden/Usr_Config/Create_Edit_an_Agent.htm');">
+										<nobr>
+										<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom"/>
+										Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto;">
+				<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0"><tr><td>
+				
+				<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td width="100%" class="subheader">
+						Agent Information
+						</td>
+					</tr>
+					<tr>
+						<td width="100%" class="subSectionWrapper" align="left">
+							<TABLE BORDER="0" width="100%" style="padding-left:20px;" CELLPADDING="0" CELLSPACING="0">
+								<tr>
+									<td valign="middle">
+										<select name="usertype" onchange="adjustSec(this.value)">
+											<option value="0">
+											<xsl:if test="root/Agent/@IsNTUser = '0'"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+											Local User
+											</option>
+									<xsl:if test="not(root/DOCUMENT/DEMO_VERSION)">
+											<option value="1">
+											<xsl:if test="root/Agent/@IsNTUser = '1'"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+											AD User
+											</option>
+									</xsl:if>
+									<xsl:if test="root/VMSIntegration/@Enabled = '1'">
+											<option value="2">
+											<xsl:if test="root/Agent/@IsNTUser = '2'"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+											VMS User
+											</option>
+									</xsl:if>
+										</select>
+									</td>
+								</tr>
+								<xsl:variable name="DomainSectionDisplay">
+								<xsl:choose>
+									<xsl:when test="root/Agent/@IsNTUser = '1'">block</xsl:when>
+									<xsl:otherwise>none</xsl:otherwise>
+									</xsl:choose>
+								</xsl:variable>
+								<xsl:if test="not(root/DOCUMENT/DEMO_VERSION)">
+								<tr id="DomainSection" style="padding-top:10px;display:{$DomainSectionDisplay};">
+									<td>
+										AD Domain:<br/>
+										<input type="text" name="domain">
+											<xsl:attribute name="value">
+												<xsl:value-of select = "/root/Agent/@NTDomain" />
+											</xsl:attribute>
+										</input>
+										<xsl:if test="not(root/DOCUMENT/HOSTED_VERSION)">
+										<input type="button" name="ListNTUsers" class="childControlBtn" onClick="OpenNT();" value="NT Users" />
+										</xsl:if>
+									</td>
+								</tr>
+								</xsl:if>
+								<xsl:variable name="VMSectionDisplay">
+								<xsl:choose>
+									<xsl:when test="root/Agent/@IsNTUser = '2'">block</xsl:when>
+									<xsl:otherwise>none</xsl:otherwise>
+									</xsl:choose>
+								</xsl:variable>
+								<tr id="VMSection" style="padding-top:10px;display:{$VMSectionDisplay};">
+									<td>
+										<input type="button" name="ListVMSUsers" class="childControlBtn" onClick="OpenVMS();" value="VMS Users" />
+									</td>
+								</tr>
+								<tr style="padding-top:10px;">
+									<td>
+										User Name:<br/>
+										<input type="text" maxlength="50" name="username" value="{/root/Agent/@LoginName}"/>
+									</td>
+								</tr>	
+								<tr style="padding-top:10px;">
+									<td>
+										Full Name:<br/>
+										<input type="text" maxlength="128" name="firstname" value="{/root/Agent/@Name}"/>
+									</td>
+								</tr>
+								<xsl:variable name="PasswordSectionDisplay">
+								<xsl:choose>
+									<xsl:when test="root/Agent/@IsNTUser = '0'">block</xsl:when>
+									<xsl:otherwise>none</xsl:otherwise>
+									</xsl:choose>
+								</xsl:variable>
+								<tr id="PasswordSection" style="padding-top:10px;display:{$PasswordSectionDisplay};">
+									<td>
+										Password:<br/>
+										<input type="password" name="password" value="{/root/Agent/@Password}"/>
+									</td>
+								</tr>				
+								<tr style="padding-top:10px;">
+									<td>
+										This Agent Escalates Tickets To:<br/>
+										<xsl:choose>
+											<xsl:when test="/root/Agent/@EscalateToAgentID &gt; '-1' or not(/root/Agent)">
+											<table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+											<tr>
+												<td>
+												<select name="AgentOrGroup" onchange="switchSelect(this)">
+													<option value="Agent" selected="true">Agent</option>
+													<xsl:if test="/root/EscGroups/Group">
+													<option value="Group">Group</option>
+													</xsl:if>
+												</select>
+												</td>
+												<td style="width:100%">
+												<select id="selectBox" style="width:100%;" name="Agent">
+												<option value="0">
+												<xsl:if test="root/Agent/@EscalateToAgentID = '0'">
+													<xsl:attribute name="selected">true</xsl:attribute>
+												</xsl:if>
+												None 
+												</option>
+												<xsl:for-each select="root/AgentNames/Agent">
+												<xsl:if test="/root/Agent/@ID != @ID">
+												<option	value="{@ID}">
+													<xsl:if test="/root/Agent/@EscalateToAgentID = @ID">
+														<xsl:attribute name="selected">true</xsl:attribute>
+													</xsl:if>
+													<xsl:value-of select = "@Name" />
+												</option>
+												</xsl:if>
+												</xsl:for-each>	
+												</select>
+												</td>
+											</tr>
+											</table>
+											</xsl:when>
+											<xsl:otherwise>
+											<table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+											<tr>
+												<td>
+												<select name="AgentOrGroup" onchange="switchSelect(this)">
+													<option value="Agent">Agent</option>
+													<option value="Group" selected="true">Group</option>
+												</select>
+												</td>
+												<td style="width:100%">
+												<select id="selectBox" style="width:100%;" name="Group">
+												<option value="0">
+												<xsl:if test="root/Agent/@EscalateToGroupID = '0'">
+													<xsl:attribute name="selected">true</xsl:attribute>
+												</xsl:if>
+												None
+												</option>
+												<xsl:for-each select="/root/EscGroups/Group">
+													<xsl:if test="/root/Agent/@ID != @ID">
+													<option	value="{@ID}">
+														<xsl:if test="/root/Agent/@EscalateToGroupID = @ID">
+															<xsl:attribute name="selected">true</xsl:attribute>
+														</xsl:if>
+														<xsl:value-of select = "@GroupName" />
+													</option>
+												</xsl:if>
+												</xsl:for-each>
+												</select>
+												</td>
+											</tr>
+											</table>
+											</xsl:otherwise>
+										</xsl:choose>
+									</td>
+								</tr>
+								<tr style="padding-top:10px;">
+									<td>
+										This Agent Requires Outbound Message Approval From:<br/>
+										<xsl:choose>
+											<xsl:when test="/root/Agent/@OutboundApprovalFromAgentID &gt; '-1' or not(/root/Agent)">
+											<table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+											<tr>
+												<td>
+												<select name="AppAgentOrGroup" onchange="switchSelectApp(this)">
+													<option value="Agent" selected="true">Agent</option>
+													<xsl:if test="/root/AppGroups/Group">
+													<option value="Group">Group</option>
+													</xsl:if>
+												</select>
+												</td>
+												<td style="width:100%">
+												<select id="selectBoxApp" style="width:100%;" name="AgentApp">
+												<option value="0">
+												<xsl:if test="root/Agent/@OutboundApprovalFromAgentID = '0'">
+													<xsl:attribute name="selected">true</xsl:attribute>
+												</xsl:if>
+												None
+												</option>
+												<xsl:for-each select="root/AgentNames/Agent">
+												<xsl:if test="/root/Agent/@ID != @ID">
+												<option	value="{@ID}">
+													<xsl:if test="/root/Agent/@OutboundApprovalFromAgentID = @ID">
+														<xsl:attribute name="selected">true</xsl:attribute>
+													</xsl:if>
+													<xsl:value-of select = "@Name" />
+												</option>
+												</xsl:if>
+												</xsl:for-each>	
+												</select>
+												</td>
+											</tr>
+											</table>
+											</xsl:when>
+											<xsl:otherwise>
+											<table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+											<tr>
+												<td>
+												<select name="AppAgentOrGroup" onchange="switchSelectApp(this)">
+													<option value="Agent">Agent</option>
+													<option value="Group" selected="true">Group</option>
+												</select>
+												</td>
+												<td style="width:100%">
+												<select id="selectBoxApp" style="width:100%;" name="GroupApp">
+												<option value="0">
+												<xsl:if test="root/Agent/@OutboundApprovalFromGroupID = '0'">
+													<xsl:attribute name="selected">true</xsl:attribute>
+												</xsl:if>
+												None
+												</option>
+												<xsl:for-each select="/root/AppGroups/Group">
+													<xsl:if test="/root/Agent/@ID != @ID">
+													<option	value="{@ID}">
+														<xsl:if test="/root/Agent/@OutboundApprovalFromGroupID = @ID">
+															<xsl:attribute name="selected">true</xsl:attribute>
+														</xsl:if>
+														<xsl:value-of select = "@GroupName" />
+													</option>
+												</xsl:if>
+												</xsl:for-each>
+												</select>
+												</td>
+											</tr>
+											</table>
+											</xsl:otherwise>
+										</xsl:choose>
+									</td>
+								</tr>
+								<tr style="padding-top:5px;">
+									<td>
+										Agent State:<br/>
+										<select name="enabled">
+											<option value="1">
+											<xsl:if test="root/Agent/@IsEnabled = '1'"><xsl:attribute name="selected"><xsl:value-of select="true"/></xsl:attribute></xsl:if>
+											Active
+											</option>
+											<option value="0">
+											<xsl:if test="root/Agent/@IsEnabled = '0'"><xsl:attribute name="selected"><xsl:value-of select="true"/></xsl:attribute></xsl:if>
+											Inactive
+											</option>
+										</select>
+									</td>
+								</tr>	
+								<tr style="padding-top:5px;">
+									<td>
+										Agent Status:<br/>
+										<select name="statusid">
+											<option value="1">
+											<xsl:if test="root/Agent/@StatusID = '1'"><xsl:attribute name="selected"><xsl:value-of select="true"/></xsl:attribute></xsl:if>
+											Online
+											</option>
+											<option value="2">
+											<xsl:if test="root/Agent/@StatusID = '2'"><xsl:attribute name="selected"><xsl:value-of select="true"/></xsl:attribute></xsl:if>
+											Away
+											</option>
+											<option value="3">
+											<xsl:if test="root/Agent/@StatusID = '3'"><xsl:attribute name="selected"><xsl:value-of select="true"/></xsl:attribute></xsl:if>
+											Not Available
+											</option>
+											<option value="5">
+											<xsl:if test="root/Agent/@StatusID = '5' or root/Agent/@StatusID = '0'"><xsl:attribute name="selected"><xsl:value-of select="true"/></xsl:attribute></xsl:if>
+											Offline
+											</option>
+											<option value="6">
+											<xsl:if test="root/Agent/@StatusID = '6'"><xsl:attribute name="selected"><xsl:value-of select="true"/></xsl:attribute></xsl:if>
+											Out of Office
+											</option>
+										</select>
+									</td>
+								</tr>			
+								<tr style="padding-top:5px;">
+									<td>
+										Require Get Oldest:<br/>
+										<select name="RequireGetOldest">
+											<option value="1">
+											<xsl:if test="root/Agent/@RequireGetOldest = '1'"><xsl:attribute name="selected"><xsl:value-of select="true"/></xsl:attribute></xsl:if>
+											Yes
+											</option>
+											<option value="0">
+											<xsl:if test="root/Agent/@RequireGetOldest = '0'"><xsl:attribute name="selected"><xsl:value-of select="true"/></xsl:attribute></xsl:if>
+											No
+											</option>
+										</select>
+									</td>
+								</tr>			
+								<tr style="padding-top:5px;">
+									<td>
+										Default Email Address:<br/>
+										<input maxlength="255" type="text" name="DefaultEmail" value="{root/Agent/@DefaultEmailAddress}"/>
+									</td>
+								</tr>			
+							</TABLE>
+						</td>
+					</tr>
+					<tr>
+						<td width="100%"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+					</tr>
+					<tr>
+						<td width="100%" class="subheader" align="left">
+						Group Membership<input type="hidden" name="groupidcollection" value="" />
+						</td>
+					</tr>
+					<tr>
+						<td width="100%" class="subSectionWrapper" align="left">	
+							<TABLE BORDER="0" style="padding-left:20px;" width="100%" CELLPADDING="0" CELLSPACING="0">					
+							<xsl:for-each select="root/GroupNames/Group">
+								<xsl:variable name="CurGroupId"><xsl:value-of select="@ID"/></xsl:variable>
+								<tr style="padding-top:5px;">
+									<td>
+										<input type="Checkbox" name="{concat('group', @ID)}" value="1">
+										<xsl:for-each select="/root/Agent/Group">
+											<xsl:if test="$CurGroupId = @ID"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+										</xsl:for-each>
+										<xsl:if test="@Name = 'Everyone'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+										</input>
+										<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										<xsl:value-of select="@Name"/>
+									</td>
+								</tr>
+							</xsl:for-each>	
+							</TABLE>
+						</td>
+					</tr>
+					<tr>
+						<td width="100%"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+					</tr>
+					<tr>
+						<td width="100%" class="subheader" align="left">
+						<nobr>Additional Agent Information<span style="margin-left:20px;"><input class="headerControlBtn" type="button" value="Add" onclick="addOption()"/></span></nobr>
+						</td>
+					</tr>
+					<tr>
+						<td width="100%" class="subSectionWrapper" align="left">
+							<input type="Hidden" name="PersonalDataMaxID" value="{root/Agent/@MaxPersonalDataID}"/>
+							<input type="Hidden" name="PersonalDataIdCollection" value=""/>
+							<table id="AdditionalInfoTable" style="padding-left:20px;" border="0" cellpadding="0" cellspacing="0">
+							<xsl:for-each select="root/Agent/PersonalData">
+								<xsl:variable name="PersonalDataId" select="@ID"/>
+								<xsl:variable name="CurTypeId" select="@TypeID"/>
+								<tr id="{$PersonalDataId}">
+									<td>
+										<select name="{concat('PersonalDataType', $PersonalDataId)}" onChange="adjDefault(this);">
+										<xsl:for-each select="/root/PersonalDataTypes/PersonalDataType">
+											<xsl:choose>
+												<xsl:when test="@ID = $CurTypeId">
+													<option>
+													<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+													<xsl:attribute name="selected">true</xsl:attribute>
+													<xsl:value-of select="@Description"/>
+													</option>
+												</xsl:when>
+												<xsl:otherwise>
+													<option>
+													<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+													<xsl:value-of select="@Description"/>
+													</option>
+												</xsl:otherwise>
+											</xsl:choose>
+										</xsl:for-each>
+										</select>
+										<input type="text" maxlength="255" name="{concat('PersonalData', $PersonalDataId)}" value="{@Value}"/>
+										<input type="button" rowIndex="0" name="MatchDelButton" class="childControlBtn" value="Remove" onclick="delOption();"/>
+										<input class="childControlBtn" type="button" name="MakeDefaultButton" value="Make Default" cursar="{concat('PersonalDataType', $PersonalDataId)}">
+											<xsl:attribute name="onClick">makeDefault('PersonalData<xsl:value-of select="$PersonalDataId"/>');</xsl:attribute>
+											<xsl:if test="$CurTypeId != '1'"><xsl:attribute name="style">visibility:hidden;</xsl:attribute></xsl:if>
+										</input>
+			
+									</td>
+								</tr>
+							</xsl:for-each>
+							</table>
+						</td>
+					</tr>
+				</table>
+				
+				</td></tr></table>
+				
+			</div>
+			</td>
+		</tr>
+	</table>
+
+
+	<xsl:for-each select="root/PersonalDataTypes/PersonalDataType">
+	<input type="hidden" name="hiPDName" disabled="true"><xsl:attribute name="value"><xsl:value-of select="@Description"/></xsl:attribute></input>
+	</xsl:for-each>
+
+	<xsl:for-each select="root/PersonalDataTypes/PersonalDataType">
+	<input type="hidden" name="hiPDId" disabled="true"><xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute></input>
+	</xsl:for-each>
+	
+	<xsl:for-each select="root/AgentNames/Agent">
+	<input type="hidden" name="hiAgentID" disabled="true" value="{@ID}"/>
+	<input type="hidden" name="hiAgentName" disabled="true" value="{@Name}"/>
+	</xsl:for-each>
+
+	<xsl:for-each select="root/EscGroups/Group">
+	<input type="hidden" name="hiGroupID" disabled="true" value="{@ID}"/>
+	<input type="hidden" name="hiGroupName" disabled="true" value="{@GroupName}"/>
+	</xsl:for-each>
+	
+	<xsl:for-each select="root/AppGroups/Group">
+	<input type="hidden" name="hiAppGroupID" disabled="true" value="{@ID}"/>
+	<input type="hidden" name="hiAppGroupName" disabled="true" value="{@GroupName}"/>
+	</xsl:for-each>
+	
+	</form>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

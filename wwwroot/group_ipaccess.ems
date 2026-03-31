@@ -1,0 +1,123 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	<title>
+	<!-- <xsl:value-of select="root/DOCUMENT/TITLE"/> -->
+	IP Restrictions for Groups
+	</title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontrollerrows.jmf"></script>
+	<script language="javascript">
+	function docNewItem() {
+		glo_launchModalWindow("modalframe.ems?file=ipranges.ems&amp;groupId=0",400,300);
+	}			
+	function docModItem() {
+		if(glo_isBtnDisabled()){return false;}
+		glo_launchModalWindow("modalframe.ems?file=ipranges.ems&amp;groupId="+tabularForm.selectId.value,400,300);
+	}
+
+	</script> 
+	</head>
+
+	<body>
+	<form name="tabularForm" method="post" action="ipranges.ems">
+	<input type="hidden" name="selectId" value="" />
+	<input type="hidden" name="Action" value="insert" />
+
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<!-- <xsl:value-of select="root/DOCUMENT/TITLE"/> -->
+					IP Restrictions for Groups
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Create new IP Access Restrictions" onclick="docNewItem();">
+											<nobr>
+												<img src="images/ico_new.gif" width="24" height="22" border="0" valign="bottom" alt="Create new IP Access Restrictions"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;New<xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp; 
+											</nobr>
+										</div>											
+									</td>															
+									<td height="100%">										
+										<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Edit IP Restriction" onclick="docModItem();">
+											<nobr>
+												<img src="images/ico_edit.gif" width="24" height="22" border="0" valign="bottom" alt="Edit IP Restriction"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp;Edit<xsl:text disable-output-escaping="yes">&amp;</xsl:text>nbsp; 
+											</nobr>
+										</div>											
+									</td>
+									<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('Administration/Security/IP_Access_Restrictions.htm');">
+											<nobr>
+												<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom" alt="Show Help"/>
+											</nobr>
+										</div>											
+									</td>									
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto;" class="listBack">
+
+				
+				<table id="ListTableBot" style="width:100%;" allowMultiple="false" border="0" cellspacing="0" cellpadding="0">
+				<xsl:for-each select="/root/Group">
+					<tr ID="listRow" onclick="gloListControl.listRowClick()" ondblclick="gloListControl.keepActiveRow();docModItem();" tabRowId="{position()-1}" glc_rowtype="ticket" class="ticketOff" glc_form_tabularForm_selectId="{@ID}">
+						<td id="listCell" colspan="4" class="ticketCellOff">
+						<nobr>
+						<img onclick="gloListControl.listRowExpImgClick();window.event.cancelBubble=true;" id="listRowExpImg{position()-1}" src="./images/plus.gif" width="11" height="11" border="0"/>
+						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="@Name"/>
+						</nobr>
+						</td>
+					</tr>
+					<tr style="">
+						<td id="listRowCanvas{position()-1}" colspan="4" style="display:none;border:1px inset;">
+						<xsl:variable name="loopGroupID" select="@ID"/>
+							<table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+							<xsl:if test="IPRange">
+								<tr>
+									<td style="width:50%" class="listHeaderCell" unselectable="on"><nobr>Lower</nobr></td>
+									<td style="width:50%" class="listHeaderCell" unselectable="on"><nobr>Upper</nobr></td>									
+								</tr>
+							</xsl:if>
+							<xsl:for-each select="IPRange">
+								<tr>
+									<td id="listCell" class="ticketCellOff"><xsl:value-of select="@LowerRange"/></td>
+									<td id="listCell" class="ticketCellOff"><xsl:value-of select="@UpperRange"/></td>
+								</tr>
+							</xsl:for-each>
+							</table>
+						</td>
+					</tr>
+				</xsl:for-each>
+				</table>
+
+
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

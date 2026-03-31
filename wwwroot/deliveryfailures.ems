@@ -1,0 +1,178 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+	<html>
+	<head>
+	
+
+	<title>Delivery Failures</title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script language="javascript" type="text/javascript" src="./javascript/deliveryfailures.jmf"></script>
+	<script language="javascript" type="text/javascript">
+		function docCheckSelect() {
+			var result = false;
+			for (i=0; i &lt; document.tabularForm.elements.length; i++)
+			{
+				if (document.tabularForm.elements[i].name.indexOf("chkbox")!=-1)
+				{
+					if (document.tabularForm.elements[i].checked==true)
+					{
+						result = true;
+					}
+				}
+			}
+			return result;
+		}
+	</script>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	</head>
+
+	<body callOnLoad="">
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="Action" value="" />
+	<input type="hidden" name="IDCollection" value="" disabled="true"/>
+
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(docCheckSelect())"
+										 title="Re-Spool the selected Messages" onclick="respool('selected')"
+										>
+											<xsl:if test="not(root/FailedMessages/FailedMessage)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+										<nobr>
+										<img src="images/ico_respoolselected.gif" width="24" height="22" border="0" valign="bottom"/>
+										Re-Spool Selected
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Re-Spool Messages Older than a specified number of days" onclick="respool('olderthan')"
+										>
+											<xsl:if test="not(root/FailedMessages/FailedMessage)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+										<nobr>
+										<img src="images/ico_respoololder.gif" width="24" height="22" border="0" valign="bottom"/>
+										Re-Spool Older than
+										</nobr>
+				  						</div>
+									</td>
+									<td style="padding-left:5px;"><input type="text" size="4" value="30" maxlength="4" name="numdays"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<span style="padding-right:8px;">days</span></td>
+						<!-- 
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Cancel and return to Message Destinations" onclick="document.location='messagedestinations.ems'">
+										<nobr>
+										<img src="images/ico_cancel.gif" width="24" height="22" border="0" valign="bottom"/>
+										Cancel
+										</nobr>
+				  						</div>
+									</td>
+						-->
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Show Help" onclick="openHelp('Hidden/Msg_Handling/View_Failed.htm', 2);">
+										<nobr>
+										<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom"/>
+										Help
+										</nobr>
+				  						</div>
+									</td>
+
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:hidden;">
+
+				<div style="height:100%;padding:10px;overflow:auto;">
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td>
+							<!-- this would be the table to add width="100%" to if you wanted it to take up the whole screen, without it will be proportional to the content contained -->
+							<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%">
+								<tr>
+									<td height="20">&#32;</td>
+								</tr>
+								<tr>
+									<td class="subheader" style="padding-left:10px;">
+									<xsl:value-of select="root/FailedMessages/@hostName"/>
+									</td>
+								</tr>
+								<tr>
+									<td width="100%" style="padding-right:1px;">
+									<xsl:if test="root/FailedMessages/FailedMessage">
+										<table align="center" width="100%" cellspacing="0" cellpadding="0">
+											<tr>
+												<td width="%" class="altCellHeaderChkBox" align="center"><input type="Checkbox" name="selectall" onclick="selectAll(this.checked)"/></td>
+												<td width="%" class="altCellHeader">ID</td>
+												<td width="%" class="altCellHeader">TO</td>
+												<td width="%" class="altCellHeader">FROM</td>
+												<td width="%" class="altCellHeader">SUBJECT</td>
+												<td width="%" class="altCellHeaderX">LAST ATTEMPT</td>
+											</tr>
+										<xsl:for-each select="root/FailedMessages/FailedMessage">
+											<tr>
+												<td class="altCellHeaderChildChkBox" align="center"><input type="Checkbox" name="{concat('chkbox',@ID)}"/></td>
+												<td class="altCellHeaderChild"><xsl:value-of select="@ID"/></td>
+												<td class="altCellHeaderChild"><xsl:if test="@To = ''"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</xsl:if><xsl:value-of select="@To"/></td>
+												<td class="altCellHeaderChild"><xsl:if test="@From = ''"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</xsl:if><xsl:value-of select="@From"/></td>
+												<td class="altCellHeaderChild"><xsl:if test="@Subject = ''"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</xsl:if><xsl:value-of select="@Subject" disable-output-escaping="yes"/></td>
+												<td class="altCellHeaderChildX"><xsl:if test="@LastAttempt = ''"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</xsl:if><xsl:value-of select="@LastAttempt"/></td>
+											</tr>
+										</xsl:for-each>
+										</table>
+									</xsl:if>
+									<xsl:if test="not(root/FailedMessages/FailedMessage)">
+										<table align="left" width="100%" cellspacing="0" cellpadding="0">
+											<tr>
+												<td style="font-weight:bold;padding-left:10px;">
+												No delivery failures present
+												</td>
+											</tr>
+										</table>
+									</xsl:if>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+				</div>
+			
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>
