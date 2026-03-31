@@ -1,0 +1,223 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	<title>
+		Contact Groups
+	</title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontrollerrows.jmf"></script>
+	<script language="javascript">
+	function docNewItem() {
+		var nAgentID = '<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/AGENTID"/>';
+		glo_launchModalWindow("modalframe.ems?file=editcontactgroup.ems?ID=0&amp;AgentID="+nAgentID,800,600);
+	}			
+	function docModItem() {
+		if(glo_isBtnDisabled()){return false;}
+		var nAgentID = '<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/AGENTID"/>';		
+		glo_launchModalWindow("modalframe.ems?file=editcontactgroup.ems?ID="+tabularForm.selectId.value+"&amp;AgentID="+nAgentID,800,600);
+	}
+	function docDelItem() {
+		if(glo_isBtnDisabled()){return false;}
+		var selectId = document.tabularForm.selectId.value;
+		var selectIdArr = selectId.split(",");
+		if (selectIdArr.length > 1)
+		{
+			usrResponse = confirm('Are you sure you want to permanently delete these Contact Groups?');
+		}
+		else
+		{
+			usrResponse = confirm('Are you sure you want to permanently delete this Contact Group?');
+		}
+		if (usrResponse)
+		{
+			var postResults = glo_buildFormPost('tabularForm');
+			if (eval(postResults[0])==true)
+			{
+				document.location.reload();
+			}
+		}
+	}
+	function doSearch()
+	{
+		document.tabularForm.Action.value = "searchlist";
+		document.tabularForm.submit();
+	}
+	</script> 
+	</head>
+
+	<body>
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="selectId" value="" />
+	<input type="hidden" name="Action" value="delete" />
+
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					Contact Groups
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="true"
+										 title="Create new Group" onclick="docNewItem();">
+										<nobr>
+										<img src="images/ico_new.gif" width="24" height="22" border="0" valign="bottom"/>
+										New
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(gloListControl.ActiveRows.length!=0)"
+										 title="Modify the selected Group" onclick="docModItem();">
+										<nobr>
+										<img src="images/ico_edit.gif" width="24" height="22" border="0" valign="bottom"/>
+										Edit
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(gloListControl.ActiveRows.length!=0)"
+										 title="Delete the selected Group" onclick="docDelItem();">
+										<nobr>
+										<img src="images/ico_delete.gif" width="24" height="22" border="0" valign="bottom"/>
+										Delete
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Show Help">
+										 <xsl:attribute name="onclick">
+										 <xsl:choose>
+										 <xsl:when test="/root/DOCUMENT/URLPARAMETERS/AGENTID='0'">
+										 openHelp('Administration/Contacts/Contact_Groups.htm');
+										 </xsl:when>
+										 <xsl:otherwise>
+										 openHelp('My_Shortcuts/Preferences/My_ContactGroups.htm');
+										 </xsl:otherwise>
+										 </xsl:choose>
+										 </xsl:attribute> 
+										<nobr>
+										<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom"/>
+										Help
+										</nobr>
+				  						</div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto;" class="listBack">
+				<table id="ListTableBot" style="width:100%;" allowMultiple="false" border="0" cellspacing="0" cellpadding="0">
+				<tr id="ListHeaderRow">
+					<td colspan="4" class="listHeaderCell" width="100%" style="padding-left:20px;">
+					<xsl:if test="/root/DOCUMENT/URLPARAMETERS/AGENTID='0' or /root/AgentContactGroups">
+						<xsl:attribute name="colspan">3</xsl:attribute>
+						<xsl:attribute name="width">60%</xsl:attribute>
+					</xsl:if>
+					<nobr>
+					Group Name Contains:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+					<input type="text" onchange="doSearch()" maxlength="50" style="width:200px" name="gname" value="{/root/Groups/@GroupName}"/>
+					</nobr>
+					</td>
+					<xsl:if test="/root/DOCUMENT/URLPARAMETERS/AGENTID='0' or /root/AgentContactGroups">
+					<td class="listHeaderCell" width="40%">
+					<nobr>
+					Owner:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+					<select onchange="doSearch()" name="ownerid" style="width:150px">
+						<xsl:if test="not(/root/AgentContactGroups)">
+						<option value="-1">
+							<xsl:if test="root/Groups/@OwnerID = '-1'">
+								<xsl:attribute name="selected">true</xsl:attribute>
+							</xsl:if>
+							All Owners
+						</option>
+						</xsl:if>
+						<option value="0">
+							<xsl:if test="root/Groups/@OwnerID = '0' or /root/AgentContactGroups">
+								<xsl:attribute name="selected">true</xsl:attribute>
+							</xsl:if>
+							Global
+						</option>
+					<xsl:for-each select="root/AgentNames/Agent">
+					<xsl:choose>
+						<xsl:when test="@ID = /root/Groups/@OwnerID">
+							<option value="{@ID}" selected="true"><xsl:value-of select="@Name"/></option>
+						</xsl:when>
+						<xsl:otherwise>
+							<option value="{@ID}"><xsl:value-of select="@Name"/></option>
+						</xsl:otherwise>
+					</xsl:choose>
+					</xsl:for-each>
+					</select>
+					</nobr>
+					</td>
+					</xsl:if>
+				</tr>				
+				<xsl:choose>
+				<xsl:when test="root/Groups/Group">
+				<xsl:for-each select="root/Groups/Group">
+					<tr ID="listRow" onclick="gloListControl.listRowClick()" ondblclick="gloListControl.keepActiveRow();docModItem();" tabRowId="{position()-1}" glc_rowtype="ticket" class="ticketOff" glc_form_tabularForm_selectId="{@ID}">
+						<td id="listCell" colspan="4" class="ticketCellOff">
+						<xsl:if test="/root/DOCUMENT/URLPARAMETERS/AGENTID='0' or /root/AgentContactGroups">
+							<xsl:attribute name="colspan">3</xsl:attribute>
+						</xsl:if>
+						<nobr>
+						<img onclick="gloListControl.listRowExpImgClick();window.event.cancelBubble=true;" id="listRowExpImg{position()-1}" src="./images/plus.gif" width="11" height="11" border="0"/>
+						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="@Name"/>
+						</nobr>
+						</td>
+						<xsl:if test="/root/DOCUMENT/URLPARAMETERS/AGENTID='0' or /root/AgentContactGroups">
+						<td id="listCell" class="ticketCellOff">
+						<xsl:value-of select="@Owner"/>
+						</td>
+						</xsl:if>
+					</tr>
+					<tr style="">
+						<td id="listRowCanvas{position()-1}" colspan="4" style="display:none;padding:10px;border:1px inset;">
+						<xsl:value-of select="@Members"/>
+						</td>
+					</tr>
+				</xsl:for-each>
+				</xsl:when>
+				<xsl:otherwise>
+						<xsl:attribute name="width">100%</xsl:attribute>
+						<tr>
+							<td><br/></td><td><br/></td><td><br/></td><td><br/></td><td><br/></td><td><br/></td>
+						</tr>
+						<tr>
+							<td colspan="6" class="listBack" style="width:100%;"><i><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;No Contact Groups Available</i></td>
+						</tr>
+					</xsl:otherwise>
+				</xsl:choose>
+				</table>
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

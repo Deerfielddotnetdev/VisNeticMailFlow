@@ -1,0 +1,77 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+	<html>
+	<head>
+	<title>Preferences for<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/Agent/@Name"/></title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/tabs.jmf"></script>
+	<script type="text/javascript" language="javascript">	
+	function showError()
+	{
+		alert("You do not have permission to view this page!");
+	}
+	var docIncreaseWaitCount = 1;
+	function docSetTabs() {
+		tabs.style.top = headersection.offsetHeight + 8;		
+	}
+	</script>
+	<link rel="stylesheet" type="text/css" href="{root/user/stylesheetname}"></link>
+	</head>
+	<body>	
+	<xsl:choose>
+	<xsl:when test="/root/user/access/pref='4'">	
+		<xsl:attribute name="callOnLoad">tabInit();docSetTabs();</xsl:attribute>
+	</xsl:when>
+	<xsl:otherwise>
+		<xsl:attribute name="callOnLoad">showError();</xsl:attribute>
+	</xsl:otherwise>
+	</xsl:choose>
+	<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td id="headersection">
+			<xsl:call-template name="default_titlebar">
+				<xsl:with-param name="title_text">
+				Preferences for<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/Agent/@Name"/>
+				</xsl:with-param>
+			</xsl:call-template>
+			</td>
+		</tr>
+		<xsl:if test="/root/user/access/pref='4'">
+		<tr>
+			<td style="height:100%;">
+				<div id="tabs">
+					<span id="tab1" turl="preferencegeneral.ems?selectid={/root/DOCUMENT/URLPARAMETERS/SELECTID}" class="tabActive">General</span>
+					<span id="tab2" turl="preferenceticketboxes.ems?selectid={/root/DOCUMENT/URLPARAMETERS/SELECTID}" class="tab">TicketBoxes</span>
+					<span id="tab3" turl="preferenceagents.ems?selectid={/root/DOCUMENT/URLPARAMETERS/SELECTID}" class="tab">Agent Views</span>	
+					<span id="tab4" turl="preferencesignatures.ems?selectid={/root/DOCUMENT/URLPARAMETERS/SELECTID}" class="tab">Signatures</span>
+					<span id="tab5" turl="customdictionary.ems?agentid={/root/DOCUMENT/URLPARAMETERS/SELECTID}" class="tab">My Dictionary</span>
+					<span id="tab6" turl="customticketboxviews.ems?agentid={/root/DOCUMENT/URLPARAMETERS/SELECTID}" class="tab">My Folders</span>
+					<span id="tab7" turl="myalerts.ems?agentid={/root/DOCUMENT/URLPARAMETERS/SELECTID}" class="tab">My Alerts</span>
+					<span id="tab8" turl="contactframe.ems?Action=search&amp;agentid={/root/DOCUMENT/URLPARAMETERS/SELECTID}" class="tab">My Contacts</span>
+					<span id="tab9" turl="contactgroups.ems?agentid={/root/DOCUMENT/URLPARAMETERS/SELECTID}" class="tab">My Contact Groups</span>
+				</div>
+				<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+					<tr><td id="tab_holder" style="height:24px;d"><br/></td></tr>
+					<tr>
+						<td id="tab_canvas" class="tabActiveColor" style="height:100%;border-style:outset;border-width:1px;padding:10px;overflow:hidden;">
+							<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td style="height:100%;border-style:inset;border-width:1px;overflow:hidden;">
+									<iframe id="tabWindow" name="tabWindow" style="" frameborder="0" src="preferencegeneral.ems?selectid={/root/DOCUMENT/URLPARAMETERS/SELECTID}" height="100%" width="100%" scrolling="No"></iframe>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		</xsl:if>
+	</table>	
+	</body>
+	</html>
+</xsl:template>
+</xsl:stylesheet>

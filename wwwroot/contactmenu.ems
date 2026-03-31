@@ -1,0 +1,780 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:template match="/"> 
+
+	<html>
+	<head>	
+	<title></title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script language="javascript">
+	var mergeInProgress = false;
+	var mergeStep = 0;
+	
+	if(window.opener){
+		var thisFrame = new Object();
+		thisFrame.height = 0;
+	}
+	function alterDisplay()
+	{
+		if(parent.dialogArguments)
+		{
+			if (parent.dialogArguments.docIsMsgCompWindow==true)
+			{
+				parent.frames.sendto.src  = 'contactsendto.ems';
+				parent.frames.resultsplit.cols='50%,*';
+			}
+		}
+		else if(window.parent.opener)
+		{
+			if (window.parent.opener.docIsMsgCompWindow==true)
+			{
+				parent.frames.sendto.src  = 'contactsendto.ems';
+				parent.frames.resultsplit.cols='50%,*';
+			}
+		}
+		else
+		{
+			var toolButton;
+			try
+			{
+				toolButton = document.getElementsByClassName("toolBar");
+			}
+			catch(e)
+			{
+				toolButton = document.getElementsByName("toolButton");
+			}
+			if (toolButton)
+			{
+				for (x = 0; x &lt; toolButton.length; x++)
+				{
+					<xsl:if test="not(/root/DOCUMENT/URLPARAMETERS/ADDMYCONTACT = '1')">
+						if ( toolButton[x].getAttribute("title") == "Accept and Insert Contacts into Email" || toolButton[x].getAttribute("title") == "Cancel")
+						{
+							toolButton[x].style.display = "none";
+						}
+					</xsl:if>
+				}
+			}
+		}
+	}
+	
+	function updateContact()
+	{
+		if (parent.frames.results.document.tabularForm.selectId.value!="")
+		{
+			if(parent.dialogArguments || window.parent.opener)
+			{
+				if(parent.dialogArguments){callWin = parent.dialogArguments;}
+				else{callWin = window.parent.opener;}
+			}
+			var contactArr = parent.frames.results.document.tabularForm.selectId.value.split(",");
+			callWin.CONTACT = contactArr;
+		}
+		parent.close();		
+	}
+	
+	function insertFields()
+	{
+		if(parent.dialogArguments || window.parent.opener)
+		{
+			if(parent.dialogArguments){callWin = parent.dialogArguments;}
+			else{callWin = window.parent.opener;}
+			
+			if(callWin)
+			{
+				if(
+					callWin.location.href.indexOf('newmessage')!=-1 ||
+					callWin.location.href.indexOf('forwardmessage.ems')!=-1 ||
+					callWin.location.href.indexOf('sendagain.ems')!=-1 ||
+					callWin.location.href.indexOf('senddraft.ems')!=-1 ||
+					callWin.location.href.indexOf('replytomessage.ems')!=-1 ||
+					callWin.location.href.indexOf('replytoall.ems')!=-1
+					)
+				{
+					if (callWin.toAddr)
+					{
+						callWin.toAddr = parent.frames.sendto.toAddr;
+					}
+					else if (callWin.document.message.toAddress)
+					{
+						callWin.document.message.toAddress.value = parent.frames.sendto.toAddr;
+					}
+					if (callWin.ccAddr)
+					{
+						callWin.ccAddr = parent.frames.sendto.ccAddr;
+					}
+					else if (callWin.document.message.ccAddress)
+					{
+						callWin.document.message.ccAddress.value = parent.frames.sendto.ccAddr;
+					}
+					if (callWin.bccAddr)
+					{
+						callWin.bccAddr = parent.frames.sendto.bccAddr;
+					}
+					else if (callWin.document.message.bccAddress)
+					{
+						callWin.document.message.bccAddress.value = parent.frames.sendto.bccAddr;
+					}
+					if(glo_whichBrowser() == "Internet Explorer" &amp;&amp; callWin.toAddr)
+					{
+							window.returnValue = true;						
+					}
+					else
+					{
+						callWin.processAdds();
+					}
+				}
+				else if (callWin.location.href.indexOf('report') != -1)
+				{
+					if (parent.frames.results.document.tabularForm.selectId.value.length &gt; 0) {
+						contactArr = parent.frames.results.document.tabularForm.selectId.value.split(",");
+						callWin.document.tabularForm.filterContactEmail.value = contactArr[1];
+					}
+				}
+				else if (callWin.location.href.indexOf('newticket') != -1)
+				{
+					var contactArr = parent.frames.results.document.tabularForm.selectId.value.split(",");
+					if (contactArr[2].indexOf("[")==-1)
+						callWin.document.tabularForm.name.value = contactArr[2];
+					else
+						callWin.document.tabularForm.name.value = '';
+					if (contactArr[1].indexOf("[")==-1)
+						callWin.document.tabularForm.email.value = contactArr[1];
+					else
+						callWin.document.tabularForm.email.value = '';
+					callWin.document.tabularForm.ContactId.value = contactArr[0];
+				}
+				parent.close();
+			}
+		}
+	}
+	
+	function addContact() {
+		if (mergeInProgress == false) {
+			var url = 'contact.ems';
+			glo_launchModalWindow('modalframe.ems?file=' + url, 600, 600, 'yes', 'no', 'no');
+
+			if(window.contactEmail) {
+				parent.frames.searchpane.reSearch(contactEmail);
+			}
+		} else {
+			alert('A contact merge is in progress.  You must cancel the \ncontact merge function before adding a contact.');
+		}
+	}
+	
+	function editContact() {
+		if(glo_isBtnDisabled()){return false;}
+		frame = parent.frames.results;
+		contactArr = frame.document.tabularForm.selectId.value.split(",");
+		if(contactArr[0].length == 0) {
+			alert('You must search for, and then select a contact to edit!');
+		} else {
+			var reloadSearch;
+			if(contactArr[2] == "[Contact Group]")
+			{
+				var nAgentID = '<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/AGENTID"/>';
+				reloadSearch = glo_launchModalWindow("modalframe.ems?file=editcontactgroup.ems?ID="+contactArr[0]+"&amp;AgentID="+nAgentID,800,600);
+			}
+			else
+			{
+				var url = 'contact.ems&amp;contact=' + contactArr[0];
+				reloadSearch = glo_launchModalWindow('modalframe.ems?file=' + url, 600, 600, 'yes', 'no', 'no');
+			}
+			if (reloadSearch) parent.frames.searchpane.document.tabularForm.submit();	// refresh the results with new data, if needed.
+		}
+	}
+	
+	function docConHistory() {
+		if(glo_isBtnDisabled()){return false;}
+		frame = parent.frames.results;
+		contactArr = frame.document.tabularForm.selectId.value.split(",");
+		if(contactArr[2] == "[Contact Group]")
+		{
+			alert('History not available for Contact Groups!');
+			return false;
+		}
+		if(contactArr[0].length == 0) {
+			alert('You must search for, and then select a contact to edit!');
+		} else {
+			parent.frames[0].glo_launchNewWindow("mailflow.ems?rightpane=contacthistory.ems$contactid="+contactArr[0]);
+		}
+	}
+	
+	function delContact() {
+		if(glo_isBtnDisabled()){return false;}
+		if (mergeInProgress == false) {
+			frame = parent.frames.results;
+			if(frame.document.tabularForm.selectId.value.indexOf("[Contact Group]")!=-1)
+			{
+				alert("You cannot delete Contact Groups from this dialog!")
+				return false;
+			}
+			contactArr = frame.document.tabularForm.selectId.value.split(",");
+			if(contactArr[0].length == 0) {
+				alert('You must search for, and then select a contact to delete!');
+			} else {
+				if (contactArr[3])
+					doDel = confirm('Are you sure you want to delete these contacts?');
+				else
+					doDel = confirm('Are you sure you want to delete this contact?');
+				
+				if (doDel == true) 
+				{
+					frame.document.tabularForm.Action.value = 'delete';
+					var postResults = frame.glo_buildFormPost('tabularForm');
+
+					if ( postResults[0] &amp;&amp; postResults[1].indexOf('Refresh')!=-1 )
+						frame.document.location.reload();
+				}
+			}
+		} else {
+			alert('A contact merge is in progress.  You must cancel the \ncontact merge function before deleting a contact.');
+		}
+	}
+	
+	function resStatus() {
+		if(glo_isBtnDisabled()){return false;}
+		if (mergeInProgress == false) {
+			frame = parent.frames.results;
+			if(frame.document.tabularForm.selectId.value.indexOf("[Contact Group]")!=-1)
+			{
+				alert("You cannot reset Contact Groups from this dialog!")
+				return false;
+			}
+			contactArr = frame.document.tabularForm.selectId.value.split(",");
+			if(contactArr[0].length == 0) {
+				alert('You must search for, and then select a contact to reset!');
+			} else {
+				if (contactArr[3])
+					doRes = confirm('Are you sure you want to reset these contacts?');
+				else
+					doRes = confirm('Are you sure you want to reset this contact?');
+				
+				if (doRes == true) 
+				{
+					frame.document.tabularForm.Action.value = 'reset';
+					var postResults = frame.glo_buildFormPost('tabularForm');
+
+					if ( postResults[0] &amp;&amp; postResults[1].indexOf('Refresh')!=-1 )
+						frame.document.location.reload();
+				}
+			}
+		} else {
+			alert('A contact merge is in progress.  You must cancel the \ncontact merge function before resetting a contact.');
+		}
+	}
+	
+	function addMyContact() {
+		if(glo_isBtnDisabled()){return false;}		
+		frame = parent.frames.results;
+		var nAgentID = '<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/AGENTID"/>';
+		if(nAgentID > 0)
+		{
+			glo_launchModalWindow("contactframe.ems?addmycontact=" + nAgentID, 650, 600, 'yes', 'no', 'no');
+			
+			if (frame.document.location.reload)
+			{
+				frame.document.location.reload();
+			}
+		}			
+	}
+	
+	function addMyContacts() {
+		if(glo_isBtnDisabled()){return false;}
+		frame = parent.frames.results;
+		var nAgentID = '<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/ADDMYCONTACT"/>';
+		contactArr = frame.document.tabularForm.selectId.value.split(",");
+		if(contactArr[0].length == 0) {
+			alert('You must search for and then select one or more contacts to add!');
+		} else {
+			frame.document.tabularForm.Action.value = 'addmycontact';
+			frame.document.tabularForm.AgentContactID.value = nAgentID;
+			var postResults = frame.glo_buildFormPost('tabularForm');
+			if ( postResults[0] &amp;&amp; postResults[1].indexOf('true')!=-1 )
+				top.close();
+		}
+	}
+	
+	function remMyContact()
+	{
+		if(glo_isBtnDisabled()){return false;}
+		frame = parent.frames.results;
+		contactArr = frame.document.tabularForm.selectId.value.split(",");
+		if(contactArr[0].length == 0) {
+			alert('You must search for and then select one or more contacts to remove!');
+		} else {
+			if (contactArr[3])
+				doDel = confirm('Are you sure you want to remove these contacts?');
+			else
+				doDel = confirm('Are you sure you want to remove this contact?');
+			
+			if (doDel == true) 
+			{
+				frame.document.tabularForm.Action.value = 'remove';
+				var postResults = frame.glo_buildFormPost('tabularForm');
+
+				if ( postResults[0] &amp;&amp; postResults[1].indexOf('Refresh')!=-1 )
+					frame.document.location.reload();
+			}
+		}
+	}
+	function mergestart() {
+		if (mergeInProgress == false) {
+			// sets up the display to start the merge process
+			frame = parent.frames.results;
+			if(frame.document.tabularForm.selectId.value.indexOf("[Contact Group]")!=-1)
+			{
+				alert("You cannot merge Contact Groups!")
+				return false;
+			}
+			mergeInProgress = true;
+			mergeStep = 1;
+			parent.document.getElementsByName('results')[0].src = 'contactsearchresults.ems';
+			parent.document.getElementsByName('sendto')[0].src = 'contactsearchresults.ems';
+			//parent.frames.results.src  = 'contactsearchresults.ems';
+			//parent.frames.sendto.src  = 'contactsearchresults.ems';
+			
+			/*
+			1. Select the primary contact (the contact to keep)
+			2. Highlight the secondary contact information (to be merged with the primary)
+			3. Merge the contacts
+	
+			The secondary contact information will be lost, however, all tickets, messages, 
+			and histories for both contacts will be combined and saved.
+			*/
+			
+			mergemessage = 'To merge two contacts, you must do the following:\n\n';
+			mergemessage = mergemessage + '1. Select the contact that you wish to merge into.\n';
+			mergemessage = mergemessage + '2. Then, select the contact that you wish to merge with the first.\n\n';
+			mergemessage = mergemessage + 'Contact information from the second contact will be lost.\n';
+			mergemessage = mergemessage + 'Tickets, messages, and histories for both contacts will be combined.\n';
+			alert(mergemessage);
+	
+			parent.frames.searchpane.document.tabularForm.searchbutton.value = 'Find first contact';
+			parent.frames.searchpane.document.tabularForm.cancelmerge.style.display = 'inline';
+			if ( parent.frames.searchpane.document.tabularForm.searchbutton.addEventListener )
+			{
+	      parent.frames.searchpane.document.tabularForm.searchbutton.addEventListener('click', mergeFindSecond, false);	      
+	    }
+	    else if ( parent.frames.searchpane.document.tabularForm.searchbutton.attachEvent )
+	    {
+	    	parent.frames.searchpane.document.tabularForm.searchbutton.attachEvent('onclick', mergeFindSecond);
+	    }			
+			parent.frames.resultsplit.cols='50%,*';
+		} else {
+			alert('A merge is already in progress.  Cancel the merge to start a new contact merge.');
+		}
+
+	}
+		
+	function mergeend() {
+		// resets the display
+		mergeStep = 5;
+		mergeInProgress = false;
+		parent.frames.searchpane.document.tabularForm.searchbutton.value = 'Search for contact';
+		parent.frames.searchpane.document.tabularForm.cancelmerge.style.display = 'none';
+		parent.frames.sendto.src  = 'contactsendto.ems';
+		parent.frames.searchpane.document.tabularForm.target = 'results';
+		// detach all possible events
+		if ( parent.frames.searchpane.document.tabularForm.searchbutton.removeEventListener )
+		{
+      parent.frames.searchpane.document.tabularForm.searchbutton.removeEventListener('click', mergeFindSecond, false);
+			parent.frames.searchpane.document.tabularForm.searchbutton.removeEventListener('click', mergeLastStep, false);
+			parent.frames.searchpane.document.tabularForm.searchbutton.removeEventListener('click', mergeComplete, false);	      
+    }
+    else if ( parent.frames.searchpane.document.tabularForm.searchbutton.detachEvent )
+    {
+    	parent.frames.searchpane.document.tabularForm.searchbutton.detachEvent('onclick', mergeFindSecond);
+			parent.frames.searchpane.document.tabularForm.searchbutton.detachEvent('onclick', mergeLastStep);
+			parent.frames.searchpane.document.tabularForm.searchbutton.detachEvent('onclick', mergeComplete);
+    }    
+		parent.frames.resultsplit.cols='100%,*';
+		if (parent.dialogArguments &amp;&amp; parent.dialogArguments.docIsMsgCompWindow==true)
+		{
+			parent.frames.sendto.src  = 'contactsendto.ems';
+			parent.frames.resultsplit.cols='50%,*';
+		}
+
+	}
+	
+	function mergeFindSecond() {
+		// finds the second contact
+			frame = parent.frames.results;
+			if(frame.document.tabularForm.selectId.value.indexOf("[Contact Group]")!=-1)
+			{
+				alert("You cannot merge Contact Groups!")
+				return false;
+			}
+			mergeStep = 2;
+			parent.frames.searchpane.document.tabularForm.submit();
+			parent.frames.searchpane.document.tabularForm.searchbutton.value = 'Find second contact';
+			parent.frames.searchpane.document.tabularForm.target = 'sendto';
+			if ( parent.frames.searchpane.document.tabularForm.searchbutton.removeEventListener )
+			{
+	      parent.frames.searchpane.document.tabularForm.searchbutton.removeEventListener('click', mergeFindSecond, false);
+				parent.frames.searchpane.document.tabularForm.searchbutton.addEventListener('click', mergeLastStep, false);	      
+	    }
+	    else if ( parent.frames.searchpane.document.tabularForm.searchbutton.detachEvent )
+	    {
+	    	parent.frames.searchpane.document.tabularForm.searchbutton.detachEvent('onclick', mergeFindSecond);
+				parent.frames.searchpane.document.tabularForm.searchbutton.attachEvent('onclick', mergeLastStep);
+	    }
+		}
+
+	function mergeLastStep() {
+		// last step in the merge
+		if (parent.frames.results &amp;&amp; parent.frames.results.gloListControl.ActiveRows.length!=0)
+		{
+		mergeStep = 3;
+		
+		var mrgSrcId = parent.frames.results.document.tabularForm.selectId.value.split(",");
+		mrgSrcId = mrgSrcId[0];
+		parent.frames.searchpane.document.tabularForm.MergeSourceID.value = mrgSrcId;
+		parent.frames.searchpane.document.tabularForm.submit();
+		parent.frames.searchpane.document.tabularForm.searchbutton.value = 'Complete Merge';
+		parent.frames.searchpane.document.tabularForm.target = '';
+		if ( parent.frames.searchpane.document.tabularForm.searchbutton.removeEventListener )
+		{
+      parent.frames.searchpane.document.tabularForm.searchbutton.removeEventListener('click', mergeLastStep, false);
+			parent.frames.searchpane.document.tabularForm.searchbutton.addEventListener('click', mergeComplete, false);	      
+    }
+    else if ( parent.frames.searchpane.document.tabularForm.searchbutton.detachEvent )
+    {
+    	parent.frames.searchpane.document.tabularForm.searchbutton.detachEvent('onclick', mergeLastStep);
+			parent.frames.searchpane.document.tabularForm.searchbutton.attachEvent('onclick', mergeComplete);
+    }		
+		lastmessage = 'Now that you have searched for two contacts, select \n';
+		lastmessage = lastmessage + 'from the results the two contacts that you wish to merge.\n';
+		lastmessage = lastmessage + 'Once you have selected both contacts, click \"Complete Merge\".\n\n';
+		
+		alert(lastmessage);
+		} else {
+			alert("You must first select a source contact before searching for the destination contact.");
+		}
+	}
+
+	function mergeComplete() {
+		var mrgSrcId = parent.frames.results.document.tabularForm.selectId.value.split(",");
+		mrgSrcId = mrgSrcId[0];
+		parent.frames.searchpane.document.tabularForm.MergeSourceID.value = mrgSrcId;
+		
+		mergeStep = 4;		
+		selectfirst = parent.frames.results.document.tabularForm.selectId.value.split(',');		
+		selectsecond = parent.frames.sendto.document.tabularForm.selectId.value.split(',');		
+		message = '';
+		
+		if (selectfirst[0].length == 0) {
+			message = message + '- You must select a contact from the left pane\n';
+		} 
+		
+		if (selectsecond[0].length == 0) {
+			message = message + '- You must select a contact from the right pane\n';
+		}
+		
+		if (selectfirst[0] == selectsecond[0]) {
+			message += '- You cannot merge a contact into itself\n';
+		}
+		
+		
+		if (message.length &gt; 0) {
+			alert('The following errors must be corrected:\n' + message);
+		} else {
+			ans = confirm("Are you sure you wish to merge these two contacts?");
+			
+			if (ans)
+			{
+				if ( parent.frames.searchpane.document.tabularForm.searchbutton.removeEventListener )
+				{
+		      parent.frames.searchpane.document.tabularForm.searchbutton.removeEventListener('click', mergeComplete, false);						      
+		    }
+		    else if ( parent.frames.searchpane.document.tabularForm.searchbutton.detachEvent )
+		    {
+		    	parent.frames.searchpane.document.tabularForm.searchbutton.detachEvent('onclick', mergeComplete);
+		    }
+//				parent.frames.results.document.tabularForm.selectId.value = selectfirst[0] + ',' + selectsecond[0];
+				parent.frames.results.document.tabularForm.selectId.value = selectsecond[0] + ',' + selectfirst[0];
+				parent.frames.results.document.tabularForm.action = 'contact.ems';
+				parent.frames.results.document.tabularForm.Action.value = "merge";
+				parent.frames.results.document.tabularForm.submit();
+				mergeend();
+			} else {
+				mergeend();
+			}
+		}
+	}
+	function docCancel() {
+		parent.close();
+	}
+	function docSearch() {
+		parent.frames.searchpane.startSearch()
+	}
+	</script>
+	</head>
+
+	<body callOnLoad="alterDisplay();">
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="height:32px;width:100%;">
+				<table class="menuColor" style="height:100%;width:100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:100%;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<xsl:if test="not(/root/DOCUMENT/URLPARAMETERS/ADDMYCONTACT)">
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Accept and Insert Contacts into Email" onclick="insertFields();">
+											<xsl:if test="/root/DOCUMENT/URLPARAMETERS/SELECTONE">
+											<xsl:attribute name="onclick">updateContact();</xsl:attribute>
+											</xsl:if>
+										<nobr>
+										<img src="images/ico_ok.gif" width="24" height="22" border="0" valign="bottom" alt="Accept and Insert Contacts into Email"/>
+										Ok<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Cancel" onclick="docCancel();">
+										<nobr>
+										<img src="images/ico_cancel.gif" width="24" height="22" border="0" valign="bottom"/>
+										Cancel<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									</xsl:if>
+							<xsl:choose>
+							<xsl:when test="/root/DOCUMENT/URLPARAMETERS/AGENTID">
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(docCheckButtons3())"
+										 title="Add a Contact" onclick="addMyContact();">
+										<nobr>										
+										<img src="images/ico_new.gif" width="24" height="22" border="0" valign="bottom"/>
+										Add<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(docCheckButtons())"
+										 title="Remove Contact" onclick="remMyContact();">
+										<nobr>
+										<xsl:if test="/root/user/access/prefmycont='0'">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+										</xsl:if>
+										<img src="images/ico_delete.gif" width="24" height="22" border="0" valign="bottom"/>
+										Remove<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  					</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(docCheckButtons2())"
+										 title="Contact Properties" onclick="editContact();">
+										<nobr>
+										<img src="images/ico_edit.gif" width="24" height="22" border="0" valign="bottom"/>
+										Properties<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+							</xsl:when>
+							<xsl:when test="/root/DOCUMENT/URLPARAMETERS/ADDMYCONTACT">
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(docCheckButtons())"
+										 title="Accept and Add Contact(s) to MyContacts" onclick="addMyContacts();">
+										<nobr>										
+										<img src="images/ico_ok.gif" width="24" height="22" border="0" valign="bottom" alt="Accept and Add Contact(s) to MyContacts"/>
+										Ok<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Cancel" onclick="docCancel();">
+										<nobr>
+										<img src="images/ico_cancel.gif" width="24" height="22" border="0" valign="bottom"/>
+										Cancel<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(docCheckButtons2())"
+										 title="Contact Properties" onclick="editContact();">
+										<nobr>
+										<img src="images/ico_edit.gif" width="24" height="22" border="0" valign="bottom"/>
+										Properties<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+							</xsl:when>
+							<xsl:when test="not(/root/DOCUMENT/URLPARAMETERS/SELECTONE)">
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Create a new Contact" onclick="addContact();"
+										>
+											<xsl:if test="not(/root/user/access/contact &gt; 2)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+										<nobr>
+										<img src="images/ico_viewcontact.gif" width="24" height="22" border="0" valign="bottom"/>
+										New<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(docCheckButtons2())"
+										 title="Contact Properties" onclick="editContact();">
+										<nobr>
+										<img src="images/ico_edit.gif" width="24" height="22" border="0" valign="bottom"/>
+										Properties<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(docCheckButtons())"
+										 title="Delete Contact" onclick="delContact();"
+										>
+											<xsl:if test="not(/root/user/access/contact &gt; 3)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+										<nobr>
+										<img src="images/ico_delete.gif" width="24" height="22" border="0" valign="bottom"/>
+										Delete<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Merge Contact" onclick="mergestart()"
+										>
+											<xsl:if test="not(/root/user/access/contact &gt; 2)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+										<nobr>
+										<img src="images/ico_mergecontacts.gif" width="24" height="22" border="0" valign="bottom"/>
+										Merge<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<xsl:if test="/root/DOCUMENT/useverification='1'">
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(docCheckButtons())"
+										 title="Reset Status" onclick="resStatus();"
+										>
+											<xsl:if test="not(/root/user/access/contact &gt; 3)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+										<nobr>
+										<img src="images/ico_24x22_refresh.gif" width="24" height="22" border="0" valign="bottom"/>
+										Reset Status<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									</xsl:if>
+							</xsl:when>
+							</xsl:choose>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(docCheckButtons2())"
+										 title="Contact History" onclick="docConHistory();">
+										<nobr>
+										<img src="images/ico_viewhistory.gif" width="24" height="22" border="0" valign="bottom"/>
+										History<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Show Help" onclick="">
+										 <xsl:attribute name="onclick">
+										 <xsl:choose>
+										 <xsl:when test="/root/DOCUMENT/URLPARAMETERS/AGENTID or /root/DOCUMENT/URLPARAMETERS/ADDMYCONTACT">
+										 openHelp('My_Shortcuts/Preferences/My_Contacts.htm');
+										 </xsl:when>
+										 <xsl:otherwise>										 
+										 openHelp('My_Shortcuts/Contacts/Contacts.htm');
+										 </xsl:otherwise>
+										 </xsl:choose>
+										 </xsl:attribute> 
+										<nobr>
+										<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom"/>
+										Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  						</div>
+									</td>
+									<script language="JavaScript">
+									//This function evaluates whether or not the menubuttons should be enabled!
+									function docCheckButtons() {
+										if (parent.frames.results &amp;&amp; parent.frames.results.tabularForm)
+										{
+											var selectId = parent.frames.results.tabularForm.selectId.value;
+											if (selectId!='')
+											{
+												<xsl:choose>
+												<xsl:when test="/root/user/access/prefmycont='4'">
+													return true;
+												</xsl:when>
+												<xsl:otherwise>
+													return false;
+												</xsl:otherwise>
+												</xsl:choose>
+											}
+											else
+											{
+												return false;
+											}
+										}
+										else
+											return false;			
+									}
+									function docCheckButtons2() {
+										if (parent.frames.results &amp;&amp; parent.frames.results.tabularForm)
+										{
+											var selectId = parent.frames.results.tabularForm.selectId.value;
+											var contacts = selectId.split(",");
+											if (selectId!='' &amp;&amp; (!contacts[3]))
+												return true;
+											else
+												return false;
+										}
+										else
+											return false;
+									}
+									function docCheckButtons3() {
+										<xsl:choose>
+										<xsl:when test="/root/user/access/prefmycont='4'">
+											return true;
+										</xsl:when>
+										<xsl:otherwise>
+											return false;
+										</xsl:otherwise>
+										</xsl:choose>
+									}
+									</script>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+
+			</td>
+		</tr>
+	</table>
+	</body>
+	</html>	
+
+</xsl:template>
+</xsl:stylesheet>

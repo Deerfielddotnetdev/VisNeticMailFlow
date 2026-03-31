@@ -1,0 +1,223 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/alertconfig.jmf"></script>
+
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	</head>
+
+	<body callbeforeonload="">
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="Action" value="" />
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Save changes made to this Alert" onclick="docSubmitForm()"
+										  >
+											<nobr>
+												<img src="./images/ico_save.gif" width="24" height="22" border="0"/>
+												Save
+											</nobr>
+										  </div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Discard changes and close this window" onclick="glo_doClose()"
+										  >
+											<nobr>
+												<img src="./images/ico_cancel.gif" width="24" height="22" border="0"/>
+												Cancel
+											</nobr>
+										  </div>
+									</td>
+									<td height="100%">					
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Show Help" onclick="openHelp('Administration/Logging_and_Alerting/Alert_Configuration.htm')"
+										  >
+											<nobr>
+												<img src="./images/ico_help.gif" width="24" height="22" border="0"/>
+												Help
+											</nobr>
+										  </div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto">
+
+				<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0"><tr><td>
+	
+							<table style="width:100%" border="0" cellspacing="0" cellpadding="0">
+								<tr>
+									<td>
+									Event:<br/>
+									<select name="AlertEvent" style="width:100%;" onchange="switchAlert(this);">
+									<xsl:for-each select="/root/AlertEvents/AlertEvent">
+										<xsl:if test="@ID &lt; '9' or @ID=12 or @ID=13 or @ID=14">
+										<option value="{@ID}">
+										<xsl:if test="@ID = /root/Alert/@AlertEventID"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+										<xsl:value-of select="@Name"/>
+										</option>
+										</xsl:if>										
+									</xsl:for-each>
+									</select>
+									</td>
+								</tr>
+								<tr>
+									<td style="padding-top:5px">
+									For:
+									<select name="TicketBox" style="width:100%;">
+									<xsl:for-each select="/root/TicketBoxNames/TicketBox">
+										<option value="{@ID}">
+										<xsl:if test="@ID = /root/Alert/@TicketBoxID"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+										<xsl:value-of select="@Name"/>
+										</option>
+									</xsl:for-each>
+									</select>
+									<xsl:if test="/root/Alert/@NeedTicketBoxID != '1'">
+										<script>
+											var ff = new Array();ff[0] = document.tabularForm.TicketBox;
+											glo_disableForm(false,ff);
+										</script>
+									</xsl:if>
+									</td>
+								</tr>
+								<tr>
+									<td style="padding-top:5px">
+									Method:<br/>
+									<select name="AlertMethod" style="width:100%;" onchange="switchMe(this);">
+									<xsl:for-each select="/root/AlertMethods/AlertMethod">
+										<option value="{@ID}">
+										<xsl:if test="@ID = /root/Alert/@AlertMethodID"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+										<xsl:value-of select="@Name"/>
+										</option>
+									</xsl:for-each>
+									</select>
+									</td>
+								</tr>
+								<tr>
+									<td style="padding-top:5px">Recipient:</td>
+								</tr>
+								<tr>
+									<td id="recipient">
+							<xsl:choose>
+								<xsl:when test="/root/Alert/@AgentID &gt; '0' or not(/root/Alert)">
+								<table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+								<tr>
+									<td>
+									<select name="AgentOrGroup" onchange="switchSelect(this)">
+										<option value="Agent" selected="true">Agent</option>
+										<option value="Group">Group</option>
+									</select>
+									</td>
+									<td style="width:100%">
+									<select id="selectBox" style="width:100%;" name="Agent">
+									<xsl:for-each select="/root/AgentNames/Agent">
+										<option value="{@ID}">
+										<xsl:if test="@ID = /root/Alert/@AgentID"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+										<xsl:value-of select="@Name"/>
+										</option>
+									</xsl:for-each>
+									</select>
+									</td>
+								</tr>
+								</table>
+								</xsl:when>
+								
+								<xsl:when test="/root/Alert/@GroupID &gt; '0'">
+								<table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+								<tr>
+									<td>
+									<select name="AgentOrGroup" onchange="switchSelect(this)">
+										<option value="Agent">Agent</option>
+										<option value="Group" selected="true">Group</option>
+									</select>
+									</td>
+									<td style="width:100%">
+									<select id="selectBox" style="width:100%;" name="Group">
+									<xsl:for-each select="/root/GroupNames/Group">
+										<option value="{@ID}">
+										<xsl:if test="@ID = /root/Alert/@GroupID"><xsl:attribute name="selected">true</xsl:attribute></xsl:if>
+										<xsl:value-of select="@Name"/>
+										</option>
+									</xsl:for-each>
+									</select>
+									</td>
+								</tr>
+								</table>
+								</xsl:when>
+								<xsl:otherwise>
+									<input type="text" value="{/root/Alert/@EmailAddress}" style="width:100%" maxlength="255"  name="EmailAddress" />
+								</xsl:otherwise>
+							</xsl:choose>
+									</td>
+								</tr>
+							</table>
+
+				</td></tr></table>
+
+			</div>
+			</td>
+		</tr>
+	</table>
+	<!--  hidden form fields used for dynamically creating the selectbox on this page! -->
+	<xsl:for-each select="root/AlertMethods/AlertMethod">
+	<input type="hidden" name="hiAlertMethodID" disabled="true" value="{@ID}"/>
+	<input type="hidden" name="hiAlertMethodName" disabled="true" value="{@Name}"/>
+	</xsl:for-each>
+	
+	<input type="hidden" name="hiAlertEventID" disabled="true" value="0"/>
+	<input type="hidden" name="hiAlertEventName" disabled="true" value="Select Event Type"/>
+	<input type="hidden" name="hiAlertEventShowTicketBox" disabled="true" value="0"/>
+	<xsl:for-each select="root/AlertEvents/AlertEvent">
+	<input type="hidden" name="hiAlertEventID" disabled="true" value="{@ID}"/>
+	<input type="hidden" name="hiAlertEventName" disabled="true" value="{@Name}"/>
+	<input type="hidden" name="hiAlertEventShowTicketBox" disabled="true" value="{@NeedTicketBoxID}"/>
+	</xsl:for-each>
+
+	<xsl:for-each select="root/AgentNames/Agent">
+	<input type="hidden" name="hiAgentID" disabled="true" value="{@ID}"/>
+	<input type="hidden" name="hiAgentName" disabled="true" value="{@Name}"/>
+	</xsl:for-each>
+
+	<xsl:for-each select="root/GroupNames/Group">
+	<input type="hidden" name="hiGroupID" disabled="true" value="{@ID}"/>
+	<input type="hidden" name="hiGroupName" disabled="true" value="{@Name}"/>
+	</xsl:for-each>
+
+	<xsl:for-each select="root/TicketBoxNames/TicketBox">
+	<input type="hidden" name="hiTicketBoxID" disabled="true" value="{@ID}"/>
+	<input type="hidden" name="hiTicketBoxName" disabled="true" value="{@Name}"/>
+	</xsl:for-each>
+
+	</form>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

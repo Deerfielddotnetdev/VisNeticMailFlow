@@ -1,0 +1,211 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	<title></title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontroller.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontrollerrows.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/resize_handle.jmf"></script>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script language="javascript">
+	if(window.opener){
+		var thisFrame = new Object();
+		thisFrame.height = "";
+	}
+	function selectContact(){
+		var selectId = document.tabularForm.selectId.value;
+		var selectIdArray = selectId.split(",");
+		selectId = selectIdArray[0];
+		location='contact.ems?contact='+selectId;
+	}
+	function cmerge(){
+		var selectId = document.tabularForm.selectId.value;
+		var selectIdArray = selectId.split(",");
+		selectId = selectIdArray[0];
+		document.tabularForm.action = "contact.ems?contact="+selectId;
+		document.tabularForm.Action.value = "merge";
+		ans = confirm("Are you sure you wish to merge "+'<xsl:value-of select="root/Merge/@SourceName"/>'+" into this contact?");
+		if (ans)
+		{
+			document.tabularForm.submit();
+		}
+	}
+	function tabularDblClick() {
+//		var	rowIndex = findEventRowId();
+//		resetActiveRows();
+//		appendSelectId(rowIndex);
+		docTapMenu();
+		parent.frames.menu.editContact();
+	}	
+	
+	function checkMerge() {
+		if ( this.parent.parent.parent.theMainContain )
+		{
+		     this.parent.parent.parent.docSetLoading(true);
+		}
+		if(parent.frames.menu.mergeInProgress == true &amp;&amp; window.listRow == undefined &amp;&amp; (parent.frames.menu.mergeStep == 2 || parent.frames.menu.mergeStep == 3)) {
+			alert('No contacts were found.  Please try starting the merge process again.');
+			//parent.frames.menu.mergeend();
+			parent.frames.menu.location = parent.frames.menu.location.href;
+			parent.frames.searchpane.location = parent.frames.searchpane.location.href;
+			parent.frames.resultsplit.cols='100%,*';
+			parent.frames.results.location = parent.frames.results.location.href;
+		}
+	}
+	function docTapMenu() {
+		if (parent.frames &amp;&amp; parent.frames.menu &amp;&amp; parent.frames.menu.glo_initMenuButtons)
+		parent.frames.menu.glo_initMenuButtons();
+	}
+	</script>
+	</head>
+
+	<body id="theBody" onclick="docTapMenu();" ondblclick="docTapMenu();" callBeforeOnLoad="docInitListCols();" callOnLoad="checkMerge();">
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="selectId" value="" />
+	<input type="hidden" name="Action" value="insert" />	
+	<input type="hidden" name="AgentContactID" value=""/>
+	<xsl:if test="root/Merge">
+	<input type="hidden" name="MergeSourceID" value="{root/Merge/@SourceID}" />
+	</xsl:if>
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:hidden;">
+
+				<div id="ListHolder" style="overflow:hidden;height:100%;width:100%;position:relative;">
+				<!-- table-layout:fixed - very important, without, table will extend off page -->
+				<table border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed;height:100%;width:100%;">
+					<tr>
+						<!-- no properties here, height will depend on contents -->
+						<td style="width:100%;">
+							<!-- position:relative - very important, without, table won't scroll -->
+							<table id="ListTableTop" border="0" cellspacing="0" cellpadding="0" style="position:relative;user-select:none;">
+								<tr id="ListHeaderRow">
+									<td class="listHeaderCell" width="60">
+									<NOBR>Name<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+									<td class="listHeaderCell" width="60">
+									<xsl:if test="/root/DOCUMENT/useverification='1'">
+									<img src="images/ico_as5.gif" width="12" height="12" border="0" alt="Address State" title="Address State"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+									</xsl:if>
+									<NOBR>Email Address<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<!-- set the height of this cell to 100%! -->
+						<td style="height:100%;overflow:hidden;vertical-align:top;">
+							<div id="ListDivider" style="width:100%;height:100%;overflow:auto;" class="listBack" onscroll="OnListDividerScroll(id);">
+							<table id="ListTableBot" style="user-select:none;" border="0" cellspacing="0" cellpadding="0" allowMultiple="true">
+							<xsl:if test="/root/DOCUMENT/URLPARAMETERS/MULTIPLE"><xsl:attribute name="allowMultiple"><xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/MULTIPLE"/></xsl:attribute></xsl:if>
+							<xsl:for-each select="root/Item">
+							<!-- a brief explanation:
+							(selectId)
+							@ID is used everywhere!
+							DefaultEmail is used for contactsendto.ems & newticket.ems
+							Name is used for newticket.ems
+							!!!important!!! - contactsendto.ems is dependant upon the # of comma dellimmited items here!
+							-->
+								<tr id="listRow" glc_form_tabularForm_selectId="{@ID},{DefaultEmail},{Name}" class="rowOff" onclick="gloListControl.listRowClick(event);" onDblClick="gloListControl.keepActiveRow();tabularDblClick()" onMouseOver="tabRowOn()" onMouseOut="tabRowOff()">
+									<td id="listCell" class="cellOff">
+										<NOBR>
+										<xsl:if test="Name = ''">
+										<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</xsl:if>
+										<xsl:value-of select="Name"/>
+										</NOBR>
+									</td>
+									<td id="listCell" class="cellOff">
+										<xsl:attribute name="style">
+											<xsl:choose>
+											<xsl:when test="/root/DOCUMENT/useragent = 'Chrome'">padding-left:6px !important</xsl:when>
+											<xsl:when test="/root/DOCUMENT/useragent = 'Safari' and /root/DOCUMENT/useros = 'OS X'">text-indent:0px;</xsl:when>
+											<xsl:otherwise>padding-left:4px !important</xsl:otherwise>
+											</xsl:choose>
+										</xsl:attribute>
+										<xsl:attribute name="title">
+										<xsl:choose>
+										<xsl:when test="/root/DOCUMENT/useverification='1'">
+										<xsl:choose>
+										<xsl:when test="@AddressState = '0'">
+										<xsl:value-of select="DefaultEmail"/> (Verified)
+										</xsl:when>
+										<xsl:when test="@AddressState &gt; '0'">
+										<xsl:value-of select="DefaultEmail"/> (Failed)
+										</xsl:when>
+										</xsl:choose>
+										</xsl:when>
+										<xsl:otherwise>
+										<xsl:value-of select="DefaultEmail"/>
+										</xsl:otherwise>
+										</xsl:choose>
+										</xsl:attribute>
+										<NOBR>
+										<xsl:if test="/root/DOCUMENT/useverification='1'">
+										<xsl:choose>
+										<xsl:when test="@AddressState = '0'">
+										<img src="./images/ico_as1.gif" alt="Verified" title="Verified" height="12" width="12" />
+										</xsl:when>
+										<xsl:when test="@AddressState &gt; '0'">
+										<img src="./images/ico_as4.gif" alt="Failed" title="Failed" height="12" width="12" />
+										</xsl:when>
+										<xsl:otherwise>
+										<img src="./images/trans.gif" alt="" height="12" width="12" />
+										</xsl:otherwise>
+										</xsl:choose>
+										</xsl:if>
+										<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="DefaultEmail"/>
+										</NOBR>
+									</td>
+								</tr>
+							</xsl:for-each>
+							<xsl:if test = "not(root/Item)">
+								<tr style="display:none;">
+									<td><BR/></td>
+									<td><BR/></td>
+								</tr>
+								<tr><td colspan="2" class="listBack" style="padding-left:4px;"><i>No Contacts Available</i></td></tr>
+							</xsl:if>
+							</table><!--listTableBot-->
+							</div><!--listDivider-->
+						</td>
+					</tr>
+				</table>
+				</div><!--listHolder-->
+
+			</div>
+			</td>
+		</tr>
+		<tr>
+			<td style="border:1px outset;width:100%;">
+				<TABLE BORDER="0" WIDTH="100%" CELLPADDING="0" CELLSPACING="0">
+					<TR>
+						<TD style="padding-left:10px;">
+						<script language="JavaScript">
+						function docRedefQuery() {
+							parent.frames[0].parent.location = "contactframe.ems";
+						}
+						</script>
+						<xsl:if test="/root/More/@Description">
+							<b><xsl:value-of select="/root/More/@Description"/><!--<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Click<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<a href="javascript:docRedefQuery();">here</a><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;to redefine your query.--></b>
+						</xsl:if>
+						</TD>
+					</TR>
+				</TABLE>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

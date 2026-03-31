@@ -1,0 +1,230 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+	<html>
+	<head>
+	
+
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontroller.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontrollerrows.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/resize_handle.jmf"></script>	
+	<script type="text/javascript" language="javascript">
+	function PerformAction(dowhat)
+	{
+		var continueSubmit = false;
+		if (dowhat=="import")
+		{
+			if (confirm("Are you sure you want to import the selected archive?"))
+			{
+				continueSubmit = true;
+			}
+		}	
+
+		if (dowhat=="delete")
+		{
+			if (confirm("Are you sure you want to delete the selected archive(s)?"))
+			{
+				continueSubmit = true;
+			}			
+		}
+
+		if (continueSubmit)
+		{
+			document.tabularForm.Action.value = dowhat;
+			var postResults = glo_buildFormPost('tabularForm');
+			var proceed = postResults[0];
+			if (proceed==true)
+			{
+				var reXML = postResults[2];
+				if (reXML.selectSingleNode("/root/DBMaintenance/@Running"))
+				{
+					glo_launchModalWindow('dbmaintenanceresults.ems', 350, 100, 'no', 'no', 'no');
+				} else {
+					document.location.reload();
+				}
+			}
+		}
+	}
+	function docEditArchive()
+	{
+		document.location = "editdbarchive.ems?selectId="+document.tabularForm.selectId.value;
+	}
+	</script>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	</head>
+
+	<body callBeforeOnLoad="docInitListCols();" callOnLoad="">
+	<form name="tabularForm" method="post" action="">
+	<input type="hidden" name="selectId" value="" />
+	<input type="hidden" name="type" value="" />
+	<input type="hidden" name="Action" value="" />
+
+
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(gloListControl.ActiveRows.length!=0)"
+										 title="Delete File" onclick="PerformAction('delete');">
+										<nobr>
+										<img src="images/ico_dbarchives_delete.gif" width="24" height="22" border="0" valign="bottom"/>
+										<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Delete
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(gloListControl.ActiveRows.length!=0)"
+										 title="Edit File" onclick="docEditArchive();">
+										<nobr>
+										<img src="images/ico_edit.gif" width="24" height="22" border="0" valign="bottom"/>
+										<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Edit
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(gloListControl.ActiveRows.length==1)"
+										 title="Restore File" onclick="PerformAction('import');">
+										<nobr>
+										<img src="images/ico_dbarchives_import.gif" width="24" height="22" border="0" valign="bottom"/>
+										<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Import
+										</nobr>
+				  						</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Show Help" onclick="openHelp('administration/database_maintenance/Archives.htm');">
+										<nobr>
+										<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom"/>
+										Help
+										</nobr>
+				  						</div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:hidden;">
+
+				<div id="ListHolder" style="overflow:hidden;height:100%;width:100%;position:relative;">
+				<!-- table-layout:fixed - very important, without, table will extend off page -->
+				<table border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed;height:100%;width:100%;">
+					<tr>
+						<!-- no properties here, height will depend on contents -->
+						<td style="width:100%;">
+							<!-- position:relative - very important, without, table won't scroll -->
+							<table id="ListTableTop" border="0" cellspacing="0" cellpadding="0" style="position:relative;user-select:none;">
+								<tr id="ListHeaderRow">
+									<td class="listHeaderCell" width="60">
+									<NOBR>Filename<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+									<td class="listHeaderCell" width="120">
+									<NOBR>Date<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+									<td class="listHeaderCell" width="80">
+									<NOBR>Inbound Messages<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+									<td class="listHeaderCell" width="80">
+									<NOBR>Outbound Messages<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>
+									<td class="listHeaderCell" width="80">
+									<NOBR>Size<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>
+									<xsl:call-template name="list_resizeHandle"/>
+									</td>			
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<!-- set the height of this cell to 100%! -->
+						<td style="height:100%;overflow:hidden;vertical-align:top;">
+							<div id="ListDivider" style="width:100%;height:100%;overflow:auto;" class="listBack" onscroll="OnListDividerScroll(id);">
+							<table id="ListTableBot" style="user-select:none;" border="0" cellspacing="0" cellpadding="0" allowMultiple="false">
+							<xsl:for-each select="root/Archive">
+								<tr id="listRow" class="rowOff" glc_form_tabularForm_selectId="{@ID}" onclick="gloListControl.listRowClick(event);" ondblclick="gloListControl.keepActiveRow();docEditArchive();" onMouseOver="tabRowOn()" onMouseOut="tabRowOff()">
+									<td id="listCell" class="cellOff" title="{@Filename}">
+										<NOBR>
+										<xsl:value-of select="@Filename"/>
+										</NOBR>
+									</td>
+									<td id="listCell" class="cellOff" title="{@Date}">
+										<NOBR>
+										<xsl:value-of select="@Date"/>
+										</NOBR>
+									</td>
+									<td id="listCell" class="cellOff" title="{@InMsg}">
+										<NOBR>
+										<xsl:value-of select="@InMsg"/>
+										</NOBR>
+									</td>
+									<td id="listCell" class="cellOff" title="{@OutMsg}">
+										<NOBR>
+										<xsl:value-of select="@OutMsg"/>
+										</NOBR>
+									</td>		
+									<td id="listCell" class="cellOff" title="{@Size}">
+										<NOBR>
+										<xsl:value-of select="@Size"/>
+										</NOBR>
+									</td>					
+								</tr>
+							</xsl:for-each>
+							<xsl:if test="not(root/Archive)">
+								<tr style="display:none;"><td><br/></td><td><br/></td><td><br/></td><td><br/></td><td><br/></td></tr>
+								<tr><td class="listBack" colspan="5"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<i>No Archive Files</i></td></tr>
+							</xsl:if>
+							</table><!--listTableBot-->
+							</div><!--listDivider-->
+						</td>
+					</tr>
+				</table>
+				</div>
+
+			</div>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_statusbar">
+					<xsl:with-param name="current_page" select="/root/Page/@Current"/>
+					<xsl:with-param name="page_count" select="/root/Page/@Count"/>
+					<xsl:with-param name="file_name" select="/root/DOCUMENT/FILENAME"/>
+					<!--<xsl:with-param name="other_urls" select=""/>-->
+				</xsl:call-template>
+			</td>
+		</tr>
+	</table>
+	</form>
+	<!--<TD><span style="font-weight:bold">Archive Path:</span><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/ArchiveOptions/@Path"/></TD>-->
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

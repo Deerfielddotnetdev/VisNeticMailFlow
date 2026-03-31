@@ -1,0 +1,470 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+  <xsl:include href="interface_templates.ems"/>
+  <xsl:template match="/">
+
+    <html>
+
+      <xsl:choose>
+
+        <xsl:when test="/root/NewContact/@ID">
+          <head>
+            <script language="javascript">
+              function endAdd()
+              {
+              if(parent.dialogArguments)
+              {
+              parent.dialogArguments.contactId = <xsl:value-of select="/root/NewContact/@ID"/>;
+              parent.dialogArguments.contactEmail = '<xsl:value-of select="/root/NewContact/@DefaultEmailAddress"/>';
+              parent.dialogArguments.contactName = '<xsl:value-of select="/root/NewContact/@Name"/>';
+              window.returnValue = true;
+              glo_doClose();
+              }
+              }
+            </script>
+          </head>
+          <body onload="endAdd();"></body>
+        </xsl:when>
+
+        <xsl:when test="/root/MERGE">
+          <head>
+            <link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"/>
+          </head>
+
+          <body>
+            <BR/>Contact merge is complete!<BR/>
+          </body>
+        </xsl:when>
+
+        <xsl:otherwise>
+
+          <head>
+            <title>
+              <xsl:value-of select="/root/DOCUMENT/TITLE"/>
+            </title>
+            <link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"/>
+
+            <script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"/>
+            <script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/contact.jmf"/>
+            <script TYPE="text/javascript" LANGUAGE="JavaScript">
+
+              gServerName = '<xsl:value-of select="/root/DOCUMENT/servername"/>';
+              gUseHttps = <xsl:value-of select="/root/DOCUMENT/usehttps"/>;
+							var ticketboxid = <xsl:value-of select="/root/user/defaultticketboxid"/>;
+							
+              function ViewNotes()
+              {
+              glo_launchModalWindow('./modalframe.ems?file=contactnotes.ems&amp;ContactID=<xsl:value-of select="root/Contact/@ID"/>', 650, 400, 'yes', 'no', 'no');
+              }
+
+              function NewPhoneNote()
+              {
+              glo_launchModalWindow('./modalframe.ems?file=contactnotes.ems&amp;Action=addphone&amp;ContactID=<xsl:value-of select="root/Contact/@ID"/>', 650, 400, 'yes', 'no', 'no');
+              }
+
+              function VoipCall()
+              {
+              glo_launchModelessWindow('./modalframe.ems?file=voipcall.ems&amp;contact=<xsl:value-of select="root/Contact/@ID"/>', 600, 400, 'yes', 'no', 'no');
+              }
+
+              function ViewHistory()
+              {
+              glo_launchNewWindow("mailflow.ems?rightpane=contacthistory.ems$contactid=<xsl:value-of select="root/Contact/@ID"/>");
+
+              }
+
+            </script>
+          </head>
+
+          <body callOnLoad="adjustDoc();">
+            <form name="tabularForm" method="post" action="">
+
+              <input type="hidden" disabled="true" name="UserAccessLevel" value="{root/Contact/@AccessLevel}" />
+              <input type="hidden" name="Action">
+                <xsl:if test="root/Contact/@ID = '0'">
+                  <xsl:attribute name="value">insert</xsl:attribute>
+                </xsl:if>
+                <xsl:if test="root/Contact/@ID &gt; '0'">
+                  <xsl:attribute name="value">update</xsl:attribute>
+                </xsl:if>
+              </input>
+              <input type="hidden" name="selectId" value="{root/Contact/@ID}"/>
+
+              <table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="width:100%">
+
+                    <xsl:call-template name="default_titlebar">
+                      <xsl:with-param name="title_text">
+                        <xsl:value-of select="root/DOCUMENT/TITLE"/>
+                      </xsl:with-param>
+                    </xsl:call-template>
+
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td style="height:32px" class="menubarx" nowrap="true">
+                          <table style="height:100%" align="left" border="0" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td height="100%">
+                                <div id="toolButton" name="toolButton" class="toolBar"
+                                   xrequire="(parseInt(document.tabularForm.UserAccessLevel.value) &gt; 2)"
+                                   title="Save contact" onclick="adjustForm()"
+								 >
+                                  <nobr>
+                                    <img src="images/ico_save.gif" width="24" height="22" border="0"/>
+                                    Save
+                                  </nobr>
+                                </div>
+                              </td>
+
+                              <xsl:if test="root/Contact/@ID &gt; '0'">
+                                <td height="100%">
+                                  <div id="toolButton" name="toolButton"
+                                     xrequire="true" class="toolBar"
+                                     title="Compose a new message to this contact"
+                                     onclick="glo_launchMsgCompWindow(null, {/root/Contact/@ID}, null, ticketboxid, null, null, null)"
+                                     >
+                                    <nobr>
+                                      <img src="images/ico_sendmessage.gif" width="24" height="22" border="0"/>
+                                      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Compose
+                                    </nobr>
+                                  </div>
+                                </td>
+                                <xsl:if test="/root/DOCUMENT/usevoip='1'">
+                                  <xsl:if test="/root/user/access/voip = '4'">
+                                    <td height="100%">
+                                      <div id="toolButton" name="toolButton" 
+                                         xrequire="true"
+                                         title="Initiate a VOIP call to this contact"
+                                         onclick="VoipCall()"
+                                         class="toolBar" >
+                                        <nobr>
+                                          <img src="images/voipcall.gif" width="24" height="22" border="0"/>
+                                          <xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Call
+                                        </nobr>
+                                      </div>
+                                    </td>
+                                  </xsl:if>
+                                </xsl:if>
+                                <td height="100%">
+                                  <div id="toolButton" name="toolButton" 
+                                     xrequire="true"
+                                     title="View this contact's Ticket history"
+                                     onclick="ViewHistory()"
+                                     class="toolBar">
+                                    <nobr>
+                                      <img src="images/ico_viewhistory.gif" width="24" height="22" border="0"/>
+                                      History
+                                    </nobr>
+                                  </div>
+                                </td>
+                                <td height="100%">
+                                  <div id="toolButton" name="toolButton" 
+                                     xrequire="true"
+                                     title="Manage this contact's notes"
+                                     onclick="ViewNotes()"
+                                     class="toolBar">
+                                    <nobr>
+                                      <img src="images/ico_viewnotes.gif" width="24" height="22" border="0"/>
+                                      Notes
+                                    </nobr>
+                                  </div>
+                                </td>
+                              </xsl:if>
+
+                              <td height="100%">
+                                <div id="toolButton" name="toolButton" class="toolBar"
+                                   xrequire="true"
+                                   title="Show Help"
+                                   onclick="openHelp('My_Shortcuts/Contacts/Contacts.htm')"
+                                   >
+                                  <nobr>
+                                    <img src="images/ico_help.gif" width="24" height="22" border="0"/>
+                                    Help
+                                  </nobr>
+                                </div>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+                    <div style="width:100%;height:100%;overflow:auto">
+
+                      <table width="100%" align="center" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                          <td style="padding-left:10px;padding-right:10px;">
+                            <table width="500" align="left" border="0" cellspacing="0" cellpadding="0">
+                              <tr>
+                                <td height="20" colspan="2">&#32;</td>
+                              </tr>
+                              <tr>
+                                <td  style="padding-left:10px;">Full Name</td>
+                                <td  style="padding-left:10px;">
+                                  <input maxlength="128" size="45" type="text" name="FullName" value="{root/Contact/Name/.}"/>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td  style="padding-left:10px;">Title</td>
+                                <td  style="padding-left:10px;">
+                                  <input maxlength="20" size="45" type="text" name="Title" value="{root/Contact/Title/.}"/>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td  style="padding-left:10px;">Company</td>
+                                <td  style="padding-left:10px;">
+                                  <input maxlength="50" size="45" type="text" name="Company" value="{root/Contact/Company/.}"/>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td  style="padding-left:10px;">Website</td>
+                                <td  style="padding-left:10px;">
+                                  <input maxlength="250" size="45" type="text" name="Website" value="{root/Contact/Website/.}"/>
+                                  <input type="button" name="goBtn" value="go" class="childControlBtn"
+							 onclick="if (tabularForm.Website.value!='')window.open( (tabularForm.Website.value.indexOf(':&#47;&#47;')==-1?'http://':'') +tabularForm.Website.value);"/>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td height="20" colspan="2">&#32;</td>
+                              </tr>
+                              <tr>
+                                <td  style="padding-left:10px;">Email (Default)</td>
+                                <td  style="padding-left:10px;">
+                                  <input maxlength="250" size="45" type="text" name="DefaultEmail" value="{root/Contact/DefaultEmailAddress/.}"/>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td height="20" colspan="2">&#32;</td>
+                              </tr>
+                              <tr>
+                                <td  style="padding-left:10px;">Address 1</td>
+                                <td  style="padding-left:10px;">
+                                  <input maxlength="75" size="45" type="text" name="Address1" value="{root/Contact/StreetAddress1/.}"/>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td  style="padding-left:10px;">Address 2</td>
+                                <td  style="padding-left:10px;">
+                                  <input maxlength="75" size="45" type="text" name="Address2" value="{root/Contact/StreetAddress2/.}"/>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td  style="padding-left:10px;">City</td>
+                                <td  style="padding-left:10px;">
+                                  <input maxlength="35" size="45" type="text" name="City" value="{root/Contact/City/.}"/>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td  style="padding-left:10px;">State/Province</td>
+                                <td  style="padding-left:10px;">
+                                  <input maxlength="30" size="45" type="text" name="State" value="{root/Contact/State/.}"/>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td  style="padding-left:10px;">Zip</td>
+                                <td  style="padding-left:10px;">
+                                  <input maxlength="20" type="text" name="Zip" value="{root/Contact/Zip/.}"/>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td  style="padding-left:10px;">Country</td>
+                                <td  style="padding-left:10px;">
+                                  <input maxlength="55" size="45" type="text" name="Country" value="{root/Contact/Country/.}"/>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td height="20" colspan="2">&#32;</td>
+                              </tr>
+                              <tr>
+                                <td  style="padding-left:10px;">Assign to Agent:</td>
+                                <td  style="padding-left:10px;">
+                                  <xsl:variable name="OwnerId" select="root/Contact/@Owner"/>
+                                  <select name="OwnerId">
+                                    <option value="0">
+                                      <xsl:if test="$OwnerId = '0'">
+                                        <xsl:attribute name="selected">true</xsl:attribute>
+                                      </xsl:if>
+                                      -- Do not Assign --
+                                    </option>
+                                    <xsl:for-each select="root/AgentNames/Agent">
+                                      <option value="{@ID}">
+                                        <xsl:if test="$OwnerId = @ID">
+                                          <xsl:attribute name="selected">true</xsl:attribute>
+                                        </xsl:if>
+                                        <xsl:value-of select="@Name"/>
+                                      </option>
+                                    </xsl:for-each>
+                                  </select>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td height="20" colspan="2">&#32;</td>
+                              </tr>
+                              <tr>
+																<td  colspan="2" style="padding-left:10px;">                                  
+                                  <input type="hidden" name="groupidcollection" value="" />
+                                  Contact Groups<br/>																
+																	<TABLE BORDER="0" style="padding-left:20px;" width="100%" CELLPADDING="0" CELLSPACING="0">
+																	<xsl:for-each select="root/Groups/Group">
+																		<xsl:variable name="CurGroupId"><xsl:value-of select="@ID"/></xsl:variable>
+																		<tr style="padding-top:5px;">
+																			<td>
+																				<input type="Checkbox" name="{concat('group', @ID)}" value="1">
+																				<xsl:for-each select="/root/Agent/Group">
+																					<xsl:if test="$CurGroupId = @ID"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+																				</xsl:for-each>
+																				<xsl:if test="@Name = 'Everyone'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+																				</input>
+																				<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																				<xsl:value-of select="@Name"/>
+																			</td>
+																		</tr>
+																	</xsl:for-each>	
+																	</TABLE>
+																</td>
+															</tr>
+															<tr>
+                                <td height="20" colspan="2">&#32;</td>
+                              </tr>
+                              <tr>
+                                <td  colspan="2" style="padding-left:10px;">
+                                  <input type="Hidden" name="PersonalDataMaxID">
+                                    <xsl:attribute name="value">
+                                      <xsl:value-of select="root/Contact/@PersonalDataMaxID"/>
+                                    </xsl:attribute>
+                                  </input>
+                                  <input type="Hidden" name="PersonalDataIdCollection" value=""/>
+                                  Contact Properties<br/>
+                                  <table  id="AdditionalInfoTable">
+                                    <xsl:for-each select="root/Contact/PersonalData">
+                                      <xsl:variable name="PersonalDataId" select="@ID"/>
+                                      <xsl:variable name="CurTypeId" select="@TypeID"/>
+                                      <tr id="{$PersonalDataId}">
+                                        <td align="right">
+                                          <select onChange="adjDefault(this);">
+                                            <xsl:attribute name="name">
+                                              PersonalDataType<xsl:value-of select="$PersonalDataId"/>
+                                            </xsl:attribute>
+                                            <xsl:for-each select="/root/PersonalDataTypes/PersonalDataType">
+                                              <xsl:choose>
+                                                <xsl:when test="@ID = $CurTypeId">
+                                                  <option>
+                                                    <xsl:attribute name="value">
+                                                      <xsl:value-of select="@ID"/>
+                                                    </xsl:attribute>
+                                                    <xsl:attribute name="selected">true</xsl:attribute>
+                                                    <xsl:value-of select="@Description"/>
+                                                  </option>
+                                                </xsl:when>
+                                                <xsl:otherwise>
+                                                  <option>
+                                                    <xsl:attribute name="value">
+                                                      <xsl:value-of select="@ID"/>
+                                                    </xsl:attribute>
+                                                    <xsl:value-of select="@Description"/>
+                                                  </option>
+                                                </xsl:otherwise>
+                                              </xsl:choose>
+                                            </xsl:for-each>
+                                          </select>
+                                          <input size="45" maxlength="250" type="text">
+                                            <xsl:attribute name="name">
+                                              PersonalData<xsl:value-of select="$PersonalDataId"/>
+                                            </xsl:attribute>
+                                            <xsl:attribute name="value">
+                                              <xsl:value-of select="@Value"/>
+                                            </xsl:attribute>
+                                          </input>
+                                          <xsl:if test="contains(@Value,'http://') or contains(@Value,'https://')">
+                                          	<input type="button" value="go" class="childControlBtn">
+                                          		<xsl:attribute name="name">
+                                              	GoBtn<xsl:value-of select="$PersonalDataId"/>
+                                            	</xsl:attribute>
+                                            	<xsl:attribute name="onclick">
+                                            		glo_launchExternalWindow('<xsl:value-of select="@Value"/>')
+                                            	</xsl:attribute>
+                                          	</input>
+                                          </xsl:if>
+                                          <input type="button" class="childControlBtn" rowIndex="0" name="MatchDelButton" value="Remove" onclick="delOption();"/>                                          
+                                        </td>
+                                      </tr>
+                                    </xsl:for-each>
+                                  </table>
+                                  <br />
+                                  <input type="button" class="childControlBtn" value="Add Property" onclick="addOption()"/>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td height="20" colspan="2">&#32;</td>
+                              </tr>
+                            </table>
+                            <br />
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <xsl:if test="root/Contact/@AccessLevel &lt; 3">
+                <script>
+                  var ff = new Array();
+                  for (var i = 0; i &lt; tabularForm.elements.length; i++)
+                  {if (tabularForm.elements[i].name!="goBtn")ff[ff.length]=tabularForm.elements[i];}
+                  glo_disableForm(false, ff);
+                </script>
+              </xsl:if>
+
+              <xsl:for-each select="root/PersonalDataTypes/PersonalDataType">
+                <input type="hidden" name="hiPDName" disabled="true">
+                  <xsl:attribute name="value">
+                    <xsl:value-of select="@Description"/>
+                  </xsl:attribute>
+                </input>
+              </xsl:for-each>
+
+              <xsl:for-each select="root/PersonalDataTypes/PersonalDataType">
+                <input type="hidden" name="hiPDId" disabled="true">
+                  <xsl:attribute name="value">
+                    <xsl:value-of select="@ID"/>
+                  </xsl:attribute>
+                </input>
+              </xsl:for-each>
+
+            </form>
+
+            <script type="text/javascript">
+              if (location.search != "")
+              {
+              var doNote = 0;
+              var x = location.search.substr(1).split("&amp;")
+              for (var i=0; i&lt;x.length; i++)
+              {
+              var y = x[i].split("=");
+              if(y[0]=='newphonenote')
+              {
+              doNote=1;
+              }
+              }
+              if(doNote == 1)
+              {
+              setTimeout("NewPhoneNote()",500);
+              }
+              }
+            </script>
+
+          </body>
+
+        </xsl:otherwise>
+      </xsl:choose>
+
+    </html>
+
+  </xsl:template>
+</xsl:stylesheet>

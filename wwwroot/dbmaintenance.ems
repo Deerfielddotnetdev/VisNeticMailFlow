@@ -1,0 +1,562 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	
+	<TITLE><xsl:value-of select="root/DOCUMENT/TITLE"/></TITLE>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"/>
+	<script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"></script>
+	
+	<script language="javascript">
+			
+		var g_bIsDirty = false;
+
+		function disableOptions( bLoading ) 
+		{	
+			if ( !bLoading )
+				g_bIsDirty = true;
+
+			var bEnable = document.dbMaint.Enabled.checked;
+			var fields = new Array();
+			fields[fields.length] = document.dbMaint.Time;
+			fields[fields.length] = document.dbMaint.ampm[0];
+			fields[fields.length] = document.dbMaint.ampm[1];
+			fields[fields.length] = document.dbMaint.Sun;
+			fields[fields.length] = document.dbMaint.Mon;
+			fields[fields.length] = document.dbMaint.Tue;
+			fields[fields.length] = document.dbMaint.Wed;
+			fields[fields.length] = document.dbMaint.Thu;
+			fields[fields.length] = document.dbMaint.Fri;
+			fields[fields.length] = document.dbMaint.Sat;
+			fields[fields.length] = document.dbMaint.archiveAccess;
+			glo_disableForm(bEnable,fields);
+			
+			bEnable = document.dbMaint.archiveMax.value == 0 &amp;&amp; document.dbMaint.Enabled.checked;
+			fields = new Array();
+			fields[fields.length] = document.dbMaint.archiveAccess;
+			if(!bEnable)
+			{
+				//document.dbMaint.archiveAccess.checked = false;
+			}
+			//glo_disableForm(bEnable,fields);
+
+			bEnable = dbMaint.DoBackup.checked;
+			fields = new Array();
+			fields[fields.length] = document.dbMaint.backupPath;
+			fields[fields.length] = document.dbMaint.deleteBackups;
+			glo_disableForm(bEnable,fields);
+
+			bEnable = dbMaint.DoArchive.checked;
+			fields = new Array();
+			fields[fields.length] = document.dbMaint.archivePath;
+			fields[fields.length] = document.dbMaint.archiveCutOff;
+			fields[fields.length] = document.dbMaint.archiveRemove;
+			fields[fields.length] = document.dbMaint.archiveMax;
+			glo_disableForm(bEnable,fields);
+			
+			bEnable = document.dbMaint.archiveRemove.options[document.dbMaint.archiveRemove.selectedIndex].value > 0 &amp;&amp; dbMaint.DoArchive.checked;
+			fields = new Array();
+			fields[fields.length] = document.dbMaint.archiveMax;
+			glo_disableForm(bEnable,fields);
+
+			bEnable = ( document.dbMaint.PurgeTickets.checked == true
+               || document.dbMaint.PurgeTrash.checked == true
+               || document.dbMaint.PurgeStdRspUsage.checked == true
+               || document.dbMaint.PurgeAlerts.checked == true
+			   || document.dbMaint.PurgeContacts.checked == true );
+			fields = new Array();
+			fields[fields.length] = document.dbMaint.purgeCutOff;
+			glo_disableForm(bEnable,fields);
+		}
+		
+		function setUpdateTime() {
+			
+			var dbCurrTime = "<xsl:value-of select="root/DailyOptions/@Time"/>";
+			var timeArray = dbCurrTime.split(" ");
+			
+			document.dbMaint.Time.value = timeArray[0];
+			if (timeArray[1] == "AM") {
+				document.dbMaint.ampm[0].checked = true;
+				document.dbMaint.ampm[1].checked = false;
+			} else if (timeArray[1] == "PM") {
+				document.dbMaint.ampm[0].checked = false;
+				document.dbMaint.ampm[1].checked = true;
+			}
+			disableOptions(true);
+		}
+		
+		function validateInt()
+	  {
+	     var sNum = document.getElementById("deleteBackups").value;
+	     if (sNum!="" &amp;&amp; !isNaN(sNum) &amp;&amp; (sNum/1)==parseInt(sNum))
+	     {
+	     		return;
+	     }
+	     else
+	     {
+	     		alert("You must enter a positive integer in the delete backkups dialog!");
+	     		document.getElementById("deleteBackups").value = 3;
+	     }
+	   }
+		
+		function saveOptions() {
+			var allowSave = 1;
+			if(document.dbMaint.DoBackup.checked == true) {
+				if(document.dbMaint.backupPath.value == ""){
+					alert("Please provide a path for the backup");
+					document.dbMaint.backupPath.focus();
+					allowSave = 0;
+				}				
+			} 
+			if(document.dbMaint.DoArchive.checked == true) {
+				if(document.dbMaint.archivePath.value == ""){
+					alert("Please provide a path for the archive");
+					document.dbMaint.archivePath.focus();
+					allowSave = 0;
+				}
+			} 
+
+			if(allowSave) 
+			{
+				var postResults = glo_buildFormPost('dbMaint');
+				
+				if ( postResults[0] )
+				{
+					// success, disable the save button
+					g_bIsDirty = false;
+					
+					// do we need to display the dbmaintenanceresults dialog
+					if ( postResults[2].selectSingleNode("/root/DBMaintenance/@Running") )
+						glo_launchModalWindow('dbmaintenanceresults.ems', 350, 110, 'no', 'no', 'no');
+						
+					window.location = "dbmaintenance.ems";
+				}
+			}
+		}
+		
+		function DBMaintNow() 
+		{
+			if (confirm("Are you sure that you wish to perform database maintenance now?"))
+			{
+				document.dbMaint.Action.value = "doNow";
+				saveOptions();
+			}	
+		}
+
+		function DoSaveNow() 
+		{
+			document.dbMaint.Action.value = "update";
+			saveOptions();
+		}
+		
+		function docCheckIsDirty() 
+		{
+			if ( g_bIsDirty )
+				return "Your changes to the database maintenance settings have not been saved!";
+	
+			return false;
+		}
+
+		function setIsDirty(element)
+		{
+			if ( !g_bIsDirty &amp;&amp; element.readOnly != true )
+			{
+					g_bIsDirty = true;
+					glo_initMenuButtons();
+			}
+		}
+
+	</script>
+	</head>
+
+<xsl:choose>
+	<xsl:when test = "/root/DBMaintenance/@Running != 0">
+		<script language="javascript">
+			glo_launchModalWindow('dbmaintenanceresults.ems', 350, 110, 'no', 'no', 'no');		
+		</script>
+	</xsl:when>
+	<xsl:otherwise>
+		<!-- nothing happening -->
+	<body>
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">					
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="g_bIsDirty"  
+										 title="Save" onclick="DoSaveNow()"
+										  >
+											<nobr>
+												<img src="images/ico_save.gif" width="24" height="22" border="0"/>
+												Save
+											</nobr>
+										  </div>
+									</td>
+		
+									<td height="100%">					
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Performs the selected database maintenance options immediately. Agents will not be able to utilize MailFlow while the operation is in progress." 
+										 onclick="DBMaintNow()"
+										  >
+											<nobr>
+												<img src="images/ico_performmaintenancenow.gif" width="24" height="22" border="0" align="bottom"/>
+												Perform Maintenance Now
+											</nobr>
+										  </div>
+									</td>
+		
+									<td height="100%">					
+										<div class="toolBar" id="toolButton" name="toolButton" xrequire="true"  
+										 title="Show Help" 
+										 onclick="openHelp('administration/database_maintenance/Database_Maintenance.htm')"
+										  >
+											<nobr>
+												<img src="images/ico_help.gif" width="24" height="22" border="0"/>
+												Help
+											</nobr>
+										  </div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto;">
+				<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0"><tr><td>
+			
+				<form name="dbMaint" method="post" action="dbmaintenance.ems">			
+				<input type="hidden" name="Action" value="update"/>
+
+				<table border="0" cellspacing="0" cellpadding="0" width="900px">
+					<tr>
+						<td style="padding-left:6px;padding-right:6px;" colspan="2">
+							<b>Important note:</b><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Agents will not be able to utilize MailFlow while Database Maintenance operations are in progress. 
+							Please consider this when scheduling or manually triggering these functions.	
+						</td>
+					</tr>					
+					<tr><td colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<tr>
+						<td  style="padding-left:6px;padding-bottom:6px;" colspan="2">
+							<input value="1" type="checkbox" name="Enabled" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@Enabled = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+							<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<B>Enable Daily Database Maintenance</B>
+						</td>
+					</tr>
+					<tr>
+						<td  style="padding-left:34px;padding-right:6px;" colspan="2">
+							This option schedules the actions below to run
+							on the specified days at the designated time. Only actions that are 
+							enabled will be performed. These actions can also be run 
+							immediately by clicking on the "Perform Maintenance Now"
+							button.
+						</td>
+					</tr>
+					<tr><td colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<tr>
+						<td nowrap="true" style="padding-left:34px">Days To Perform Maintenace:</td>
+						<td  style="padding-left:10px;">
+							<input type="checkbox" name="Sun" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@Sun = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+							<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Sunday
+							<input type="checkbox" name="Mon" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@Mon = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+							<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Monday
+							<input type="checkbox" name="Tue" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@Tue = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+							<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Tuesday
+							<input type="checkbox" name="Wed" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@Wed = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+							<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Wednesday
+							<input type="checkbox" name="Thu" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@Thu = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+							<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Thursday
+							<input type="checkbox" name="Fri" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@Fri = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+							<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Friday
+							<input type="checkbox" name="Sat" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@Sat = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+							<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Saturday
+							
+						</td>
+					</tr>
+					<tr><td colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					<tr>
+						<td nowrap="true" style="padding-left:34px">Time To Perform Maintenace:</td>
+						<td  style="padding-left:10px;">
+							<input  maxlength="8" type="text" name="Time" size="5" onkeydown="setIsDirty(this)" oncut="setIsDirty(this)" onpaste="setIsDirty(this)"/>&#32;				
+							<input type="radio" name="ampm" value="AM" onClick="setIsDirty(this)" />AM&#32;
+							<input type="radio" name="ampm" value="PM" onClick="setIsDirty(this)" />PM
+						</td>
+					</tr>
+					
+					<tr>
+						<td  style="padding-left:34px;padding-top:10px;">Allow Access to System During Archive and Purge Operations: </td>
+						<td  style="padding-left:10px;padding-top:10px;">
+							<input  value="1" type="checkbox" name="archiveAccess" onClick="disableOptions()">
+								<xsl:if test="root/ArchiveOptions/@ArchiveAccess = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+						</td>
+					</tr>
+					
+					<tr><td colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+	
+					<tr>
+						<td  style="padding-left:6px;padding-bottom:10px;">
+							<input value="1" type="checkbox" name="DoBackup" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@DoBackup = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+							<B><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Perform Database Backup</B>
+						</td>
+						<td style="padding-left:10px;;padding-bottom:10px;">
+							Last Performed<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160; 
+							<xsl:value-of select="root/BackupOptions/@LastRun"/>
+						</td>
+						
+					</tr>
+					<tr>
+						<td  style="padding-left:34px;" colspan="2">							
+							This action performs a complete backup of the MailFlow database to a file. 
+						</td>
+					</tr>
+					<tr><td colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>						
+					<tr>
+						<td  style="padding-left:34px;">Path for Backup Files:</td>
+						<td  style="padding-left:10px;">
+							<input maxlength="255" type="text" name="backupPath" size="64" onkeydown="setIsDirty(this)" oncut="setIsDirty(this)" onpaste="setIsDirty(this)">
+							<xsl:attribute name="value"><xsl:value-of select="root/BackupOptions/@Path"/></xsl:attribute>
+							</input>
+						</td>
+						
+					</tr>
+					<tr><td colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>						
+					<tr>
+						<td  style="padding-left:34px;">Delete Backups:</td>
+						<td  style="padding-left:10px;">
+							After
+							<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+							<input maxlength="3" type="text" name="deleteBackups" size="3" onkeydown="setIsDirty(this)" oncut="setIsDirty(this)" onpaste="setIsDirty(this)" onkeyup="validateInt();">
+							<xsl:attribute name="value"><xsl:value-of select="root/BackupOptions/@DeleteBackups"/></xsl:attribute>
+							</input>
+							<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;days
+						</td>
+						
+					</tr>
+					<tr><td colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					
+					<tr>
+						<td  style="padding-left:6px;padding-bottom:8px;">
+							<input value="1" type="checkbox" name="DoArchive" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@DoArchive = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+							<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<B>Perform Archive</B>
+						</td>
+			
+						<td style="padding-left:10px;padding-bottom:8px">
+							Last Performed<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+							<xsl:value-of select="root/ArchiveOptions/@LastRun"/>
+						</td>
+						
+					</tr>
+					<tr>
+						<td  style="padding-left:34px;" colspan="2">
+							This action stores old tickets,<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;and all associated messages and attachments in an archive.
+						</td>
+					</tr>
+					<tr><td colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>						
+					<tr>
+						<td nowrap="true" style="padding-left:34px;">Archive Cut Off Interval<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;(days):</td>
+						<td  style="padding-left:10px;">
+							<input  maxlength="8" type="text" name="archiveCutOff" size="2" onkeydown="setIsDirty(this)" oncut="setIsDirty(this)" onpaste="setIsDirty(this)">
+								<xsl:attribute name="value"><xsl:value-of select="root/ArchiveOptions/@CutoffDays"/></xsl:attribute>
+							</input>
+						</td>
+					</tr>
+					<tr>
+						<td  style="padding-left:34px;">Path for Archive Files:</td>
+						<td  style="padding-left:10px;">
+							<input  maxlength="255" type="text" name="archivePath" size="64" onkeydown="setIsDirty(this)" oncut="setIsDirty(this)" onpaste="setIsDirty(this)">
+							<xsl:attribute name="value"><xsl:value-of select="root/ArchiveOptions/@Path"/></xsl:attribute>
+							</input>
+						</td>						
+					</tr>
+					<tr>
+						<td  style="padding-left:34px;">Remove from database: </td>
+						<td  style="padding-left:10px;">
+							<select name="archiveRemove" onchange="disableOptions()">
+								<option value="0">
+									<xsl:if test="root/ArchiveOptions/@RemoveTickets = 0">
+										<xsl:attribute name="selected">true</xsl:attribute>
+									</xsl:if>
+									Nothing
+								</option>
+								<option value="1">
+									<xsl:if test="root/ArchiveOptions/@RemoveTickets = 1">
+										<xsl:attribute name="selected">true</xsl:attribute>
+									</xsl:if>
+									Messages
+								</option>
+								<option value="2">
+									<xsl:if test="root/ArchiveOptions/@RemoveTickets = 2">
+										<xsl:attribute name="selected">true</xsl:attribute>
+									</xsl:if>
+									Tickets and Messages
+								</option>
+							</select>
+						</td>						
+					</tr>	
+					<tr>
+						<td nowrap="true" style="padding-left:34px;">Maximum Tickets per Archive File<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;(0=unlimited):</td>
+						<td  style="padding-left:10px;">
+							<input  maxlength="8" type="text" name="archiveMax" size="2" onkeyup="disableOptions()" oncut="disableOptions()" onpaste="disableOptions()">
+								<xsl:attribute name="value"><xsl:value-of select="root/ArchiveOptions/@ArchiveMax"/></xsl:attribute>
+							</input>
+						</td>
+					</tr>
+										
+					<tr><td colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+					
+					<tr>
+						<td nowrap="true" style="padding-left:6px;padding-bottom:10px;" >
+							<B>Purge Old Records:</B>
+						</td>
+						<td  style="padding-left:10px;padding-bottom:10px;">
+							Last Performed<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160; 
+							<xsl:value-of select="root/PurgeOptions/@LastRun"/>
+						</td>
+						
+					</tr>
+					<tr>
+						<td  style="padding-left:34px;" colspan="2">
+							This action removes records that are older than the cutoff interval.
+						</td>
+					</tr>
+					<tr><td colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+												
+					<tr>
+						<td style="padding-left:34px" colspan="2">
+							<input  value="1" type="checkbox" name="PurgeTickets" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@PurgeTickets = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Purge Tickets</td>
+					</tr>
+	
+					<tr>
+						<td style="padding-left:34px" colspan="2">
+							<input  value="1" type="checkbox" name="PurgeTrash" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@PurgeTrash = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Purge Trash</td>
+					</tr>
+	
+					<tr>
+						<td style="padding-left:34px" colspan="2">
+							<input  value="1" type="checkbox" name="PurgeStdRspUsage" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@PurgeStdRspUsage = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Purge Standard Response Usage</td>
+					</tr>
+	
+					<tr>
+						<td style="padding-left:34px" colspan="2">
+							<input  value="1" type="checkbox" name="PurgeAlerts" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@PurgeAlerts = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Purge Alerts</td>
+					</tr>
+	
+					<tr>
+						<td style="padding-left:34px" colspan="2">
+							<input  value="1" type="checkbox" name="PurgeContacts" onClick="disableOptions()">
+								<xsl:if test="root/DailyOptions/@PurgeContacts = 1">
+									<xsl:attribute name="checked"/>
+								</xsl:if>
+							</input>
+						<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Purge Contacts Without Tickets</td>
+					</tr>
+	
+					<tr><td colspan="2"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td></tr>
+	
+					<tr>
+						<td  style="padding-left:34px;">Purge Cut Off Interval<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;(days):</td>
+						<td  style="padding-left:10px;" colspan="2">
+							<input  maxlength="8" type="text" name="purgeCutOff" size="2" onkeydown="setIsDirty(this)" oncut="setIsDirty(this)" onpaste="setIsDirty(this)">
+							<xsl:attribute name="value"><xsl:value-of select="root/PurgeOptions/@CutoffDays"/></xsl:attribute>
+							</input>
+						</td>
+					</tr>
+						
+				</table>
+				</form>
+			
+				</td></tr></table>
+			</div>
+			</td>
+		</tr>
+	</table>
+
+		<script>
+			setUpdateTime();
+		</script>
+		
+		</body>
+		
+	</xsl:otherwise>
+	</xsl:choose>
+
+		</html>
+</xsl:template>
+</xsl:stylesheet>

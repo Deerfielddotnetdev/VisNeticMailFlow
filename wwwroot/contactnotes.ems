@@ -1,0 +1,1270 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+	<html>
+	<head>
+	<title>Contact Notes</title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/tabs.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/listcontrollerrows.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/timer.jmf"></script>
+	<script type="text/javascript" language="javascript" src="./javascript/datetimepicker.jmf"></script>
+	<script language="javascript">
+	
+	var isSpellChecked=false;
+		
+	function stopRKey(evt)
+	{
+	  var evt = (evt) ? evt : ((event) ? event : null);
+	  var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+	  if ((evt.keyCode == 13) &amp;&amp; (node.type=="text"))  {return false;}
+	}
+
+	document.onkeypress = stopRKey;
+	
+	function chkSpell(isSend)
+	{
+		if(!glo_isMobile())
+		{
+			<xsl:choose>
+			<xsl:when test="root/Spell/Check/@DcEnabled &gt; '1'">
+			var nDictionaryID = document.tabularForm.DictionaryID.options[document.tabularForm.DictionaryID.selectedIndex].value;
+			<xsl:if test="root/Spell/Check/@DictionaryPrompt = '1'">
+				var sDictionary = document.tabularForm.DictionaryID.options[document.tabularForm.DictionaryID.selectedIndex].text;
+				var msg = 	'You have selected the '+sDictionary+' spell check dictionary.\n\n' + 
+								'Do you want to select an alternate dictionary?';
+								
+				if (confirm(msg))
+				{
+					return;
+				}
+				
+			</xsl:if>
+			var result = glo_launchModalWindow('./modalframe.ems?file=spelltemp.ems&amp;isnote=1&amp;did='+nDictionaryID, 400, 250, 'yes', 'no', 'no');			
+			</xsl:when>
+			<xsl:otherwise>
+			var result = glo_launchModalWindow('./modalframe.ems?file=spelltemp.ems&amp;isnote=1', 400, 250, 'yes', 'no', 'no');
+			</xsl:otherwise>
+			</xsl:choose>
+			
+			return result;
+		}
+		else
+		{
+			alert("Spell checking is disabled in mobile browsers!");
+		}
+	}
+	
+	function updateElapsed()
+	{
+		var timestart = new Date(document.tabularForm.timestart.value);
+		var timeend = new Date(document.tabularForm.timestop.value);
+		var timediff = new Date();
+	   timediff.setTime(Math.abs(timeend.getTime() - timestart.getTime()));
+	   diff = timediff.getTime();
+	   if(diff &gt; 0)
+		{
+			hours_passed = Math.floor(diff / (1000 * 60 * 60)); 
+			diff -= hours_passed * (1000 * 60 * 60);
+			if(hours_passed &lt; 10){
+			        hours_passed = "0" + hours_passed;
+			    }
+			minutes_passed = Math.floor(diff / (1000 * 60)); 
+			diff -= minutes_passed * (1000 * 60);
+			if(minutes_passed &lt; 10){
+		           minutes_passed = "0" + minutes_passed;
+		       }
+		       
+			seconds_passed = Math.floor(diff / 1000); 
+			diff -= seconds_passed * 1000;
+		   if(seconds_passed &lt; 10){
+		           seconds_passed = "0" + seconds_passed;
+		       }
+		          
+		   document.tabularForm.timetextarea.value = hours_passed + ":" + minutes_passed + ":" + seconds_passed;
+		 }
+		 else
+		 {
+		 	document.tabularForm.timetextarea.value = "00:00:00";
+		 }
+	}
+	function perform(what)
+	{
+		if(glo_isBtnDisabled()){return false;}		
+		if ( document.tabularForm.selectId.value != '' || what == 'add' || what == 'addphone')
+		{
+			if (what!="")
+				{document.tabularForm.Action.value = what;}
+				
+			if (what == 'insert')
+			{
+				<xsl:if test="root/ContactNote/@IsPhone='1'">
+				if(document.tabularForm.timetextarea.value!="00:00:00")
+				{
+					if(document.tabularForm.timestart.value!="")
+					{
+						if(document.tabularForm.timestop.value=="")
+						{
+							StopTimer('<xsl:value-of select="root/DOCUMENT/dateformat"/>');
+						}
+					}
+				}
+				
+				var timenow = new Date();
+				<xsl:choose>
+				<xsl:when test="root/DOCUMENT/dateformat = '0'">
+					var timestart = new Date(document.tabularForm.timestart.value);
+					var timeend = new Date(document.tabularForm.timestop.value);
+				</xsl:when>
+				<xsl:otherwise>
+					var ts = document.tabularForm.timestart.value.split('/');
+					var te = document.tabularForm.timestop.value.split('/');
+					var timestart = new Date(ts[1]+"/"+ts[0]+"/"+ts[2]);
+					var timeend = new Date(te[1]+"/"+te[0]+"/"+te[2]);
+				</xsl:otherwise>
+				</xsl:choose>
+				var timediff = timeend - timestart;
+				if (timediff &lt; 0 )
+				{
+					alert("The Stop Time must be later than the Start Time!");
+					document.tabularForm.timestart.focus;
+					return;
+				}
+												
+				timediff = timenow - timestart;
+				if (timediff &lt; 0 )
+				{
+					alert("The Start Time cannot be in the future!");
+					document.tabularForm.timestart.focus;
+					return;
+				}
+				timediff = timenow - timeend;
+				if (timediff &lt; 0 )
+				{
+					alert("The Stop Time cannot be in the future!");
+					document.tabularForm.timestop.focus;
+					return;
+				}
+				
+			</xsl:if>				
+			}	
+			
+			if (what == 'cancel')
+			{
+				<xsl:if test="root/Contact/@Display = 'New'">
+					docDeleteNote();
+				</xsl:if>				
+			}
+			
+			if (what == 'insert')
+			{
+				document.tabularForm.Action.value='insert';
+				
+				var postResults = glo_buildFormPost('tabularForm');
+				if (eval(postResults[0])==true)
+				{
+					if (document.tabularForm.ContactID.value == 0)
+					{
+						document.location = './modalframe.ems?file=contactnotes.ems&amp;TicketBoxView=<xsl:value-of select="root/DOCUMENT/URLPARAMETERS/TICKETBOXVIEW"/>';						
+					}
+					else
+					{
+						document.location = './modalframe.ems?file=contactnotes.ems&amp;ContactID=<xsl:value-of select="root/Contact/@ID"/>';
+					}
+					updateCounts();
+				}
+			}
+			else
+			{
+				document.tabularForm.submit();				
+			}						
+		}
+	}
+		function docDeleteNote()
+		{
+			if(glo_isBtnDisabled()){return false;}		
+			var selectId = tabularForm.selectId.value;
+			if (tabularForm.selectId.value.indexOf(",")!=-1)
+				var cont = confirm("Are you sure you want to delete these notes?");
+			else
+				var cont = confirm("Are you sure you want to delete this note?");
+			if (!cont)
+				return false;
+			
+			document.tabularForm.Action.value = "delete";
+			document.tabularForm.submit();
+			updateCounts();
+		}		
+		function updateCounts()
+		{
+			if (window.dialogArguments.frames.parent.document.frames.menu)
+			{
+				window.dialogArguments.frames.parent.document.frames.menu.updateTicketCount();						
+			}			
+		}
+		function docUpdateNote()
+		{
+			document.tabularForm.Action.value = "update";
+			document.tabularForm.submit();
+		}
+		function docUpdateNoteBtnLabel()
+		{
+			var noteBtnLabel = parent.dialogArguments.document.getElementById("noteBtnLabel");
+			if (document.getElementById("listRow"))
+			{
+				if (listRow.length)
+				{
+					noteBtnLabel.innerText = "View Notes";
+					noteBtnLabel.parentElement.parentElement.setAttribute("title", "View Notes");
+					noteBtnLabel.setAttribute("action", "");
+				} else {
+					noteBtnLabel.innerText = "View Note";
+					noteBtnLabel.parentElement.parentElement.setAttribute("title", "View Note");
+					noteBtnLabel.setAttribute("action", "");
+				}
+			} else {
+				noteBtnLabel.innerText = "Add Note";
+				noteBtnLabel.parentElement.parentElement.setAttribute("title", "Add Note");
+				noteBtnLabel.setAttribute("action", "add");
+			}
+		}
+
+	function tabRowDblClick()
+	{
+		<xsl:choose>
+		<xsl:when test="/root/Contact/@ContactName = /root/user/name">
+			document.tabularForm.Action.value = 'edit';
+		</xsl:when>
+		<xsl:otherwise>
+			document.tabularForm.Action.value = 'view';
+		</xsl:otherwise>
+		</xsl:choose>
+		document.tabularForm.submit();
+	}
+	
+	function upFile()
+		{
+			document.tabularForm.lastCID.value = genID();
+			if ( glo_whichBrowser() == "Internet Explorer" )
+			{
+				document.tabularForm.doInsImage.value = "0";
+				window.frames["attframe"].document.forms["tabularForm"].elements["uploadFile"].click();
+				if(document.tabularForm.lastFile.value != '')
+				{
+					htmledit.insertImage(document.tabularForm.lastFile.value,document.tabularForm.lastCID.value);
+					document.tabularForm.lastFile.value = '';
+				}
+			}
+			else
+			{
+				document.tabularForm.doInsImage.value = "1";
+				window.frames["attframe"].document.forms["tabularForm"].elements["uploadFile"].click();			
+			}		
+		}
+		
+	</script>
+	</head>
+<xsl:choose>
+<xsl:when test="root/Contact/@Display = 'New' or root/Contact/@Display = 'Edit'">
+	<body onload="tabInit();">
+	<form action="" method="post" name="tabularForm">
+	<input type="hidden" value="{root/Contact/@ID}" name="ContactID" />
+	<input type="hidden" value="{root/Contact/@AgentBoxID}" name="AgentBoxID" />		
+	<input type="hidden" value="{root/ContactNote[1]/@ContactNoteID}" name="selectId" />
+	<input type="hidden" value="{root/ContactNote/@IsPhone}" name="IsPhone" />	
+	<input type="hidden" value="" name="Action" />
+	<input type="hidden" name="lastFile" value="" />
+	<input type="hidden" name="lastCID" value="" />
+	<input type="hidden" name="doInsImage" value="0" />
+	<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="height:100%;">
+				<div id="tabs" style="position:absolute!important;top:8px!important;">
+					<span id="tab1" useContent="true" class="tabActive">Compose</span>
+					<span id="tab2" turl="noteattachments.ems?noteid={root/ContactNote[1]/@ContactNoteID}&amp;notetype=2" class="tab">Attachments</span>
+				</div>
+				<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td id="tab_holder" style="height:24px;"><br/></td>
+					</tr>
+					<tr>
+						<td id="tab_canvas" class="tabActiveColor" style="height:100%;border-style:outset;border-width:1px;padding:10px;overflow:hidden;">
+							<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td style="height:100%;border-style:inset;border-width:1px;overflow:hidden;">
+		
+									<iframe id="tabWindow" name="tabWindow" style="" frameborder="0" src="blank.htm" height="100%" width="100%" scrolling="No"></iframe>
+			
+									<div id="content1" style="overflow:hidden;display:block;visibility:visible;width:100%;height:100%;">
+									<!-- ####  So here is where New Message finally ended up! -->
+	
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+						<xsl:choose>
+							<xsl:when test="/root/Contact/@ID = 0">
+								<xsl:choose>
+									<xsl:when test="/root/Contact/@ContactName = /root/user/name">
+										My Notes
+									</xsl:when>
+									<xsl:when test="root/Contact/@Display = 'New'">
+										New Note
+									</xsl:when>
+									<xsl:when test="root/Contact/@Display = 'Edit'">
+										Edit Note
+									</xsl:when>
+									<xsl:when test="root/Contact/@Display = 'View'">
+										View Note
+									</xsl:when>
+									<xsl:otherwise>
+										Notes for <xsl:value-of select="root/Contact/@ContactName"/>
+									</xsl:otherwise>
+								</xsl:choose>								
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:value-of select="root/DOCUMENT/TITLE"/>
+							</xsl:otherwise>
+						</xsl:choose>					
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+							<xsl:choose>
+							<xsl:when test="root/Contact/@Display = 'List'">
+								<xsl:choose>
+									<xsl:when test="/root/Contact/@ContactName = /root/user/name">
+										<td height="100%">										
+											<div xrequire="(gloListControl.ActiveRows.length==1)" class="toolBar" id="toolButton" name="toolButton"  title="Edit Note" onclick="perform('edit');">
+												<nobr>
+												<img src="images/ico_edit.gif" width="24" height="22" border="0" valign="bottom" alt="Edit Note"/>
+												Edit<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+												</nobr>
+											</div>											
+										</td>							
+									</xsl:when>
+									<xsl:otherwise>
+										<td height="100%">										
+											<div xrequire="(gloListControl.ActiveRows.length==1)" class="toolBar" id="toolButton" name="toolButton"  title="View Note" onclick="perform('view');">
+												<nobr>
+												<img src="images/ico_magnify.gif" width="24" height="22" border="0" valign="bottom" alt="View Note"/>
+												View<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+												</nobr>
+											</div>											
+										</td>																	
+									</xsl:otherwise>
+								</xsl:choose>									
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Add Note" onclick="perform('add');">
+											<xsl:if test="not(/root/user/access/contact &gt; 2)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+											<nobr>
+											<img src="images/ico_new.gif" width="24" height="22" border="0" valign="bottom" alt="Add Note"/>
+											Add<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>	
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Add Phone Note" onclick="perform('addphone');">
+											<xsl:if test="not(/root/user/access/contact &gt; 2)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+											<nobr>
+											<img src="images/voipcall.gif" width="24" height="22" border="0" valign="bottom" alt="Add Phone Note"/>
+											Add Phone Note<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>
+									<td height="100%">										
+										<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Delete Note" onclick="docDeleteNote();">
+											<xsl:if test="not(/root/user/access/contact &gt; 3)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+											<nobr>
+											<img src="images/ico_delete.gif" width="24" height="22" border="0" valign="bottom" alt="Delete Note"/>
+											Delete<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>									
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('My_Shortcuts/Contacts/Contact_Notes.htm');">
+											<nobr>
+											<img src="images/ico_help.gif" width="24" height="22" alt="Show Help"/>
+											Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>									
+							</xsl:when>
+							<xsl:when test="root/Contact/@Display = 'New' or root/Contact/@Display = 'Edit' or root/Contact/@Display = 'View'">
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Save">
+											<xsl:attribute name="onclick">
+												<xsl:choose>
+													<xsl:when test="root/Contact/@Display = 'New'">
+														perform('insert')	
+													</xsl:when>
+													<xsl:otherwise>
+														docUpdateNote()
+													</xsl:otherwise>
+												</xsl:choose>
+											</xsl:attribute>
+											<xsl:attribute name="xrequire">
+												<xsl:choose>
+													<xsl:when test="/root/user/id = /root/ContactNote/@ContactAgentID">true</xsl:when>
+													<xsl:otherwise>false</xsl:otherwise>
+												</xsl:choose>
+											</xsl:attribute>
+											<nobr>
+											<img src="images/ico_save.gif" width="24" height="22" border="0" valign="bottom" alt="Save"/>
+											Save<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>	
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Check Spelling" onclick="chkSpell(0);">
+											<xsl:attribute name="xrequire">
+											<xsl:choose>
+												<xsl:when test="/root/user/id = /root/ContactNote/@ContactAgentID">true</xsl:when>
+												<xsl:otherwise>false</xsl:otherwise>
+											</xsl:choose>
+										</xsl:attribute>
+											<nobr>
+											<img src="images/ico_spellcheck.gif" width="24" height="22" border="0" valign="bottom" alt="Check Spelling"/>
+											Spelling<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>									
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Cancel" onclick="perform('cancel');">
+											<nobr>
+											<img src="images/ico_cancel.gif" width="24" height="22" border="0" valign="bottom" alt="Cancel"/>
+											Cancel<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>										
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('My_Shortcuts/Contacts/Contact_Notes.htm');">
+											<nobr>
+											<img src="images/ico_help.gif" width="24" height="22" alt="Show Help"/>
+											Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>										
+							</xsl:when>
+							</xsl:choose>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:hidden;">
+			<xsl:if test="root/Contact/@Display = 'List'">
+			<xsl:attribute name="class">listBack</xsl:attribute>
+			</xsl:if>
+			<xsl:if test="root/Contact/@Display = 'List'">
+			<table id="ListTableBot" style="width:100%;" border="0" cellspacing="0" cellpadding="0" allowMultiple="true">
+				<tr id="listRow">
+					<td class="listHeaderCell" style="width:16px;">
+					<NOBR><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>									
+					</td>
+					<td class="listHeaderCell" style="width:16px;">
+					<NOBR><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>									
+					</td>
+					<xsl:if test="/root/Contact/@ID != 0">									
+					<td class="listHeaderCell" style="width:150px;">
+					<NOBR>Subject<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>									
+					</td>
+					</xsl:if>
+					<td class="listHeaderCell" style="width:40px;">
+					<NOBR>
+					<xsl:choose>
+						<xsl:when test="/root/Contact/@ID != 0">
+							Owner<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+						</xsl:when>
+						<xsl:otherwise>
+							Subject<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+						</xsl:otherwise>
+					</xsl:choose>									
+					</NOBR>									
+					</td>	
+					<td class="listHeaderCell" style="width:40px;">
+					<NOBR>Date<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>									
+					</td>																													
+				</tr>
+				<xsl:for-each select="root/ContactNote">
+				<tr id="listRow" title="Created by: {@Agent} on {@DateCreated}" class="rowOff" glc_form_tabularForm_selectId="{@ContactNoteID}" onclick="gloListControl.listRowClick(event)" onDblClick="gloListControl.keepActiveRow();tabRowDblClick()" onMouseOver="tabRowOn()" onMouseOut="tabRowOff()">
+					<xsl:choose>
+					<xsl:when test="@IsPhone='1'">
+						<td name="phonenote" id="listCell" class="ticketCellOff" style="padding-left:0px !important;" title="Phone Note">
+							<nobr style="padding-left:1px;">
+							<img src="images/ico_11x_voip.gif" width="11" height="11" border="0" valign="bottom"/>
+							</nobr>
+						</td>
+					</xsl:when>
+					<xsl:otherwise>
+						<td name="phonenote" id="listCell" class="ticketCellOff" style="padding-left:0px !important;" title="Note">
+							<nobr style="padding-left:1px;">
+							<img src="images/ico_11x_notes.gif" width="11" height="11" border="0" valign="bottom"/>
+							</nobr>
+						</td>
+					</xsl:otherwise>
+					</xsl:choose>
+						<td name="attach" id="listCell" class="ticketCellOff" style="padding-left:0px !important;" title="Attachment(s)">
+							<nobr style="padding-left:1px;">
+					<xsl:choose>
+					<xsl:when test="@NumAttach &gt; 0">										
+							<img src="images/ico_attach_11.gif" width="11" height="11" border="0" valign="bottom"/>											
+					</xsl:when>
+					<xsl:otherwise>										
+							<img src="images/ico_transparent.gif" width="11" height="11" border="0" valign="bottom"/>	
+					</xsl:otherwise>
+					</xsl:choose>
+							</nobr>
+						</td>
+					<xsl:if test="/root/Contact/@ID != 0">
+					<td id="listCell" class="cellOff">
+						<NOBR>
+						<xsl:value-of select="@Subject"/>					
+						</NOBR>
+					</td>
+					</xsl:if>
+					<td id="listCell" class="cellOff">
+						<NOBR>
+						<xsl:choose>
+							<xsl:when test="/root/Contact/@ID != 0">
+								<xsl:value-of select="@Agent"/>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:value-of select="@Subject"/>
+							</xsl:otherwise>
+						</xsl:choose>						
+						</NOBR>
+					</td>
+					<td id="listCell" class="cellOff">
+						<NOBR>
+						<xsl:value-of select="@DateCreated"/>
+						</NOBR>
+					</td>
+				</tr>
+				</xsl:for-each>
+			</table>
+			</xsl:if>		
+			<xsl:if test="root/Contact/@Display = 'New' or root/Contact/@Display = 'Edit'  or root/Contact/@Display = 'View'">
+			<table style="width:100%;height:100%;table-layout:fixed;" border="0" cellspacing="0" cellpadding="0">
+				<xsl:if test="root/ContactNote/@IsPhone='1'">
+				<tr>
+					<td style="width:100%;">
+						<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<td style="height:100px;" class="menubarx" nowrap="true">
+									<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td height="100%" style="padding-left:5px;">
+												<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+													<tr>
+														<td style="width:80px;" align="right">
+															Elapsed Time:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+														</td>
+														<td>
+															<input type="text" id="timetextarea" name="timetextarea" value="{root/ContactNote/@TimeTextArea}" size="10" disabled="true"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+															<input type="button" id="start" name="start" value="Start" style="width:55px;" onclick="StartTimer({root/DOCUMENT/dateformat});"/>
+															<input type="button" id="stop" name="stop" value="Stop" onclick="StopTimer({root/DOCUMENT/dateformat})"/>
+															<input type="button" id="reset" name="reset" value="Reset" onclick="ResetTimer()"/>
+														</td>
+													</tr>
+													<tr>
+														<td style="width:80px;" align="right">
+															Start Time:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+														</td>
+														<td>
+															<input type="text" id="timestart" name="timestart" value="{root/ContactNote/@TimeStart}" size="39" disabled="true"/>
+															<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+															<xsl:choose>
+															<xsl:when test="root/DOCUMENT/dateformat = '0'">
+															<img src="images/cal.gif" width="16" height="16" border="0" alt="Set Date/Time" onclick="NewCal('timestart','mmddyyyy',true,12,'dropdown',false)"/>
+															</xsl:when>
+															<xsl:otherwise>
+															<img src="images/cal.gif" width="16" height="16" border="0" alt="Set Date/Time" onclick="NewCal('timestart','ddmmyyyy',true,12,'dropdown',false)"/>
+															</xsl:otherwise>
+															</xsl:choose>
+														</td>
+													</tr>
+													<tr>
+														<td style="width:80px;" align="right">
+															Stop Time:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+														</td>
+														<td>
+															<input type="text" id="timestop" name="timestop" value="{root/ContactNote/@TimeStop}" size="39" disabled="true"/>
+															<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+															<xsl:choose>
+															<xsl:when test="root/DOCUMENT/dateformat = '0'">
+															<img src="images/cal.gif" width="16" height="16" border="0" alt="Set Date/Time" onclick="NewCal('timestop','mmddyyyy',true,12,'dropdown',false)"/>
+															</xsl:when>
+															<xsl:otherwise>
+															<img src="images/cal.gif" width="16" height="16" border="0" alt="Set Date/Time" onclick="NewCal('timestop','ddmmyyyy',true,12,'dropdown',false)"/>
+															</xsl:otherwise>
+															</xsl:choose>
+														</td>
+													</tr>
+													<xsl:if test="root/Contact/@Display != 'View' or root/user/id = root/ContactNote/@ContactAgentID">
+													<tr>
+														<td style="width:80px;" align="right">
+															Subject:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+														</td>
+														<td>
+															<input type="text" id="subject" name="subject" value="{root/ContactNote/@Subject}" size="39" maxlength="50" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+														</td>
+														<xsl:if test="root/Spell/Check/@DcEnabled &gt; '1'">
+														<td>
+																Spell Check Dictionary:
+														</td>
+														<td align="left" width="150px">
+															<select name="DictionaryID">
+																<xsl:for-each select="/root/Dictionaries/Dictionary">
+																	<xsl:if test="@IsEnabled = '1'">
+					                        <option>
+																		<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																		<xsl:if test="/root/Spell/Check/@DictionaryID = @ID">
+																		<xsl:attribute name="selected">true</xsl:attribute>
+																		</xsl:if>
+																		<xsl:value-of select="@Description"/>
+																	</option>
+																	</xsl:if>
+					                      </xsl:for-each>
+															</select>
+														</td>
+														</xsl:if>
+													</tr>
+													</xsl:if>
+												</table>												
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				</xsl:if>
+				<xsl:if test="(root/ContactNote/@IsPhone='0' and root/Contact/@Display != 'View') or (root/ContactNote/@IsPhone='0' and root/user/id = root/ContactNote/@ContactAgentID)">
+				<tr>
+					<td style="width:100%;">
+						<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<td style="height:30px;" class="menubarx" nowrap="true">
+									<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td height="100%" style="padding-left:5px;">
+												<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">													
+													<tr>
+														<td style="width:80px;" align="left">
+															Subject:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+														</td>
+														<td>
+															<input type="text" id="subject" name="subject" value="{root/ContactNote/@Subject}" size="39" maxlength="50" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;															
+														</td>
+														<xsl:if test="root/Spell/Check/@DcEnabled &gt; '1'">
+														<td>
+																Spell Check Dictionary:
+														</td>
+														<td align="left" width="150px">
+															<select name="DictionaryID">
+																<xsl:for-each select="/root/Dictionaries/Dictionary">
+																	<xsl:if test="@IsEnabled = '1'">
+					                        <option>
+																		<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																		<xsl:if test="/root/Spell/Check/@DictionaryID = @ID">
+																		<xsl:attribute name="selected">true</xsl:attribute>
+																		</xsl:if>
+																		<xsl:value-of select="@Description"/>
+																	</option>
+																	</xsl:if>
+					                      </xsl:for-each>
+															</select>
+														</td>
+														</xsl:if>
+													</tr>
+												</table>
+												
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				</xsl:if>
+				<xsl:if test="root/Contact/@Display = 'View'">
+				<tr>
+					<td id="information" align="LEFT" style="padding:10px;font-weight:bold;">
+						Subject:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/ContactNote/@Subject"/><br/>
+						Creator:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/ContactNote/@Agent"/><br/>
+						Created:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/ContactNote/@DateCreated"/>
+					</td>
+				</tr>
+				</xsl:if>
+				<tr>
+					<td style="height:100%">
+						<div id="editregion" style="display:none;word-wrap:break-word;height:1px;width:1px;cursor:text;background:white;font-family:verdana;"></div>													
+						<textarea name="note" style="width:100%;height:100%;">
+						<xsl:attribute name="contentEditable">
+							<xsl:choose>
+								<xsl:when test="/root/user/id = /root/ContactNote/@ContactAgentID">true</xsl:when>
+								<xsl:otherwise>false</xsl:otherwise>
+							</xsl:choose>
+						</xsl:attribute>
+						<xsl:value-of select="root/ContactNote/Body"/>
+						</textarea>
+					</td>
+				</tr>
+				<xsl:if test="root/ContactNote/@NumAttach &gt; 0">
+				<tr>
+					<td>
+						<iframe name="attframe" src="attachments.ems?noteid={root/ContactNote/@ContactNoteID}&amp;notetype=2" width="100%" height="70px" border="0" scrolling="yes"/>
+					</td>
+				</tr>
+				<tr class="ListHeaderRow">
+					<td class="listHeaderCell" width="100%" height="5px">
+						<br/>
+					</td>		
+				</tr>
+				</xsl:if>
+			</table>
+			</xsl:if>
+		
+			</div>
+			</td>
+		</tr>
+	</table>
+	
+												
+									</div>	
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	
+	</form>
+	<xsl:if test="root/ContactNote/@IsPhone='1'">
+	<script type="text/javascript">
+		<xsl:choose>
+			<xsl:when test="root/Contact/@Display = 'New'">
+				StartTimer('<xsl:value-of select="root/DOCUMENT/dateformat"/>');
+			</xsl:when>
+			<xsl:when test="root/Contact/@Display = 'List'">
+				
+			</xsl:when>
+			<xsl:otherwise>
+				document.tabularForm.start.disabled = true;
+				document.tabularForm.stop.disabled = true;
+				document.tabularForm.reset.disabled = true;	
+			</xsl:otherwise>
+		</xsl:choose>		
+	</script>
+	</xsl:if>	
+	</body>
+</xsl:when>
+<xsl:otherwise>	
+	<body>
+	<form action="" method="post" name="tabularForm">
+	<input type="hidden" value="{root/Contact/@ID}" name="ContactID" />
+	<input type="hidden" value="{root/Contact/@AgentBoxID}" name="AgentBoxID" />		
+	<input type="hidden" value="{root/ContactNote[1]/@ContactNoteID}" name="selectId" />
+	<input type="hidden" value="{root/ContactNote/@IsPhone}" name="IsPhone" />	
+	<input type="hidden" value="" name="Action" />
+	<input type="hidden" name="lastFile" value="" />
+	<input type="hidden" name="lastCID" value="" />
+	<input type="hidden" name="doInsImage" value="0" />	
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+						<xsl:choose>
+							<xsl:when test="/root/Contact/@ID = 0">
+								<xsl:choose>
+									<xsl:when test="/root/Contact/@ContactName = /root/user/name">
+										My Notes
+									</xsl:when>
+									<xsl:when test="root/Contact/@Display = 'New'">
+										New Note
+									</xsl:when>
+									<xsl:when test="root/Contact/@Display = 'Edit'">
+										Edit Note
+									</xsl:when>
+									<xsl:when test="root/Contact/@Display = 'View'">
+										View Note
+									</xsl:when>
+									<xsl:otherwise>
+										Notes for <xsl:value-of select="root/Contact/@ContactName"/>
+									</xsl:otherwise>
+								</xsl:choose>								
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:value-of select="root/DOCUMENT/TITLE"/>
+							</xsl:otherwise>
+						</xsl:choose>					
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+							<xsl:choose>
+							<xsl:when test="root/Contact/@Display = 'List'">
+								<xsl:choose>
+									<xsl:when test="/root/Contact/@ContactName = /root/user/name">
+										<td height="100%">										
+											<div xrequire="(gloListControl.ActiveRows.length==1)" class="toolBar" id="toolButton" name="toolButton"  title="Edit Note" onclick="perform('edit');">
+												<nobr>
+												<img src="images/ico_edit.gif" width="24" height="22" border="0" valign="bottom" alt="Edit Note"/>
+												Edit<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+												</nobr>
+											</div>											
+										</td>																		
+									</xsl:when>
+									<xsl:otherwise>
+										<td height="100%">										
+											<div xrequire="(gloListControl.ActiveRows.length==1)" class="toolBar" id="toolButton" name="toolButton"  title="View Note" onclick="perform('view');">
+												<nobr>
+												<img src="images/ico_magnify.gif" width="24" height="22" border="0" valign="bottom" alt="View Note"/>
+												View<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+												</nobr>
+											</div>											
+										</td>																	
+									</xsl:otherwise>
+								</xsl:choose>									
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Add Note" onclick="perform('add');">
+											<xsl:if test="not(/root/user/access/contact &gt; 2)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+											<nobr>
+											<img src="images/ico_new.gif" width="24" height="22" border="0" valign="bottom" alt="Add Note"/>
+											Add<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Add Phone Note" onclick="perform('addphone');">
+											<xsl:if test="not(/root/user/access/contact &gt; 2)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+											<nobr>
+											<img src="images/voipcall.gif" width="24" height="22" border="0" valign="bottom" alt="Add Phone Note"/>
+											Add Phone Note<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>
+									<td height="100%">										
+										<div xrequire="(gloListControl.ActiveRows.length!=0)" class="toolBar" id="toolButton" name="toolButton"  title="Delete Note" onclick="docDeleteNote();">
+											<xsl:if test="not(/root/user/access/contact &gt; 3)">
+											<xsl:attribute name="xrequire">false</xsl:attribute>
+											</xsl:if>
+											<nobr>
+											<img src="images/ico_delete.gif" width="24" height="22" border="0" valign="bottom" alt="Delete Note"/>
+											Delete<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>									
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('My_Shortcuts/Contacts/Contact_Notes.htm');">
+											<nobr>
+											<img src="images/ico_help.gif" width="24" height="22" alt="Show Help"/>
+											Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>
+							</xsl:when>
+							<xsl:when test="root/Contact/@Display = 'New' or root/Contact/@Display = 'Edit' or root/Contact/@Display = 'View'">
+							<!--if the user is adding a note make OK submit an insert-->
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Save">
+											<xsl:attribute name="onclick">
+												<xsl:choose>
+													<xsl:when test="root/Contact/@Display = 'New'">
+														perform('insert')	
+													</xsl:when>
+													<xsl:otherwise>
+														docUpdateNote()
+													</xsl:otherwise>
+												</xsl:choose>
+											</xsl:attribute>
+											<xsl:attribute name="xrequire">
+												<xsl:choose>
+													<xsl:when test="/root/user/id = /root/ContactNote/@ContactAgentID">true</xsl:when>
+													<xsl:otherwise>false</xsl:otherwise>
+												</xsl:choose>
+											</xsl:attribute>
+											<nobr>
+											<img src="images/ico_save.gif" width="24" height="22" border="0" valign="bottom" alt="Save"/>
+											Save<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>	
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Check Spelling" onclick="chkSpell(0);">
+											<xsl:attribute name="xrequire">
+											<xsl:choose>
+												<xsl:when test="/root/user/id = /root/ContactNote/@ContactAgentID">true</xsl:when>
+												<xsl:otherwise>false</xsl:otherwise>
+											</xsl:choose>
+										</xsl:attribute>
+											<nobr>
+											<img src="images/ico_spellcheck.gif" width="24" height="22" border="0" valign="bottom" alt="Check Spelling"/>
+											Spelling<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>									
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Cancel" onclick="perform('cancel');">
+											<nobr>
+											<img src="images/ico_cancel.gif" width="24" height="22" border="0" valign="bottom" alt="Cancel"/>
+											Cancel<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>										
+									<td height="100%">										
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('My_Shortcuts/Contacts/Contact_Notes.htm');">
+											<nobr>
+											<img src="images/ico_help.gif" width="24" height="22" alt="Show Help"/>
+											Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>											
+									</td>
+							</xsl:when>
+							</xsl:choose>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:hidden;">
+			<xsl:if test="root/Contact/@Display = 'List'">
+			<xsl:attribute name="class">listBack</xsl:attribute>
+			</xsl:if>
+			<xsl:if test="root/Contact/@Display = 'List'">
+			<table id="ListTableBot" style="width:100%;" border="0" cellspacing="0" cellpadding="0" allowMultiple="true">
+				<tr id="listRow">
+					<td class="listHeaderCell" style="width:16px;">
+					<NOBR><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>									
+					</td>
+					<td class="listHeaderCell" style="width:16px;">
+					<NOBR><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>									
+					</td>
+					<xsl:if test="/root/Contact/@ID != 0">									
+					<td class="listHeaderCell" style="width:150px;">
+					<NOBR>Subject<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>									
+					</td>
+					</xsl:if>
+					<td class="listHeaderCell" style="width:40px;">
+					<NOBR>
+					<xsl:choose>
+						<xsl:when test="/root/Contact/@ID != 0">
+							Owner<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+						</xsl:when>
+						<xsl:otherwise>
+							Subject<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+						</xsl:otherwise>
+					</xsl:choose>									
+					</NOBR>									
+					</td>	
+					<td class="listHeaderCell" style="width:40px;">
+					<NOBR>Date<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</NOBR>									
+					</td>																													
+				</tr>
+				<xsl:for-each select="root/ContactNote">
+				<tr id="listRow" title="Created by: {@Agent} on {@DateCreated}" class="rowOff" glc_form_tabularForm_selectId="{@ContactNoteID}" onclick="gloListControl.listRowClick(event)" onDblClick="gloListControl.keepActiveRow();tabRowDblClick()" onMouseOver="tabRowOn()" onMouseOut="tabRowOff()">
+					<xsl:choose>
+					<xsl:when test="@IsPhone='1'">
+						<td name="phonenote" id="listCell" class="ticketCellOff" style="padding-left:0px !important;" title="Phone Note">
+							<nobr style="padding-left:1px;">
+							<img src="images/ico_11x_voip.gif" width="11" height="11" border="0" valign="bottom"/>
+							</nobr>
+						</td>
+					</xsl:when>
+					<xsl:otherwise>
+						<td name="phonenote" id="listCell" class="ticketCellOff" style="padding-left:0px !important;" title="Note">
+							<nobr style="padding-left:1px;">
+							<img src="images/ico_11x_notes.gif" width="11" height="11" border="0" valign="bottom"/>
+							</nobr>
+						</td>
+					</xsl:otherwise>
+					</xsl:choose>
+						<td name="attach" id="listCell" class="ticketCellOff" style="padding-left:0px !important;" title="Attachment(s)">
+							<nobr style="padding-left:1px;">
+					<xsl:choose>
+					<xsl:when test="@NumAttach &gt; 0">										
+							<img src="images/ico_attach_11.gif" width="11" height="11" border="0" valign="bottom"/>											
+					</xsl:when>
+					<xsl:otherwise>										
+							<img src="images/ico_transparent.gif" width="11" height="11" border="0" valign="bottom"/>	
+					</xsl:otherwise>
+					</xsl:choose>
+							</nobr>
+						</td>
+					<xsl:if test="/root/Contact/@ID != 0">
+					<td id="listCell" class="cellOff">
+						<NOBR>
+						<xsl:value-of select="@Subject"/>					
+						</NOBR>
+					</td>
+					</xsl:if>
+					<td id="listCell" class="cellOff">
+						<NOBR>
+						<xsl:choose>
+							<xsl:when test="/root/Contact/@ID != 0">
+								<xsl:value-of select="@Agent"/>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:value-of select="@Subject"/>
+							</xsl:otherwise>
+						</xsl:choose>						
+						</NOBR>
+					</td>
+					<td id="listCell" class="cellOff">
+						<NOBR>
+						<xsl:value-of select="@DateCreated"/>
+						</NOBR>
+					</td>
+				</tr>
+				</xsl:for-each>
+			</table>
+			</xsl:if>		
+			<xsl:if test="root/Contact/@Display = 'New' or root/Contact/@Display = 'Edit'  or root/Contact/@Display = 'View'">
+			<table style="width:100%;height:100%;table-layout:fixed;" border="0" cellspacing="0" cellpadding="0">
+				<xsl:if test="root/ContactNote/@IsPhone='1'">
+				<tr>
+					<td style="width:100%;">
+						<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<td style="height:100px;" class="menubarx" nowrap="true">
+									<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td height="100%" style="padding-left:5px;">
+												<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+													<tr>
+														<td style="width:80px;" align="right">
+															Elapsed Time:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+														</td>
+														<td>
+															<input type="text" id="timetextarea" name="timetextarea" value="{root/ContactNote/@TimeTextArea}" size="10" disabled="true"/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+															<input type="button" id="start" name="start" value="Start" style="width:55px;" onclick="StartTimer({root/DOCUMENT/dateformat});"/>
+															<input type="button" id="stop" name="stop" value="Stop" onclick="StopTimer({root/DOCUMENT/dateformat})"/>
+															<input type="button" id="reset" name="reset" value="Reset" onclick="ResetTimer()"/>
+														</td>
+													</tr>
+													<tr>
+														<td style="width:80px;" align="right">
+															Start Time:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+														</td>
+														<td>
+															<input type="text" id="timestart" name="timestart" value="{root/ContactNote/@TimeStart}" size="39" disabled="true"/>
+															<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+															<xsl:choose>
+															<xsl:when test="root/DOCUMENT/dateformat = '0'">
+															<img src="images/cal.gif" width="16" height="16" border="0" alt="Set Date/Time" onclick="NewCal('timestart','mmddyyyy',true,12,'dropdown',false)"/>
+															</xsl:when>
+															<xsl:otherwise>
+															<img src="images/cal.gif" width="16" height="16" border="0" alt="Set Date/Time" onclick="NewCal('timestart','ddmmyyyy',true,12,'dropdown',false)"/>
+															</xsl:otherwise>
+															</xsl:choose>
+														</td>
+													</tr>
+													<tr>
+														<td style="width:80px;" align="right">
+															Stop Time:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+														</td>
+														<td>
+															<input type="text" id="timestop" name="timestop" value="{root/ContactNote/@TimeStop}" size="39" disabled="true"/>
+															<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+															<xsl:choose>
+															<xsl:when test="root/DOCUMENT/dateformat = '0'">
+															<img src="images/cal.gif" width="16" height="16" border="0" alt="Set Date/Time" onclick="NewCal('timestop','mmddyyyy',true,12,'dropdown',false)"/>
+															</xsl:when>
+															<xsl:otherwise>
+															<img src="images/cal.gif" width="16" height="16" border="0" alt="Set Date/Time" onclick="NewCal('timestop','ddmmyyyy',true,12,'dropdown',false)"/>
+															</xsl:otherwise>
+															</xsl:choose>
+														</td>
+													</tr>
+													<xsl:if test="root/Contact/@Display != 'View' or root/user/id = root/ContactNote/@ContactAgentID">
+													<tr>
+														<td style="width:80px;" align="right">
+															Subject:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+														</td>
+														<td>
+															<input type="text" id="subject" name="subject" value="{root/ContactNote/@Subject}" size="39" maxlength="50" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;															
+														</td>
+														<xsl:if test="root/Spell/Check/@DcEnabled &gt; '1'">
+														<td>
+																Spell Check Dictionary:
+														</td>
+														<td align="left" width="150px">
+															<select name="DictionaryID">
+																<xsl:for-each select="/root/Dictionaries/Dictionary">
+																	<xsl:if test="@IsEnabled = '1'">
+					                        <option>
+																		<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																		<xsl:if test="/root/Spell/Check/@DictionaryID = @ID">
+																		<xsl:attribute name="selected">true</xsl:attribute>
+																		</xsl:if>
+																		<xsl:value-of select="@Description"/>
+																	</option>
+																	</xsl:if>
+					                      </xsl:for-each>
+															</select>
+														</td>
+														</xsl:if>
+													</tr>
+													</xsl:if>
+												</table>												
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				</xsl:if>
+				<xsl:if test="(root/ContactNote/@IsPhone='0' and root/Contact/@Display != 'View') or (root/ContactNote/@IsPhone='0' and root/user/id = root/ContactNote/@ContactAgentID)">
+				<tr>
+					<td style="width:100%;">
+						<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<td style="height:30px;" class="menubarx" nowrap="true">
+									<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td height="100%" style="padding-left:5px;">
+												<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">													
+													<tr>
+														<td style="width:80px;" align="left">
+															Subject:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+														</td>
+														<td>
+															<input type="text" id="subject" name="subject" value="{root/ContactNote/@Subject}" size="39" maxlength="50" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;															
+														</td>
+														<xsl:if test="root/Spell/Check/@DcEnabled &gt; '1'">
+														<td>
+																Spell Check Dictionary:
+														</td>
+														<td align="left" width="150px">
+															<select name="DictionaryID">
+																<xsl:for-each select="/root/Dictionaries/Dictionary">
+																	<xsl:if test="@IsEnabled = '1'">
+					                        <option>
+																		<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																		<xsl:if test="/root/Spell/Check/@DictionaryID = @ID">
+																		<xsl:attribute name="selected">true</xsl:attribute>
+																		</xsl:if>
+																		<xsl:value-of select="@Description"/>
+																	</option>
+																	</xsl:if>
+					                      </xsl:for-each>
+															</select>
+														</td>
+														</xsl:if>
+													</tr>
+												</table>
+												
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				</xsl:if>
+				<xsl:if test="root/Contact/@Display = 'View'">
+				<tr>
+					<td id="information" align="LEFT" style="padding:10px;font-weight:bold;">
+						Subject:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/ContactNote/@Subject"/><br/>
+						Creator:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/ContactNote/@Agent"/><br/>
+						Created:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<xsl:value-of select="root/ContactNote/@DateCreated"/>
+					</td>
+				</tr>
+				</xsl:if>
+				<tr>
+					<td style="height:100%">
+						<div id="editregion" style="display:none;word-wrap:break-word;height:1px;width:1px;cursor:text;background:white;font-family:verdana;"></div>													
+						<textarea name="note" style="width:100%;height:100%;">
+						<xsl:attribute name="contentEditable">
+							<xsl:choose>
+								<xsl:when test="/root/user/id = /root/ContactNote/@ContactAgentID">true</xsl:when>
+								<xsl:otherwise>false</xsl:otherwise>
+							</xsl:choose>
+						</xsl:attribute>
+						<xsl:value-of select="root/ContactNote/Body"/>
+						</textarea>
+					</td>
+				</tr>
+				<xsl:if test="root/ContactNote/@NumAttach &gt; 0">
+				<tr>
+					<td>
+						<iframe name="attframe" src="attachments.ems?noteid={root/ContactNote/@ContactNoteID}&amp;notetype=2" width="100%" height="70px" border="0" scrolling="yes"/>
+					</td>
+				</tr>
+				<tr class="ListHeaderRow">
+					<td class="listHeaderCell" width="100%" height="5px">
+						<br/>
+					</td>		
+				</tr>
+				</xsl:if>
+			</table>
+			</xsl:if>
+		
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	<xsl:if test="root/ContactNote/@IsPhone='1'">
+	<script type="text/javascript">
+		<xsl:choose>
+			<xsl:when test="root/Contact/@Display = 'New'">
+				StartTimer('<xsl:value-of select="root/DOCUMENT/dateformat"/>');
+			</xsl:when>
+			<xsl:when test="root/Contact/@Display = 'List'">
+				
+			</xsl:when>
+			<xsl:otherwise>
+				document.tabularForm.start.disabled = true;
+				document.tabularForm.stop.disabled = true;
+				document.tabularForm.reset.disabled = true;	
+			</xsl:otherwise>
+		</xsl:choose>		
+	</script>
+	</xsl:if>	
+	</body>
+</xsl:otherwise>
+</xsl:choose>
+	
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

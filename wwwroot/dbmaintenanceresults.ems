@@ -1,0 +1,124 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script> 
+	<script language="javascript">
+		var xmlhttp = glo_createXMLhttpObject();
+		var pct = 0;
+		var oWin;
+		if ( glo_whichBrowser() == "Internet Explorer" )
+		{
+			oWin = dialogArguments;
+		}
+		else 
+		{
+			oWin = window.parent.opener;
+		}
+			 
+		function updProgress() {
+			progressin.style.width = pct+"%";
+			//Do this once a second:
+			xmlhttp.open('GET', 'dbmaintenanceresults.ems?OutputXML=1', false);
+			if(xmlhttp.overrideMimeType){ xmlhttp.overrideMimeType('text/xml'); }
+			xmlhttp.send();
+					
+			if (xmlhttp.responseXML) {
+				if (xmlhttp.responseXML.selectSingleNode('/root/Results/@Code')) {
+					stat = xmlhttp.responseXML.selectSingleNode('/root/Results/@Code').value;
+					desc = xmlhttp.responseXML.selectSingleNode('/root/Results/@Description').value;
+				} else {
+					stat = 0;
+					desc = '';
+				}
+			}
+					
+			if (stat == 1) {
+				message = desc;
+			} else if (stat == 2) {
+				message = desc;
+			} else if (stat == 3) {
+				message = desc;	
+			} else if (stat == 4) {
+				message = 'Finished successfully!';
+			} else if (stat == 5) {
+				message = 'Finished with errors!';	
+			} else {
+				message = 'Please wait...';
+			}	
+					
+			//messagetext.innerHTML = message+"<br/>"+desc;
+			messagetext.innerHTML = "<br/>"+message+"<br/>";
+					
+			if(stat == '' || stat == 0 || stat > 3) {
+				if(oWin.parent.frames.menu)
+				{
+					oWin.location.reload();
+					oWin.parent.frames.menu.location.reload();
+				}
+				clearInterval(timerID);
+				progressin.style.display = 'none';
+				progressout.style.display = 'none';
+				if (stat == 4 || stat == 5) {
+					document.getElementById("stopbutton").style.display = "none";
+					document.getElementById("okbutton").style.display = "block";
+				}
+			}
+			else
+			{
+				if(pct == 100){pct = 0;}else{pct += 10;}
+			} 
+		}
+		timerID = setInterval('updProgress()', 1000)
+		function closeWindow()
+		{
+			glo_doClose();
+		}
+		<xsl:if test="/root/user/isadmin = 1">
+		function stopMaint()
+		{
+			msg = 	'Warning! Stopping database maintenance may\ncause unintended consequences!\n\n' + 
+							'Are you sure you want to stop database maintenance?';
+							
+			if (confirm(msg))
+			{
+				var postResults = glo_buildFormPost('dbMaint');
+				
+				if ( postResults[0] )
+				{
+					document.getElementById("stopbutton").style.display = "none";
+					document.getElementById("okbutton").style.display = "block";
+				}
+				
+			}
+		}
+	</xsl:if>
+	</script>	
+	</head>
+		
+	<body class="menuColor">
+	<form name="dbMaint" method="post" action="dbmaintenanceresults.ems">			
+		<input type="hidden" name="Action" value="cancel"/>
+		<div align="center">
+			<span id="messagetext"><br/>Performing Database Maintenance, please wait...</span>
+			<p/>
+			<div style="width:80%;height:12px;border:1px inset;overflow:hidden;" id="progressout" align="left">
+				<div id="progressin" class="progressin" style="width:0%;height:100%;"></div>
+			</div>
+			<br/>
+			<span id = "buttonarea" style="display:inline-block;text-align:center;">
+				<input id="stopbutton" name="stopbutton" type="button" class="childControlBtn" value="Stop Maintenance" onclick="stopMaint();" style="display:block;"/>
+				<input id="okbutton" name="okbutton" type="button" class="childControlBtn" value="OK" onclick="glo_doClose();" style="display:none;"/>
+			</span>
+		</div>
+	</form>
+			
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

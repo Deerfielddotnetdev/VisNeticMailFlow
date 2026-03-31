@@ -1,0 +1,204 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+<html>
+<head>
+
+<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"/>
+<script TYPE="text/javascript" LANGUAGE="JavaScript" src="./javascript/global.jmf"></script>
+<script type="text/javascript" language="javascript">
+	function doTest()
+	{
+		glo_launchModalWindow('./modalframe.ems?file=regextest.ems', 600, 250, 'yes', 'no', 'no');
+	}
+	function doSave()
+	{
+		var submitform = true;
+	
+    if (document.tabularForm.Description.value=="")
+    {
+	    alert("You must enter a Description!");
+	    document.tabularForm.Description.focus();
+	    submitform = false;
+	    return;		
+    }		
+    if (document.tabularForm.RegEx.value=="")
+    {
+	    alert("You must enter a Regular Expression!");
+	    document.tabularForm.RegEx.focus();
+	    submitform = false;
+	    return;			
+    }		
+    if (document.tabularForm.Header.value.indexOf(" ") != -1)
+    {
+	    alert("The Header can not contain spaces!");
+	    document.tabularForm.Header.focus();
+	    submitform = false;
+	    return;		
+    }
+    if (document.tabularForm.Header.value == "")
+    {
+    	document.tabularForm.Header.value = document.tabularForm.Description.value;
+    }		
+    if (submitform)
+    {
+	    var postResults = glo_buildFormPost('tabularForm');
+	    if (eval(postResults[0])==true)
+	    {
+		    glo_setOpenerLocation();
+		    glo_doClose();
+	    }
+    }
+	}	
+</script>	
+</head>
+<body>
+<form name="tabularForm" method="post" action="">
+<input type="hidden" name="Action">
+<xsl:if test="root/DateFilter/@ID &gt; '0'"><xsl:attribute name="value">update</xsl:attribute></xsl:if>
+<xsl:if test="root/DateFilter/@ID = '0'"><xsl:attribute name="value">insert</xsl:attribute></xsl:if>
+</input>
+<input type="hidden" name="PrePost" value="0" />
+<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td style="width:100%">
+			<xsl:call-template name="default_titlebar">
+				<xsl:with-param name="title_text">
+				<xsl:value-of select="root/DOCUMENT/TITLE"/>
+				</xsl:with-param>
+			</xsl:call-template>
+			<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td style="height:32px;" class="menubarx" nowrap="true">
+						<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+							<tr>
+								<td height="100%">
+									<div class="toolBar" id="toolButton" name="toolButton" 
+									 xrequire="true"  
+									 title="Save Date Filter" onclick="doSave()"
+									  >
+										<nobr>
+											<img src="images/ico_save.gif" width="24" height="22" border="0"/>
+											Save
+										</nobr>
+									  </div>
+								</td>
+								<td height="100%">					
+									<div class="toolBar" id="toolButton" name="toolButton" 
+									 xrequire="true"  
+									 title="Cancel" onclick="glo_doClose();"
+									  >
+										<nobr>
+											<img src="images/ico_cancel.gif" width="24" height="22" border="0"/>
+											Cancel
+										</nobr>
+									  </div>
+								</td>
+								<td height="100%">					
+									<div class="toolBar" id="toolButton" name="toolButton" 
+									 xrequire="true"  
+									 title="Show Help" 
+									 onclick="openHelp('administration/hidden/msg_handling/create_edit_a_date_filter.htm')"
+									  >
+										<nobr>
+											<img src="images/ico_help.gif" width="24" height="22" border="0"/>
+											Help
+										</nobr>
+									  </div>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+		<div style="width:100%;height:100%;overflow:auto">
+		<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td>
+					<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+						<tr>
+							<td style="padding-left:10px;padding-right:10px;">
+								<table cellspacing="0" width="100%">
+									<tr>
+										<td width="10%" style="padding-right:5px;padding-top:5px;">Description:</td>
+										<td width="90%" align="left" style="padding-top:5px;">
+											<input style="width:400px" maxlength="125" type="text" name="Description" value="{root/DateFilter/@Description}"/>
+											<script language="javascript">
+												document.tabularForm.Description.focus();
+											</script>
+										</td>
+									</tr>
+									<tr>
+										<td width="10%" style="padding-right:5px;padding-top:5px;">Result Message Header:</td>
+										<td width="90%" align="left" style="padding-top:5px;">
+											<NOBR>X-MailFlow-<input style="width:340px" maxlength="50" type="text" name="Header" value="{root/DateFilter/@Header}"/></NOBR>
+										</td>
+									</tr>
+									<tr>
+										<td width="10%" style="padding-right:5px;padding-top:5px;">Result Value:</td>
+										<td width="90%" align="left" style="padding-top:5px;">
+											<input style="width:400px" maxlength="50" type="text" name="HeaderValue" value="{root/DateFilter/@HeaderValue}"/>											
+										</td>
+									</tr>
+									<tr>
+										<td style="padding-right:5px;width:30%;padding-top:5px;">Search Text in the Message:</td>
+										<td style="width:70%;" align="left">
+										<xsl:variable name="CurMatchLocId" select="root/DateFilter/@WhereToCheck"/>
+										<select name="WhereToCheck">
+										<xsl:for-each select="/root/MatchLocations/Location">
+											<xsl:if test="@ID &lt; '3'">
+											<xsl:choose>
+											<xsl:when test="@ID = $CurMatchLocId">
+											<option>
+												<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+												<xsl:attribute name="selected">true</xsl:attribute>
+												<xsl:value-of select="@Description"/>
+											</option>
+											</xsl:when>
+											<xsl:otherwise>
+											<option>
+												<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+												<xsl:value-of select="@Description"/>
+											</option>
+											</xsl:otherwise>
+											</xsl:choose>
+											</xsl:if>
+										</xsl:for-each>
+										</select>
+										</td>
+									</tr>
+									<tr>
+										<td width="10%" style="padding-right:5px;padding-top:5px;">Regular Expression:</td>
+										<td width="90%" align="left" style="padding-top:5px;">
+											<input style="width:400px" maxlength="512" type="text" name="RegEx" value="{root/DateFilter/@RegEx}"/>											
+										</td>
+									</tr>
+									<tr>
+										<td width="10%" style="padding-right:5px;padding-top:15px;"></td>
+										<td width="90%" align="left" style="padding-top:15px;">
+											<input type="button" name="TestRegEx" value="Test RegEx" class="childControlBtn" onclick="doTest();" />																					
+										</td>
+									</tr>																												
+								</table>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>				
+		</div>
+		</td>
+	</tr>
+</table>
+</form>
+</body>
+</html>
+</xsl:template>
+</xsl:stylesheet>

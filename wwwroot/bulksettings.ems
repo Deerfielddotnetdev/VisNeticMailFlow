@@ -1,0 +1,1606 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+<html>
+<head>
+	<title>Bulk Settings</title>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" src="./javascript/tabs.jmf"></script>
+	<script type="text/javascript">
+		
+		function onButtonMouseDown(id)
+		{
+			document.getElementById(id).className = "HiLightInsetButton";
+		}
+		
+		function onButtonMouseUp(id)
+		{
+			document.getElementById(id).className = "HiLightButton";
+		}
+		
+		function applyAG()
+		{
+			var proceed = true;
+			var e = document.getElementById("AgentID");
+			var selAgent = "";
+			for (var i = 0; i &lt; e.options.length; i++)
+			{
+	     	if(e.options[i].selected ==true)
+	     	{
+          if(e.options[i].value == 0)
+          {
+          	selAgent = 0;
+          	break;
+          }
+          else if(e.options[i].value != -1)
+          {
+	          if(selAgent.length == 0)
+	          {
+	          	selAgent = e.options[i].value;
+	          }
+	          else
+	          {
+	          	selAgent = selAgent + "," + e.options[i].value;
+	          }
+	        }
+	      }
+	    }
+  		
+			e = document.getElementById("GroupID");
+			var selGroup = "";
+			for (var i = 0; i &lt; e.options.length; i++)
+			{
+	     	if(e.options[i].selected ==true)
+	     	{
+	        if(e.options[i].value == 0)
+          {
+          	selGroup = 0;
+          	break;
+          }
+          else if(e.options[i].value != -1)
+          {
+	          if(selGroup.length == 0)
+	          {
+	          	selGroup = e.options[i].value;
+	          }
+	          else
+	          {
+	          	selGroup = selGroup + "," + e.options[i].value;
+	          }
+	        }
+	      }
+	    }
+			
+			if(selAgent.length == 0 &amp;&amp; selGroup.length == 0)
+			{
+				alert("You must designate at least one Agent or\nGroup to apply the selected setting(s) to!");
+				proceed = false;
+			}
+			
+			if(proceed)
+			{
+				var elements = document.forms["frmBulkSettings"].elements;
+				var onechecked = false;
+			  for (x=0; x &lt; elements.length; x++)
+			  {
+			    if(elements[x].name.substring(0,3) == "ag_")
+			    {
+			    	if(elements[x].checked == true){onechecked=true;break;}
+			    }
+			  }
+			  if(!onechecked)
+			  {
+			  	alert("You must select at least one Setting to\napply to the designated Agent(s) or Group(s)!");
+					proceed = false;
+			  }
+			}
+			   
+			if(proceed)
+			{	
+				if(confirm("Are you sure you want to apply the selected\nsetting(s) to the designated Agent(s) or Group(s)?"))
+				{
+					if(selAgent.length == 0){selAgent="-1";}
+					if(selGroup.length == 0){selGroup = "-1";}					
+					document.frmBulkSettings.selectedAgents.value = selAgent;
+					document.frmBulkSettings.selectedGroups.value = selGroup;
+					document.frmBulkSettings.action.value = "applyag";
+					var postResults = glo_buildFormPost('frmBulkSettings');
+					var proceed = postResults[0];
+					if (proceed==true)
+					{
+						alert("Successfully applied the selected setting(s)\nto the designated Agent(s) or Group(s)!");
+					}
+					else
+					{
+						alert("The selected setting(s) were not applied\nto the designated Agent(s) or Group(s)!");
+					}
+				}
+			}
+		}
+		
+		function enableAgentForm()
+		{
+			var elements = document.forms["frmBulkSettings"].elements;
+		  for (i=0; i &lt; elements.length; i++)
+		  {
+		    if(elements[i].name.substring(0,3) == "ag_")
+		    {
+		    	var elName = elements[i].name.substring(3,elements[i].name.length);
+		    	var numRadio = 0;
+		    	if(elName == "preview" || elName == "dblclk" || elName == "showmsg" || elName == "quote" || elName == "default" || elName == "autofill" || elName == "spell" || elName == "autoset"){numRadio = 2;}
+		    	if(elName == "tbv"){numRadio = 11;}
+		    	if(numRadio > 0)
+		    	{
+		    		for (x=0; x &lt; numRadio; x++)
+		    		{
+			    		var elID = elName + x;
+			    		if(elements[i].checked)
+				    	{
+				    		document.getElementById(elID).disabled = false;
+				    	}
+				    	else
+				    	{
+				    		document.getElementById(elID).disabled = true;
+				    	}
+				    }
+		    	}
+		    	else
+		    	{
+			    	if(elements[i].checked)
+			    	{
+			    		document.getElementById(elName).disabled = false;
+			    	}
+			    	else
+			    	{
+			    		document.getElementById(elName).disabled = true;
+			    	}
+			    }
+		    }
+		  }
+		}
+		
+		function applyTB()
+		{
+			var proceed = true;
+			var e = document.getElementById("TicketBoxID");
+			var selTB = "";
+			for (var i = 0; i &lt; e.options.length; i++)
+			{
+	     	if(e.options[i].selected ==true)
+	     	{
+          if(e.options[i].value == 0)
+          {
+          	selTB = 0;
+          	break;
+          }
+          else if(e.options[i].value != -1)
+          {
+	          if(selTB.length == 0)
+	          {
+	          	selTB = e.options[i].value;
+	          }
+	          else
+	          {
+	          	selTB = selTB + "," + e.options[i].value;
+	          }
+	        }
+	      }
+	    }
+  		
+			if(selTB.length == 0)
+			{
+				alert("You must designate at least one TicketBox\nto apply the selected setting(s) to!");
+				proceed = false;
+			}
+			
+			if(proceed)
+			{
+				var elements = document.forms["frmBulkSettings"].elements;
+				var onechecked = false;
+			  for (x=0; x &lt; elements.length; x++)
+			  {
+			    if(elements[x].name.substring(0,3) == "tb_")
+			    {
+			    	if(elements[x].checked == true){onechecked=true;break;}
+			    }
+			  }
+			  if(!onechecked)
+			  {
+			  	alert("You must select at least one Setting to\napply to the designated TicketBox(es)!");
+					proceed = false;
+			  }
+			}
+			   
+			if(proceed)
+			{	
+				if(confirm("Are you sure you want to apply the selected\nsetting(s) to the designated TicketBox(es)?"))
+				{
+					document.frmBulkSettings.selectedTB.value = selTB;
+					document.frmBulkSettings.action.value = "applytb";
+					var postResults = glo_buildFormPost('frmBulkSettings');
+					var proceed = postResults[0];
+					if (proceed==true)
+					{
+						alert("Successfully applied the selected setting(s)\nto the designated TicketBox(es)!");
+					}
+					else
+					{
+						alert("The selected setting(s) were not applied\nto the designated TicketBox(es)!");
+					}
+				}
+			}
+		}
+		
+		function enableTBForm()
+		{
+			var elements = document.forms["frmBulkSettings"].elements;
+		  for (i=0; i &lt; elements.length; i++)
+		  {
+		    if(elements[i].name.substring(0,3) == "tb_")
+		    {
+		    	var elName = elements[i].name.substring(3,elements[i].name.length);		    	
+		    	if(elements[i].checked)
+		    	{
+		    		document.getElementById(elName).disabled = false;
+		    	}
+		    	else
+		    	{
+		    		document.getElementById(elName).disabled = true;
+		    	}
+		    }
+		  }
+		}
+		
+		function applyRR()
+		{
+			var proceed = true;
+			var e = document.getElementById("RoutingRuleID");
+			var selRR = "";
+			for (var i = 0; i &lt; e.options.length; i++)
+			{
+	     	if(e.options[i].selected ==true)
+	     	{
+          if(e.options[i].value == 0)
+          {
+          	selRR = 0;
+          	break;
+          }
+          else if(e.options[i].value != -1)
+          {
+	          if(selRR.length == 0)
+	          {
+	          	selRR = e.options[i].value;
+	          }
+	          else
+	          {
+	          	selRR = selRR + "," + e.options[i].value;
+	          }
+	        }
+	      }
+	    }
+  		
+			if(selRR.length == 0)
+			{
+				alert("You must designate at least one Routing Rule\nto apply the selected setting(s) to!");
+				proceed = false;
+			}
+			
+			if(proceed)
+			{
+				var elements = document.forms["frmBulkSettings"].elements;
+				var onechecked = false;
+			  for (x=0; x &lt; elements.length; x++)
+			  {
+			    if(elements[x].name.substring(0,3) == "rr_")
+			    {
+			    	if(elements[x].checked == true){onechecked=true;break;}
+			    }
+			  }
+			  if(!onechecked)
+			  {
+			  	alert("You must select at least one Setting to\napply to the designated Routing Rule(s)!");
+					proceed = false;
+			  }
+			}
+			   
+			if(proceed)
+			{	
+				if(confirm("Are you sure you want to apply the selected\nsetting(s) to the designated Routing Rule(s)?"))
+				{
+					document.frmBulkSettings.selectedRR.value = selRR;
+					document.frmBulkSettings.action.value = "applyrr";
+					var postResults = glo_buildFormPost('frmBulkSettings');
+					var proceed = postResults[0];
+					if (proceed==true)
+					{
+						alert("Successfully applied the selected setting(s)\nto the designated Routing Rule(s)!");
+					}
+					else
+					{
+						alert("The selected setting(s) were not applied\nto the designated Routing Rule(s)!");
+					}
+				}
+			}
+		}
+		
+		function enableRRForm()
+		{
+			var elements = document.forms["frmBulkSettings"].elements;
+		  for (i=0; i &lt; elements.length; i++)
+		  {
+		    if(elements[i].name.substring(0,3) == "rr_")
+		    {
+		    	var elName = elements[i].name.substring(3,elements[i].name.length);
+		    	if(elements[i].checked)
+		    	{
+		    		document.getElementById(elName).disabled = false;
+		    	}
+		    	else
+		    	{
+		    		document.getElementById(elName).disabled = true;
+		    	}
+		    }
+		  }
+		}
+		
+		function applyMS()
+		{
+			var proceed = true;
+			var e = document.getElementById("MessageSourceID");
+			var selMS = "";
+			for (var i = 0; i &lt; e.options.length; i++)
+			{
+	     	if(e.options[i].selected ==true)
+	     	{
+          if(e.options[i].value == 0)
+          {
+          	selMS = 0;
+          	break;
+          }
+          else if(e.options[i].value != -1)
+          {
+	          if(selMS.length == 0)
+	          {
+	          	selMS = e.options[i].value;
+	          }
+	          else
+	          {
+	          	selMS = selMS + "," + e.options[i].value;
+	          }
+	        }
+	      }
+	    }
+  		
+			if(selMS.length == 0)
+			{
+				alert("You must designate at least one Message Source\nto apply the selected setting(s) to!");
+				proceed = false;
+			}
+			
+			if(proceed)
+			{
+				var elements = document.forms["frmBulkSettings"].elements;
+				var onechecked = false;
+			  for (x=0; x &lt; elements.length; x++)
+			  {
+			    if(elements[x].name.substring(0,3) == "ms_")
+			    {
+			    	if(elements[x].checked == true){onechecked=true;break;}
+			    }
+			  }
+			  if(!onechecked)
+			  {
+			  	alert("You must select at least one Setting to\napply to the designated Message Source(s)!");
+					proceed = false;
+			  }
+			}
+			   
+			if(proceed)
+			{	
+				if(confirm("Are you sure you want to apply the selected\nsetting(s) to the designated Message Source(s)?"))
+				{
+					document.frmBulkSettings.selectedMS.value = selMS;
+					document.frmBulkSettings.action.value = "applyms";
+					var postResults = glo_buildFormPost('frmBulkSettings');
+					var proceed = postResults[0];
+					if (proceed==true)
+					{
+						alert("Successfully applied the selected setting(s)\nto the designated Message Source(s)!");
+					}
+					else
+					{
+						alert("The selected setting(s) were not applied\nto the designated Message Source(s)!");
+					}
+				}
+			}
+		}
+		
+		function enableMSForm()
+		{
+			var elements = document.forms["frmBulkSettings"].elements;
+		  for (i=0; i &lt; elements.length; i++)
+		  {
+		    if(elements[i].name.substring(0,3) == "ms_")
+		    {
+		    	var elName = elements[i].name.substring(3,elements[i].name.length);
+		    	var numRadio = 0;
+		    	if(elName == "lvcopies"){numRadio = 2;}
+		    	if(numRadio > 0)
+		    	{
+		    		for (x=0; x &lt; numRadio; x++)
+		    		{
+			    		var elID = elName + x;
+			    		if(elements[i].checked)
+				    	{
+				    		document.getElementById(elID).disabled = false;
+				    	}
+				    	else
+				    	{
+				    		document.getElementById(elID).disabled = true;
+				    	}
+				    }
+		    	}
+		    	else
+		    	{
+			    	if(elements[i].checked)
+			    	{
+			    		document.getElementById(elName).disabled = false;
+			    	}
+			    	else
+			    	{
+			    		document.getElementById(elName).disabled = true;
+			    	}
+			    }
+		    }
+		  }
+		}
+		
+		function applyMD()
+		{
+			var proceed = true;
+			var e = document.getElementById("MessageDestinationID");
+			var selMD = "";
+			for (var i = 0; i &lt; e.options.length; i++)
+			{
+	     	if(e.options[i].selected ==true)
+	     	{
+          if(e.options[i].value == 0)
+          {
+          	selMD = 0;
+          	break;
+          }
+          else if(e.options[i].value != -1)
+          {
+	          if(selMD.length == 0)
+	          {
+	          	selMD = e.options[i].value;
+	          }
+	          else
+	          {
+	          	selMD = selMD + "," + e.options[i].value;
+	          }
+	        }
+	      }
+	    }
+  		
+			if(selMD.length == 0)
+			{
+				alert("You must designate at least one Message Destination\nto apply the selected setting(s) to!");
+				proceed = false;
+			}
+			
+			if(proceed)
+			{
+				var elements = document.forms["frmBulkSettings"].elements;
+				var onechecked = false;
+			  for (x=0; x &lt; elements.length; x++)
+			  {
+			    if(elements[x].name.substring(0,3) == "md_")
+			    {
+			    	if(elements[x].checked == true){onechecked=true;break;}
+			    }
+			  }
+			  if(!onechecked)
+			  {
+			  	alert("You must select at least one Setting to\napply to the designated Message Destination(s)!");
+					proceed = false;
+			  }
+			}
+			   
+			if(proceed)
+			{	
+				if(confirm("Are you sure you want to apply the selected\nsetting(s) to the designated Message Destination(s)?"))
+				{
+					document.frmBulkSettings.selectedMD.value = selMD;
+					document.frmBulkSettings.action.value = "applymd";
+					var postResults = glo_buildFormPost('frmBulkSettings');
+					var proceed = postResults[0];
+					if (proceed==true)
+					{
+						alert("Successfully applied the selected setting(s)\nto the designated Message Destination(s)!");
+					}
+					else
+					{
+						alert("The selected setting(s) were not applied\nto the designated Message Destination(s)!");
+					}
+				}
+			}
+		}
+		
+		function enableMDForm()
+		{
+			var elements = document.forms["frmBulkSettings"].elements;
+		  for (i=0; i &lt; elements.length; i++)
+		  {
+		    if(elements[i].name.substring(0,3) == "md_")
+		    {
+		    	var elName = elements[i].name.substring(3,elements[i].name.length);
+		    	if(elements[i].checked)
+		    	{
+		    		document.getElementById(elName).disabled = false;
+		    	}
+		    	else
+		    	{
+		    		document.getElementById(elName).disabled = true;
+		    	}
+		    }
+		  }
+		}
+		
+		function setWidth()
+		{
+			<xsl:if test="/root/DOCUMENT/useragent = 'Safari'">
+				document.getElementById("tabHolderTable").width = window.innerWidth;
+			</xsl:if>
+		}
+		window.onload=function(){tabInit();setWidth();};
+	</script>
+</head>
+<body>
+<form name="frmBulkSettings" method="post" action="">
+<input name="action" type="hidden"/>
+<input name="selectedMS" type="hidden"/>
+<input name="selectedMD" type="hidden"/>
+<input name="selectedAgents" type="hidden"/>
+<input name="selectedGroups" type="hidden"/>
+<input name="selectedTB" type="hidden"/>
+<input name="selectedRR" type="hidden"/>
+<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td style="height:32px" class="menubarx" nowrap="true">
+			<table style="height:100%" align="left" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td height="100%">
+						<div class="toolBar" id="toolButton" name="toolButton" 
+						 xrequire="true"  
+						 title="Show Help" onclick="openHelp('Administration/general_configuration/settings.htm')"
+						  >
+							<nobr>
+								<img src="images/ico_help.gif" width="24" height="22" border="0"/>
+								Help
+							</nobr>
+						  </div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto">		
+				<table id="tabHolderTable" style="table-layout:fixed;height:100%;" border="0" cellpadding="0" cellspacing="0" width="100%">
+					<tr>
+						<td id="tab_holder" style="height:24px;">
+							<div id="tabs" style="position:relative!important;top:8px!important;">
+								<span id="tab1" useContent="true" class="tabActive">Agents</span>
+								<span id="tab2" useContent="true" class="tab">TicketBoxes</span>
+								<span id="tab3" useContent="true" class="tab">Custom Routing Rules</span>
+								<span id="tab4" useContent="true" class="tab">Message Sources</span>
+								<span id="tab5" useContent="true" class="tab">Message Destinations</span>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td id="tab_canvas" class="tabActiveColor" style="height:100%;border-style:outset;border-width:1px;padding:10px;overflow:hidden;">
+							<table style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td style="height:100%;border-style:inset;border-width:1px;overflow:hidden;">
+										<div style="width:100%;height:100%;overflow-y:auto;overflow-x:hidden;padding-right:10px;">
+											<div id="content1" style="overflow:auto;display:none;visibility:hidden;width:100%;height:100%;">
+	  										<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0">
+													<tr>
+														<td>
+															<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+																<tr>
+																	<td style="padding-right:10px;">
+																		<table cellspacing="0" border="0" width="100%">
+																			<tr>
+																				<td width="100%" colspan="2" class="subSectionHeader" align="left">
+																					Select Agent
+																				</td>
+																			</tr>
+																			<tr>
+																				<td width="100%" style="padding-left:10px;" class="subSectionWrapper" colspan="2" align="left">
+																					<table border="0" width="100%" cellpadding="0" cellspacing="0">
+																						<tr>
+																							<td style="padding-right:5px;width:100%;" valign="top">
+																								<table>
+																									<tr>
+																										<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;" valign="top">
+																											<input type="button" name="btnApplyAG" style="padding-left:2px;padding-right:3px;" class="childControlBtn" value="Apply" onclick="applyAG();"/><span style="padding-top:10px;"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Selected Setting(s) to:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span>
+																										</td>
+																										<td style="padding-top:5px;width:100%;" valign="bottom">
+																											<select id="AgentID" name="AgentID" style="width:300px;">
+																												<xsl:attribute name="multiple">true</xsl:attribute>
+																												<xsl:attribute name="size">5</xsl:attribute>
+																												<option>
+																													<xsl:attribute name="value">-1</xsl:attribute>
+																													<xsl:attribute name="selected">true</xsl:attribute>
+																													Select One, Many or All Agent(s)
+																												</option>
+																												<option>
+																													<xsl:attribute name="value">0</xsl:attribute>
+																													All Agents
+																												</option>
+																												<xsl:for-each select="root/AgentNames/Agent">
+																													<option>
+																														<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																														<xsl:value-of select="@Name"/>
+																													</option>
+																												</xsl:for-each>
+																										</select>
+																										<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																										<select id="GroupID" name="GroupID" style="width:300px;">
+																												<xsl:attribute name="multiple">true</xsl:attribute>
+																												<xsl:attribute name="size">5</xsl:attribute>
+																												<option>
+																													<xsl:attribute name="value">-1</xsl:attribute>
+																													<xsl:attribute name="selected">true</xsl:attribute>
+																													Select One, Many or All Agent Group(s)
+																												</option>
+																												<option>
+																													<xsl:attribute name="value">0</xsl:attribute>
+																													All Agent Groups
+																												</option>
+																												<xsl:for-each select="root/GroupNames/Group">
+																													<option>
+																														<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																														<xsl:value-of select="@Name"/>
+																													</option>
+																												</xsl:for-each>
+																										</select>
+																										</td>
+																									</tr>
+																								</table>
+																							</td>
+																						</tr>
+																					</table>
+																				</td>
+																			</tr>
+																			<tr>
+																				<td colspan="2" height="10"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionHeader" colspan="2">Agent Information</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionWrapper" colspan="2" style="padding-top:0px!important;">
+																					<table border="0" cellspacing="0" cellpadding="0" style="width:100%;padding-left:5px;padding-right:5px;">
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ag_state" onclick="enableAgentForm();"/>Agent State:</td>
+																							<td style="padding-left:10px;padding-top:5px;width:100%;" valign="bottom">
+																								<select id="state" disabled="true" name="AgentStateID">
+																								<option value="1" selected="selected">Active</option>
+																								<option value="0">InActive</option>
+																								</select>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ag_getoldest" onclick="enableAgentForm();"/>Require Get Oldest:</td>
+																							<td style="padding-left:10px;padding-top:5px;width:100%;" valign="bottom">
+																								<select id="getoldest" disabled="true" name="GetOldestID">
+																								<option value="0">No</option>
+																								<option value="1">Yes</option>
+																								</select>
+																							</td>
+																						</tr>
+																					</table>
+																				</td>
+																			</tr>
+																			<tr>
+																				<td colspan="2" height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionHeader" colspan="2">General Settings</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionWrapper" colspan="2" style="padding-top:0px!important;">
+																					<table border="0" cellspacing="0" cellpadding="0" style="width:100%;padding-left:5px;padding-right:5px;">
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ag_stylesht" onclick="enableAgentForm();"/>Display theme:</td>
+																							<td style="padding-left:10px;padding-top:5px;width:100%;" valign="bottom">
+																								<select id="stylesht" disabled="true" name="StyleSheetID">
+																								<xsl:for-each select="root/StyleSheets/Style">
+																									<option value="{@ID}"><xsl:value-of select="@Name"/></option>
+																								</xsl:for-each>
+																								</select>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;"><input type="checkbox" name="ag_maxrows" onclick="enableAgentForm();"/>Max number of rows to display:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="maxrows" disabled="true" type="Text" maxlength="2" size="1" name="MaxReportRowsPerPage" value="25"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;"><input type="checkbox" name="ag_dblclk" onclick="enableAgentForm();"/>Ticket double click behavior:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="dblclk0" disabled="true" type="radio" value="0" name="TicketDblClick"> 
+																								<xsl:attribute name="checked"/>
+																								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Expand Ticket
+																								<input id="dblclk1" disabled="true" type="radio" value="1" name="TicketDblClick"> 
+																								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Open Ticket in new window
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;"><input type="checkbox" name="ag_showmsg" onclick="enableAgentForm();"/>Show messages within ticket:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="showmsg1" disabled="true" type="radio" value="1" name="ShowMessages"> 
+																								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;by inbound
+																								<input id="showmsg0" disabled="true" type="radio" value="0" name="ShowMessages"> 
+																								<xsl:attribute name="checked"/>
+																								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;by thread
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;"><input type="checkbox" name="ag_preview" onclick="enableAgentForm();"/>Use preview pane when viewing messages:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="preview1" disabled="true" type="radio" value="1" name="UsePreviewPane"> 
+																								<xsl:attribute name="checked"/>
+																								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Yes
+																								<input id="preview0" disabled="true" type="radio" value="0" name="UsePreviewPane"> 
+																								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;No
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_markread" onclick="enableAgentForm();"/>Automatically mark selected messages and notes as read after:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="markread" disabled="true" type="text" maxlength="2" size="2" name="txtMarkMsgRead" value="5"/>
+																								second(s)
+																							</td>
+																						</tr>
+																					</table>
+																				</td>
+																			</tr>
+																			<tr>
+																				<td colspan="2" height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionHeader" colspan="2">When sending messages</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionWrapper" colspan="2" style="padding-top:0px!important;">
+																					<table border="0" cellspacing="0" cellpadding="0" style="width:100%;padding-left:5px;padding-right:5px;">
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ag_quote" onclick="enableAgentForm();"/>Quote original message in reply:</td>
+																							<td align="left" style="padding-left:10px;padding-top:5px;width:100%;">
+																								<input id="quote1" disabled="true" type="Radio" name="QuoteMsgInReply" value="1">
+																								<xsl:attribute name="checked">true</xsl:attribute>
+																								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Yes
+																								<input id="quote0" disabled="true" type="Radio" name="QuoteMsgInReply" value="0">
+																								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;No
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_prefix" onclick="enableAgentForm();"/>Original message prefix:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="prefix" disabled="true" type="Text" maxlength="2" size="1" name="ReplyQuotedPrefix" value=">"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_sigreply" onclick="enableAgentForm();"/>Signature position on reply:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<select id="sigreply" disabled="true" name="SignatureTopReply">
+																									<option value="1">Top</option>
+																									<option value="0">
+																									<xsl:attribute name="selected">true</xsl:attribute>Bottom
+																									</option>
+																								</select>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_default" onclick="enableAgentForm();"/>Default format for new messages:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="default0" disabled="true" type="radio" value="0" name="NewMessageFormat"> 
+																								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Text
+																								<input id="default1" disabled="true" type="radio" value="1" name="NewMessageFormat"> 
+																								<xsl:attribute name="checked">true</xsl:attribute>
+																								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;HTML
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_autofill" onclick="enableAgentForm();"/>Use email address autofill:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="autofill1" disabled="true" type="Radio" name="UseAutoFill" value="1">
+																								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Yes
+																								<input id="autofill0" disabled="true" type="Radio" name="UseAutoFill" value="0">
+																								<xsl:attribute name="checked">true</xsl:attribute>
+																								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;No
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_spell" onclick="enableAgentForm();"/>Initiate spell check before sending:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="spell1" disabled="true" type="radio" value="1" name="ForceSpellCheck"> 
+																								<xsl:attribute name="checked">true</xsl:attribute>
+																								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Yes
+																								<input id="spell0" disabled="true" type="radio" value="0" name="ForceSpellCheck"> 
+																								</input><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;No
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_deftb" onclick="enableAgentForm();"/>Default TicketBox for New Tickets:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<select id="deftb" disabled="true" name="DefaultTicketBoxID">
+																									<xsl:for-each select="/root/TicketBoxNames/TicketBox">
+																										<xsl:choose>
+																											<xsl:when test="@ID = /root/Agent/@DefaultTicketBoxID">
+																											<option>
+																												<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																												<xsl:attribute name="selected">true</xsl:attribute>
+																												<xsl:value-of select="@Name"/>
+																											</option>
+																											</xsl:when>
+																											<xsl:otherwise>
+																											<option>
+																												<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																												<xsl:value-of select="@Name"/>
+																											</option>
+																											</xsl:otherwise>
+																										</xsl:choose>
+																									</xsl:for-each>
+																								</select>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_route" onclick="enableAgentForm();"/>Route Replies to Me:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<select id="route" disabled="true" name="AutoRouteToInbox">
+																									<option value="2">Prompt</option>
+																									<option value="0">No</option>
+																									<option value="1">Yes</option>
+																								</select>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_close" onclick="enableAgentForm();"/>Close ticket after sending:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<select id="close" disabled="true" name="CloseTicketAfterSend">
+																									<option value="2">Prompt</option>
+																									<option value="0">No</option>
+																									<option value="1">Yes</option>
+																								</select>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_readrcpt" onclick="enableAgentForm();"/>Request Read Receipt:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<select id="readrcpt" disabled="true" name="ReadReceipt">
+																									<option value="2">Prompt</option>
+																									<option value="0">No</option>
+																									<option value="1">Yes</option>
+																								</select>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_confirm" onclick="enableAgentForm();"/>Request Delivery Confirmation:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<select id="confirm" disabled="true" name="DeliveryConfirmation">
+																									<option value="2">Prompt</option>
+																									<option value="0">No</option>
+																									<option value="1">Yes</option>
+																								</select>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_keepsent" onclick="enableAgentForm();"/>Keep sent messages in outbox for at least:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="keepsent" disabled="true" type="Text" maxlength="2" size="2" name="OutboxHoldTime" value="0"/>
+																								minute(s)
+																							</td>
+																						</tr>
+																					</table>
+																				</td>
+																			</tr>
+																			<tr>
+																				<td colspan="2" height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionHeader" colspan="2">Status Settings</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionWrapper" colspan="2" style="padding-top:0px!important;">
+																					<table border="0" cellspacing="0" cellpadding="0" style="width:100%;padding-left:5px;padding-right:5px;">
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ag_deflogin" onclick="enableAgentForm();"/>Default Status at Login:</td>
+																							<td align="left" style="padding-left:10px;padding-top:5px;width:100%;">
+																								<select id="deflogin" disabled="true" name="DefaultOnlineStatus">
+																									<option value="1">Online</option>
+																									<option value="2">Away</option>
+																									<option value="3">Not Available</option>
+																								</select>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_deflogout" onclick="enableAgentForm();"/>Default Status at Logout:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<select id="deflogout" disabled="true" name="DefaultOfflineStatus">
+																									<option value="5">Offline</option>
+																									<option value="6">Out of Office</option>
+																								</select>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_autoset" onclick="enableAgentForm();"/>Automatically set my Status to:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<select id="autoset0" disabled="true" name="AutoStatusTypeID">
+																									<option value="1">Online</option>
+																									<option value="2">Away</option>
+																									<option value="3">Not Available</option>
+																									<option value="5">Offline</option>
+																									<option value="6">Out of Office</option>
+																								</select>
+																								after<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																								<input id="autoset1" disabled="true" type="text" maxlength="2" size="2" name="AutoStatusMin" value="15"/>
+																								minute(s) of inactivity
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_ontxt" onclick="enableAgentForm();"/>Default Online Status Text:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="ontxt" disabled="true" type="Text" maxlength="125" size="100" name="OnlineText" value="Online"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_awaytxt" onclick="enableAgentForm();"/>Default Away Status Text:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="awaytxt" disabled="true" type="Text" maxlength="125" size="100" name="AwayText" value="Away"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_notavailtxt" onclick="enableAgentForm();"/>Default Not Avail Status Text:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="notavailtxt" disabled="true" type="Text" maxlength="125" size="100" name="NotAvailText" value="Not Available"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_offtxt" onclick="enableAgentForm();"/>Default Offine Status Text:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="offtxt" disabled="true" type="Text" maxlength="125" size="100" name="OfflineText" value="Offline"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;"><input type="checkbox" name="ag_oootxt" onclick="enableAgentForm();"/>Default Out of Office Status Text:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="oootxt" disabled="true" type="Text" maxlength="125" size="100" name="OooText" value="Out of Office"/>
+																							</td>
+																						</tr>
+																					</table>
+																				</td>
+																			</tr>
+																			<tr>
+																				<td colspan="2" height="20"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionHeader" colspan="2">Default Column View</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionWrapper" colspan="2" style="padding-top:0px!important;">
+																					<table border="0" cellspacing="0" cellpadding="0" style="width:100%;padding-left:5px;padding-right:5px;">
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ag_tbv" onclick="enableAgentForm();"/>Default Column Views</td>
+																							<td align="left" style="padding-left:10px;padding-top:5px;width:100%;">
+																								<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:30px;padding-top:5px;width:380px;">Ticket State:</td>
+																							<td align="left" style="padding-left:10px;padding-top:5px;width:100%;">
+																								<input id="tbv0" disabled="true" type="checkbox" name="ShowState">
+																									<xsl:attribute name="checked"/>
+																								</input>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:30px;">Ticket Priority:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="tbv1" disabled="true" type="checkbox" name="ShowPriority">
+																									<xsl:attribute name="checked"/>
+																								</input>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:30px;">Ticket Notes:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="tbv2" disabled="true" type="checkbox" name="ShowNumNotes">
+																									<xsl:attribute name="checked"/>
+																								</input>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:30px;">Ticket ID:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="tbv3" disabled="true" type="checkbox" name="ShowTicketID">
+																									<xsl:attribute name="checked"/>
+																								</input>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:30px;">Number Messages:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="tbv4" disabled="true" type="checkbox" name="ShowNumMsgs">
+																									<xsl:attribute name="checked"/>
+																								</input>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:30px;">Subject:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="tbv5" disabled="true" type="checkbox" name="ShowSubject">
+																									<xsl:attribute name="checked"/>
+																								</input>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:30px;">Contact:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="tbv6" disabled="true" type="checkbox" name="ShowContact">
+																									<xsl:attribute name="checked"/>
+																								</input>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:30px;">Date:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="tbv7" disabled="true" type="checkbox" name="ShowDate">
+																									<xsl:attribute name="checked"/>
+																								</input>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:30px;">Category:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="tbv8" disabled="true" type="checkbox" name="ShowCategory">
+																									<xsl:attribute name="checked"/>
+																								</input>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:30px;">Owner:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="tbv9" disabled="true" type="checkbox" name="ShowOwner">
+																									<xsl:attribute name="checked"/>
+																								</input>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" align="left" style="padding-left:30px;">TicketBox:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="tbv10" disabled="true" type="checkbox" name="ShowTicketBox">
+																									<xsl:attribute name="checked"/>
+																								</input>
+																							</td>
+																						</tr>
+																					</table>
+																				</td>
+																			</tr>
+																		</table>
+																	</td>
+																</tr>
+															</table>
+														</td>
+													</tr>	
+												</table>
+											</div>
+											<div id="content2" style="overflow:auto;display:none;visibility:hidden;width:100%;height:100%;">
+	  										<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0">
+													<tr>
+														<td>
+															<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+																<tr>
+																	<td style="padding-right:10px;">
+																		<table cellspacing="0" border="0" width="100%">
+																			<tr>
+																				<td width="100%" colspan="2" class="subSectionHeader" align="left">
+																					Select TicketBox
+																				</td>
+																			</tr>
+																			<tr>
+																				<td width="100%" style="padding-left:10px;" class="subSectionWrapper" colspan="2" align="left">
+																					<table border="0" width="100%" cellpadding="0" cellspacing="0">
+																						<tr>
+																							<td style="padding-right:5px;width:100%;" valign="top">
+																								<table>
+																									<tr>
+																										<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;" valign="top">
+																											<input type="button" name="btnApplyTB" style="padding-left:2px;padding-right:3px;" class="childControlBtn" value="Apply" onclick="applyTB();"/><span style="padding-top:10px;"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;TicketBox Settings to:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span>
+																										</td>
+																										<td style="padding-top:5px;width:100%;" valign="bottom">
+																											<select id="TicketBoxID" name="TicketBoxID" style="width:300px;">
+																												<xsl:attribute name="multiple">true</xsl:attribute>
+																												<xsl:attribute name="size">5</xsl:attribute>
+																												<option>
+																													<xsl:attribute name="value">-1</xsl:attribute>
+																													<xsl:attribute name="selected">true</xsl:attribute>
+																													Select One, Many or All TicketBox(es)
+																												</option>
+																												<option>
+																													<xsl:attribute name="value">0</xsl:attribute>
+																													All TicketBoxes
+																												</option>
+																												<xsl:for-each select="/root/TicketBoxNames/TicketBox">
+																													<option>
+																														<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																														<xsl:value-of select="@Name"/>
+																													</option>
+																												</xsl:for-each>
+																											</select>
+																										</td>
+																									</tr>
+																								</table>
+																							</td>
+																						</tr>
+																					</table>
+																				</td>
+																			</tr>
+																			<tr>
+																				<td colspan="2" height="10"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionHeader" colspan="2">General Settings</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionWrapper" colspan="2" style="padding-top:0px!important;">
+																					<table border="0" cellspacing="0" cellpadding="0" style="width:100%;padding-left:5px;padding-right:5px;">
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input style="padding-bottom:10px;" type="checkbox" name="tb_owner" onclick="enableTBForm();"/>TicketBox Owner:</td>
+																							<td style="padding-left:10px;padding-top:5px;width:100%;" valign="bottom">
+																								<select id="owner" disabled="true" name="OwnerID">
+																									<option value="0">-- NONE --</option>
+																									<xsl:for-each select="/root/TicketBoxOwners/TicketBoxOwner">
+																										<option>
+																											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																											<xsl:value-of select="@Description"/>
+																										</option>
+																									</xsl:for-each>
+																								</select>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="tb_msgdest" onclick="enableTBForm();"/>Message Destination:</td>
+																							<td style="padding-left:10px;padding-top:5px;width:100%;" valign="bottom">
+																								<select id="msgdest" disabled="true" name="MsgDestID">
+																									<xsl:for-each select="root/MessageDestinations/MessageDestination">
+																										<option>
+																											<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																											<xsl:value-of select="@Address" disable-output-escaping="yes"/>
+																										</option>
+																									</xsl:for-each>
+																								</select>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="tb_getold" onclick="enableTBForm();"/>Require Get Oldest:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="getold" disabled="true" type="checkbox" name="TBGetOld"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="tb_reqtc" onclick="enableTBForm();"/>Require TicketCategory Selection before Message Send:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="reqtc" disabled="true" type="checkbox" name="RequireTC"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="tb_globalunread" onclick="enableTBForm();"/>Use Global Unread Mode:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="globalunread" disabled="true" type="checkbox" name="GlobalUnread"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="tb_multi" onclick="enableTBForm();"/>Enable MultiMail for New Outbound Messages:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="multi" disabled="true" type="checkbox" name="MultiMail"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="tb_fromadd" onclick="enableTBForm();"/>Default From Address Format:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<select id="fromadd" disabled="true" name="fromFormat">
+																									<option value="0">"TicketBox Email Name" &lt;TicketBox Email Address&gt;</option>
+																									<option value="1">"Agent Name" &lt;TicketBox Email Address&gt;</option>
+																									<option value="2">"Agent Name" &lt;Agent Email Address&gt;</option>
+																								</select>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="tb_linking" onclick="enableTBForm();"/>Ticket Linking:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<select id="linking" disabled="true" name="TicketLink">
+																									<option value="0">Do not allow Ticket Linking</option>
+																									<option value="1">Allow Ticket Linking to other Tickets in this TicketBox</option>
+																									<option value="2">Allow Ticket Linking to Tickets in any TicketBox</option>
+																								</select>
+																							</td>
+																						</tr>
+																					</table>
+																				</td>
+																			</tr>
+																		</table>
+																	</td>
+																</tr>
+															</table>
+														</td>
+													</tr>	
+												</table>
+											</div>
+											<div id="content3" style="overflow:auto;display:none;visibility:hidden;width:100%;height:100%;">
+	  										<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0">
+													<tr>
+														<td>
+															<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+																<tr>
+																	<td style="padding-right:10px;">
+																		<table cellspacing="0" border="0" width="100%">
+																			<tr>
+																				<td width="100%" colspan="2" class="subSectionHeader" align="left">
+																					Select Custom Routing Rule
+																				</td>
+																			</tr>
+																			<tr>
+																				<td width="100%" style="padding-left:10px;" class="subSectionWrapper" colspan="2" align="left">
+																					<table border="0" width="100%" cellpadding="0" cellspacing="0">
+																						<tr>
+																							<td style="padding-right:5px;width:100%;" valign="top">
+																								<table>
+																									<tr>
+																										<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;" valign="top">
+																											<input type="button" name="btnApplyRR" style="padding-left:2px;padding-right:3px;" class="childControlBtn" value="Apply" onclick="applyRR();"/><span style="padding-top:10px;"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Routing Rule Settings to:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span>
+																										</td>
+																										<td style="padding-top:5px;width:100%;" valign="bottom">
+																											<select id="RoutingRuleID" name="RoutingRuleID" style="width:300px;">
+																												<xsl:attribute name="multiple">true</xsl:attribute>
+																												<xsl:attribute name="size">5</xsl:attribute>
+																												<option>
+																													<xsl:attribute name="value">-1</xsl:attribute>
+																													<xsl:attribute name="selected">true</xsl:attribute>
+																													Select One, Many or All Routing Rule(s)
+																												</option>
+																												<option>
+																													<xsl:attribute name="value">0</xsl:attribute>
+																													All Routing Rules
+																												</option>
+																											<xsl:for-each select="/root/RoutingRules/RoutingRule">
+																												<option>
+																													<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																													<xsl:value-of select="@Description"/>
+																												</option>
+																											</xsl:for-each>
+																										</select>
+																										</td>
+																									</tr>
+																								</table>
+																							</td>
+																						</tr>
+																					</table>
+																				</td>
+																			</tr>
+																			<tr>
+																				<td colspan="2" height="10"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionHeader" colspan="2">General Settings</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionWrapper" colspan="2" style="padding-top:0px!important;">
+																					<table border="0" cellspacing="0" cellpadding="0" style="width:100%;padding-left:5px;padding-right:5px;">
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="rr_rrenabled" onclick="enableRRForm();"/>Enabled:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<select id="rrenabled" disabled="true" name="rrEnabled">
+																									<option value="0">No</option>
+																									<option value="1"><xsl:attribute name="selected">true</xsl:attribute>Yes</option>
+																								</select>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="rr_doprocess" onclick="enableRRForm();"/>Do Processing Rules:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<select id="doprocess" disabled="true" name="DoProcessing">
+																									<option value="0"><xsl:attribute name="selected">true</xsl:attribute>No</option>
+																									<option value="1">Yes</option>
+																								</select>
+																							</td>
+																						</tr>
+																					</table>
+																				</td>
+																			</tr>
+																		</table>
+																	</td>
+																</tr>
+															</table>
+														</td>
+													</tr>	
+												</table>
+											</div>
+											<div id="content4" style="overflow:auto;display:none;visibility:hidden;width:100%;height:100%;">
+	  										<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0">
+													<tr>
+														<td>
+															<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+																<tr>
+																	<td style="padding-right:10px;">
+																		<table cellspacing="0" border="0" width="100%">
+																			<tr>
+																				<td width="100%" colspan="2" class="subSectionHeader" align="left">
+																					Select Message Source
+																				</td>
+																			</tr>
+																			<tr>
+																				<td width="100%" style="padding-left:10px;" class="subSectionWrapper" colspan="2" align="left">
+																					<table border="0" width="100%" cellpadding="0" cellspacing="0">
+																						<tr>
+																							<td style="padding-right:5px;width:100%;" valign="top">
+																								<table>
+																									<tr>
+																										<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;" valign="top">
+																											<input type="button" name="btnApplyMS" style="padding-left:2px;padding-right:3px;" class="childControlBtn" value="Apply" onclick="applyMS();"/><span style="padding-top:10px;"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Message Source Settings to:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span>
+																										</td>
+																										<td style="padding-top:5px;width:100%;" valign="bottom">
+																											<select id="MessageSourceID" name="MessageSourceID" style="width:300px;">
+																												<xsl:attribute name="multiple">true</xsl:attribute>
+																												<xsl:attribute name="size">5</xsl:attribute>
+																												<option>
+																													<xsl:attribute name="value">-1</xsl:attribute>
+																													<xsl:attribute name="selected">true</xsl:attribute>
+																													Select One, Many or All Message Source(s)
+																												</option>
+																												<option>
+																													<xsl:attribute name="value">0</xsl:attribute>
+																													All Message Sources
+																												</option>
+																											<xsl:for-each select="/root/MessageSources/MessageSource">
+																												<option>
+																													<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																													<xsl:value-of select="@Address"/>
+																												</option>
+																											</xsl:for-each>
+																										</select>
+																										</td>
+																									</tr>
+																								</table>
+																							</td>
+																						</tr>
+																					</table>
+																				</td>
+																			</tr>
+																			<tr>
+																				<td colspan="2" height="10"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionHeader" colspan="2">Settings</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionWrapper" colspan="2" style="padding-top:0px!important;">
+																					<table border="0" cellspacing="0" cellpadding="0" style="width:100%;padding-left:5px;padding-right:5px;">
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ms_msenabled" onclick="enableMSForm();"/>Enabled:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="msenabled" disabled="true" type="checkbox" name="msEnabled"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ms_lvcopies" onclick="enableMSForm();"/>Leave Copies On Server:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="lvcopies0" disabled="true" type="checkbox" name="lvCopies"/>
+																								for
+																								<input id="lvcopies1" disabled="true" size="5" maxlength="4" type="text" name="leaveCopiesDays" value="0" />
+																								day(s)
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ms_skipdownload" onclick="enableMSForm();"/>Ignore Messages Older Than:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="skipdownload" disabled="true" size="5" maxlength="4" type="text" name="skipDownloadDays" value="7" />
+																								day(s)
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ms_ignoredups" onclick="enableMSForm();"/>Ignore Duplicate Messages:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="ignoredups" disabled="true" type="checkbox" name="ignoreDups"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ms_msofficehrs" onclick="enableMSForm();"/>Only Collect During Office Hours:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="msofficehrs" disabled="true" type="checkbox" name="msOfficeHrs"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ms_usereplyto" onclick="enableMSForm();"/>Use "Reply-To:" email address as contact address:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="usereplyto" disabled="true" type="checkbox" name="useReplyTo"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ms_ckinterval" onclick="enableMSForm();"/>Check Interval:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="ckinterval" disabled="true" size="5" maxlength="4" type="text" name="ckInterval" value="2" />
+																								minute(s)
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ms_mstimeout" onclick="enableMSForm();"/>Connection Timeout:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="mstimeout" disabled="true" size="5" maxlength="4" type="text" name="msTimeout" value="75" />
+																								second(s)
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ms_msmaxsize" onclick="enableMSForm();"/>Max Message Size:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="msmaxsize" disabled="true" size="5" maxlength="6" type="text" name="msMaxSize" value="5000" />
+																								kilobyte(s)
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="ms_zipattach" onclick="enableMSForm();"/>Zip Attachments Threshold:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="zipattach" disabled="true" size="5" maxlength="4" type="text" name="zipAttach" value="0" />
+																							</td>
+																						</tr>
+																					</table>
+																				</td>
+																			</tr>
+																		</table>
+																	</td>
+																</tr>
+															</table>
+														</td>
+													</tr>	
+												</table>
+											</div>
+											<div id="content5" style="overflow:auto;display:none;visibility:hidden;width:100%;height:100%;">
+	  										<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0">
+													<tr>
+														<td>
+															<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+																<tr>
+																	<td style="padding-right:10px;">
+																		<table cellspacing="0" border="0" width="100%">
+																			<tr>
+																				<td width="100%" colspan="2" class="subSectionHeader" align="left">
+																					Select Message Destination
+																				</td>
+																			</tr>
+																			<tr>
+																				<td width="100%" style="padding-left:10px;" class="subSectionWrapper" colspan="2" align="left">
+																					<table border="0" width="100%" cellpadding="0" cellspacing="0">
+																						<tr>
+																							<td style="padding-right:5px;width:100%;" valign="top">
+																								<table>
+																									<tr>
+																										<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;" valign="top">
+																											<input type="button" name="btnApplyMD" style="padding-left:2px;padding-right:3px;" class="childControlBtn" value="Apply" onclick="applyMD();"/><span style="padding-top:10px;"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Message Destination Settings to:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</span>
+																										</td>
+																										<td style="padding-top:5px;width:100%;" valign="bottom">
+																											<select id="MessageDestinationID" name="MessageDestinationID" style="width:300px;">
+																												<xsl:attribute name="multiple">true</xsl:attribute>
+																												<xsl:attribute name="size">5</xsl:attribute>
+																												<option>
+																													<xsl:attribute name="value">-1</xsl:attribute>
+																													<xsl:attribute name="selected">true</xsl:attribute>
+																													Select One, Many or All Message Destination(s)
+																												</option>
+																												<option>
+																													<xsl:attribute name="value">0</xsl:attribute>
+																													All Message Destinations
+																												</option>
+																											<xsl:for-each select="/root/MessageDestinations/MessageDestination">
+																												<option>
+																													<xsl:attribute name="value"><xsl:value-of select="@ID"/></xsl:attribute>
+																													<xsl:value-of select="@Address"/>
+																												</option>
+																											</xsl:for-each>
+																										</select>
+																										</td>
+																									</tr>
+																								</table>
+																							</td>
+																						</tr>
+																					</table>
+																				</td>
+																			</tr>
+																			<tr>
+																				<td colspan="2" height="10"><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionHeader" colspan="2">Settings</td>
+																			</tr>
+																			<tr>
+																				<td class="subSectionWrapper" colspan="2" style="padding-top:0px!important;">
+																					<table border="0" cellspacing="0" cellpadding="0" style="width:100%;padding-left:5px;padding-right:5px;">
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="md_mdenabled" onclick="enableMDForm();"/>Enabled:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="mdenabled" disabled="true" type="checkbox" name="mdEnabled"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="md_delinterval" onclick="enableMDForm();"/>Delivery Interval:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="delinterval" disabled="true" size="5" maxlength="4" type="text" name="delInterval" value="2" />
+																								minute(s)
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="md_mdofficehrs" onclick="enableMDForm();"/>Only Deliver During Office Hours:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="mdofficehrs" disabled="true" type="checkbox" name="mdOfficeHrs"/>
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="md_mdtimeout" onclick="enableMDForm();"/>Connection Timeout:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="mdtimeout" disabled="true" size="5" maxlength="4" type="text" name="mdTimeout" value="10" />
+																								second(s)
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="md_mdmaxsize" onclick="enableMDForm();"/>Max Message Size:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="mdmaxsize" disabled="true" size="5" maxlength="6" type="text" name="mdMaxSize" value="5000" />
+																								kilobyte(s)
+																							</td>
+																						</tr>
+																						<tr style="padding-top:10px;">
+																							<td nowrap="true" style="padding-left:10px;padding-top:5px;width:380px;"><input type="checkbox" name="md_retry" onclick="enableMDForm();"/>Retry Send:</td>
+																							<td align="left" style="padding-left:10px;width:100%;">
+																								<input id="retry" disabled="true" size="5" maxlength="4" type="text" name="retrySend" value="0" />
+																								hr(s)
+																							</td>
+																						</tr>
+																					</table>
+																				</td>
+																			</tr>
+																		</table>
+																	</td>
+																</tr>
+															</table>
+														</td>
+													</tr>	
+												</table>
+											</div>
+										</div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</td>
+	</tr>
+</table>
+</form>
+<script type="text/javascript">
+	document.frmBulkSettings.action.value = "none";
+</script>
+</body>
+</html>
+</xsl:template>
+</xsl:stylesheet>

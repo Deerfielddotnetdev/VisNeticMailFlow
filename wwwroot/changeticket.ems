@@ -1,0 +1,360 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+
+	<html>
+	<head>	
+		<title><xsl:value-of select="root/DOCUMENT/TITLE"/></title>
+		<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+		<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+		<script type="text/javascript" language="javascript">
+			
+			if(window.dialogArguments != null)
+			{
+				windowFrom = windowFrom = window.dialogArguments.windowObj;
+			}
+			else if (window.parent.window.opener)
+	    {
+	    	windowFrom = window.parent.window.opener;
+	    }	
+			
+			function changeTicketGo()
+			{
+				var doWhat = (document.tabularForm.changeAction[1].checked)?"move":"new";
+				var showDest = document.tabularForm.showDestination.checked;
+				windowFrom.changeTicketAction(doWhat, showDest);
+				top.close();				
+			}
+			function mergeTickets()
+			{
+				var doWhat = (document.tabularForm.changeAction[1].checked)?"mergeExist":"merge";
+				windowFrom.mergeTicketAction(doWhat);
+				top.close();
+			}
+			function linkView(TicketID)
+			{
+				if(glo_isBtnDisabled()){return false;}					
+				glo_launchNewWindow("ticketlinks.ems?ticketid="+TicketID,960,480 );
+				top.close();
+			}
+			function manageLinks()
+			{
+				windowFrom.manageLinks();
+				top.close();
+			}
+			function linkTickets()
+			{
+				var actions = document.getElementsByName('changeAction');
+				var doWhat;
+				for(var i = 0; i &lt; actions.length; i++){
+				    if(actions[i].checked){
+				        doWhat = actions[i].value;
+				    }
+				}
+				if(doWhat == 'linkTicketsTicket' || doWhat == 'linkTickets')
+				{
+					var sTemp = document.tabularForm.linkName.value;
+					sTemp = sTemp.replace(/ /g,'');
+					if(sTemp.length == 0)
+					{
+						alert("You must specify a Link Name!");
+						document.tabularForm.linkName.value = "";
+						document.tabularForm.linkName.focus();
+						return;
+					}
+					var isDupe = 0;
+					try
+					{
+						var thisUrl = "changeticket.ems?postXML=1&amp;linkName="+document.tabularForm.linkName.value;
+						var useThisForm = new Array();
+						var postResults = glo_buildFormPost('tabularForm', thisUrl, null, useThisForm);
+						if (postResults[0]==true)
+						{
+							var reXML = postResults[2];						
+							if(reXML.selectSingleNode("/root/Result/@IsDupe"))
+							{
+								isDupe = reXML.selectSingleNode("/root/Result/@IsDupe").value;
+							}						
+						}
+					}catch(e){}
+					
+					if(isDupe == 1)
+					{
+						alert("The Link Name [" +document.tabularForm.linkName.value+ "] is already defined! Please specify an alternate Link Name.");
+						return;
+					}
+				}
+				
+				if(doWhat == 'viewLinks')
+				{
+					viewLinks(<xsl:value-of select="root/linkTicket/@ID"/>);
+				}
+				else
+				{
+					windowFrom.linkTicketAction(doWhat,document.tabularForm.linkName.value);
+				}
+				glo_doClose();
+			}
+			function viewLinks(TicketID)
+			{
+				glo_launchNewWindow("ticketlinks.ems?ticketid="+TicketID,960,480 );
+			}
+			function disable()
+			{
+				var actions = document.getElementsByName('changeAction');
+				var nSelected;
+				for(var i = 0; i &lt; actions.length; i++){
+				    if(actions[i].checked)
+				    {
+				        nSelected = i;
+				    }
+				}
+				<xsl:choose>
+				<xsl:when test="root/linkTicket/@ISMULTIPLE = '0' and root/linkTicket/@LINKCOUNT > '0'">
+				var enabled = (nSelected==1);
+				</xsl:when>
+				<xsl:otherwise>
+				var enabled = (nSelected==0);
+				</xsl:otherwise>
+				</xsl:choose>				
+				<xsl:if test="root/linkTicket/@ISMULTIPLE = '1'">
+				if(!enabled){enabled=(nSelected==1);}
+				</xsl:if>
+				var fields = new Array();
+				fields[fields.length] = document.tabularForm.linkName;
+				glo_disableForm(enabled,fields);
+			}
+		</script>
+	</head>
+
+	<body callOnLoad="disable();">
+	<form name="tabularForm">
+	<xsl:choose>
+	<xsl:when test="root/linkTicket">
+		<input type="hidden" name="ticketId" value="{root/linkTicket/@ID}"/>	
+	</xsl:when>	
+	<xsl:otherwise>
+		<input type="hidden" name="ticketId" value="{root/srcTicket/@ID}"/>	
+	</xsl:otherwise>
+	</xsl:choose>
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:100%;">
+				<xsl:call-template name="default_titlebar">
+					<xsl:with-param name="title_text">
+					<xsl:choose>
+					<xsl:when test="root/linkTicket">
+						Link Tickets
+					</xsl:when>
+					<xsl:when test="root/srcTicket">
+						Merge Tickets
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:value-of select="root/DOCUMENT/TITLE"/>
+					</xsl:otherwise>
+					</xsl:choose>
+					</xsl:with-param>
+				</xsl:call-template>
+				<table class="menuColor" width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="height:32px;" class="menubarx" nowrap="true">
+							<table style="height:100%;" border="0" cellpadding="0" cellspacing="0">
+								<tr>
+									<td height="100%">
+										<xsl:choose>
+										<xsl:when test="root/linkTicket">
+											<div class="toolBar" id="toolButton" name="toolButton"  title="Link Tickets" onclick="linkTickets();">
+												<nobr>
+													<img src="images/ico_ok.gif" width="24" height="22" border="0" valign="bottom" alt="Link Tickets"/>Ok<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+												</nobr>
+											</div>
+										</xsl:when>
+										<xsl:when test="root/srcTicket">											
+											<div class="toolBar" id="toolButton" name="toolButton"  title="Merge Tickets" onclick="mergeTickets();">
+												<nobr>
+													<img src="images/ico_ok.gif" width="24" height="22" border="0" valign="bottom" alt="Merge Tickets"/>Ok<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+												</nobr>
+											</div>
+										</xsl:when>
+										<xsl:otherwise>
+											<div class="toolBar" id="toolButton" name="toolButton"  title="Move Message" onclick="changeTicketGo();">
+												<nobr>
+													<img src="images/ico_ok.gif" width="24" height="22" border="0" valign="bottom" alt="Move Message"/>Ok<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+												</nobr>
+											</div>
+										</xsl:otherwise>
+										</xsl:choose>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"
+										 xrequire="(true)"
+										 title="Cancel" onclick="glo_doClose();">
+										<nobr>
+										<img src="images/ico_cancel.gif" width="24" height="22" border="0" valign="bottom"/>
+										Cancel<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+										</nobr>
+				  					</div>
+									</td>
+									<xsl:if test="root/linkTicket">
+									<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton"
+										 xrequire="(true)"
+										 title="Manage Ticket Links" onclick="manageLinks();">
+											<nobr>
+												<img src="images/ico_managelink.gif" width="24" height="22" border="0" valign="bottom" alt="Manage Ticket Links"/>
+											</nobr>
+										</div>
+									</td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton"
+										 xrequire="(false)"
+										 title="View Links for this Ticket" onclick="linkView({root/linkTicket/@ID});">
+											<xsl:if test="root/linkTicket/@ISMULTIPLE = '0' and root/linkTicket/@LINKCOUNT > '0'">
+												<xsl:attribute name="xrequire">true</xsl:attribute>
+												</xsl:if>
+											<nobr>
+												<img src="images/ico_viewlink.gif" width="24" height="22" border="0" valign="bottom" alt="View Links for this Ticket"/>
+											</nobr>
+										</div>
+									</td>
+									</xsl:if>
+									<td height="100%" style="padding:2px;"><div style="width:0px;border:1px inset;height:100%"></div></td>
+									<td height="100%">
+										<div class="toolBar" id="toolButton" name="toolButton"  title="Show Help" onclick="openHelp('overview/Messages.htm', 3);">
+											<nobr>
+												<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom" alt="Show Help"/>Help<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;
+											</nobr>
+										</div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto;">
+				<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0"><tr><td>
+				
+				<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+					<xsl:choose>
+					<xsl:when test="root/linkTicket">
+						<tr><td><br/></td></tr>
+						<tr>
+							<td style="padding-left:14px">
+							Link Name:<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;<input type="text" name="linkName" value="" maxlength="50" size="48"/>
+							</td>
+						</tr>
+						<tr><td><br/></td></tr>
+						<xsl:if test="root/linkTicket/@ISMULTIPLE = '0' and root/linkTicket/@LINKCOUNT > '0'">
+						<tr>
+							<td style="padding-left:10px">
+							<input checked="true" type="radio" name="changeAction" value="viewLinks" onClick="disable()">
+							</input>
+								View links for this Ticket
+							</td>
+						</tr>
+						<tr><td><br/></td></tr>
+						</xsl:if>
+						<xsl:if test="root/linkTicket/@ISMULTIPLE = '1'">
+						<tr>
+							<td style="padding-left:10px">
+							<input checked="true" type="radio" name="changeAction" value="linkTickets" onClick="disable()">
+							</input>
+								Link the selected Tickets
+							</td>
+						</tr>
+						<tr><td><br/></td></tr>
+						</xsl:if>
+						<tr>
+							<td style="padding-left:10px">
+								<input type="radio" name="changeAction" value="linkTicketsTicket" onClick="disable()">
+								<xsl:if test="root/linkTicket/@ISMULTIPLE = '0' and root/linkTicket/@LINKCOUNT = '0'">
+								<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+								</input>
+								<xsl:choose>
+								<xsl:when test="root/linkTicket/@ISMULTIPLE = '0'">
+								Link the selected Ticket to another Ticket
+								</xsl:when>
+								<xsl:otherwise>
+								Link the selected Tickets to another Ticket
+								</xsl:otherwise>
+								</xsl:choose>
+							</td>
+						</tr>
+						<tr><td><br/></td></tr>
+						<tr>
+							<td style="padding-left:10px">
+								<input type="radio" name="changeAction" value="linkTicketsLink" onClick="disable()"/>
+								<xsl:choose>
+								<xsl:when test="root/linkTicket/@ISMULTIPLE = '0'">
+								Add the selected Ticket to an existing Ticket Link
+								</xsl:when>
+								<xsl:otherwise>
+								Add the selected Tickets to an existing Ticket Link
+								</xsl:otherwise>
+								</xsl:choose>
+							</td>
+						</tr>
+					</xsl:when>
+					<xsl:when test="root/srcTicket">
+						<tr><td><br/></td></tr>
+						<tr>
+							<td style="padding-left:10px">
+							<input checked="true" type="radio" name="changeAction" value="merge">
+							</input>
+								Merge selected Tickets
+							</td>
+						</tr>
+						<tr><td><br/></td></tr>
+						<tr>
+							<td style="padding-left:10px">
+								<input type="radio" name="changeAction" value="mergeExist">
+								</input>
+								Merge selected Tickets with an existing Ticket
+							</td>
+						</tr>						
+					</xsl:when>
+					<xsl:otherwise>
+						<tr>
+							<td style="padding-left:10px">
+							Move this message and its entire thread:
+							</td>
+						</tr>
+						<tr>
+							<td style="padding-left:10px">
+								<input checked="true" type="radio" name="changeAction" value="new">
+								<xsl:if test="root/DisableNew"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+								</input>
+								<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;to a new ticket
+								<input type="radio" name="changeAction" value="move">
+								<xsl:if test="root/DisableNew"><xsl:attribute name="checked">true</xsl:attribute></xsl:if>
+								</input>
+								<xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;to an existing ticket
+							</td>
+						</tr>
+						<tr><td><br/></td></tr>
+						<tr>
+							<td style="padding-left:10px">
+								<input type="checkbox" name="showDestination" value=""/><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Display the destination ticket when finished
+							</td>
+						</tr>
+					</xsl:otherwise>
+					</xsl:choose>					
+				</table>				
+				</td></tr></table>
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

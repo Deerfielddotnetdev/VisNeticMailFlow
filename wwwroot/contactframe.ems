@@ -1,0 +1,37 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.01 Frameset//EN"  />
+<xsl:template match="/"> 
+<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+<script type="text/javascript" language="javascript">
+var docIncreaseWaitCount = 4;
+</script>
+<title>Contacts</title> 
+
+<frameset id="bholder" rows="32,*" framespacing="0" frameborder="0">
+	<frame src="contactmenu.ems" name="menu" frameborder="0" scrolling="no" noresize="true" marginwidth="0" marginheight="0" framespacing="0">
+		<xsl:if test="/root/DOCUMENT/URLPARAMETERS/SELECTONE"><xsl:attribute name="src">contactmenu.ems?selectone=true</xsl:attribute></xsl:if>
+		<xsl:if test="/root/DOCUMENT/URLPARAMETERS/AGENTID and /root/DOCUMENT/URLPARAMETERS/ACTION"><xsl:attribute name="src">contactmenu.ems?agentid=<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/AGENTID"/></xsl:attribute></xsl:if>
+		<xsl:if test="/root/DOCUMENT/URLPARAMETERS/ADDMYCONTACT"><xsl:attribute name="src">contactmenu.ems?addmycontact=<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/ADDMYCONTACT"/></xsl:attribute></xsl:if>
+	</frame>
+  <frameset id="search" framespacing="0" frameborder="0" rows="125,*">
+    <frame name="searchpane" src="contactsearch.ems" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" style="cursor: n-resize; border-bottom-style: ridge; border-bottom-width: 2px;">
+    	<xsl:if test="/root/DOCUMENT/URLPARAMETERS/AGENTID and /root/DOCUMENT/URLPARAMETERS/ACTION"><xsl:attribute name="src">contactsearch.ems?agentid=<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/AGENTID"/></xsl:attribute></xsl:if>
+    </frame>
+	    <frameset cols="100%,*" framespacing="0" frameborder="0" id="resultsplit">
+		    <frame src="contactsearchresults.ems" name="results" scrolling="no" marginwidth="0" marginheight="0">
+					<xsl:if test="/root/DOCUMENT/URLPARAMETERS/SELECTONE"><xsl:attribute name="src">contactsearchresults.ems?multiple=false</xsl:attribute></xsl:if>
+					<xsl:if test="/root/DOCUMENT/URLPARAMETERS/AGENTID and /root/DOCUMENT/URLPARAMETERS/ACTION"><xsl:attribute name="src">contactsearchresults.ems?agentid=<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/AGENTID"/>&amp;action=<xsl:value-of select="/root/DOCUMENT/URLPARAMETERS/ACTION"/></xsl:attribute></xsl:if>
+				</frame>
+		    <xsl:if test="not(root/DOCUMENT/URLPARAMETERS/ADDMYCONTACT)">
+		    <frame name="sendto" style="cursor: e-resize; border-left-style: ridge; border-left-width: 2px;" src="contactsendto.ems" marginwidth="0" marginheight="0"  scrolling="no" frameborder="0">
+					<xsl:if test="/root/DOCUMENT/URLPARAMETERS/SELECTONE"><xsl:attribute name="src">blank.htm</xsl:attribute></xsl:if>
+				</frame>
+				</xsl:if>
+	    </frameset>
+  </frameset>
+</frameset>
+
+
+</xsl:template>
+</xsl:stylesheet>
+

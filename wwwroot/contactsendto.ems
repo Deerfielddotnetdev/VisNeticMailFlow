@@ -1,0 +1,210 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/"> 
+	<html>
+	<head>
+
+	<title></title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	
+	<script language="javascript">
+		var toAddr = new Array();
+		var ccAddr = new Array();
+		var bccAddr = new Array();
+		
+		function addAddr(field) {
+			frame = parent.frames.results;
+			if(frame.document.tabularForm.selectId.value == '') {
+				alert('You must select a contact to insert into this field.');
+			} else {
+			/* !!!important!!!
+				See contactsearchresults.ems - this function will get items in sets of threes!
+				ID, EMAIL, NAME, ID, EMAIL, NAME, ID, EMAIL, NAME, ID, EMAIL, NAME, ID, EMAIL, NAME
+		keepCnt: 1, 2, 3, 1, 2, 3, 1, 2, 3,
+			*/
+				contactArr = frame.document.tabularForm.selectId.value.split(",");
+				list = eval('document.tabularForm.'+field);
+				listArray = eval(field+'Addr');
+				
+				var keepCnt = 0;
+				for (i = 0; i &lt; contactArr.length; i++)
+				{
+					keepCnt++;
+					if (keepCnt==4)
+						keepCnt = 1;
+
+					if (keepCnt==2)
+					{
+						var noMatch = true;
+						for (x = 0; x &lt; list.options.length; x++)
+						{
+							if (contactArr[i]==list.options[x].value)
+							{
+								noMatch = false;
+								break;
+							}
+						}
+						if (noMatch)
+						{
+							if (contactArr[i].indexOf("[")==-1)
+							{
+								var realName = "";
+								if (contactArr[i+1] &amp;&amp; contactArr[i+1].indexOf("[No name defined]")==-1 &amp;&amp; contactArr[i+1].indexOf("[Contact Group]")==-1)
+								{
+									realName = '"' + contactArr[i+1] + '" &lt;' + contactArr[i] + '&gt;';
+								} else {
+									realName = contactArr[i];
+								}
+								newContact = new Option();
+								newContact.text = realName;
+								newContact.value = realName;
+								list.options[list.options.length] = newContact;
+								listArray[listArray.length] =realName;
+
+//								newContact = new Option();
+//								newContact.text = contactArr[i];
+//								newContact.value = contactArr[i];
+//								list.options[list.options.length] = newContact;
+//								listArray[listArray.length] = contactArr[i];
+							} else {
+								alert("A selected contact was not added because it has no default email address.");
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		function removeAddr(field) {
+			list = eval('document.tabularForm.'+field);
+			if(list.options.length == 0) {
+				alert('No contacts in ' + field + ': field to remove!');
+			} else {
+				listArray = eval(field+'Addr');
+				didSomething = false;
+				for(i = 0; i &lt; list.options.length; i++) {
+					if(list.options[i].selected == true) {
+						didSomething = true;
+						// [ ] Code to replace "listArray.splice(1,i);"
+						noNames = new Array();
+						for (x = 0; x &lt; list.options.length; x++)
+						{
+							if (list.options[x].value != list.options[i].value)
+							noNames[noNames.length] = list.options[x].text;
+						}
+						listArray.length = 0;
+						for (x = 0; x &lt; noNames.length; x++)
+						{
+							listArray[listArray.length] = noNames[x];
+						}
+						// [X] Code to replace "listArray.splice(1,i);"
+						list.removeChild(list.options[i]);
+						i--;
+					}
+				}
+				if (didSomething != true) {
+					alert('You must select an address to remove!');
+				}
+			}
+		}
+		
+		function docCheckInit()
+		{
+			if (window.dialogArguments || parent.dialogArguments || window.parent.opener)
+			{
+				var thWindow;
+				if(window.dialogArguments){thWindow = window.dialogArguments.document;}
+				else if(parent.dialogArguments){thWindow = parent.dialogArguments.document;}
+				else{thWindow = window.parent.opener.document;}
+				
+				var fieldsArr = new Array("to", "cc", "bcc");
+				for (var nx = 0; nx &lt; fieldsArr.length; nx++)
+				{
+					var xString = new String(eval("thWindow.message."+fieldsArr[nx]).value);
+					xString = xString.replace(/&#44;/g,';');
+					var xStringArr = xString.split(";");
+					for (var q=0; q &lt; xStringArr.length; q++)
+					{
+						if (xStringArr[q]!="")
+						{
+							var newOptText = glo_trimWhitespace(xStringArr[q]);
+							var	newContact = new Option();
+								newContact.text = newOptText;
+								newContact.value = newOptText;
+							eval("document.tabularForm."+fieldsArr[nx]).options[eval("document.tabularForm."+fieldsArr[nx]).options.length] = newContact;
+							eval(fieldsArr[nx]+"Addr")[eval(fieldsArr[nx]+"Addr").length] = newOptText;
+						}
+					}
+				}				
+			}
+		}
+	</script>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	</head>
+
+	<body callOnLoad="docCheckInit();">
+	<form name="tabularForm" method="post" action="">
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto;">
+
+				<table width="84%" align="center" border="0" cellpadding="0" cellspacing="0" >
+					<tr><td colspan="2"><br/></td></tr>
+					<tr>
+						<td colspan="2" class="subheader">
+						TO:
+						</td>
+					</tr>
+					<tr>
+						<td width="10%" align="center">
+							<input type="button" class="childControlBtn" style="font-size:larger;width: 100%;" height="50%" onClick="addAddr('to');" value="&gt;"/><BR/>
+							<input type="button" class="childControlBtn" style="font-size:larger;width: 100%;" height="50%" onClick="removeAddr('to');" value="&lt;"/><BR/>
+						</td>
+						<td width="90%" align="left">
+							<select style="width: 100%;" name="to" multiple="true"></select>
+						</td>
+					</tr>
+					<tr><td colspan="2"><br/></td></tr>
+					<tr>
+						<td colspan="2" class="subheader">
+						CC:
+						</td>
+					</tr>
+					<tr>
+						<td align="center">
+							<input type="button" class="childControlBtn" style="font-size:larger;width: 100%;" height="50%" onClick="addAddr('cc');" value="&gt;"/><BR/>
+							<input type="button" class="childControlBtn" style="font-size:larger;width: 100%;" height="50%" onClick="removeAddr('cc');" value="&lt;"/><BR/>
+						</td>
+						<td align="left">
+							<select style="width: 100%;" name="cc" multiple="true"/>
+						</td>
+					</tr>
+					<tr><td colspan="2"><br/></td></tr>
+					<tr>
+						<td colspan="2" class="subheader">
+						BCC:
+						</td>
+					</tr>
+					<tr>
+						<td align="center">
+							<input type="button" class="childControlBtn" style="font-size:larger;width: 100%;" height="50%" onClick="addAddr('bcc');" value="&gt;"/><BR/>
+							<input type="button" class="childControlBtn" style="font-size:larger;width: 100%;" height="50%" onClick="removeAddr('bcc');" value="&lt;"/><BR/>
+						</td>
+						<td align="left">
+							<select style="width: 100%;" name="bcc" multiple="true"/>
+						</td>
+					</tr>
+				</table>
+			
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+
+	</xsl:template>
+</xsl:stylesheet>

@@ -1,0 +1,554 @@
+     
+<?AdobeSVGViewer save="disable" resolution="300" ?>
+
+<svg id="svgGraph" zoomAndPan="disable" onload="Initialize(evt)"> 
+
+	<defs>
+		<filter id="DropShadowFilter" filterUnits="objectBoundingBox" x="-10%" y="-10%" width="120%" height="120%">
+		  <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="BlurAlpha"/>
+		  <feOffset in="BlurAlpha" dx="4" dy="4" result="OffsetBlurAlpha"/>
+		  <feMerge>
+			<feMergeNode in="OffsetBlurAlpha"/>
+			<feMergeNode in="SourceGraphic"/>
+		  </feMerge>
+		</filter>
+	</defs>
+
+<script TYPE="text/javascript" LANGUAGE="JavaScript"> 
+
+<![CDATA[
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Global Variables
+\*--------------------------------------------------------------------------*/
+
+var g_MaxValue = .9;
+var g_TotalValue = 0;
+
+var g_ChartHeight;
+var g_ChartWidth; 
+var g_PieChartSize = 140;
+
+var g_CreatedBar = false;
+var g_CreatedLine = false;
+var g_CreatedPie = false;
+var g_ShowFullLabels = false;
+
+// constants
+// var g_AngleFactor = Math.pow(2, .5);
+
+// arrays
+var g_ChartValues = new Array();
+
+// object references
+var g_SVGDocument  = null;
+var	g_PieChart     = null;
+var	g_PieSlices    = null;
+var g_PieLableRect = null;
+var	g_BarChart     = null;
+var	g_Bars         = null;
+var g_Labels	   = null;
+var g_Lines		   = null;
+
+var g_ColorArray = new Array( "#FF9966", "#C2A00E", "#71A214", "#3399CC", 
+							  "#CC99FF", "#FF9999", "#00CC99", "#A00000", 
+							  "#0000A0", "#FFFF00", "#00FF00", "#FF0000", 
+							  "#0000FF", "#800080", "#FFA000", "#00FFFF", 
+							  "#008080", "#FF00A0", "#CCCCCC" );
+
+/*---------------------------------------------------------------------------\            
+||  Comments: Initialize the graph	              
+\*--------------------------------------------------------------------------*/
+function Initialize(LoadEvent)
+{
+	g_SVGDocument  = LoadEvent.getTarget().getOwnerDocument();
+	g_PieChart     = g_SVGDocument.getElementById("piechart");
+	g_PieSlices    = g_SVGDocument.getElementById("slices");
+	g_BarChart     = g_SVGDocument.getElementById("barchart");
+	g_Bars         = g_SVGDocument.getElementById("bars");
+	g_Lines		   = g_SVGDocument.getElementById("lines");
+	g_Labels	   = g_SVGDocument.getElementById("bar_labels");
+	g_PieLables	   = g_SVGDocument.getElementById("pie_labels");
+
+	// support for tool tips
+	new Title(g_SVGDocument, 11);
+
+	// set width and height
+	g_ChartWidth  = 600 - 75;
+	g_ChartHeight = 300 - 60;
+	g_BarChart.setAttribute("transform", "translate(0," + g_ChartHeight + ")" ); 
+	g_PieChartSize = g_PieChartSize * -1;
+
+	// add the bar chart border
+	var Node = g_SVGDocument.createElement("path");
+	Node.setAttribute("style", "fill:none;stroke:black;filter:url(#DropShadowFilter)");
+	Node.setAttribute("d", "M0,0H-5 0V-" + g_ChartHeight + " h -5 10 -5 V 0H" + g_ChartWidth + " 0");
+	g_BarChart.appendChild(Node);
+
+	// add the zero lable to the scale
+	Node = g_SVGDocument.createElement("text");
+	Node.setAttribute("y", 4 );
+	Node.appendChild(g_SVGDocument.createTextNode("0"));
+	g_SVGDocument.getElementById("scale_labels").appendChild(Node);
+
+	// call back to our parent to populate the graph
+	window.DisplayGraph( window );
+}
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Adds a value to the chart	              
+\*--------------------------------------------------------------------------*/
+function AddChartValue(Value, Name)
+{	
+	// set the max value
+	if ( Value > g_MaxValue )
+		g_MaxValue = Value;
+	
+	// update the total value
+	g_TotalValue += Value;
+	
+	// add to the array
+	var ChartValue = new Object();
+	ChartValue.value = Value;
+	ChartValue.name  = Name;	
+	g_ChartValues[g_ChartValues.length] = ChartValue;	
+}
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Draws a line graph	              
+\*--------------------------------------------------------------------------*/
+function DrawLineGraph()
+{
+	var OffsetWidth     = g_ChartWidth / g_ChartValues.length;
+	var HalfOffsetWidth = OffsetWidth / 2;
+	var BarChartHeight  = g_ChartHeight * -1;
+	var CurrentPos;
+	var LastWidth;
+	var Node;
+
+	// do we need to draw the gridlines?
+	DrawGridLines();
+
+	for ( var i = 0; i < g_ChartValues.length; i++ )
+	{
+		// draw the lines
+		if ( i < (g_ChartValues.length-1) )
+		{
+			Node = g_SVGDocument.createElement("line");
+			Node.setAttribute("y1", (g_ChartValues[i].value / g_nChartTop) * BarChartHeight);
+			Node.setAttribute("x1", (i * OffsetWidth) + HalfOffsetWidth + 1);
+			Node.setAttribute("y2", (g_ChartValues[i+1].value / g_nChartTop) * BarChartHeight);
+			Node.setAttribute("x2", ((i+1) * OffsetWidth) + HalfOffsetWidth );
+			g_Lines.appendChild(Node);
+		}
+		
+		// draw the circles
+		Node = g_SVGDocument.createElement("circle");
+		Node.setAttribute("r", 3);
+		Node.setAttribute("style", "stroke:black;fill:#80FF80");
+		Node.setAttribute("cy", (g_ChartValues[i].value / g_nChartTop) * BarChartHeight);
+		Node.setAttribute("cx", (i * OffsetWidth) + HalfOffsetWidth );
+		Node.addEventListener("mouseover", Title.Activate, false);
+		
+		var TitleObj = g_SVGDocument.createElement("title");
+		TitleObj.appendChild(g_SVGDocument.createTextNode( g_ChartValues[i].name + "\x20:\x20" + g_ChartValues[i].value));
+		Node.appendChild(TitleObj);
+
+		g_Lines.appendChild(Node);
+
+		if ( !g_CreatedBar )
+		{
+			// draw the labels
+			Node = g_SVGDocument.createElement("text");
+			Node.appendChild( g_SVGDocument.createTextNode( g_ShowFullLabels ? g_ChartValues[i].name : i + 1 ));
+		
+			CurrentPos = (i * OffsetWidth) + HalfOffsetWidth;
+
+			if ( i == 0 || ( CurrentPos - (Node.getComputedTextLength() / 2) >= LastWidth + 3 ))
+			{
+				LastWidth = CurrentPos + (Node.getComputedTextLength() / 2);
+				Node.setAttribute("x", CurrentPos);
+				Node.setAttribute("y", 0);
+				g_Labels.appendChild(Node);	
+			}
+		}
+	}	
+}
+
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Draws a bar graph	              
+\*--------------------------------------------------------------------------*/
+function DrawBarGraph()
+{
+	var OffsetWidth     = g_ChartWidth / g_ChartValues.length;
+	var HalfOffsetWidth = OffsetWidth / 2;
+	var BarChartHeight  = g_ChartHeight * -1;
+	var Color;
+	var CurrentPos;
+	var LastWidth;
+	var Height;
+	var Node;
+
+	// do we need to draw the gridlines?
+	DrawGridLines();
+
+	for ( var i = 0; i < g_ChartValues.length; i++ )
+	{
+		Height = (g_ChartValues[i].value / g_nChartTop) * (g_ChartHeight);
+
+		Color = g_ColorArray[i % g_ColorArray.length];
+		Node = g_SVGDocument.createElement("rect");
+		Node.setAttribute("style", "fill:" + Color +";stroke:black;stroke-width:1");
+		Node.setAttribute("x", OffsetWidth * i);
+		Node.setAttribute("y", Height * -1);
+		Node.setAttribute("width", OffsetWidth);
+		Node.setAttribute("height", (g_ChartValues[i].value / g_nChartTop) * (g_ChartHeight));
+        Node.addEventListener("mouseover", Title.Activate, false);
+
+		var TitleObj = g_SVGDocument.createElement("title");
+		TitleObj.appendChild(g_SVGDocument.createTextNode( g_ChartValues[i].name + "\x20:\x20" + g_ChartValues[i].value ));
+		Node.appendChild(TitleObj);
+		
+		g_Bars.appendChild(Node);
+		
+		if ( !g_CreatedLine )
+		{
+			// draw the labels
+			Node = g_SVGDocument.createElement("text");
+			Node.appendChild(g_SVGDocument.createTextNode( g_ShowFullLabels ? g_ChartValues[i].name : i+1));
+		
+			CurrentPos = (i * OffsetWidth) + HalfOffsetWidth;
+			
+			if ( i == 0 || ( CurrentPos - ( Node.getComputedTextLength() / 2) >= LastWidth + 3 ))
+			{
+				LastWidth = CurrentPos + (Node.getComputedTextLength() / 2);
+				Node.setAttribute("x", CurrentPos);
+				Node.setAttribute("y", 0);
+				g_Labels.appendChild(Node);	
+			}
+		}
+	}
+}
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Draws a pie graph	              
+\*--------------------------------------------------------------------------*/
+function DrawPieGraph()
+{
+	var Start = 0;
+	var Size;
+	var Percent;
+	var PathData;
+	var Color;
+	var Node;
+	var n;
+
+	for ( var i = 0; i < g_ChartValues.length; i++ )
+	{
+		n = (g_ChartValues.length-1) -i;
+		Color = g_ColorArray[n % g_ColorArray.length];
+
+		Size = (g_ChartValues[n].value / g_TotalValue); 
+		Percent = "\x20:\x20" + Math.round(Size * 10000) / 100 + "%)";
+		PathData = "M0,0L";
+
+		PathData += g_PieChartSize * Math.sin(Start * Math.PI * 2) + "," + 
+					g_PieChartSize * Math.cos(Start * Math.PI * 2);
+	
+		if (Size >= .5)
+		{
+			PathData += "A" + g_PieChartSize + " " + g_PieChartSize + " 1 1 0 " + 
+					    g_PieChartSize * Math.sin((Start + Size) * Math.PI * 2) + "," + 
+					    g_PieChartSize * Math.cos((Start + Size) * Math.PI * 2);
+		}
+		else
+		{
+			PathData += "A" + g_PieChartSize + " " + g_PieChartSize + " 0 0 0 " + 
+					     g_PieChartSize * Math.sin((Start + Size) * Math.PI * 2) + "," + 
+					     g_PieChartSize * Math.cos((Start + Size) * Math.PI * 2);
+		}
+
+		PathData += "z";
+
+		// create the pie slice
+		Node = g_SVGDocument.createElement("path");
+		Node.setAttribute("style", "stroke:black;fill:" + Color);
+		Node.setAttribute("d", PathData);
+		Node.addEventListener("mouseover", Title.Activate, false);
+
+		var TitleObj = g_SVGDocument.createElement("title");
+		TitleObj.appendChild(g_SVGDocument.createTextNode(g_ChartValues[n].name + "\x20(" + g_ChartValues[n].value + Percent));
+		Node.appendChild(TitleObj);
+		
+		g_PieSlices.appendChild(Node);
+
+		if ( n < 18 )
+		{
+			// create the square graphic portion of the label
+			Node = g_SVGDocument.createElement("rect");
+			Node.setAttribute("style", "fill:" + Color +";stroke:black;stroke-width:1");
+			Node.setAttribute("height", 10);
+			Node.setAttribute("width", 10);
+			Node.setAttribute("x", 275);
+			Node.setAttribute("y", (n-1) * 16);
+			g_PieLables.appendChild(Node);
+
+			// create the text portion of the label
+			Node = g_SVGDocument.createElement("text");
+			Node.appendChild(g_SVGDocument.createTextNode(g_ChartValues[n].name + "\x20(" + g_ChartValues[n].value + Percent ));
+			Node.setAttribute("x", 290 );
+			Node.setAttribute("y", ((n-1) * 16) + 9 );
+			g_PieLables.appendChild(Node);
+		}
+
+		Start += Size;
+	}	
+}
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Draws the gridlines used with the bar and line graphs	              
+\*--------------------------------------------------------------------------*/
+function DrawGridLines(MaxSize)
+{
+	if ( g_CreatedLine || g_CreatedBar )
+		return;
+	
+	var PathData = null;
+	var y = 0;
+
+	// determine the step interval of the scale
+	var nExpFactor  = Math.pow(10, Math.floor( Math.log(g_MaxValue) * Math.LOG10E ));
+	var nFirstDigit = Math.abs( Math.floor( g_MaxValue / nExpFactor ));
+	var nStepInterval;
+
+	if ( nFirstDigit >= 5 )
+	{
+		nStepInterval = 1 * nExpFactor;
+	}
+	else if ( nFirstDigit > 1 )
+	{
+		nStepInterval = .5 * nExpFactor;
+	}
+	else
+	{
+		nStepInterval = .2 * nExpFactor;
+	}
+
+	// calculate how many gridlines we need
+	var nLineCount = Math.floor( g_MaxValue / nStepInterval ) + 1;
+
+	// calculate the top of the chart... the bars
+	// are scaled against the top of the chart
+	g_nChartTop = nLineCount * nStepInterval;
+
+	// display the gridlines
+	for ( var i = 0; i < nLineCount; i++ )
+	{
+		y = (((i + 1) * nStepInterval) / g_nChartTop ) * ( g_ChartHeight * -1 ); 
+		PathData = "M 0 " + y + " L " + g_ChartWidth + " " + y + " Z";
+
+		// add the gridline
+		var Node = g_SVGDocument.createElement("path");
+		Node.setAttribute("d", PathData );
+		g_SVGDocument.getElementById("gridlines").appendChild(Node);
+
+		// add the lable
+		Node = g_SVGDocument.createElement("text");
+		Node.setAttribute("y", y + 4 );
+		Node.appendChild(g_SVGDocument.createTextNode((i + 1) * nStepInterval));
+		g_SVGDocument.getElementById("scale_labels").appendChild(Node);
+	}
+}
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Displays the pie graph	              
+\*--------------------------------------------------------------------------*/
+function ShowPieGraph()
+{
+	g_SVGDocument.getElementById("barchart").getStyle().setProperty("visibility", "hidden");
+	g_SVGDocument.getElementById("piechart").getStyle().setProperty("visibility", "show");
+	g_SVGDocument.getElementById("pie_labels").getStyle().setProperty("visibility", "show");
+
+	if ( !g_CreatedPie )
+		DrawPieGraph();
+
+	g_CreatedPie = true;
+}
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Displays the bar graph	              
+\*--------------------------------------------------------------------------*/
+function ShowBarGraph()
+{
+	g_SVGDocument.getElementById("piechart").getStyle().setProperty("visibility", "hidden");
+	g_SVGDocument.getElementById("lines").getStyle().setProperty("visibility", "hidden");
+	g_SVGDocument.getElementById("pie_labels").getStyle().setProperty("visibility", "hidden");
+	g_SVGDocument.getElementById("barchart").getStyle().setProperty("visibility", "show");
+	g_SVGDocument.getElementById("bars").getStyle().setProperty("visibility", "show");
+
+	if ( !g_CreatedBar )
+		DrawBarGraph();
+
+	g_CreatedBar = true;
+}
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Displays the line graph	              
+\*--------------------------------------------------------------------------*/
+function ShowLineGraph()
+{
+	g_SVGDocument.getElementById("piechart").getStyle().setProperty("visibility", "hidden");
+	g_SVGDocument.getElementById("pie_labels").getStyle().setProperty("visibility", "hidden");
+	g_SVGDocument.getElementById("bars").getStyle().setProperty("visibility", "hidden");
+	g_SVGDocument.getElementById("barchart").getStyle().setProperty("visibility", "show");
+	g_SVGDocument.getElementById("lines").getStyle().setProperty("visibility", "show");
+
+	if ( !g_CreatedLine )
+		DrawLineGraph();
+
+	g_CreatedLine = true;
+}
+
+/*---------------------------------------------------------------------------\                     
+||  Comments:	Sets if full lables should be displayed for the 
+||				bar and line charts.
+\*--------------------------------------------------------------------------*/
+function SetFullLables(bShowFullLables)
+{
+	g_ShowFullLabels = bShowFullLables;
+}
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Tooltip support
+\*--------------------------------------------------------------------------*/
+function Title(doc, sz)
+{
+   this.element = null;  // element to show title of ..
+   Title.size = sz;      // text size ..
+   
+   this.Create(doc);
+   window.svgTitle = this;
+}
+
+Title.prototype.Create = function(doc)
+{
+   this.rec = doc.createElement("rect");
+   this.rec.setAttribute("y", -1.1 * Title.size);
+   this.rec.setAttribute("x", -0.25 * Title.size);
+   this.rec.setAttribute("width", "1");
+   this.rec.setAttribute("height", 1.5 * Title.size);
+   this.rec.setAttribute("style", "stroke:black;fill:#ffffe4;stroke-width:1");
+
+   this.str = doc.createTextNode("");
+
+   this.txt = doc.createElement("text");
+   this.txt.setAttribute("style", "text-rendering: optimizeSpeed; font-family:Arial; font-size:" + Title.size + ";fill:black;");
+   this.txt.appendChild(this.str);
+
+   this.grp = doc.createElement("g");
+   this.grp.setAttribute("transform", "translate(0,0)");
+   this.grp.setAttribute("visibility", "hidden");
+   this.grp.appendChild(this.rec);
+   this.grp.appendChild(this.txt);
+
+   doc.getDocumentElement().appendChild(this.grp);
+};
+
+Title.Activate = function Title_Activate(evt)
+{
+   if (window.svgTitle.element == null)
+   {
+		var  x = evt.getClientX() + 0.25 * Title.size;
+		y =  evt.getClientY() - Title.size;
+
+		window.svgTitle.element = evt.getCurrentTarget();
+		window.svgTitle.element.removeEventListener("mouseover", Title.Activate, false);
+		window.svgTitle.element.addEventListener("mouseout", Title.Passivate, false);
+		window.svgTitle.str.setNodeValue(TextOf(TitleElementOf(window.svgTitle.element)));
+		window.svgTitle.rec.setAttribute("width", window.svgTitle.txt.getComputedTextLength() + 0.5 * Title.size);
+	
+		var width = window.svgTitle.txt.getComputedTextLength() + 0.5*Title.size;
+		
+		if ( g_ChartWidth )
+		{
+			if ( (x + width) > g_ChartWidth + 60 )
+				x = x - width + 2;
+		}
+
+		window.svgTitle.grp.setAttribute("transform", "translate(" + x + "," + y + ")");
+		window.svgTitle.grp.setAttribute("visibility", "visible");
+   }
+};
+
+Title.Passivate = function Title_Passivate(evt)
+{
+   if (window.svgTitle.element != null)
+   {
+      window.svgTitle.grp.setAttribute("visibility", "hidden");
+      window.svgTitle.element.removeEventListener("mouseout", Title.Passivate, false);
+      window.svgTitle.element.addEventListener("mouseover", Title.Activate, false);
+      window.svgTitle.element = null;
+   }
+};
+
+function TitleElementOf(elem)
+{
+	var childs = elem.getChildNodes();
+
+	for (var i=0; i<childs.getLength(); i++)
+	{
+	  if (childs.item(i).getNodeType() == 1 && childs.item(i).getNodeName() == "title")
+		 return childs.item(i);
+	}
+
+	return null;
+}
+
+function TextOf(elem)
+{
+	var childs = elem ? elem.getChildNodes() : null;
+
+	for (var i=0; childs && i<childs.getLength(); i++)
+	{
+	  if (childs.item(i).getNodeType() == 3) 
+		 return childs.item(i).getNodeValue();
+	}
+
+	return "";
+}
+
+/*---------------------------------------------------------------------------\            
+||  Comments:	Set function references in the parent window
+\*--------------------------------------------------------------------------*/
+window.addChartValue = AddChartValue;
+window.ShowBarGraph = ShowBarGraph;
+window.ShowPieGraph = ShowPieGraph;
+window.ShowLineGraph = ShowLineGraph;
+window.SetFullLables = SetFullLables;
+
+]]>
+
+</script>
+
+	<g transform="translate(50, 25)" style="font-size:11;font-family:'Arial';text-rendering:optimizeSpeed">
+
+		<g id="barchart" transform="translate(0, 0)">
+			<g id="gridlines" style="fill:none; stroke:#B0B0B0; stroke-width:1; &#xA; stroke-dasharray:2 4"/>
+			<g id="scale_labels" transform="translate( -7 , 0)" style="text-anchor:end;" />
+			<g id="bar_labels" transform="translate(1, 15)" style="text-anchor:middle" />
+			<g id="bars"/>
+			<g id="lines" stroke="red" stroke-width="1" style="visibility:hidden"/>
+			<g id="lines" stroke="blue" stroke-width="1" style="visibility:hidden"/>
+		</g>
+      
+		<g style="filter:url(#DropShadowFilter)">
+			<g id="piechart" transform="translate(100, 100) scale(1, .5)" style="visibility:hidden">
+				<g id="slices"/>
+			</g>
+		</g>
+
+		<g id="pie_labels" style="font-family:'Verdana'"/>
+
+	</g>
+</svg>

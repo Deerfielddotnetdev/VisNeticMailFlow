@@ -1,0 +1,352 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:template match="/"> 
+
+	<html>
+	<head>
+	<title></title>
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	<script type="text/javascript" language="javascript">
+	function showAdv() {
+		if (advanced.style.display == 'none') {
+			parent.document.all.search.rows = '250,*';
+			advanced.style.display = 'block';
+			AdvanceOptionsOn.style.display = 'block';
+			AdvanceOptionsOff.style.display = 'none';
+		} else {
+			parent.document.all.search.rows = '120,*';
+			advanced.style.display = 'none';
+			AdvanceOptionsOn.style.display = 'none';
+			AdvanceOptionsOff.style.display = 'block';
+		}
+	}
+	
+	function reSearch(email) {
+		tabularForm.reset();
+		tabularForm.contact_email_exact[1].checked = true;
+		tabularForm.contact_email.value = email;
+		if ( this.parent.parent.parent.theMainContain )
+		{
+		     this.parent.parent.parent.docSetLoading(false);
+		}
+		tabularForm.submit();
+	}
+	
+	function startSearch() {
+		if (parent.frames.menu.mergeInProgress == false) {
+			if ( this.parent.parent.parent.theMainContain )
+			{
+			     this.parent.parent.parent.docSetLoading(false);
+			}
+			tabularForm.submit();
+		}
+	}
+	function itemHot(id)
+	{
+		document.getElementById(id).className = "menuButton itemOn";
+	}
+	function itemClick(id) {
+		document.getElementById(id).className = "menuButton itemClk";
+	}
+	function itemCold(id)
+	{
+		document.getElementById(id).className = "menuButton itemOn";
+	}
+	function CheckKey()
+	{
+		if (event.keyCode == 13)
+		{
+			startSearch();
+		}
+	}
+	function alterDisplay()
+	{
+		if(parent.dialogArguments)
+		{
+			if (parent.dialogArguments.docIsMsgCompWindow==true)
+			{
+				chkGroupsTR.style.display = 'block';
+			}
+		}
+		else if(window.parent.opener)
+		{
+			if (window.parent.opener.docIsMsgCompWindow==true)
+			{
+				chkGroupsTR.style.display = 'block';
+			}
+		}
+	}
+	</script>
+	</head>
+
+	<body callOnLoad="alterDisplay();" onkeydown="CheckKey(event);">
+	<form name="tabularForm" method="get" target="results" action="contactsearchresults.ems">
+	<input type="hidden" name="Action" value="search"/>
+	<input type="hidden" name="AgentContactID" value="{root/DOCUMENT/URLPARAMETERS/AGENTID}"/>
+	<input type="hidden" name="MergeSourceID" value="{root/Merge/@SourceID}" />
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="height:100%;width:100%;overflow:hidden;vertical-align:top;">
+			<div style="width:100%;height:100%;overflow:auto;">
+				<table style="width:100%;padding:10px;" border="0" cellspacing="0" cellpadding="0"><tr><td>
+				
+				<table width="100%;" border="0" cellspacing="0" cellpadding="0">
+				<xsl:if test="root/Merge">
+					<tr>
+						<td colspan="3">
+							<div style="margin:10px;">
+							<span style="font-weight:bold;"><xsl:value-of select="root/Merge/@SourceName"/></span> will be the source contact.  
+							<li>The source contact's email addresses, notes, and history will be moved to the destination contact.  </li>
+							<li>The source contact will be deleted upon the completion of the merge.</li>
+							</div>
+							<div style="margin-left:10px;margin-top:20px;margin-bottom:20px;">
+							Search for your destination contact below:
+							</div>
+						</td>
+					</tr>
+					<tr><td height="10" colspan="3"></td></tr>
+				</xsl:if>
+					<tr>
+						<td><nobr>Name :</nobr></td>
+						<td style="width:100%;">
+							<input style="width:100%;" maxlength="250" type="text" name="contact_name"/>
+						</td>
+						<td>
+							<nobr>
+							<input type="radio" name="contact_name_exact" checked="true" value="0" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Contains
+							<input type="radio" name="contact_name_exact" value="1" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Exact
+							</nobr>
+						</td>
+					</tr>
+					<tr>
+						<td><nobr>Email Address :</nobr></td>
+						<td style="width:100%;">
+							<input style="width:100%;" maxlength="250" type="text" name="contact_email"/>
+						</td>
+						<td>
+							<nobr>
+							<input type="radio" name="contact_email_exact" checked="true" value="0" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Contains
+							<input type="radio" name="contact_email_exact" value="1" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Exact
+							</nobr>
+						</td>
+					</tr>
+					<tr id="chkGroupsTR" style="display:none;">
+						<td align="left" valign="top">	
+							<nobr>Include Groups  :</nobr>
+						</td>
+						<td colspan="2">
+							<input name="chkGroups" type="checkbox"/>
+						</td>
+					</tr>
+					<tr>
+						<td align="left" valign="top">	
+							<nobr>Max number of Results  :</nobr>
+						</td>
+						<td colspan="2">
+							<input type="text" name="maxlines" maxlength="3" size="3" value="{root/Parameters/@MaxRecs}"/>
+							<nobr>
+							<input type="button" class="childControlBtn" name="searchbutton" value="Search for Contact" onClick="startSearch();"/>
+							<input type="button" name="cancelmerge" class="childControlBtn" value="Cancel" style="display: none;" onClick="parent.frames.menu.mergeend();"/>
+							</nobr>
+						</td>
+					</tr>
+		
+					<tr id="AdvanceOptionsOff">
+						<td colspan="3" height="100%">
+							<table height="100%" border="0" cellpadding="0" cellspacing="0">
+								<tr><td class="menuButton itemOn" height="100%" id="cmdDisplayOptions" title="Click to display Advanced Search Options" onclick="showAdv();" onmouseover="itemHot(id);" onmouseout="itemCold(id);" onmousedown="itemClick(id);">
+								<nobr>
+								<img src="images/ico_transparent.gif" width="6" height="6" border="0" alt="Click to display Advanced Search Options"/>
+								<img src="images/ico_arrow6x.gif" width="6" height="6" border="0" alt="Click to display Advanced Search Options"/>
+								<img src="images/ico_arrow6x.gif" width="6" height="6" border="0" alt="Click to display Advanced Search Options"/>
+								<img src="images/ico_transparent.gif" width="6" height="6" border="0" alt="Click to display Advanced Search Options"/>
+								<span style="padding-left:3px;font-size:smaller;"><em>Show Advanced</em></span>				
+								</nobr>
+								</td></tr>
+							</table>
+						</td>
+					</tr>
+					<tr id="AdvanceOptionsOn" style="display:none;">
+						<td colspan="3" height="100%">
+							<table height="100%" border="0" cellpadding="0" cellspacing="0">
+								<tr><td class="menuButton itemOn" height="100%" id="cmdDisplayOptions" title="Click to hide Advanced Search Options" onclick="showAdv();" onmouseover="itemHot(id);" onmouseout="itemCold(id);" onmousedown="itemClick(id);">
+								<nobr>
+								<img src="images/ico_transparent.gif" width="6" height="6" border="0" alt="Click to hide Advanced Search Options"/>
+								<img src="images/ico_arrow6x_up.gif" width="6" height="6" border="0" alt="Click to hide Advanced Search Options"/>
+								<img src="images/ico_arrow6x_up.gif" width="6" height="6" border="0" alt="Click to hide Advanced Search Options"/>
+								<img src="images/ico_transparent.gif" width="6" height="6" border="0" alt="Click to hide Advanced Search Options"/>
+								<span style="padding-left:3px;font-size:smaller;"><em>Hide Advanced</em></span>
+								</nobr>
+								</td></tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+				<div style="display: none;" id="advanced">
+				<table style="width:100%;padding:0px 10px 0px 10px;" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td><nobr>Owner :</nobr></td>
+						<td style="width:100%;">
+							<select style="width:100%;" name="contact_owner">
+								<option value="0">All Owners</option>
+								<xsl:for-each select="root/AgentNames/Agent">
+									<option value="{@ID}"><xsl:value-of select="@Name"/></option>
+								</xsl:for-each>
+							</select>
+						</td>
+						<td><br/></td>
+					</tr>
+					<xsl:if test="/root/DOCUMENT/useverification='1'">
+					<tr>
+						<td><nobr>Verification Status :</nobr></td>
+						<td style="width:100%;">
+							<select style="width:100%;" name="verification_status">
+								<option value="0">All States</option>
+								<option value="1">Verified</option>
+								<option value="2">Failed</option>
+							</select>
+						</td>
+						<td><br/></td>
+					</tr>
+					</xsl:if>
+					<tr>
+						<td>	
+							<nobr>Company Name :</nobr>
+						</td>
+						<td style="width:100%;">
+							<input style="width:100%;" maxlength="49" type="text" name="contact_company_name"/>
+						</td>
+						<td>
+							<nobr>
+							<input type="radio" name="contact_company_name_exact" checked="true" value="0" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Contains
+							<input type="radio" name="contact_company_name_exact" value="1" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Exact
+							</nobr>
+						</td>
+					</tr>
+					<tr>
+						<td>	
+							<nobr>Website :</nobr>
+						</td>
+						<td style="width:100%;">
+							<input style="width:100%;" maxlength="250" type="text" name="contact_website"/>
+						</td>
+						<td>
+							<nobr>
+							<input type="radio" name="contact_website_exact" checked="true" value="0" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Contains
+							<input type="radio" name="contact_website_exact" value="1" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Exact
+							</nobr>
+						</td>
+					</tr>
+					<tr>
+						<td>	
+							<nobr>Address :</nobr>
+						</td>
+						<td style="width:100%;">
+							<input style="width:100%;" maxlength="74" type="text" name="contact_address"/>
+						</td>
+						<td>
+							<nobr>
+							<input type="radio" name="contact_address_exact" checked="true" value="0" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Contains
+							<input type="radio" name="contact_address_exact" value="1" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Exact
+							</nobr>
+						</td>
+					</tr>
+					<tr>
+						<td>	
+							<nobr>City :</nobr>
+						</td>
+						<td style="width:100%;">
+							<input style="width:100%;" maxlength="34" type="text" name="contact_city"/>
+						</td>
+						<td>
+							<nobr>
+							<input type="radio" name="contact_city_exact" checked="true" value="0" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Contains
+							<input type="radio" name="contact_city_exact" value="1" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Exact
+							</nobr>
+						</td>
+					</tr>
+					<tr>
+						<td>	
+							<nobr>State :</nobr>
+						</td>
+						<td>
+							<input size="7" maxlength="29" type="text" name="contact_state"/>
+						</td>
+						<td>
+							<nobr>
+							<input type="radio" name="contact_state_exact" checked="true" value="0" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Contains
+							<input type="radio" name="contact_state_exact" value="1" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Exact
+							</nobr>
+						</td>
+					</tr>
+					<tr>
+						<td>	
+							<nobr>Zip :</nobr>
+						</td>
+						<td>
+							<input size="7" maxlength="19" type="text" name="contact_zip"/>
+						</td>
+						<td>
+							<nobr>
+							<input type="radio" name="contact_zip_exact" checked="true" value="0" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Contains
+							<input type="radio" name="contact_zip_exact" value="1" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Exact
+							</nobr>
+						</td>
+					</tr>
+					<tr>
+						<td>	
+							<nobr>Country :</nobr>
+						</td>
+						<td style="width:100%;">
+							<input style="width:100%;" maxlength="54" type="text" name="contact_country"/>
+						</td>
+						<td>
+							<nobr>
+							<input type="radio" name="contact_country_exact" checked="true" value="0" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Contains
+							<input type="radio" name="contact_country_exact" value="1" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Exact
+							</nobr>
+						</td>
+					</tr>
+					<tr>
+						<td>	
+							<nobr>Custom Property :</nobr>
+						</td>
+						<td style="width:100%;">
+							<select style="width:100%;" name="contact_personaldata_type">
+								<option value="0">All Data Types</option>
+								<xsl:for-each select="root/PersonalDataTypes/PersonalDataType">
+								<option value="{@ID}"><xsl:value-of select="@Description"/></option>
+								</xsl:for-each>
+							</select>
+						</td>
+						<td><br/></td>
+					</tr>
+					<tr>
+						<td>	
+							<nobr>Custom Property Value :</nobr>
+						</td>
+						<td style="width:100%;">
+							<input style="width:100%;" maxlength="250" type="text" name="contact_personaldata_value"/>
+						</td>
+						<td>
+							<nobr>
+							<input type="radio" name="contact_personaldata_exact" checked="true" value="0" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Contains
+							<input type="radio" name="contact_personaldata_exact" value="1" /><xsl:text disable-output-escaping="yes">&amp;</xsl:text>#160;Exact
+							</nobr>
+						</td>
+					</tr>
+				</table>
+				</div>
+				
+			</td></tr></table>
+			</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	</html>
+
+</xsl:template>
+</xsl:stylesheet>

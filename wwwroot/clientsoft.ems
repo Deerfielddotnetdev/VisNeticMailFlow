@@ -1,0 +1,92 @@
+<xsl:stylesheet	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD HTML 4.0 Transitional//EN"  />
+<xsl:include href="interface_templates.ems"/>
+<xsl:template match="/">
+
+	<html>
+	<head>
+	
+
+	<script type="text/javascript" language="javascript" src="./javascript/global.jmf"></script>
+	<script type="text/javascript" language="javascript">
+
+	function handleException()
+	{
+		var XMLObject = document.getElementById("docXML").XMLDocument;
+		
+		if ( XMLObject )
+		{
+			if (document.implementation.hasFeature("XPath", "3.0"))
+			{
+				var Node = glo_getXML('//root/error');
+				
+				if ( Node )
+						alert( Node.textContent);
+			}
+			else
+			{
+				var Node = XMLObject.selectSingleNode("/root/Error/.");
+	
+				if ( Node )
+					alert( Node.text );
+			}
+		}
+	}
+
+	</script>
+	<link rel="STYLESHEET" type="text/css" href="{root/user/stylesheetname}"></link>
+	</head>
+	
+	<body class="tabActiveColor" callBeforeOnLoad="" callOnLoad="handleException();">
+	<form name="tabularForm" enctype="multipart/form-data" method="post" action="">
+	<table id="docMasterTable" style="table-layout:fixed;height:100%;width:100%;" border="0" cellpadding="0" cellspacing="0">		
+		<tr>
+			<td style="height:32px;" class="menubarx menuColor" nowrap="true">
+				<table align="left" style="height:100%;" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td height="100%">
+							<div class="toolBar" id="toolButton" name="toolButton"
+							 xrequire="(true)"
+							 title="Show Help" onclick="openHelp('administration/voip/3cx_mailflow_plug-in.htm')">
+							<nobr>
+							<img src="images/ico_help.gif" width="24" height="22" border="0" valign="bottom"/>
+							Help
+							</nobr>
+	  						</div>
+						</td>
+	
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr valign="top">						
+			<td style="padding-left:10px;padding-top:10px;">							
+				<table border="0" cellspacing="0" cellpadding="0" >
+					<tr>
+						<td width="600px" style="padding-left:10px;padding-top:10px;padding-bottom:30px;">
+							<p>This page provides descriptions and download links for client software applications and utilities that are compatible with the current version of MailFlow.</p>
+						</td>
+					</tr>
+					<tr>
+						<td width="100%" colspan="1" class="subSectionHeader" align="left" style="padding-left:10px;">
+							MailFlow Plug-in for 3CX Version: <xsl:value-of select="root/PlugIn3cx/@Version"/>
+						</td>
+					</tr>
+					<tr>
+						<td width="600px" style="padding-left:10px;" class="subSectionWrapper" colspan="1" align="left">
+							<p>The MailFlow Plug-in for the 3CX provides lookup of MailFlow Contacts when an inbound telephone call is received. It utilizes the callerid of the inbound telephone call to query the MailFlow database for Contacts with that telephone number defined in any of the Contact telephone number fields.</p>
+							<p>There are no special MailFlow server requirements to support the 3CX Plug-in. Configuration of the plug-in is done at the client utilizing the same MailFlow login URL, port, user name and password that the Agent utilizes to log into the MailFlow web based interface.</p>
+							<p>For additional information regarding the MailFlow Plug-in for 3CX, please click <a href="http://www.visnetic.com/products/visnetic-mailflow/3cx" target="_blank">here</a>.</p>
+							<p>To download the MailFlow Plug-in for the 3CX, please click <a href="plug-ins/3cxplug.exe" target="_blank">here</a>.</p>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>				
+	</table>
+	</form>
+	</body>
+	</html>
+
+   </xsl:template>
+</xsl:stylesheet>
